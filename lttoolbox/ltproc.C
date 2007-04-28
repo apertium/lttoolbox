@@ -180,42 +180,55 @@ int main(int argc, char *argv[])
     endProgram(argv[0]);
   }
 
+  /* 2007-04-28
+   * Modified by Stephen Paulger (aimaz)
+   * Changed stdin to input and stdout to output
+   * in order to match the usage description
+   * given in endProgram()
+   */
+
   switch(cmd)
   {
     case 'n':
       fstp.initGeneration();
       checkValidity(fstp);
-      fstp.generation(stdin, stdout, gm_clean);
+      // fstp.generation(stdin, stdout, gm_clean);
+      fstp.generation(input, output, gm_clean);
       break;
 
     case 'g':
       fstp.initGeneration();
       checkValidity(fstp);
-      fstp.generation(stdin, stdout); 
+      // fstp.generation(stdin, stdout); 
+      fstp.generation(input, output);
       break;
       
     case 'd':
       fstp.initGeneration();
       checkValidity(fstp);
-      fstp.generation(stdin, stdout, gm_all);
+      // fstp.generation(stdin, stdout, gm_all);
+      fstp.generation(input, output, gm_all);
       
     case 'p':
       fstp.initPostgeneration();
       checkValidity(fstp);
-      fstp.postgeneration(stdin, stdout);
+      //fstp.postgeneration(stdin, stdout);
+      fstp.postgeneration(input, output);
       break;
 
     case 's':
       fstp.initAnalysis();
       checkValidity(fstp);
-      fstp.SAO(stdin, stdout);
+      // fstp.SAO(stdin, stdout);
+      fstp.SAO(input, output);
       break;
       
     case 'a':
     default:
       fstp.initAnalysis(); 
       checkValidity(fstp);
-      fstp.analysis(stdin, stdout);
+      // fstp.analysis(stdin, stdout);
+      fstp.analysis(input, output);
       break;
   }      
 
