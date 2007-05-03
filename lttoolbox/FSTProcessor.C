@@ -723,7 +723,7 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
         }
         else if(mode == gm_unknown)
         {
-          fputc_unlocked('#', output);
+          fputwc_unlocked(L'#', output);
           writeEscaped(removeTags(sf), output);
         }
       }
