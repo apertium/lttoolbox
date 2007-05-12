@@ -20,7 +20,7 @@
 #define _COMPRESSION_
 
 #include <cstdio>
-#include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -63,23 +63,6 @@ public:
    * @return the wide string readed.
    */
   static wstring wstring_read(FILE *input);
-  
-    /**
-   * Codifica y escribe un entero a un flujo de salida.
-   * @see multibyte_read()
-   * @param value valor a escribir.
-   * @param output flujo de salida.
-   */
-  static void multibyte_write(unsigned int value, ostream &os);
-  
-  /**
-   * Lee y decodifica un entero del flujo de entrada suministrado.
-   * @see multibyte_read()
-   * @param input flujo de entrada.
-   * @return el valor leído.
-   */
-  static unsigned int multibyte_read(istream &is);
-
 };
 
 #endif
