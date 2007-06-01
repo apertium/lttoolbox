@@ -103,12 +103,6 @@ Compiler::parse(string const &fichero, wstring const &dir)
 }
 
 
-string
-Compiler::latin1(xmlChar const * entrada)
-{
-  return XMLParseUtil::latin1(entrada);
-}
-
 void
 Compiler::procAlphabet()
 {
@@ -224,8 +218,8 @@ Compiler::requireEmptyError(wstring const &name)
 {
   if(!xmlTextReaderIsEmptyElement(reader))
   {
-    wcerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << "): Non-empty element '<" << name << ">' should be empty." << endl;
+    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+    wcerr << L"): Non-empty element '<" << name << L">' should be empty." << endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -234,11 +228,11 @@ bool
 Compiler::allBlanks()
 {
   bool flag = true;
-  string text = latin1(xmlTextReaderConstValue(reader));
+  wstring text = XMLParseUtil::towstring(xmlTextReaderConstValue(reader));
   
   for(unsigned int i = 0, limit = text.size(); i < limit; i++)
   {
-    flag = flag && isspace(text[i]);
+    flag = flag && iswspace(text[i]);
   }
   
   return flag;
@@ -285,8 +279,8 @@ Compiler::readString(list<int> &result, wstring const &name)
 
     if(!alphabet.isSymbolDefined(symbol))
     {
-      wcerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << "): Undefined symbol '" << symbol << "'." << endl;
+      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+      wcerr << L"): Undefined symbol '" << symbol << L"'." << endl;
       exit(EXIT_FAILURE);
     }
     
@@ -294,9 +288,9 @@ Compiler::readString(list<int> &result, wstring const &name)
   }
   else
   {
-    wcerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << "): Invalid specification of element '<" << name;
-    wcerr << ">' in this context." << endl;
+    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+    wcerr << L"): Invalid specification of element '<" << name;
+    wcerr << L">' in this context." << endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -344,8 +338,8 @@ Compiler::skip(wstring &name, wstring const &elem)
     
   if(name != elem)
   {
-    wcerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << "): Expected '<" << elem << ">'." << endl;
+    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+    wcerr << L"): Expected '<" << elem << L">'." << endl;
     exit(EXIT_FAILURE);
   }  
 }
@@ -437,8 +431,8 @@ Compiler::procPar()
 
   if(paradigms.find(nomparadigma) == paradigms.end())
   {
-    wcerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << "): Undefined paradigm '" << nomparadigma << "'." << endl;
+    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+    wcerr << L"): Undefined paradigm '" << nomparadigma << L"'." << endl;
     exit(EXIT_FAILURE);
   }
   e.setParadigm(nomparadigma);
@@ -550,10 +544,10 @@ Compiler::requireAttribute(wstring const &value, wstring const &attrname,
 {
   if(value == L"")
   {
-    wcerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);  
-    wcerr << "): '<" << elemname;
-    wcerr << "' element must specify non-void '";
-    wcerr<< attrname << "' attribute." << endl;
+    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);  
+    wcerr << L"): '<" << elemname;
+    wcerr << L"' element must specify non-void '";
+    wcerr << attrname << L"' attribute." << endl;
     exit(EXIT_FAILURE);
   }  
 }
@@ -639,8 +633,8 @@ Compiler::procEntry()
 
       if(paradigms.find(p) == paradigms.end())
       {
-        wcerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        wcerr << "): Undefined paradigm '" << p << "'." <<endl;
+        wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+        wcerr << L"): Undefined paradigm '" << p << L"'." <<endl;
         exit(EXIT_FAILURE);
       }
       // descartar entradas con paradigms vacíos (por las direciones,
@@ -667,9 +661,9 @@ Compiler::procEntry()
     }
     else
     {
-      wcerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << "): Invalid inclusion of '<" << name << ">' into '<" << COMPILER_ENTRY_ELEM;
-      wcerr << ">'." << endl;
+      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+      wcerr << L"): Invalid inclusion of '<" << name << L">' into '<" << COMPILER_ENTRY_ELEM;
+      wcerr << L">'." << endl; 
       exit(EXIT_FAILURE);
     }
   }
@@ -725,8 +719,8 @@ Compiler::procNode()
   }
   else
   {
-    wcerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << "): Invalid node '<" << nombre << ">'." << endl;
+    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+    wcerr << L"): Invalid node '<" << nombre << L">'." << endl;
     exit(EXIT_FAILURE);
   }
 }

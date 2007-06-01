@@ -266,13 +266,6 @@ public:
   void parse(string const &fichero, wstring const &dir);
   
   /**
-   * UTF-8 to Latin-1 conversion
-   * @param input the input string, in UTF-8 encoding
-   * @return the output string, in Latin-1 encoding
-   */
-  static string latin1(xmlChar const * input);
-
-  /**
    * Write the result of compilation 
    * @param fd the stream where write the result
    */
