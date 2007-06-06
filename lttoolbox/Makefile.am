@@ -1,16 +1,14 @@
 
-h_sources = Alphabet.H RegExpCompiler.H EntryToken.H Ltstr.H Compiler.H \
-            Compression.H Transducer.H  LtLocale.H \
-            MyStdio.H Buffer.H FSTProcessor.H Ltstr.H \
-            TransExe.H State.H Node.H Pool.H LttoolsConfig.H \
-            Expander.H XMLParseUtil.H EndianUtil.H \
-            PatternList.H  MatchNode.H MatchState.H MatchExe.H \
-            SortedVector.H 
-cc_sources = Alphabet.C RegExpCompiler.C EntryToken.C Compiler.C \
-             Compression.C Transducer.C LtLocale.C FSTProcessor.C TransExe.C \
-             State.C Node.C Expander.C XMLParseUtil.C \
-             PatternList.C MatchNode.C MatchState.C MatchExe.C \
-             SortedVector.C
+h_sources = alphabet.h buffer.h compiler.h compression.h endian_util.h \
+            entry_token.h expander.h fst_processor.h lt_locale.h ltstr.h \
+            match_exe.h match_node.h match_state.h my_stdio.h node.h \
+            pattern_list.h pool.h regexp_compiler.h sorted_vector.h state.h \
+            transducer.h trans_exe.h xml_parse_util.h lttools_config.h
+cc_sources = alphabet.cc compiler.cc compression.cc entry_token.cc \
+             expander.cc fst_processor.cc lt_locale.cc match_exe.cc \
+             match_node.cc match_state.cc node.cc pattern_list.cc \
+             regexp_compiler.cc sorted_vector.cc state.cc transducer.cc \
+             trans_exe.cc xml_parse_util.cc
 
 library_includedir = $(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/$(GENERIC_LIBRARY_NAME)
 library_include_HEADERS = $(h_sources)
@@ -18,9 +16,9 @@ library_include_HEADERS = $(h_sources)
 bin_PROGRAMS = lt-comp lt-proc lt-expand
 instdir = lttoolbox
 
-lib_LTLIBRARIES= liblttoolbox-2.0.la
-liblttoolbox_2_0_la_SOURCES= $(h_sources) $(cc_sources)
-liblttoolbox_2_0_la_LDFLAGS= -version-info $(GENERIC_LIBRARY_VERSION) -release $(GENERIC_RELEASE)
+lib_LTLIBRARIES= liblttoolbox-3.0.la
+liblttoolbox_3_0_la_SOURCES= $(h_sources) $(cc_sources)
+liblttoolbox_3_0_la_LDFLAGS= -version-info $(GENERIC_LIBRARY_VERSION) -release $(GENERIC_RELEASE)
 
 lttoolboxdir = $(prefix)/lttoolbox-$(GENERIC_API_VERSION)
 lttoolboxinclude = $(prefix)/include
@@ -28,15 +26,15 @@ lttoolboxlib = $(prefix)/lib
 
 lttoolbox_DATA = dix.dtd
 
-lt_comp_SOURCES = ltcomp.C 
+lt_comp_SOURCES = ltcomp.cc  #CAMBIAR POR lt_comp.cc
 lt_comp_LDADD = liblttoolbox-$(GENERIC_API_VERSION).la
 lt_comp_LDFLAGS = -llttoolbox-$(GENERIC_API_VERSION) $(LTTOOLBOX_LIBS)
 
-lt_proc_SOURCES = ltproc.C 
+lt_proc_SOURCES = lt_proc.cc
 lt_proc_LDADD = liblttoolbox-$(GENERIC_API_VERSION).la
 lt_proc_LDFLAGS = -llttoolbox-$(GENERIC_API_VERSION) $(LTTOOLBOX_LIBS)
 
-lt_expand_SOURCES = ltexpand.C 
+lt_expand_SOURCES = lt_expand.cc
 lt_expand_LDADD = liblttoolbox-$(GENERIC_API_VERSION).la
 lt_expand_LDFLAGS = -llttoolbox-$(GENERIC_API_VERSION) $(LTTOOLBOX_LIBS)
 

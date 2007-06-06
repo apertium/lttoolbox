@@ -4,15 +4,14 @@
 AC_PREREQ(2.52)
 
 m4_define([required_libxml_version], [2.6.17])
-#m4_define([required_pkg_config_version], [0.15])
 
-AC_INIT([lttoolbox/lttoolbox.H], [2.0.0], [sortiz@users.sourceforge.net])
-AC_CONFIG_HEADER([lttoolbox/LttoolsConfig.H])
+AC_INIT([lttoolbox/lttoolbox.h], [3.0.0], [sortiz@users.sourceforge.net])
+AC_CONFIG_HEADER([lttoolbox/lttools_config.h])
 
 GENERIC_LIBRARY_NAME=lttoolbox
 
 # Release versioning
-GENERIC_MAJOR_VERSION=2
+GENERIC_MAJOR_VERSION=3
 GENERIC_MINOR_VERSION=0
 GENERIC_MICRO_VERSION=0
 
@@ -120,4 +119,4 @@ AC_CHECK_DECLS([fread_unlocked, fwrite_unlocked, fgetc_unlocked, \
                 
 AC_CHECK_FUNCS([setlocale strdup getopt_long])
 
-AC_OUTPUT([Makefile lttoolbox-2.0.pc lttoolbox/Makefile])
+AC_OUTPUT([Makefile lttoolbox-3.0.pc lttoolbox/Makefile])
