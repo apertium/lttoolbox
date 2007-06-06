@@ -26,7 +26,7 @@ lttoolboxlib = $(prefix)/lib
 
 lttoolbox_DATA = dix.dtd
 
-lt_comp_SOURCES = ltcomp.cc  #CAMBIAR POR lt_comp.cc
+lt_comp_SOURCES = lt_comp.cc  
 lt_comp_LDADD = liblttoolbox-$(GENERIC_API_VERSION).la
 lt_comp_LDFLAGS = -llttoolbox-$(GENERIC_API_VERSION) $(LTTOOLBOX_LIBS)
 
