@@ -172,7 +172,7 @@ RegexpCompiler::Cola()
   {
     int e = state;
     state = transducer.getInitial();
-    consume('|');
+    consume(L'|');
     RExpr();
     Cola();
    
