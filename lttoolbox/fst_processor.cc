@@ -197,14 +197,14 @@ FSTProcessor::skipUntil(FILE *input, FILE *output, wint_t const character)
       return;
     }
 
-    if(val == '\\')
+    if(val == L'\\')
     {
       val = fgetwc_unlocked(input);
       if(feof(input))
       {
 	return;
       }
-      fputwc_unlocked('\\', output);
+      fputwc_unlocked(L'\\', output);
       fputwc_unlocked(val, output);
     }
     else if(val == character)
@@ -612,7 +612,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
       {
         printWord(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
 		  lf, output);
-	fputwc_unlocked(' ', output);
+	fputwc_unlocked(L' ', output);
         input_buffer.setPos(last);
         input_buffer.back(1);
       }
@@ -951,7 +951,7 @@ FSTProcessor::biltrans(wstring const &input_word, bool with_delim)
       i++;
       val = static_cast<int>(input_word[i]);
     }
-    else if(input_word[i] == '<')
+    else if(input_word[i] == L'<')
     {
       symbol = L'<';
       for(unsigned int j = i + 1; j <= end_point; j++)
@@ -1234,13 +1234,13 @@ FSTProcessor::biltransWithoutQueue(wstring const &input_word, bool with_delim)
       i++;
       val = static_cast<int>(input_word[i]);
     }
-    else if(input_word[i] == '<')
+    else if(input_word[i] == L'<')
     {
-      symbol = '<';
+      symbol = L'<';
       for(unsigned int j = i + 1; j <= end_point; j++)
       {
 	symbol += input_word[j];
-	if(input_word[j] == '>')
+	if(input_word[j] == L'>')
 	{
 	  i = j;
 	  break;
@@ -1337,7 +1337,7 @@ FSTProcessor::readSAO(FILE *input)
         }
         blankqueue.push(str);
         input_buffer.add(static_cast<int>(L' '));
-        return static_cast<int>(' ');
+        return static_cast<int>(L' ');
       }
       else
       {

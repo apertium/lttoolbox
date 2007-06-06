@@ -159,7 +159,7 @@ PatternList::insertIntoSequence(int const id, wstring const &lemma,
     list<vector<int> >::iterator limit = sequence_data.end();
     for(; it != limit; it++)
     {
-      it->push_back('+');
+      it->push_back(L'+');
       insertOutOfSequence(lemma, tags, *it);
     }
   }
@@ -211,7 +211,7 @@ PatternList::insert(int const id, int const otherid)
 	  p.first != p.second; p.first++)
       {
 	vector<int> temp = *it;
-	temp.push_back('+');
+	temp.push_back(L'+');
         temp.insert(temp.end(), (p.first->second).begin(),
 		    (p.first->second).end());
 	new_sequence_data.push_back(temp);
@@ -233,7 +233,7 @@ PatternList::tagCount(wstring const &tags)
     {
       count++;
     }
-    else if(tags[i] == '.')
+    else if(tags[i] == L'.')
     {
       count++;
     }
@@ -251,7 +251,7 @@ PatternList::tagAt(wstring const &tags, int const index)
 
   for(unsigned int i = 0, limit = tags.size(); i < limit; i++)
   {
-    if(tags[i] == '.')
+    if(tags[i] == L'.')
     {
       count++;
       if(end == 0)
