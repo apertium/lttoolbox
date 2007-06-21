@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
  * 02111-1307, USA.
  */
-#ifndef _TMXCOMPILER_
-#define _TMXCOMPILER_
+#ifndef _TMXPREPROCESSOR_
+#define _TMXPREPROCESSOR_
 
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/regexp_compiler.h>
@@ -35,7 +35,7 @@ using namespace std;
 /**
  * A compiler of dictionaries to letter transducers
  */
-class TMXCompiler
+class TMXPreprocessor
 {
 private:
   /**
@@ -220,45 +220,61 @@ public:
    * Constants to represent the element and the attributes of
    * dictionaries
    */
-  static wstring const COMPILER_DICTIONARY_ELEM;
-  static wstring const COMPILER_ALPHABET_ELEM;
-  static wstring const COMPILER_SDEFS_ELEM;
-  static wstring const COMPILER_SDEF_ELEM;
-  static wstring const COMPILER_N_ATTR;
-  static wstring const COMPILER_PARDEFS_ELEM;
-  static wstring const COMPILER_PARDEF_ELEM;
-  static wstring const COMPILER_PAR_ELEM;
-  static wstring const COMPILER_ENTRY_ELEM;
-  static wstring const COMPILER_RESTRICTION_ATTR;
-  static wstring const COMPILER_RESTRICTION_LR_VAL;
-  static wstring const COMPILER_RESTRICTION_RL_VAL;
-  static wstring const COMPILER_PAIR_ELEM;
-  static wstring const COMPILER_LEFT_ELEM;
-  static wstring const COMPILER_RIGHT_ELEM;
-  static wstring const COMPILER_S_ELEM;
-  static wstring const COMPILER_REGEXP_ELEM;
-  static wstring const COMPILER_SECTION_ELEM;
-  static wstring const COMPILER_ID_ATTR;
-  static wstring const COMPILER_TYPE_ATTR;
-  static wstring const COMPILER_IDENTITY_ELEM;
-  static wstring const COMPILER_JOIN_ELEM;
-  static wstring const COMPILER_BLANK_ELEM;
-  static wstring const COMPILER_POSTGENERATOR_ELEM;
-  static wstring const COMPILER_GROUP_ELEM;
-  static wstring const COMPILER_LEMMA_ATTR;
-  static wstring const COMPILER_IGNORE_ATTR;
-  static wstring const COMPILER_IGNORE_YES_VAL;
-
+  static wstring const TMX_BODY_ELEM;
+  static wstring const TMX_HEADER_ELEM;
+  static wstring const TMX_MAP_ELEM;
+  static wstring const TMX_NOTE_ELEM;
+  static wstring const TMX_PROP_ELEM;
+  static wstring const TMX_SEG_ELEM;
+  static wstring const TMX_TMX_ELEM;
+  static wstring const TMX_TU_ELEM;
+  static wstring const TMX_TUV_ELEM;
+  static wstring const TMX_UDE_ELEM;
+  static wstring const TMX_BPT_ELEM;
+  static wstring const TMX_EPT_ELEM;
+  static wstring const TMX_HI_ELEM;
+  static wstring const TMX_IT_ELEM;
+  static wstring const TMX_PH_ELEM;
+  static wstring const TMX_SUB_ELEM;
+  static wstring const TMX_UT_ELEM;
+  static wstring const TMX_ADMINLANG_ATTR;
+  static wstring const TMX_ASSOC_ATTR;
+  static wstring const TMX_BASE_ATTR;
+  static wstring const TMX_CHANGEDATE_ATTR;
+  static wstring const TMX_CHANGEID_ATTR;
+  static wstring const TMX_CODE_ATTR;
+  static wstring const TMX_CREATIONDATE_ATTR;
+  static wstring const TMX_CREATIONID_ATTR;
+  static wstring const TMX_CREATIONTOOL_ATTR;
+  static wstring const TMX_CREATIONTOOLVERSION_ATTR;
+  static wstring const TMX_DATATYPE_ATTR;
+  static wstring const TMX_ENT_ATTR;
+  static wstring const TMX_I_ATTR;
+  static wstring const TMX_LASTUSAGEDATE_ATTR;
+  static wstring const TMX_NAME_ATTR;
+  static wstring const TMX_O_ENCODING_ATTR;
+  static wstring const TMX_O_TMF_ATTR;
+  static wstring const TMX_POS_ATTR;
+  static wstring const TMX_SEGTYPE_ATTR;
+  static wstring const TMX_SRCLANG_ATTR;
+  static wstring const TMX_SUBST_ATTR;
+  static wstring const TMX_TUID_ATTR;
+  static wstring const TMX_TYPE_ATTR;
+  static wstring const TMX_UNICODE_ATTR;
+  static wstring const TMX_USAGECOUNT_ATTR;
+  static wstring const TMX_VERSION_ATTR;
+  static wstring const TMX_X_ATTR;
+  static wstring const TMX_XML_LANG;
 
   /**
    * Copnstructor
    */
-  TMXCompiler();
+  TMXPreprocessor();
 
   /**
    * Destructor
    */
-  ~TMXCompiler();
+  ~TMXPreprocessor();
 
   /**
    * Compile dictionary to letter transducers

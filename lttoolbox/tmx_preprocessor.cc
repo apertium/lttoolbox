@@ -28,46 +28,63 @@
 
 using namespace std;
 
-wstring const TMXCompiler::COMPILER_DICTIONARY_ELEM    = L"dictionary";
-wstring const TMXCompiler::COMPILER_ALPHABET_ELEM      = L"alphabet";
-wstring const TMXCompiler::COMPILER_SDEFS_ELEM         = L"sdefs";
-wstring const TMXCompiler::COMPILER_SDEF_ELEM          = L"sdef";
-wstring const TMXCompiler::COMPILER_N_ATTR             = L"n";
-wstring const TMXCompiler::COMPILER_PARDEFS_ELEM       = L"pardefs";
-wstring const TMXCompiler::COMPILER_PARDEF_ELEM        = L"pardef";
-wstring const TMXCompiler::COMPILER_PAR_ELEM           = L"par";
-wstring const TMXCompiler::COMPILER_ENTRY_ELEM         = L"e";
-wstring const TMXCompiler::COMPILER_RESTRICTION_ATTR   = L"r";
-wstring const TMXCompiler::COMPILER_RESTRICTION_LR_VAL = L"LR";
-wstring const TMXCompiler::COMPILER_RESTRICTION_RL_VAL = L"RL";
-wstring const TMXCompiler::COMPILER_PAIR_ELEM          = L"p";
-wstring const TMXCompiler::COMPILER_LEFT_ELEM          = L"l";
-wstring const TMXCompiler::COMPILER_RIGHT_ELEM         = L"r";
-wstring const TMXCompiler::COMPILER_S_ELEM             = L"s";
-wstring const TMXCompiler::COMPILER_REGEXP_ELEM        = L"re";
-wstring const TMXCompiler::COMPILER_SECTION_ELEM       = L"section";
-wstring const TMXCompiler::COMPILER_ID_ATTR            = L"id";
-wstring const TMXCompiler::COMPILER_TYPE_ATTR	    = L"type";
-wstring const TMXCompiler::COMPILER_IDENTITY_ELEM      = L"i";
-wstring const TMXCompiler::COMPILER_JOIN_ELEM	    = L"j";
-wstring const TMXCompiler::COMPILER_BLANK_ELEM	    = L"b";
-wstring const TMXCompiler::COMPILER_POSTGENERATOR_ELEM = L"a";
-wstring const TMXCompiler::COMPILER_GROUP_ELEM         = L"g";
-wstring const TMXCompiler::COMPILER_LEMMA_ATTR         = L"lm";
-wstring const TMXCompiler::COMPILER_IGNORE_ATTR        = L"i";
-wstring const TMXCompiler::COMPILER_IGNORE_YES_VAL     = L"yes";
+wstring const TMXPreprocessor::TMX_BODY_ELEM 	= L"body";
+wstring const TMXPreprocessor::TMX_HEADER_ELEM  = L"header";
+wstring const TMXPreprocessor::TMX_MAP_ELEM     = L"map";
+wstring const TMXPreprocessor::TMX_NOTE_ELEM    = L"note";
+wstring const TMXPreprocessor::TMX_PROP_ELEM    = L"prop";
+wstring const TMXPreprocessor::TMX_SEG_ELEM     = L"seg";
+wstring const TMXPreprocessor::TMX_TMX_ELEM     = L"tmx";
+wstring const TMXPreprocessor::TMX_TU_ELEM      = L"tu";
+wstring const TMXPreprocessor::TMX_TUV_ELEM     = L"tuv";
+wstring const TMXPreprocessor::TMX_UDE_ELEM 	= L"ude";
+wstring const TMXPreprocessor::TMX_BPT_ELEM 	= L"bpt";
+wstring const TMXPreprocessor::TMX_EPT_ELEM 	= L"ept";
+wstring const TMXPreprocessor::TMX_HI_ELEM 	= L"hi";
+wstring const TMXPreprocessor::TMX_IT_ELEM      = L"it";
+wstring const TMXPreprocessor::TMX_PH_ELEM      = L"ph";
+wstring const TMXPreprocessor::TMX_SUB_ELEM     = L"sub";
+wstring const TMXPreprocessor::TMX_UT_ELEM      = L"ut";
+wstring const TMXPreprocessor::TMX_ADMINLANG_ATTR 	= L"adminlang";
+wstring const TMXPreprocessor::TMX_ASSOC_ATTR   	= L"assoc";
+wstring const TMXPreprocessor::TMX_BASE_ATTR	    	= L"base";
+wstring const TMXPreprocessor::TMX_CHANGEDATE_ATTR	= L"changedate";
+wstring const TMXPreprocessor::TMX_CHANGEID_ATTR 	= L"changeid";
+wstring const TMXPreprocessor::TMX_CODE_ATTR         	= L"code";
+wstring const TMXPreprocessor::TMX_CREATIONDATE_ATTR    = L"creationdate";
+wstring const TMXPreprocessor::TMX_CREATIONID_ATTR      = L"creationid";
+wstring const TMXPreprocessor::TMX_CREATIONTOOL_ATTR    = L"creationtool";
+wstring const TMXPreprocessor::TMX_CREATIONTOOLVERSION_ATTR = L"creationtoolversion";
+wstring const TMXPreprocessor::TMX_DATATYPE_ATTR      	= L"datatype";
+wstring const TMXPreprocessor::TMX_ENT_ATTR	    	= L"ent";
+wstring const TMXPreprocessor::TMX_I_ATTR	    	= L"i";
+wstring const TMXPreprocessor::TMX_LASTUSAGEDATE_ATTR 	= L"lastusagedate";
+wstring const TMXPreprocessor::TMX_NAME_ATTR         	= L"name";
+wstring const TMXPreprocessor::TMX_O_ENCODING_ATTR      = L"o-encoding";
+wstring const TMXPreprocessor::TMX_O_TMF_ATTR        	= L"o-tmf";
+wstring const TMXPreprocessor::TMX_POS_ATTR     	= L"pos";
+wstring const TMXPreprocessor::TMX_SEGTYPE_ATTR 	= L"segtype";
+wstring const TMXPreprocessor::TMX_SRCLANG_ATTR      	= L"srclang";
+wstring const TMXPreprocessor::TMX_SUBST_ATTR	    	= L"subst";
+wstring const TMXPreprocessor::TMX_TUID_ATTR	    	= L"tuid";
+wstring const TMXPreprocessor::TMX_TYPE_ATTR 		= L"type";
+wstring const TMXPreprocessor::TMX_UNICODE_ATTR         = L"unicode";
+wstring const TMXPreprocessor::TMX_USAGECOUNT_ATTR      = L"usagecount";
+wstring const TMXPreprocessor::TMX_VERSION_ATTR        	= L"version";
+wstring const TMXPreprocessor::TMX_X_ATTR    		= L"x";
+wstring const TMXPreprocessor::TMX_XML_LANG_ATTR    	= L"xml:lang";
 
-Compiler::Compiler()
+TMXPreprocessor::TMXPreprocessor()
 {
   LtLocale::tryToSetLocale();
 }
 
-Compiler::~Compiler()
+TMXPreprocessor::~TMXPreprocessor()
 {
 }
 
 void
-Compiler::parse(string const &fichero, wstring const &dir)
+TMXPreprocessor::parse(string const &fichero, wstring const &dir)
 {
   direction = dir;
   reader = xmlReaderForFile(fichero.c_str(), NULL, 0);
@@ -104,7 +121,7 @@ Compiler::parse(string const &fichero, wstring const &dir)
 
 
 void
-Compiler::procAlphabet()
+TMXPreprocessor::procAlphabet()
 {
   int tipo=xmlTextReaderNodeType(reader);
 
@@ -126,13 +143,13 @@ Compiler::procAlphabet()
 }
 
 void
-Compiler::procSDef()
+TMXPreprocessor::procSDef()
 {
   alphabet.includeSymbol(L"<"+attrib(COMPILER_N_ATTR)+L">");
 }
 
 void
-Compiler::procParDef()
+TMXPreprocessor::procParDef()
 {
   int tipo=xmlTextReaderNodeType(reader);
 
@@ -152,7 +169,7 @@ Compiler::procParDef()
 }
 
 int
-Compiler::matchTransduction(list<int> const &pi, 
+TMXPreprocessor::matchTransduction(list<int> const &pi, 
 				 list<int> const &pd, 
 				 int estado, Transducer &t)
 {
@@ -214,7 +231,7 @@ Compiler::matchTransduction(list<int> const &pi,
 
 
 void
-Compiler::requireEmptyError(wstring const &name)
+TMXPreprocessor::requireEmptyError(wstring const &name)
 {
   if(!xmlTextReaderIsEmptyElement(reader))
   {
@@ -225,7 +242,7 @@ Compiler::requireEmptyError(wstring const &name)
 }
 
 bool 
-Compiler::allBlanks()
+TMXPreprocessor::allBlanks()
 {
   bool flag = true;
   wstring text = XMLParseUtil::towstring(xmlTextReaderConstValue(reader));
@@ -239,7 +256,7 @@ Compiler::allBlanks()
 }
 
 void 
-Compiler::readString(list<int> &result, wstring const &name)
+TMXPreprocessor::readString(list<int> &result, wstring const &name)
 {
   if(name == L"#text")
   {
@@ -296,7 +313,7 @@ Compiler::readString(list<int> &result, wstring const &name)
 }
 
 void
-Compiler::skipBlanks(wstring &name)
+TMXPreprocessor::skipBlanks(wstring &name)
 {
   while(name == L"#text" || name == L"#comment")
   {
@@ -316,7 +333,7 @@ Compiler::skipBlanks(wstring &name)
 }
 
 void
-Compiler::skip(wstring &name, wstring const &elem)
+TMXPreprocessor::skip(wstring &name, wstring const &elem)
 {
   xmlTextReaderRead(reader);
   name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
@@ -345,7 +362,7 @@ Compiler::skip(wstring &name, wstring const &elem)
 }
 
 EntryToken
-Compiler::procIdentity()
+TMXPreprocessor::procIdentity()
 {
   list<int> both_sides;
 
@@ -371,7 +388,7 @@ Compiler::procIdentity()
 }
 
 EntryToken
-Compiler::procTransduction()
+TMXPreprocessor::procTransduction()
 {
   list<int> lhs, rhs;
   wstring name;
@@ -418,13 +435,13 @@ Compiler::procTransduction()
 }
 
 wstring
-Compiler::attrib(wstring const &name)
+TMXPreprocessor::attrib(wstring const &name)
 {
   return XMLParseUtil::attrib(reader, name);
 } 
 
 EntryToken
-Compiler::procPar()
+TMXPreprocessor::procPar()
 {
   EntryToken e;
   wstring nomparadigma = attrib(COMPILER_N_ATTR);
@@ -440,7 +457,7 @@ Compiler::procPar()
 }
 
 void
-Compiler::insertEntryTokens(vector<EntryToken> const &elements)
+TMXPreprocessor::insertEntryTokens(vector<EntryToken> const &elements)
 {
   if(current_paradigm != L"")
   {
@@ -461,7 +478,7 @@ Compiler::insertEntryTokens(vector<EntryToken> const &elements)
       }
       else if(elements[i].isRegexp())
       {
-	RegexpCompiler analyzer;
+	RegexpTMXPreprocessor analyzer;
 	analyzer.initialize(&alphabet);
 	analyzer.compile(elements[i].regExp());
 	e = t.insertTransducer(e, analyzer.getTransducer(), alphabet(0,0));
@@ -523,7 +540,7 @@ Compiler::insertEntryTokens(vector<EntryToken> const &elements)
       }
       else if(elements[i].isRegexp())
       {
-	RegexpCompiler analyzer;
+	RegexpTMXPreprocessor analyzer;
 	analyzer.initialize(&alphabet);
 	analyzer.compile(elements[i].regExp());
 	e = t.insertTransducer(e, analyzer.getTransducer(), alphabet(0,0));
@@ -539,7 +556,7 @@ Compiler::insertEntryTokens(vector<EntryToken> const &elements)
 
 
 void
-Compiler::requireAttribute(wstring const &value, wstring const &attrname,
+TMXPreprocessor::requireAttribute(wstring const &value, wstring const &attrname,
                            wstring const &elemname)
 {
   if(value == L"")
@@ -554,7 +571,7 @@ Compiler::requireAttribute(wstring const &value, wstring const &attrname,
 
 
 void
-Compiler::procSection()
+TMXPreprocessor::procSection()
 {
   int tipo=xmlTextReaderNodeType(reader);
 
@@ -576,7 +593,7 @@ Compiler::procSection()
 }
 
 void
-Compiler::procEntry()
+TMXPreprocessor::procEntry()
 {
   wstring atributo=this->attrib(COMPILER_RESTRICTION_ATTR);
   wstring ignore = this->attrib(COMPILER_IGNORE_ATTR);
@@ -670,7 +687,7 @@ Compiler::procEntry()
 }
 
 void
-Compiler::procNode()
+TMXPreprocessor::procNode()
 {
   xmlChar const *xnombre = xmlTextReaderConstName(reader);
   wstring nombre = XMLParseUtil::towstring(xnombre);
@@ -726,7 +743,7 @@ Compiler::procNode()
 }
 
 EntryToken
-Compiler::procRegexp()
+TMXPreprocessor::procRegexp()
 {
   EntryToken et;
   xmlTextReaderRead(reader);
@@ -737,7 +754,7 @@ Compiler::procRegexp()
 }
 
 void 
-Compiler::write(FILE *output)
+TMXPreprocessor::write(FILE *output)
 {
   // letters
   Compression::wstring_write(letters, output);
