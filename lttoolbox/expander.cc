@@ -449,6 +449,9 @@ Expander::procEntry(FILE *output)
     else if(name == L"#text" && allBlanks())
     {
     }
+    else if(name == L"#comment")
+    {
+    }
     else
     {
       wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
