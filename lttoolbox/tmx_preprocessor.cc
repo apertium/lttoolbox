@@ -16,9 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
  * 02111-1307, USA.
  */
-#include <lttoolbox/compiler.h>
-#include <lttoolbox/compression.h>
-#include <lttoolbox/entry_token.h>
+#include <lttoolbox/tmx_preprocessor.h>
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/xml_parse_util.h>
 
@@ -84,13 +82,14 @@ TMXPreprocessor::~TMXPreprocessor()
 }
 
 void
-TMXPreprocessor::parse(string const &fichero, wstring const &dir)
+TMXPreprocessor::parse(string const &filename, wstring const &dir)
 {
-  direction = dir;
-  reader = xmlReaderForFile(fichero.c_str(), NULL, 0);
+  reader = xmlReaderForFile(filename.c_str(), NULL, 0);
   if(reader == NULL)
   {
-    cerr << "Error: Cannot open '" << fichero << "'." << endl;
+    wcerr << L"Error: Cannot open '";
+    cerr << filename;
+    wcerr << L"'." << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -108,127 +107,7 @@ TMXPreprocessor::parse(string const &fichero, wstring const &dir)
 
   xmlFreeTextReader(reader);
   xmlCleanupParser();
-
- 
-  // Minimize transducers 
-  for(map<wstring, Transducer, Ltstr>::iterator it = sections.begin(),
-                                               limit = sections.end(); 
-      it != limit; it++)
-  {
-    (it->second).minimize();
-  }
 }
-
-
-void
-TMXPreprocessor::procAlphabet()
-{
-  int tipo=xmlTextReaderNodeType(reader);
-
-  if(tipo != XML_READER_TYPE_END_ELEMENT)
-  {
-    int ret = xmlTextReaderRead(reader);
-    if(ret == 1)
-    {          
-      xmlChar const *valor = xmlTextReaderConstValue(reader);
-      letters = XMLParseUtil::towstring(valor);
-    }
-    else
-    {
-      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << "): Missing alphabet symbols." << endl;
-      exit(EXIT_FAILURE);
-    }
-  }
-}
-
-void
-TMXPreprocessor::procSDef()
-{
-  alphabet.includeSymbol(L"<"+attrib(COMPILER_N_ATTR)+L">");
-}
-
-void
-TMXPreprocessor::procParDef()
-{
-  int tipo=xmlTextReaderNodeType(reader);
-
-  if(tipo != XML_READER_TYPE_END_ELEMENT)
-  {
-    current_paradigm = attrib(COMPILER_N_ATTR);
-  }
-  else
-  {
-    if(!paradigms[current_paradigm].isEmpty())
-    {
-      paradigms[current_paradigm].minimize();
-      paradigms[current_paradigm].joinFinals();
-      current_paradigm = L"";
-    }
-  }
-}
-
-int
-TMXPreprocessor::matchTransduction(list<int> const &pi, 
-				 list<int> const &pd, 
-				 int estado, Transducer &t)
-{
-  list<int>::const_iterator izqda, dcha, limizqda, limdcha;
-
-  if(direction == COMPILER_RESTRICTION_LR_VAL)
-  {
-    izqda = pi.begin();
-    dcha = pd.begin();
-    limizqda = pi.end();
-    limdcha = pd.end();
-  }
-  else
-  {
-    izqda = pd.begin();
-    dcha = pi.begin();
-    limizqda = pd.end();
-    limdcha = pi.end();
-  }
- 
-
-  if(pi.size() == 0 && pd.size() == 0)
-  {
-    estado = t.insertNewSingleTransduction(alphabet(0, 0), estado);
-  }
-  else
-  {
-    while(true)
-    {
-      int etiqueta;
-
-      if(izqda == limizqda && dcha == limdcha)
-      {
-        break;
-      }
-      else if(izqda == limizqda)
-      {
-        etiqueta = alphabet(0, *dcha);
-        dcha++;
-      }
-      else if(dcha == limdcha)
-      {
-        etiqueta = alphabet(*izqda, 0);
-        izqda++;
-      }
-      else
-      {
-        etiqueta = alphabet(*izqda, *dcha);
-        izqda++;
-        dcha++;
-      }
-
-      estado = t.insertSingleTransduction(etiqueta, estado);
-    }
-  }
-
-  return estado;
-}
-
 
 void
 TMXPreprocessor::requireEmptyError(wstring const &name)
@@ -253,63 +132,6 @@ TMXPreprocessor::allBlanks()
   }
   
   return flag;
-}
-
-void 
-TMXPreprocessor::readString(list<int> &result, wstring const &name)
-{
-  if(name == L"#text")
-  {
-    wstring value = XMLParseUtil::towstring(xmlTextReaderConstValue(reader));
-    for(unsigned int i = 0, limit = value.size(); i < limit; i++)
-    {
-      result.push_back(static_cast<int>(value[i]));
-    }
-  }
-  else if(name == COMPILER_BLANK_ELEM)
-  {
-    requireEmptyError(name);
-    result.push_back(static_cast<int>(L' '));
-  }
-  else if(name == COMPILER_JOIN_ELEM)
-  {
-    requireEmptyError(name);
-    result.push_back(static_cast<int>(L'+'));
-  }
-  else if(name == COMPILER_POSTGENERATOR_ELEM)
-  {
-    requireEmptyError(name);
-    result.push_back(static_cast<int>(L'~'));
-  }
-  else if(name == COMPILER_GROUP_ELEM)
-  {
-    int tipo=xmlTextReaderNodeType(reader);
-    if(tipo != XML_READER_TYPE_END_ELEMENT)
-    {
-      result.push_back(static_cast<int>(L'#'));
-    }
-  }
-  else if(name == COMPILER_S_ELEM)
-  {
-    requireEmptyError(name);
-    wstring symbol = L"<" + attrib(COMPILER_N_ATTR) + L">";
-
-    if(!alphabet.isSymbolDefined(symbol))
-    {
-      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << L"): Undefined symbol '" << symbol << L"'." << endl;
-      exit(EXIT_FAILURE);
-    }
-    
-    result.push_back(alphabet(symbol));
-  }
-  else
-  {
-    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << L"): Invalid specification of element '<" << name;
-    wcerr << L">' in this context." << endl;
-    exit(EXIT_FAILURE);
-  }
 }
 
 void
@@ -361,199 +183,11 @@ TMXPreprocessor::skip(wstring &name, wstring const &elem)
   }  
 }
 
-EntryToken
-TMXPreprocessor::procIdentity()
-{
-  list<int> both_sides;
-
-  if(!xmlTextReaderIsEmptyElement(reader))
-  {
-    wstring name = L"";
-
-    while(true)
-    {
-      xmlTextReaderRead(reader);
-      name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
-      if(name == COMPILER_IDENTITY_ELEM)
-      {
-        break;
-      }
-      readString(both_sides, name);
-    }
-  }
-  
-  EntryToken e;
-  e.setSingleTransduction(both_sides, both_sides);
-  return e;
-}
-
-EntryToken
-TMXPreprocessor::procTransduction()
-{
-  list<int> lhs, rhs;
-  wstring name;
-  
-  skip(name, COMPILER_LEFT_ELEM);
-
-  if(!xmlTextReaderIsEmptyElement(reader))
-  {
-    name = L"";
-    while(true)
-    {
-      xmlTextReaderRead(reader);
-      name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
-      if(name == COMPILER_LEFT_ELEM)
-      {
-        break;
-      }
-      readString(lhs, name);
-    }
-  }
- 
-  skip(name, COMPILER_RIGHT_ELEM);
-
-  if(!xmlTextReaderIsEmptyElement(reader))
-  {
-    name = L"";
-    while(true)
-    {
-      xmlTextReaderRead(reader);
-      name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
-      if(name == COMPILER_RIGHT_ELEM)
-      {
-        break;
-      }
-      readString(rhs, name);
-    }    
-  }
-
-  skip(name, COMPILER_PAIR_ELEM);  
-  
-  EntryToken e;
-  e.setSingleTransduction(lhs, rhs);
-  return e;
-}
-
 wstring
 TMXPreprocessor::attrib(wstring const &name)
 {
   return XMLParseUtil::attrib(reader, name);
 } 
-
-EntryToken
-TMXPreprocessor::procPar()
-{
-  EntryToken e;
-  wstring nomparadigma = attrib(COMPILER_N_ATTR);
-
-  if(paradigms.find(nomparadigma) == paradigms.end())
-  {
-    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << L"): Undefined paradigm '" << nomparadigma << L"'." << endl;
-    exit(EXIT_FAILURE);
-  }
-  e.setParadigm(nomparadigma);
-  return e;
-}
-
-void
-TMXPreprocessor::insertEntryTokens(vector<EntryToken> const &elements)
-{
-  if(current_paradigm != L"")
-  {
-    // compilation of paradigms
-    Transducer &t = paradigms[current_paradigm];
-    int e = t.getInitial();
-    
-    for(unsigned int i = 0, limit = elements.size(); i < limit; i++)
-    {
-      if(elements[i].isParadigm())
-      {
-	e = t.insertTransducer(e, paradigms[elements[i].paradigmName()]);
-      }
-      else if(elements[i].isSingleTransduction())
-      {
-        e = matchTransduction(elements[i].left(), 
-                                  elements[i].right(), e, t);
-      }
-      else if(elements[i].isRegexp())
-      {
-	RegexpTMXPreprocessor analyzer;
-	analyzer.initialize(&alphabet);
-	analyzer.compile(elements[i].regExp());
-	e = t.insertTransducer(e, analyzer.getTransducer(), alphabet(0,0));
-      }
-      else
-      {
-        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        cerr << "): Invalid entry token." << endl;
-        exit(EXIT_FAILURE);
-      }
-    }
-    t.setFinal(e);
-  }
-  else
-  {
-    // compilación de dictionary
-
-    Transducer &t = sections[current_section];
-    int e = t.getInitial();
-
-    for(unsigned int i = 0, limit = elements.size(); i < limit; i++)
-    {
-      if(elements[i].isParadigm())
-      {
-        if(i == elements.size()-1)
-	{
-	  // paradigma sufijo
-	  if(suffix_paradigms[current_section].find(elements[i].paradigmName()) != suffix_paradigms[current_section].end())
-	  {
-	    t.linkStates(e, suffix_paradigms[current_section][elements[i].paradigmName()], 0);
-            e = postsuffix_paradigms[current_section][elements[i].paradigmName()];
-	  }
-          else
-          {
-            e = t.insertNewSingleTransduction(alphabet(0, 0), e);
-            suffix_paradigms[current_section][elements[i].paradigmName()] = e;
-            e = t.insertTransducer(e, paradigms[elements[i].paradigmName()]);
-            postsuffix_paradigms[current_section][elements[i].paradigmName()] = e;
-	  }
-	}
-        else if(i == 0)
-	{
-          // paradigma prefijo
-	  if(prefix_paradigms[current_section].find(elements[i].paradigmName()) != prefix_paradigms[current_section].end())
-	  {
-            e = prefix_paradigms[current_section][elements[i].paradigmName()];
-	  }
-	  else
-	  {
-            e = t.insertTransducer(e, paradigms[elements[i].paradigmName()]);
-            prefix_paradigms[current_section][elements[i].paradigmName()] = e;
-	  }
-        }
-	else
-	{
-          // paradigma intermedio
-          e = t.insertTransducer(e, paradigms[elements[i].paradigmName()]);
-	}
-      }
-      else if(elements[i].isRegexp())
-      {
-	RegexpTMXPreprocessor analyzer;
-	analyzer.initialize(&alphabet);
-	analyzer.compile(elements[i].regExp());
-	e = t.insertTransducer(e, analyzer.getTransducer(), alphabet(0,0));
-      }
-      else
-      {
-        e = matchTransduction(elements[i].left(), elements[i].right(), e, t);
-      }
-    }
-    t.setFinal(e);
-  }
-}
-
 
 void
 TMXPreprocessor::requireAttribute(wstring const &value, wstring const &attrname,
@@ -569,211 +203,34 @@ TMXPreprocessor::requireAttribute(wstring const &value, wstring const &attrname,
   }  
 }
 
-
-void
-TMXPreprocessor::procSection()
-{
-  int tipo=xmlTextReaderNodeType(reader);
-
-  if(tipo != XML_READER_TYPE_END_ELEMENT)
-  {
-    wstring const &id = attrib(COMPILER_ID_ATTR);
-    wstring const &type = attrib(COMPILER_TYPE_ATTR);
-    requireAttribute(id, COMPILER_ID_ATTR, COMPILER_SECTION_ELEM);
-    requireAttribute(type, COMPILER_TYPE_ATTR, COMPILER_SECTION_ELEM);
-    
-    current_section = id;
-    current_section += L"@";
-    current_section.append(type);
-  }
-  else
-  {
-    current_section = L"";
-  }
-}
-
-void
-TMXPreprocessor::procEntry()
-{
-  wstring atributo=this->attrib(COMPILER_RESTRICTION_ATTR);
-  wstring ignore = this->attrib(COMPILER_IGNORE_ATTR);
-
-  // if entry is masked by a restriction of direction or an ignore mark
-  if((atributo != L"" && atributo != direction) || ignore == COMPILER_IGNORE_YES_VAL)
-  {
-    // parse to the end of the entry
-    wstring name = L"";
-
-    while(name != COMPILER_ENTRY_ELEM)
-    {
-      xmlTextReaderRead(reader);
-      name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
-    }
-
-    return;
-  }
-
-  vector<EntryToken> elements;
-
-  while(true)
-  {
-    int ret = xmlTextReaderRead(reader);
-    if(ret != 1)
-    {
-      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << "): Parse error." << endl;
-      exit(EXIT_FAILURE);
-    }
-    wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
-    skipBlanks(name);
-
-    int tipo = xmlTextReaderNodeType(reader);
-    if(name == COMPILER_PAIR_ELEM)
-    {      
-      elements.push_back(procTransduction());
-    }
-    else if(name == COMPILER_IDENTITY_ELEM)
-    {
-      elements.push_back(procIdentity());
-    }
-    else if(name == COMPILER_REGEXP_ELEM)
-    {
-      elements.push_back(procRegexp());
-    }
-    else if(name == COMPILER_PAR_ELEM)
-    {
-      elements.push_back(procPar());
-
-      // detección del uso de paradigmas no definidos
-
-      wstring const &p = elements.rbegin()->paradigmName();
-
-      if(paradigms.find(p) == paradigms.end())
-      {
-        wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-        wcerr << L"): Undefined paradigm '" << p << L"'." <<endl;
-        exit(EXIT_FAILURE);
-      }
-      // descartar entradas con paradigms vacíos (por las direciones,
-      // normalmente
-      if(paradigms[p].isEmpty())
-      {
-        while(name != COMPILER_ENTRY_ELEM || tipo != XML_READER_TYPE_END_ELEMENT)
-        {
-          xmlTextReaderRead(reader);
-          name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
-          tipo = xmlTextReaderNodeType(reader);
-        }
-        return;
-      }
-    }
-    else if(name == COMPILER_ENTRY_ELEM && tipo == XML_READER_TYPE_END_ELEMENT)
-    {
-      // insertar elements into letter transducer
-      insertEntryTokens(elements);
-      return;
-    }
-    else if(name == L"#text" && allBlanks())
-    {
-    }
-    else
-    {
-      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << L"): Invalid inclusion of '<" << name << L">' into '<" << COMPILER_ENTRY_ELEM;
-      wcerr << L">'." << endl; 
-      exit(EXIT_FAILURE);
-    }
-  }
-}
-
 void
 TMXPreprocessor::procNode()
 {
   xmlChar const *xnombre = xmlTextReaderConstName(reader);
   wstring nombre = XMLParseUtil::towstring(xnombre);
 
-  // HACER: optimizar el orden de ejecución de esta ristra de "ifs"
+  wcout << nombre << endl;
 
-  if(nombre == L"#text")
+
+  if(nombre == TMX_TMX_ELEM)
   {
-    /* ignorar */
-  }
-  else if(nombre == COMPILER_DICTIONARY_ELEM)
-  {
-    /* ignorar */
-  }
-  else if(nombre == COMPILER_ALPHABET_ELEM)
-  {
-    procAlphabet();
-  }
-  else if(nombre == COMPILER_SDEFS_ELEM)
-  {
-    /* ignorar */
-  }
-  else if(nombre == COMPILER_SDEF_ELEM)
-  {
-    procSDef();
-  }
-  else if(nombre == COMPILER_PARDEFS_ELEM)
-  {
-    /* ignorar */
-  }
-  else if(nombre == COMPILER_PARDEF_ELEM)
-  {
-    procParDef();
-  }
-  else if(nombre == COMPILER_ENTRY_ELEM)
-  {
-    procEntry();
-  }
-  else if(nombre == COMPILER_SECTION_ELEM)
-  {
-    procSection();
-  }
-  else if(nombre== L"#comment")
-  {
-    /* ignorar */
+    wcout << nombre << endl;
   }
   else
   {
     wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
     wcerr << L"): Invalid node '<" << nombre << L">'." << endl;
     exit(EXIT_FAILURE);
-  }
+  }  
 }
 
-EntryToken
-TMXPreprocessor::procRegexp()
+int main(int argc, char *argv[])
 {
-  EntryToken et;
-  xmlTextReaderRead(reader);
-  wstring re = XMLParseUtil::towstring(xmlTextReaderConstValue(reader));
-  et.setRegexp(re);
-  xmlTextReaderRead(reader);
-  return et;
-}
-
-void 
-TMXPreprocessor::write(FILE *output)
-{
-  // letters
-  Compression::wstring_write(letters, output);
-  
-  // symbols
-  alphabet.write(output);
-  
-  // transducers
-  Compression::multibyte_write(sections.size(), output);
-
-  int conta=0;
-  for(map<wstring, Transducer, Ltstr>::iterator it = sections.begin(),
-                                               limit = sections.end(); 
-      it != limit; it++)
+  TMXPreprocessor tmxp;
+  if(argc == 3)
   {
-    conta++;
-    wcout << it->first << " " << it->second.size();
-    wcout << " " << it->second.numberOfTransitions() << endl;
-    Compression::wstring_write(it->first, output);
-    it->second.write(output);
+    tmxp.parse(argv[1], L"LR");
   }
+  return 0;
 }
+

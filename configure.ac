@@ -53,19 +53,19 @@ ARCH=$(/bin/arch)
 if test x$ARCH = xppc
 then
   AC_MSG_RESULT([PowerPC])
-  CFLAGS="$CFLAGS -Wall -ansi -mpowerpc -maltivec -fno-pic -fomit-frame-pointer"
-  CXXFLAGS="$CXXFLAGS -Wall -ansi -mpowerpc -maltivec -fno-pic -fomit-frame-pointer"
+  CFLAGS="-Wall -ansi -mpowerpc -maltivec -fno-pic -fomit-frame-pointer $CFLAGS"
+  CXXFLAGS="-Wall -ansi -mpowerpc -maltivec -fno-pic -fomit-frame-pointer $CXXFLAGS"
 else
   if test x$ARCH = xi686
   then
     AC_MSG_RESULT([i686])
-    CFLAGS="$CFLAGS -Wall -ansi -march=i686 -O3 -fomit-frame-pointer -funroll-loops"
-    CXXFLAGS="$CXXFLAGS -Wall -ansi -march=i686 -O3 \
-              -fomit-frame-pointer -funroll-loops"
+    CFLAGS="-Wall -ansi -march=i686 -O3 -fomit-frame-pointer -funroll-loops $CFLAGS"
+    CXXFLAGS="-Wall -ansi -march=i686 -O3 \
+              -fomit-frame-pointer -funroll-loops $CXXFLAGS"
   else
     AC_MSG_RESULT([Other])
-    CFLAGS="$CFLAGS -Wall -ansi -O3"
-    CXXFLAGS="$CXXFLAGS -Wall -ansi -O3"
+    CFLAGS="-Wall -ansi -O3 $CFLAGS"
+    CXXFLAGS="-Wall -ansi -O3 $CXXFLAGS"
   fi
 fi
 

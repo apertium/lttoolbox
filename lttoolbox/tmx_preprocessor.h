@@ -20,10 +20,7 @@
 #define _TMXPREPROCESSOR_
 
 #include <lttoolbox/alphabet.h>
-#include <lttoolbox/regexp_compiler.h>
-#include <lttoolbox/entry_token.h>
 #include <lttoolbox/ltstr.h>
-#include <lttoolbox/transducer.h>
 
 #include <map>
 #include <string>
@@ -44,22 +41,6 @@ private:
   xmlTextReaderPtr reader;
   
   /**
-   * The paradigm being compiled
-   */
-  wstring current_paradigm;
-  
-  /**
-   * The dictionary section being compiled
-   */
-  wstring current_section;
-  
-  /**
-   * The direction of the compilation, 'lr' (left-to-right) or 'rl'
-   * (right-to-left)
-   */
-  wstring direction;
-  
-  /**
    * List of characters to be considered alphabetic
    */
   wstring letters;
@@ -70,70 +51,9 @@ private:
   Alphabet alphabet;  
   
   /**
-   * List of named transducers-paradigms
-   */
-  map<wstring, Transducer, Ltstr> paradigms;
-  
-  /**
-   * List of named dictionary sections
-   */
-  map<wstring, Transducer, Ltstr> sections;
-  
-  /**
-   * List of named prefix copy of a paradigm
-   */
-  map<wstring, map<wstring, int, Ltstr>, Ltstr> prefix_paradigms;
-  
-  /**
-   * List of named suffix copy of a paradigm
-   */
-  map<wstring, map<wstring, int, Ltstr>, Ltstr> suffix_paradigms;
-
-  /**
-   * List of named endings of a suffix copy of a paradgim
-   */
-  map<wstring, map<wstring, int, Ltstr>, Ltstr> postsuffix_paradigms;
-
-  /*    
-  static string range(char const a, char const b);
-  string readAlphabet();
-  */
-
-  /**
    * Method to parse an XML Node
    */
   void procNode();
-
-  /**
-   * Parse the &lt;alphabet&gt; element
-   */
-  void procAlphabet();
-
-  /**
-   * Parse the &lt;sdef&lt; element
-   */
-  void procSDef();
-
-  /**
-   * Parse the &lt;pardef&gt; element
-   */
-  void procParDef();
-  
-  /**
-   * Parse the &lt;e&gt; element
-   */
-  void procEntry();
-
-  /**
-   * Parse the &lt;re&gt; element
-   * @return a list of tokens from the dictionary's entry
-   */
-  EntryToken procRegexp();
-
-  /**
-   * Parse the &lt;section&gt; element
-   */
-  void procSection();
 
   /**
    * Gets an attribute value with their name and the current context
@@ -141,41 +61,6 @@ private:
    * @return the value of the attribute
    */
   wstring attrib(wstring const &name);
-
-  /**
-   * Construct symbol pairs by align left side of both parts and insert
-   * them into a transducer
-   * @param lp left part of the transduction
-   * @param rp right part of the transduction
-   * @param state the state from wich insert the new transduction
-   * @param t the transducer
-   * @return the last state of the inserted transduction
-   */
-  int matchTransduction(list<int> const &lp, list<int> const &rp,
-			    int state, Transducer &t);
-  /**
-   * Parse the &lt;p&lt; element
-   * @return a list of tokens from the dictionary's entry
-   */
-  EntryToken procTransduction();
-
-  /**
-   * Parse the &lt;i&lt; element
-   * @return a list of tokens from the dictionary's entry
-   */
-  EntryToken procIdentity();
-
-  /**
-   * Parse the &lt;par&gt; element
-   * @return a list of tokens from the dictionary's entry
-   */
-  EntryToken procPar();
-
-  /**
-   * Insert a list of tokens into the paradigm / section being processed
-   * @param elements the list
-   */
-  void insertEntryTokens(vector<EntryToken> const &elements);
 
   /**
    * Skip all document #text nodes before "elem"
@@ -189,9 +74,6 @@ private:
    * @param name the name of the node
    */
   void skipBlanks(wstring &name);
-  
-  
-  void readString(list<int> &result, wstring const &name);
   
   /**
    * Force an element to be empty, and check for it
@@ -264,7 +146,7 @@ public:
   static wstring const TMX_USAGECOUNT_ATTR;
   static wstring const TMX_VERSION_ATTR;
   static wstring const TMX_X_ATTR;
-  static wstring const TMX_XML_LANG;
+  static wstring const TMX_XML_LANG_ATTR;
 
   /**
    * Copnstructor
@@ -279,7 +161,7 @@ public:
   /**
    * Compile dictionary to letter transducers
    */
-  void parse(string const &fichero, wstring const &dir);
+  void parse(string const &filename, wstring const &dir);
   
   /**
    * Write the result of compilation 
