@@ -58,7 +58,6 @@ void checkValidity(FSTProcessor const &fstp)
 {
   if(!fstp.valid())
   {
-    cerr << "ERROR: Invalid dictionary" << endl;
     exit(EXIT_FAILURE);
   }
 }

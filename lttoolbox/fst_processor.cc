@@ -1307,7 +1307,23 @@ FSTProcessor::biltransWithoutQueue(wstring const &input_word, bool with_delim)
 bool
 FSTProcessor::valid() const
 {
-  return !initial_state.isFinal(all_finals);
+  if(initial_state.isFinal(all_finals))
+  {
+    wcerr << L"Error: Invalid dictionary (hint: the left side of an entry is empty)" << endl;
+    return false;
+  }
+  else
+  {
+    State s = initial_state;
+    s.step(L' ');
+    if(s.size() != 0)
+    {
+      wcerr << L"Error: Invalid dictionary (hint: entry beginning with whitespace)" << endl;
+      return false;
+    }
+  } 
+  
+  return true;
 }
 
 int
