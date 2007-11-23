@@ -228,27 +228,42 @@ State::filterFinals(set<Node *> const &finals,
   {
     if(finals.find(state[i].where) != finals.end())
     {
-      result += L'/';
-      unsigned int const first_char = result.size() + firstchar;
-      for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
+      if(state[i].dirty)
       {
-        if(escaped_chars.find((*(state[i].sequence))[j]) != escaped_chars.end())
+        result += L'/';
+        unsigned int const first_char = result.size() + firstchar;
+        for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
         {
-          result += L'\\';
+          if(escaped_chars.find((*(state[i].sequence))[j]) != escaped_chars.end())
+          {
+            result += L'\\';
+          }
+          alphabet.getSymbol(result, (*(state[i].sequence))[j], uppercase);
         }
-        alphabet.getSymbol(result, (*(state[i].sequence))[j], uppercase);
+        if(firstupper)
+        {
+  	  if(result[first_char] == L'~')
+	  {
+	    // skip post-generation mark
+	    result[first_char+1] = towupper(result[first_char+1]);
+	  }
+	  else
+	  {
+            result[first_char] = towupper(result[first_char]);
+	  }
+        }
       }
-      if(firstupper)
+      else
       {
-	if(result[first_char] == L'~')
-	{
-	  // skip post-generation mark
-	  result[first_char+1] = towupper(result[first_char+1]);
-	}
-	else
-	{
-          result[first_char] = towupper(result[first_char]);
-	}
+        result += L'/';
+        for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
+        {
+          if(escaped_chars.find((*(state[i].sequence))[j]) != escaped_chars.end())
+          {
+            result += L'\\';
+          }
+          alphabet.getSymbol(result, (*(state[i].sequence))[j]);
+        }
       }
     }
   }
