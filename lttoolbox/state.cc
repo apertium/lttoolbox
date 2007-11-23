@@ -53,11 +53,9 @@ void
 State::destroy()
 {
   // release references
-  for(multimap<Node *, vector<int> *>::iterator it = state.begin(),
-                                                limit = state.end();
-      it != limit; it++)
+  for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
-    pool.release(it->second);
+    pool.release(state[i].sequence);
   }
 
   state.clear();
@@ -67,22 +65,18 @@ void
 State::copy(State const &s)
 {
   // release references
-  for(multimap<Node *, vector<int> *>::iterator it = state.begin(),
-                                                limit = state.end();
-      it != limit; it++)
+  for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
-    pool.release(it->second);
+    pool.release(state[i].sequence);
   }
 
   state = s.state;
 
-  for(multimap<Node *, vector<int> *>::iterator it = state.begin(),
-                                                limit = state.end();
-      it != state.end(); it++)
+  for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     vector<int> *tmp = pool.get();
-    *tmp = *(it->second);
-    it->second = tmp;
+    *tmp = *(state[i].sequence);
+    state[i].sequence = tmp;
   }
 }
 
@@ -96,88 +90,76 @@ void
 State::init(Node *initial)
 {
   state.clear();
-  multimap<Node *, vector<int> *>::iterator it;
-  it = state.insert(pair<Node *, vector<int> * >(initial, pool.get()));
-  it->second->clear();
+  state.push_back(TNodeState(initial,pool.get(),false));
+  state[0].sequence->clear();
   epsilonClosure();  
 }  
 
 void
 State::apply(int const input)
 {
-  multimap<Node *, vector<int> *> new_state;
-
-  multimap<Node *, vector<int> *>::iterator s_it;
-
-  for(multimap<Node *, vector<int> *>::iterator s_it = state.begin(),
-                                                s_limit = state.end();
-      s_it != s_limit;  s_it++)
+  vector<TNodeState> new_state;
+  
+  for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     map<int, Dest>::const_iterator it;
-    it = s_it->first->transitions.find(input);
-    if(it != s_it->first->transitions.end())
+    it = state[i].where->transitions.find(input);
+    if(it != state[i].where->transitions.end())
     {
-      for(int i = 0; i != it->second.size; i++)
+      for(int j = 0; j != it->second.size; j++)
       {
         vector<int> *new_v = pool.get();
-        *new_v = *(s_it->second);
-
+        *new_v = *(state[i].sequence);
         if(it->first != 0)
-	{
-          new_v->push_back(it->second.out_tag[i]);
+        {
+          new_v->push_back(it->second.out_tag[j]);
         }
-
-        new_state.insert(pair<Node *, vector<int> *>(it->second.dest[i], new_v));
+        new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
       }
     }
-    pool.release(s_it->second);
+    pool.release(state[i].sequence);
   }
-
+  
   state = new_state;
 }
 
 void 
 State::apply(int const input, int const alt)
 {
-  multimap<Node *, vector<int> *> new_state;
-
-  for(multimap<Node *, vector<int> *>::iterator s_it = state.begin(),
-                                                           s_limit = state.end();
-      s_it != s_limit; s_it++)
+  vector<TNodeState> new_state;
+  
+  for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     map<int, Dest>::const_iterator it;
-    it = s_it->first->transitions.find(input);
-    if(it != s_it->first->transitions.end())
+    it = state[i].where->transitions.find(input);
+    if(it != state[i].where->transitions.end())
     {
-      for(int i = 0; i != it->second.size; i++)
+      for(int j = 0; j != it->second.size; j++)
       {
         vector<int> *new_v = pool.get();
-
-        *new_v = *(s_it->second);
+        *new_v = *(state[i].sequence);
         if(it->first != 0)
-	{
-          new_v->push_back(it->second.out_tag[i]);
+        {
+          new_v->push_back(it->second.out_tag[j]);
         }
-        new_state.insert(pair<Node *, vector<int> *>(it->second.dest[i], new_v));
+        new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
       }
     }
-
-    it = s_it->first->transitions.find(alt);
-    if(it != s_it->first->transitions.end())
+    it = state[i].where->transitions.find(alt);
+    if(it != state[i].where->transitions.end())
     {
-      for(int i = 0; i != it->second.size; i++)
+      for(int j = 0; j != it->second.size; j++)
       {
         vector<int> *new_v = pool.get();
-
-        *new_v = *(s_it->second);
+        *new_v = *(state[i].sequence);
         if(it->first != 0)
-	{
-          new_v->push_back(it->second.out_tag[i]);
+        {
+          new_v->push_back(it->second.out_tag[j]);
         }
-        new_state.insert(pair<Node *, vector<int> *>(it->second.dest[i], new_v));
+        new_state.push_back(TNodeState(it->second.dest[j], new_v, true));
       }
     }
-    pool.release(s_it->second);
+    pool.release(state[i].sequence);
   }
 
   state = new_state;
@@ -186,35 +168,23 @@ State::apply(int const input, int const alt)
 void
 State::epsilonClosure()
 {
-  list<multimap<Node *, vector<int> *>::iterator> alive;
-  
-  for(multimap<Node *, vector<int> *>::iterator s_it = state.begin(),
-                                                           s_limit = state.end(); 
-      s_it != s_limit; s_it++)
+  for(size_t i = 0; i != state.size(); i++)
   {
-    alive.push_back(s_it);
-  }
-
-  while(alive.size() != 0)
-  {
-    list<multimap<Node *, vector<int> *>::iterator>::iterator it = alive.begin();
     map<int, Dest>::iterator it2;
-    it2 = (*it)->first->transitions.find(0);
-    
-    if(it2 != (*it)->first->transitions.end())
+    it2 = state[i].where->transitions.find(0);
+    if(it2 != state[i].where->transitions.end())
     {
-      for(int i = 0 ; i != it2->second.size; i++)
+      for(int j = 0 ; j != it2->second.size; j++)
       {
         vector<int> *tmp = pool.get();
-        *tmp = *((*it)->second);
-        if(it2->second.out_tag[i] != 0)
+        *tmp = *(state[i].sequence);
+        if(it2->second.out_tag[j] != 0)
         {
-	  tmp->push_back(it2->second.out_tag[i]);
+	  tmp->push_back(it2->second.out_tag[j]);
         }
-        alive.push_back(state.insert(pair<Node *, vector<int> *>(it2->second.dest[i],tmp)));
-      }
+        state.push_back(TNodeState(it2->second.dest[j], tmp, state[i].dirty));
+      }          
     }
-    alive.erase(it);
   }
 }
 
@@ -234,12 +204,10 @@ State::step(int const input, int const alt)
 
 bool
 State::isFinal(set<Node *> const &finals) const
-{  
-  for(multimap<Node *, vector<int> *>::const_iterator it = state.begin(), 
-                                                                 limit = state.end(); 
-      it != limit; it++)
+{
+  for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
-    if(finals.find(it->first) != finals.end())
+    if(finals.find(state[i].where) != finals.end())
     {
       return true;
     }
@@ -256,21 +224,19 @@ State::filterFinals(set<Node *> const &finals,
 {
   wstring result = L"";
 
-  for(multimap<Node *, vector<int> *>::const_iterator it = state.begin(),
-                                                                 limit = state.end(); 
-      it != limit; it++)
+  for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
-    if(finals.find(it->first) != finals.end())
+    if(finals.find(state[i].where) != finals.end())
     {
       result += L'/';
       unsigned int const first_char = result.size() + firstchar;
-      for(unsigned int i = 0, limit = it->second->size(); i < limit; i++)
+      for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
       {
-        if(escaped_chars.find((*(it->second))[i]) != escaped_chars.end())
+        if(escaped_chars.find((*(state[i].sequence))[j]) != escaped_chars.end())
         {
           result += L'\\';
         }
-        alphabet.getSymbol(result, (*(it->second))[i], uppercase);
+        alphabet.getSymbol(result, (*(state[i].sequence))[j], uppercase);
       }
       if(firstupper)
       {
@@ -297,30 +263,28 @@ State::filterFinalsSAO(set<Node *> const &finals,
 		       bool uppercase, bool firstupper, int firstchar) const
 {
   wstring result = L"";
-
-  for(multimap<Node *, vector<int> *>::const_iterator it = state.begin(),
-                                                                 limit = state.end(); 
-      it != limit; it++)
+  
+  for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
-    if(finals.find(it->first) != finals.end())
+    if(finals.find(state[i].where) != finals.end())
     {
       result += L'/';
       unsigned int const first_char = result.size() + firstchar;
-      for(unsigned int i = 0, limit = it->second->size(); i < limit; i++)
+      for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
       {
-        if(escaped_chars.find((*(it->second))[i]) != escaped_chars.end())
+        if(escaped_chars.find((*(state[i].sequence))[j]) != escaped_chars.end())
         {
           result += L'\\';
         }
-        if(alphabet.isTag((*(it->second))[i]))
+        if(alphabet.isTag((*(state[i].sequence))[j]))
         {
           result += L'&';
-          alphabet.getSymbol(result, (*(it->second))[i]);
+          alphabet.getSymbol(result, (*(state[i].sequence))[j]);
           result[result.size()-1] = L';';
         }
         else
         {
-          alphabet.getSymbol(result, (*(it->second))[i], uppercase);
+          alphabet.getSymbol(result, (*(state[i].sequence))[j], uppercase);
         }
       }
       if(firstupper)

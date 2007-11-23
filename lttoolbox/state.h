@@ -19,8 +19,6 @@
 #ifndef _STATE_
 #define _STATE_
 
-#include <list>
-#include <map>
 #include <set>
 #include <string>
 #include <vector>
@@ -40,7 +38,23 @@ private:
   /**
    * The current state of transducer processing
    */
-  multimap<Node *, vector<int> * > state;
+  struct TNodeState
+  {
+    Node *where;
+    vector<int> *sequence;
+    bool dirty;
+    
+    TNodeState(Node * const &w, vector<int> * const &s, bool const &d): where(w), sequence(s), dirty(d){}
+    TNodeState & operator=(TNodeState const &other)
+    {
+      where = other.where;
+      sequence = other.sequence;
+      dirty = other.dirty;
+      return *this;
+    }
+  };
+  
+  vector<TNodeState> state;
 
   /**
    * Pool of wchar_t vectors, for efficience (static class)
