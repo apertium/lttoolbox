@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     endProgram(argv[0]);
   }
 
-  FILE *output = fopen(argv[3], "w");
+  FILE *output = fopen(argv[3], "wb");
   if(!output)
   {
     cerr << "Error: Cannot open file '" << argv[2] << "'." << endl;

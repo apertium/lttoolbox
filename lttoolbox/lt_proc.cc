@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
   
   if(optind == (argc - 3))
   {
-    FILE *in = fopen(argv[optind], "r");
+    FILE *in = fopen(argv[optind], "rb");
     if(in == NULL || ferror(in))
     {
       endProgram(argv[0]);
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
   }
   else if(optind == (argc -2))
   {
-    FILE *in = fopen(argv[optind], "r");
+    FILE *in = fopen(argv[optind], "rb");
     if(in == NULL || ferror(in))
     {
       endProgram(argv[0]);
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
   }   
   else if(optind == (argc - 1))
   {
-    FILE *in = fopen(argv[optind], "r");
+    FILE *in = fopen(argv[optind], "rb");
     if(in == NULL || ferror(in))
     {
       endProgram(argv[0]);
