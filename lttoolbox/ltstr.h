@@ -26,22 +26,22 @@ using namespace std;
 
 struct Ltstr
 {
-  bool operator()(string const &s1, string const &s2)
+  bool operator()(string const &s1, string const &s2) const
   {
     return strcmp(s1.c_str(), s2.c_str()) < 0;
   }
 
-  bool operator()(wchar_t const *s1, wchar_t const *s2)
+  bool operator()(wchar_t const *s1, wchar_t const *s2) const
   {
     return wcscmp(s1, s2) < 0;
   }
 
-  bool operator()(char const *s1, char const *s2)
+  bool operator()(char const *s1, char const *s2) const
   {
     return strcmp(s1, s2) < 0;
   }
 
-  bool operator()(wstring const &s1, wstring const &s2)
+  bool operator()(wstring const &s1, wstring const &s2) const
   {
     return wcscmp(s1.c_str(), s2.c_str()) < 0;
   }

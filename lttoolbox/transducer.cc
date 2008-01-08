@@ -259,7 +259,7 @@ Transducer::isEmptyIntersection(set<int> const &s1, set<int> const &s2)
 
   if(s1.size() < s2.size())
   {
-    for(set<int>::iterator it = s1.begin(), limit = s1.end(); it != limit; it++)
+    for(set<int>::const_iterator it = s1.begin(), limit = s1.end(); it != limit; it++)
     {
       if(s2.find(*it) != s2.end())
       {
@@ -269,7 +269,7 @@ Transducer::isEmptyIntersection(set<int> const &s1, set<int> const &s2)
   }
   else
   {
-    for(set<int>::iterator it = s2.begin(), limit = s2.end(); it != limit; it++)
+    for(set<int>::const_iterator it = s2.begin(), limit = s2.end(); it != limit; it++)
     {
       if(s1.find(*it) != s1.end())
       {
