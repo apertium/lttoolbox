@@ -51,7 +51,11 @@ XMLParseUtil::latin1(xmlChar const *input)
   int outputlen = xmlStrlen(input) + 1;
   int inputlen = xmlStrlen(input);
 
+#ifdef WIN32
+  unsigned char* output = (unsigned char*) alloca(outputlen);
+#else
   unsigned char output[outputlen];
+#endif
   
   if(UTF8Toisolat1(output, &outputlen, input, &inputlen) != 0)
   {
@@ -115,7 +119,11 @@ XMLParseUtil::towstring(xmlChar const * input)
 wstring 
 XMLParseUtil::stows(string const &str)
 {
+#ifdef WIN32
+  wchar_t* result = (wchar_t*) alloca(str.size());  
+#else
   wchar_t result[str.size()];
+#endif
   mbstowcs(result, str.c_str(), str.size());
   wstring result2 = result;
   return result2;
