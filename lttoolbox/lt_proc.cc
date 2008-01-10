@@ -31,10 +31,11 @@ using namespace std;
 void endProgram(char *name)
 {
   cout << basename(name) << ": process a stream with a letter transducer" << endl;
-  cout << "USAGE: " << basename(name) << " [-a|-g|-n|-d|-p|-s] fst_file [input_file [output_file]]" << endl;
+  cout << "USAGE: " << basename(name) << " [-c] [-a|-g|-n|-d|-p|-s] fst_file [input_file [output_file]]" << endl;
   cout << "Options:" << endl;
 #if HAVE_GETOPT_LONG
   cout << "  -a, --analysis:         morphological analysis (default behavior)" << endl;
+  cout << "  -c, --case-sensitive:   use the literal case of the incoming characters" << endl;
   cout << "  -g, --generation:       morphological generation" << endl;
   cout << "  -n, --non-marked-gen    morph. generation without unknown word marks" << endl;
   cout << "  -d, --debugged-gen      morph. generation with all the stuff" <<endl;
@@ -44,6 +45,7 @@ void endProgram(char *name)
   cout << "  -h, --help:             show this help" << endl;
 #else
   cout << "  -a:   morphological analysis (default behavior)" << endl;
+  cout << "  -c:   use the literal case of the incoming characters" << endl;
   cout << "  -g:   morphological generation" << endl;
   cout << "  -n:   morph. generation without unknown word marks" << endl;
   cout << "  -p:   post-generation" << endl;
@@ -65,6 +67,7 @@ void checkValidity(FSTProcessor const &fstp)
 int main(int argc, char *argv[])
 {
   int cmd = 0;
+  FSTProcessor fstp;
 
   static struct option long_options[]=
     {
@@ -75,6 +78,7 @@ int main(int argc, char *argv[])
       {"post-generation", 0, 0, 'p'},
       {"sao",             0, 0, 's'},
       {"version",	  0, 0, 'v'},
+      {"case-sensitive",  0, 0, 'c'},
       {"help",            0, 0, 'h'}
     };
 
@@ -82,9 +86,9 @@ int main(int argc, char *argv[])
   {
 #if HAVE_GETOPT_LONG
     int option_index;
-    int c = getopt_long(argc, argv, "agndpsvh", long_options, &option_index);
+    int c = getopt_long(argc, argv, "acgndpsvh", long_options, &option_index);
 #else
-    int c = getopt(argc, argv, "agndpsvh");
+    int c = getopt(argc, argv, "acgndpsvh");
 #endif    
 
     if(c == -1)
@@ -94,6 +98,10 @@ int main(int argc, char *argv[])
       
     switch(c)
     {
+    case 'c':
+      fstp.setCaseSensitiveMode(true);
+      break;
+      
     case 'a':
     case 'g':
     case 'n':
@@ -122,7 +130,6 @@ int main(int argc, char *argv[])
 
   FILE *input = stdin, *output = stdout;
   LtLocale::tryToSetLocale();
-  FSTProcessor fstp;
   
   if(optind == (argc - 3))
   {

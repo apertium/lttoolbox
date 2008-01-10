@@ -36,6 +36,8 @@ FSTProcessor::FSTProcessor()
   escaped_chars.insert(L'@');
   escaped_chars.insert(L'<');
   escaped_chars.insert(L'>');
+  
+  caseSensitive = false;
 }
 
 FSTProcessor::~FSTProcessor()
@@ -571,7 +573,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
       last = input_buffer.getPos();
     }
 
-    if(!iswupper(val))
+    if(!iswupper(val) || caseSensitive)
     {
       current_state.step(val);
     }
@@ -744,7 +746,7 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
       alphabet.getSymbol(sf,val);
       if(current_state.size() > 0)
       {
-	if(!alphabet.isTag(val) && iswupper(val))
+	if(!alphabet.isTag(val) && iswupper(val) && !caseSensitive)
 	{
 	  current_state.step(val, towlower(val));
 	}
@@ -850,7 +852,7 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
         last = input_buffer.getPos();
       }
 
-      if(!iswupper(val))
+      if(!iswupper(val) || caseSensitive)
       {
         current_state.step(val);
       }
@@ -971,7 +973,7 @@ FSTProcessor::biltrans(wstring const &input_word, bool with_delim)
     }
     if(current_state.size() != 0)
     {
-      if(!alphabet.isTag(val) && iswupper(val))
+      if(!alphabet.isTag(val) && iswupper(val) && !caseSensitive)
       {
 	current_state.step(val, towlower(val));
       }
@@ -1113,7 +1115,7 @@ FSTProcessor::biltransWithQueue(wstring const &input_word, bool with_delim)
     }
     if(current_state.size() != 0)
     {
-      if(!alphabet.isTag(val) && iswupper(val))
+      if(!alphabet.isTag(val) && iswupper(val) && !caseSensitive)
       {
 	current_state.step(val, towlower(val));
       }
@@ -1254,7 +1256,7 @@ FSTProcessor::biltransWithoutQueue(wstring const &input_word, bool with_delim)
     }
     if(current_state.size() != 0)
     {
-      if(!alphabet.isTag(val) && iswupper(val))
+      if(!alphabet.isTag(val) && iswupper(val) && !caseSensitive)
       {
 	current_state.step(val, towlower(val));
       }
@@ -1457,7 +1459,7 @@ FSTProcessor::SAO(FILE *input, FILE *output)
       last = input_buffer.getPos();
     }
 
-    if(!iswupper(val))
+    if(!iswupper(val) || caseSensitive)
     {
       current_state.step(val);
     }
@@ -1559,4 +1561,10 @@ FSTProcessor::removeTags(wstring const &str)
   }
   
   return str;
+}
+
+void
+FSTProcessor::setCaseSensitiveMode(bool const value)
+{
+  caseSensitive = value;
 }

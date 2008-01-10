@@ -121,6 +121,13 @@ private:
    */
   bool outOfWord;
   
+  
+  /**
+   * if true, makes always difference between uppercase and lowercase 
+   * characters
+   */
+  bool caseSensitive;
+  
   /**
    * Prints an error of input stream and exits
    */
@@ -262,6 +269,8 @@ public:
   void load(FILE *input);
 
   bool valid() const;
+  
+  void setCaseSensitiveMode(bool const value);
 };
 
 #endif
