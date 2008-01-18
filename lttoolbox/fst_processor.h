@@ -261,6 +261,7 @@ public:
   void analysis(FILE *input = stdin, FILE *output = stdout);
   void generation(FILE *input = stdin, FILE *output = stdout, GenerationMode mode = gm_unknown);
   void postgeneration(FILE *input = stdin, FILE *output = stdout); 
+  void transliteration(FILE *input = stdin, FILE *output = stdout); 
   wstring biltrans(wstring const &input_word, bool with_delim = true);
   pair<wstring, int> biltransWithQueue(wstring const &input_word, bool with_delim = true);
   wstring biltransWithoutQueue(wstring const &input_word, bool with_delim = true);

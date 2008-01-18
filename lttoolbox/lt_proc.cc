@@ -31,7 +31,7 @@ using namespace std;
 void endProgram(char *name)
 {
   cout << basename(name) << ": process a stream with a letter transducer" << endl;
-  cout << "USAGE: " << basename(name) << " [-c] [-a|-g|-n|-d|-p|-s] fst_file [input_file [output_file]]" << endl;
+  cout << "USAGE: " << basename(name) << " [-c] [-a|-g|-n|-d|-p|-s|-t] fst_file [input_file [output_file]]" << endl;
   cout << "Options:" << endl;
 #if HAVE_GETOPT_LONG
   cout << "  -a, --analysis:         morphological analysis (default behavior)" << endl;
@@ -41,6 +41,7 @@ void endProgram(char *name)
   cout << "  -d, --debugged-gen      morph. generation with all the stuff" <<endl;
   cout << "  -p, --post-generation:  post-generation" << endl;
   cout << "  -s, --sao:              SAO annotation system input processing" << endl;
+  cout << "  -t, --transliteration:  apply transliteration dictionary" << endl;
   cout << "  -v, --version:          version" << endl;
   cout << "  -h, --help:             show this help" << endl;
 #else
@@ -50,6 +51,7 @@ void endProgram(char *name)
   cout << "  -n:   morph. generation without unknown word marks" << endl;
   cout << "  -p:   post-generation" << endl;
   cout << "  -s:   SAO annotation system input processing" << endl;
+  cout << "  -t:   apply transliteration dictionary" << endl;
   cout << "  -v:   version" << endl;
   cout << "  -h:   show this help" << endl;
 #endif
@@ -77,6 +79,7 @@ int main(int argc, char *argv[])
       {"debugged-gen",    0, 0, 'd'},
       {"post-generation", 0, 0, 'p'},
       {"sao",             0, 0, 's'},
+      {"transliteration", 0, 0, 't'},
       {"version",	  0, 0, 'v'},
       {"case-sensitive",  0, 0, 'c'},
       {"help",            0, 0, 'h'}
@@ -86,9 +89,9 @@ int main(int argc, char *argv[])
   {
 #if HAVE_GETOPT_LONG
     int option_index;
-    int c = getopt_long(argc, argv, "acgndpsvh", long_options, &option_index);
+    int c = getopt_long(argc, argv, "acgndpstvh", long_options, &option_index);
 #else
-    int c = getopt(argc, argv, "acgndpsvh");
+    int c = getopt(argc, argv, "acgndpstvh");
 #endif    
 
     if(c == -1)
@@ -107,6 +110,7 @@ int main(int argc, char *argv[])
     case 'n':
     case 'd':
     case 'p':
+    case 't':
     case 's':
       if(cmd == 0)
       {
@@ -215,6 +219,12 @@ int main(int argc, char *argv[])
       fstp.initAnalysis();
       checkValidity(fstp);
       fstp.SAO(input, output);
+      break;
+
+    case 't':
+      fstp.initPostgeneration(); 
+      checkValidity(fstp);
+      fstp.transliteration(input, output);
       break;
       
     case 'a':

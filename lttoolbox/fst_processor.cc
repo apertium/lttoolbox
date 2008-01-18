@@ -920,6 +920,92 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
   flushBlanks(output);  
 }
 
+void
+FSTProcessor::transliteration(FILE *input, FILE *output)
+{
+  State current_state = initial_state;
+  wstring lf = L"";
+  wstring sf = L"";
+  int last = 0;
+
+  while(wchar_t val = readPostgeneration(input))
+  {
+    if(iswpunct(val) || iswspace(val)) 
+    {
+      bool firstupper = iswupper(sf[1]);
+      bool uppercase = sf.size() > 1 && firstupper && iswupper(sf[2]);
+      lf = current_state.filterFinals(all_finals, alphabet, escaped_chars,
+                                      uppercase, firstupper, 0);
+      if(!lf.empty()) 
+      {
+        fputws_unlocked(lf.substr(1).c_str(), output);
+        current_state = initial_state;
+        lf = L"";
+        sf = L"";
+      }
+      if(iswspace(val)) 
+      {
+        printSpace(val, output);
+      } 
+      else 
+      {
+        if(isEscaped(val)) 
+        {
+          fputwc_unlocked(L'\\', output);
+        }
+        fputwc_unlocked(val, output);
+      }
+    } 
+    else 
+    {
+      if(current_state.isFinal(all_finals)) 
+      {
+        bool firstupper = iswupper(sf[1]);
+        bool uppercase = sf.size() > 1 && firstupper && iswupper(sf[2]);
+        lf = current_state.filterFinals(all_finals, alphabet, escaped_chars,
+                                        uppercase, firstupper, 0);
+        last = input_buffer.getPos();
+      }
+
+      current_state.step(val);
+      if(current_state.size() != 0) 
+      {
+        alphabet.getSymbol(sf, val);
+      } 
+      else 
+      {
+        if(!lf.empty()) 
+        {
+          fputws_unlocked(lf.substr(1).c_str(), output);
+          input_buffer.setPos(last);
+          input_buffer.back(1);
+          val = lf[lf.size()-1];
+        } 
+        else 
+        {
+          if(iswspace(val)) 
+          {
+            printSpace(val, output);
+          } 
+          else 
+          {
+            if(isEscaped(val)) 
+            {
+              fputwc_unlocked(L'\\', output);
+            }
+            fputwc_unlocked(val, output);
+          }
+        }
+        current_state = initial_state;
+        lf = L"";
+        sf = L"";
+      }
+    }
+  }
+  // print remaining blanks
+  flushBlanks(output);
+}
+
 wstring
 FSTProcessor::biltrans(wstring const &input_word, bool with_delim)
 {
