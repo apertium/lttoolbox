@@ -1,0 +1,38 @@
+.TH lt-expand 1 2006-03-08 "" ""
+.SH NAME
+lt-expand \- This application is part of the lexical processing modules
+and tools (
+.B lttoolbox
+)
+.PP
+This tool is part of the apertium machine translation
+architecture: \fBhttp://apertium.sf.net\fR.
+.SH SYNOPSIS
+.B lt-expand
+dictionary_file [output_file]
+.PP
+.SH DESCRIPTION
+.BR lt-expand 
+Is the application responsible of expanding a dictionary into a
+simple list of input string-output string pairs by eliminating
+paradigms through substitution and unfolding.
+.PP
+The output goes to \fIoutput_file\fR if it is present or to standard
+output if it is missing.
+.PP
+.SH FILES
+.B dictionary_file
+The input dictionary to expand.
+.PP
+.B output_file
+Text containing the expanded dictionary information.
+.SH SEE ALSO
+.I lt-proc\fR(1),
+.I lt-comp\fR(1),
+.I apertium-tagger\fR(1),
+.I apertium-translator\fR(1).
+.SH BUGS
+Lots of...lurking in the dark and waiting for you!
+.SH AUTHOR
+(c) 2005,2006 Universitat d'Alacant / Universidad de Alicante. All rights
+reserved.

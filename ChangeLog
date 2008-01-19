@@ -1,0 +1,143 @@
+Version 0.2
+
+* Generation supported (-g option)
+* Version number displayed (-v option)
+
+Version 0.5
+
+* Full intergration of transfer and format modules 
+
+Version 0.5.2
+
+* ltproc checks if the transducer accepts the empty string
+
+Version 0.6
+
+* PoolVecUshort problems fixed
+
+Version 0.6.2
+
+* Bilingual problem with accents solved
+* Generator inconsistencies writing policy changed
+
+Version 0.6.4
+
+* adflex added
+* retflex added
+
+Version 0.6.5
+
+* Problem in format block generation fixed
+
+Version 0.6.6
+
+* Problem with spaces in generation fixed
+
+Version 0.6.7
+
+* g++-2.95 support discarded
+
+Version 0.6.8
+
+* Optional flex optimizations in "gen-*" scripts with flag "-O"
+* adflex problem with nonalphabetic characters solved
+
+Version 0.6.9
+
+* adflex and retflex problem with [] blocks patched
+
+Version 0.6.10
+
+* get-case-from transfer module error fixed
+
+Version 0.6.11
+
+* <b> element in the transfer specification rule behavior is changed.  If
+attribute is nonspecified, then a blank spacing character (ASCII 32) is
+generated.  The transfer.dtd file is modified accordingly.
+
+Version 0.6.12
+
+* dots in lit-tag 'v' attributes are translated as "><"
+
+Version 0.7
+
+* adflex deleted
+* transfer.xsl multi-lexical units treatment added
+
+Version 0.7.1
+
+* skipUntil error fixed
+* dix.dtd included as EXTRA_DIST
+* "postblank" section type support
+
+Version 0.7.2
+
+* "notdollar" transfer variable redefined
+
+Version 0.7.3
+
+* transfer problem temporarily solved
+
+Version 0.8
+
+* transfer problem definitely solved
+
+Version 0.8.1
+
+* Added support for uppercase first characters of words when post-generation 
+  mark is present
+* basename feature added
+
+Version 0.8.2
+
+* Empty blanks support added
+
+Version 0.8.3
+
+* _unlocked standard I/O updated
+* getopt_long feature set as optional
+
+Version 0.8.4
+
+* retflex adds a blank behind two elements of a multi-lexical form of a word
+* "hay incidencias" problem patched
+
+Version 0.9
+
+* New transfer
+
+Version 0.9.1
+
+* Minor bugfixes in transfer
+
+Version 0.9.2
+
+* Minor bugfixes in transfer
+
+Version 0.9.3
+
+* -n option added to ltproc
+* capitalisation problem of generator solved
+
+Version 0.9.5
+
+* Escaped character minor fixes
+
+Version 0.9.6
+
+* <equali> transfer tag introduced
+
+Version 0.9.7
+
+* Line number bug fixed
+
+Version 0.9.9
+
+* "whole" part in transfer is now persistent
+* <equali> replaced by <equal caseless="yes">.  transfer.dtd edited
+  accordingly.
+
+Pending:
+* Implement the new policy of case propagation of the post-generator
+* Solve the problems with '$' and '^' when appearing in the original text
