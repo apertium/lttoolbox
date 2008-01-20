@@ -1,4 +1,4 @@
-.TH lt-proc 1 2006-03-23 "" ""
+﻿.TH lt-proc 1 2006-03-23 "" ""
 .SH NAME
 lt-proc \- This application is part of the lexical processing modules
 and tools (
@@ -11,10 +11,12 @@ architecture: \fBhttp://apertium.sf.net\fR.
 .B lt-proc
 [
 .B \-a \fR| 
+.B \-c \fR| 
 .B \-g \fR|
 .B \-n \fR|
 .B \-p \fR|
 .B \-s \fR|
+.B \-t \fR| 
 .B \-v \fR|
 .B \-h
 ] fst_file [input_file [output_file]]
@@ -22,10 +24,12 @@ architecture: \fBhttp://apertium.sf.net\fR.
 .B lt-proc
 [
 .B \-\-analysis \fR| 
+.B \-\-case-sensitive \fR|
 .B \-\-generation \fR|
 .B \-\-non-marked-gen \fR|
 .B \-\-post-generation \fR|
 .B \-\-sao \fR|
+.B \-\-transliteration \fR|
 .B \-\-version \fR|
 .B \-\-help
 ] fst_file [input_file [output_file]]
@@ -78,6 +82,9 @@ forms analysis produces output like the one in these examples:
 \fI"cantaba"\fR \->
 `\fI^cantaba/cantar<vblex><pii><p1><sg>/cantar<vblex><pii><p3><sg>$\fR'.
 .TP
+.B \-c, \-\-case-sensitive
+Use the literal case of the incoming characters
+.TP
 .B \-g, \-\-generation
 Delivers a target-language surface form for each target-language
 lexical form, by suitably inflecting it.
@@ -97,6 +104,9 @@ back to sleep.
 .B \-s, \-\-sao
 Input processing is in \fIorthoepikon\fR (previosuly `\fIsao\fR')
 annotation system format: \fBhttp://orthoepikon.sf.net\fR.
+.TP
+.B \-t, \-\-transliteration
+Apply a transliteration dictionary
 .TP
 .B \-v, \-\-version
 Display the version number.
