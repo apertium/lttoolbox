@@ -70,8 +70,8 @@ Node::addTransition(int const i, int const o, Node * const d)
   
   if(aux.size > 1)
   {
-    delete aux.out_tag;
-    delete aux.dest;
+    delete[] aux.out_tag;
+    delete[] aux.dest;
   }
 
   out_tag[aux.size-1] = o;
