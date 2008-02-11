@@ -41,17 +41,7 @@ private:
   
   void copy(Dest const &d)
   {
-    if(size != 0)
-    {
-      if(!out_tag)
-      {
-        delete out_tag;
-      }
-      if(!dest)
-      {
-        delete dest;
-      }
-    }
+    destroy();
     size = d.size;
     out_tag = new int[size];
     dest = new Node*[size];
@@ -62,23 +52,28 @@ private:
     if(size != 0)
     {
       size = 0;
-      if(!out_tag)
+      if(out_tag)
       {
-        delete out_tag;
+        delete[] out_tag;
       }
-      if(!dest)
+      if(dest)
       {
-        delete dest;
+        delete[] dest;
       }
     }
+  }
+
+  void init()
+  {
+    size = 0;
+    out_tag = NULL;
+    dest = NULL;  
   }
   
 public:
   Dest()
   {
-    size = 0;
-    out_tag = NULL;
-    dest = NULL;
+    init();
   }
   
   ~Dest()
@@ -88,6 +83,7 @@ public:
   
   Dest(Dest const &d)
   {
+    init();
     copy(d);
   }
   
