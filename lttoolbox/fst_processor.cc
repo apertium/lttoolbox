@@ -628,7 +628,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
         }         
         while((val = readAnalysis(input)) && isAlphabetic(val));
 
-        unsigned int limit = sf.find(L' ');
+        unsigned int limit = firstNotAlpha(sf);
         unsigned int size = sf.size();
         limit = (limit == static_cast<unsigned int>(wstring::npos)?size:limit);
         input_buffer.back(1+(size-limit));
@@ -636,7 +636,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
       }
       else if(lf == L"")
       {
-        unsigned int limit = sf.find(L' ');
+        unsigned int limit = firstNotAlpha(sf);
         unsigned int size = sf.size();
         limit = (limit == static_cast<unsigned int >(wstring::npos)?size:limit);
         input_buffer.back(1+(size-limit));
@@ -1653,4 +1653,18 @@ void
 FSTProcessor::setCaseSensitiveMode(bool const value)
 {
   caseSensitive = value;
+}
+
+size_t
+FSTProcessor::firstNotAlpha(wstring const &sf)
+{
+  for(size_t i = 0, limit = sf.size(); i < limit; i++)
+  {
+    if(!isAlphabetic(sf[i]))
+    {
+      return i;
+    }   
+  }
+  
+  return wstring::npos;
 }

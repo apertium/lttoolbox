@@ -247,6 +247,7 @@ private:
   void printSpace(wchar_t const val, FILE *output);
   void skipUntil(FILE *input, FILE *output, wint_t const character);
   static wstring removeTags(wstring const &str);
+  size_t firstNotAlpha(wstring const &sf);
   
 public:
   FSTProcessor();
