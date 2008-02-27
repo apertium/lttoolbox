@@ -1598,7 +1598,7 @@ FSTProcessor::SAO(FILE *input, FILE *output)
         }         
         while((val = readSAO(input)) && isAlphabetic(val));
 
-        unsigned int limit = sf.find(L' ');
+        unsigned int limit = firstNotAlpha(sf);
         unsigned int size = sf.size();
         limit = (limit == static_cast<unsigned int>(wstring::npos)?size:limit);
         input_buffer.back(1+(size-limit));
@@ -1608,7 +1608,7 @@ FSTProcessor::SAO(FILE *input, FILE *output)
       }
       else if(lf == L"")
       {
-        unsigned int limit = sf.find(L' ');
+        unsigned int limit = firstNotAlpha(sf);
         unsigned int size = sf.size();
         limit = (limit == static_cast<unsigned int>(wstring::npos)?size:limit);
         input_buffer.back(1+(size-limit));
