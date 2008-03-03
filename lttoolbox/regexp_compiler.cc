@@ -92,14 +92,14 @@ RegexpCompiler::isReserved(int const t)
 void
 RegexpCompiler::error()
 {
-  cerr << "Error de análisis de expresión regular\n";
+  wcerr << L"Error parsing regexp" <<endl;
   exit(EXIT_FAILURE);
 }
 
 void 
 RegexpCompiler::errorConsuming(int const t)
 {
-  cerr << "Expresión regular: Error de análisis en '" << char(t) << "'\n";
+  wcerr << L"Error parsing regexp" << endl;
   exit(EXIT_FAILURE);
 }
 

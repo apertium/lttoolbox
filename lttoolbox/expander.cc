@@ -177,8 +177,8 @@ Expander::skip(wstring &name, wstring const &elem)
   {
     if(!allBlanks())
     {
-      cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << L"): Invalid construction." << endl;
+      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+      wcerr << L"): Invalid construction." << endl;
       exit(EXIT_FAILURE);
     }
     xmlTextReaderRead(reader);
@@ -315,8 +315,8 @@ Expander::procEntry(FILE *output)
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << "): Parse error." << endl;
+      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+      wcerr << L"): Parse error." << endl;
       exit(EXIT_FAILURE);
     }
     wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));

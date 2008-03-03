@@ -171,8 +171,8 @@ Transducer::linkStates(int const source, int const destino,
   }
   else
   {
-    cerr << "Error: Trying to link nonexistent states (" << source;
-    cerr << ", " << destino << ", " << etiqueta << ")" << endl;
+    wcerr << L"Error: Trying to link nonexistent states (" << source;
+    wcerr << L", " << destino << L", " << etiqueta << L")" << endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -248,7 +248,7 @@ Transducer::joinFinals(int const epsilon_tag)
   }
   else if(finals.size() == 0)
   {
-    cerr << "Error: empty set of final states" <<endl;
+    wcerr << L"Error: empty set of final states" <<endl;
     exit(EXIT_FAILURE);
   }
 }
