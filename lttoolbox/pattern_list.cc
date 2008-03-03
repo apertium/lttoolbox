@@ -77,7 +77,7 @@ PatternList::beginSequence()
 {
   if(sequence)
   {
-    cerr << "Error: opening an unended sequence" << endl;
+    wcerr << L"Error: opening an unended sequence" << endl;
     exit(EXIT_FAILURE);
   }
   sequence = true;
@@ -89,7 +89,7 @@ PatternList::endSequence()
 {
   if(!sequence)
   {
-    cerr << "Error: ending an unopened sequence" << endl;
+    wcerr << L"Error: ending an unopened sequence" << endl;
     exit(EXIT_FAILURE);
   }
   sequence = false;
@@ -193,7 +193,7 @@ PatternList::insert(int const id, int const otherid)
 {
   if(!sequence)
   {
-    cerr << "Error: using labels outside of a sequence" << endl;
+    wcerr << L"Error: using labels outside of a sequence" << endl;
     exit(EXIT_FAILURE);
   }
 

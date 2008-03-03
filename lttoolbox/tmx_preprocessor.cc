@@ -87,9 +87,9 @@ TMXPreprocessor::parse(string const &filename, wstring const &dir)
   reader = xmlReaderForFile(filename.c_str(), NULL, 0);
   if(reader == NULL)
   {
-    wcerr << L"Error: Cannot open '";
+    cerr << "Error: Cannot open '";
     cerr << filename;
-    wcerr << L"'." << endl;
+    cerr << "'." << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -102,7 +102,7 @@ TMXPreprocessor::parse(string const &filename, wstring const &dir)
 
   if(ret != 0)
   {
-    cerr << "Error: Parse error at the end of input." << endl;
+    wcerr << L"Error: Parse error at the end of input." << endl;
   }
 
   xmlFreeTextReader(reader);
@@ -143,8 +143,8 @@ TMXPreprocessor::skipBlanks(wstring &name)
     {
       if(!allBlanks())
       {
-        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader); 
-        cerr << "): Invalid construction." << endl;
+        wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader); 
+        wcerr << L"): Invalid construction." << endl;
         exit(EXIT_FAILURE);
       }
     }
@@ -166,8 +166,8 @@ TMXPreprocessor::skip(wstring &name, wstring const &elem)
     {
       if(!allBlanks())
       {
-        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        cerr << "): Invalid construction." << endl;
+        wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+        wcerr << L"): Invalid construction." << endl;
         exit(EXIT_FAILURE);
       }
     }

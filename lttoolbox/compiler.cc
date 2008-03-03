@@ -86,7 +86,7 @@ Compiler::parse(string const &fichero, wstring const &dir)
 
   if(ret != 0)
   {
-    cerr << "Error: Parse error at the end of input." << endl;
+    wcerr << L"Error: Parse error at the end of input." << endl;
   }
 
   xmlFreeTextReader(reader);
@@ -118,8 +118,8 @@ Compiler::procAlphabet()
     }
     else
     {
-      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << "): Missing alphabet symbols." << endl;
+      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+      wcerr << L"): Missing alphabet symbols." << endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -304,8 +304,8 @@ Compiler::skipBlanks(wstring &name)
     {
       if(!allBlanks())
       {
-        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader); 
-        cerr << "): Invalid construction." << endl;
+        wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader); 
+        wcerr << L"): Invalid construction." << endl;
         exit(EXIT_FAILURE);
       }
     }
@@ -327,8 +327,8 @@ Compiler::skip(wstring &name, wstring const &elem)
     {
       if(!allBlanks())
       {
-        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        cerr << "): Invalid construction." << endl;
+        wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+        wcerr << L"): Invalid construction." << endl;
         exit(EXIT_FAILURE);
       }
     }
@@ -468,8 +468,8 @@ Compiler::insertEntryTokens(vector<EntryToken> const &elements)
       }
       else
       {
-        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        cerr << "): Invalid entry token." << endl;
+        wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+        wcerr << L"): Invalid entry token." << endl;
         exit(EXIT_FAILURE);
       }
     }
@@ -603,8 +603,8 @@ Compiler::procEntry()
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << "): Parse error." << endl;
+      cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+      cerr << L"): Parse error." << endl;
       exit(EXIT_FAILURE);
     }
     wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));

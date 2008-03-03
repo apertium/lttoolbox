@@ -47,7 +47,7 @@ FSTProcessor::~FSTProcessor()
 void
 FSTProcessor::streamError()
 {
-  cerr << "Error: Malformed input stream." << endl;
+  wcerr << L"Error: Malformed input stream." << endl;
   exit(EXIT_FAILURE);
 }
 
@@ -368,8 +368,8 @@ FSTProcessor::classifyFinals()
     }
     else
     {
-      wcerr << "Error: Unsupported transducer type for '";
-      wcerr << it->first << "'." << endl;
+      wcerr << L"Error: Unsupported transducer type for '";
+      wcerr << it->first << L"'." << endl;
       exit(EXIT_FAILURE);
     }
   }
