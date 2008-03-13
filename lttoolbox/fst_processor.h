@@ -129,6 +129,11 @@ private:
   bool caseSensitive;
   
   /**
+   * if true, flush the output when the null character is found
+   */
+  bool nullFlush;
+  
+  /**
    * Prints an error of input stream and exits
    */
   void streamError();
@@ -248,6 +253,8 @@ private:
   void skipUntil(FILE *input, FILE *output, wint_t const character);
   static wstring removeTags(wstring const &str);
   size_t firstNotAlpha(wstring const &sf);
+
+  void analysis_wrapper_null_flush(FILE *input, FILE *output);
   
 public:
   FSTProcessor();
@@ -273,6 +280,8 @@ public:
   bool valid() const;
   
   void setCaseSensitiveMode(bool const value);
+  void setNullFlush(bool const value);
+  bool getNullFlush();
 };
 
 #endif

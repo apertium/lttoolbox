@@ -18,8 +18,11 @@
  */
 #include <lttoolbox/fst_processor.h>
 #include <lttoolbox/compression.h>
+#include <lttoolbox/exception.h>
 
 #include <iostream>
+
+#include <errno.h>
 
 using namespace std;
 
@@ -38,6 +41,7 @@ FSTProcessor::FSTProcessor()
   escaped_chars.insert(L'>');
   
   caseSensitive = false;
+  nullFlush = false;
 }
 
 FSTProcessor::~FSTProcessor()
@@ -47,8 +51,7 @@ FSTProcessor::~FSTProcessor()
 void
 FSTProcessor::streamError()
 {
-  wcerr << L"Error: Malformed input stream." << endl;
-  exit(EXIT_FAILURE);
+  throw Exception("Error: Malformed input stream.");
 }
 
 wchar_t
@@ -517,6 +520,11 @@ FSTProcessor::initBiltrans()
 void
 FSTProcessor::analysis(FILE *input, FILE *output)
 {
+  if(getNullFlush())
+  {
+    analysis_wrapper_null_flush(input, output);
+  }
+
   bool last_incond = false;
   bool last_postblank = false;
   State current_state = initial_state;
@@ -660,6 +668,22 @@ FSTProcessor::analysis(FILE *input, FILE *output)
   
   // print remaining blanks
   flushBlanks(output);
+}
+
+void
+FSTProcessor::analysis_wrapper_null_flush(FILE *input, FILE *output)
+{
+  setNullFlush(false);
+  while(true) 
+  {
+    analysis(input, output);
+    fputwc_unlocked(L'\0', output);
+    int code = fflush(output);
+    if(code != 0) 
+    {
+        cerr << "Could not flush output " << errno << endl;
+    }
+  }
 }
 
 void
@@ -1653,6 +1677,18 @@ void
 FSTProcessor::setCaseSensitiveMode(bool const value)
 {
   caseSensitive = value;
+}
+
+void
+FSTProcessor::setNullFlush(bool const value)
+{
+  nullFlush = value;
+}
+
+bool
+FSTProcessor::getNullFlush()
+{
+  return nullFlush;
 }
 
 size_t

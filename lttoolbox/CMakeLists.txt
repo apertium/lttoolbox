@@ -3,7 +3,7 @@ FIND_PACKAGE (LibXml2 REQUIRED)
 INCLUDE_DIRECTORIES (${LIBXML2_INCLUDE_DIR})
 ADD_DEFINITIONS (${LIBXML2_DEFINITIONS})
 
-ADD_LIBRARY (lttoolbox3 SHARED alphabet.cc compiler.cc compression.cc entry_token.cc
+ADD_LIBRARY (lttoolbox3 ${LTTOOLBOX_SHARED} alphabet.cc compiler.cc compression.cc entry_token.cc
              expander.cc fst_processor.cc lt_locale.cc match_exe.cc
              match_node.cc match_state.cc node.cc pattern_list.cc
              regexp_compiler.cc sorted_vector.cc state.cc transducer.cc
