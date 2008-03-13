@@ -42,6 +42,7 @@ void endProgram(char *name)
   cout << "  -p, --post-generation:  post-generation" << endl;
   cout << "  -s, --sao:              SAO annotation system input processing" << endl;
   cout << "  -t, --transliteration:  apply transliteration dictionary" << endl;
+  cout << "  -z, --null-flush:       flush output on the null character " << endl;
   cout << "  -v, --version:          version" << endl;
   cout << "  -h, --help:             show this help" << endl;
 #else
@@ -52,6 +53,7 @@ void endProgram(char *name)
   cout << "  -p:   post-generation" << endl;
   cout << "  -s:   SAO annotation system input processing" << endl;
   cout << "  -t:   apply transliteration dictionary" << endl;
+  cout << "  -z:   flush output on the null character " << endl;
   cout << "  -v:   version" << endl;
   cout << "  -h:   show this help" << endl;
 #endif
@@ -71,6 +73,7 @@ int main(int argc, char *argv[])
   int cmd = 0;
   FSTProcessor fstp;
 
+#if HAVE_GETOPT_LONG
   static struct option long_options[]=
     {
       {"analysis",        0, 0, 'a'},
@@ -80,18 +83,20 @@ int main(int argc, char *argv[])
       {"post-generation", 0, 0, 'p'},
       {"sao",             0, 0, 's'},
       {"transliteration", 0, 0, 't'},
+      {"null-flush",      0, 0, 'z'},
       {"version",	  0, 0, 'v'},
       {"case-sensitive",  0, 0, 'c'},
       {"help",            0, 0, 'h'}
     };
+#endif    
 
   while(true)
   {
 #if HAVE_GETOPT_LONG
     int option_index;
-    int c = getopt_long(argc, argv, "acgndpstvh", long_options, &option_index);
+    int c = getopt_long(argc, argv, "acgndpstzvh", long_options, &option_index);
 #else
-    int c = getopt(argc, argv, "acgndpstvh");
+    int c = getopt(argc, argv, "acgndpstzvh");
 #endif    
 
     if(c == -1)
@@ -121,6 +126,11 @@ int main(int argc, char *argv[])
 	endProgram(argv[0]);
       }
       break;
+
+    case 'z':
+      fstp.setNullFlush(true);
+      break;
+
     case 'v':
       cout << basename(argv[0]) << " version " << PACKAGE_VERSION << endl;
       exit(EXIT_SUCCESS);
@@ -190,50 +200,62 @@ int main(int argc, char *argv[])
     endProgram(argv[0]);
   }
 
-  switch(cmd)
+  try
   {
-    case 'n':
-      fstp.initGeneration();
-      checkValidity(fstp);
-      fstp.generation(input, output, gm_clean);
-      break;
+    switch(cmd)
+    {
+      case 'n':
+        fstp.initGeneration();
+        checkValidity(fstp);
+        fstp.generation(input, output, gm_clean);
+        break;
 
-    case 'g':
-      fstp.initGeneration();
-      checkValidity(fstp);
-      fstp.generation(input, output);
-      break;
+      case 'g':
+        fstp.initGeneration();
+        checkValidity(fstp);
+        fstp.generation(input, output);
+        break;
       
-    case 'd':
-      fstp.initGeneration();
-      checkValidity(fstp);
-      fstp.generation(input, output, gm_all);
+      case 'd':
+        fstp.initGeneration();
+        checkValidity(fstp);
+        fstp.generation(input, output, gm_all);
       
-    case 'p':
-      fstp.initPostgeneration();
-      checkValidity(fstp);
-      fstp.postgeneration(input, output);
-      break;
+      case 'p':
+        fstp.initPostgeneration();
+        checkValidity(fstp);
+        fstp.postgeneration(input, output);
+        break;
 
-    case 's':
-      fstp.initAnalysis();
-      checkValidity(fstp);
-      fstp.SAO(input, output);
-      break;
+      case 's':
+        fstp.initAnalysis();
+        checkValidity(fstp);
+        fstp.SAO(input, output);
+        break;
 
-    case 't':
-      fstp.initPostgeneration(); 
-      checkValidity(fstp);
-      fstp.transliteration(input, output);
-      break;
+      case 't':
+        fstp.initPostgeneration(); 
+        checkValidity(fstp);
+        fstp.transliteration(input, output);
+        break;
       
-    case 'a':
-    default:
-      fstp.initAnalysis(); 
-      checkValidity(fstp);
-      fstp.analysis(input, output);
-      break;
-  }      
+      case 'a':
+      default:
+        fstp.initAnalysis(); 
+        checkValidity(fstp);
+        fstp.analysis(input, output);
+        break;
+    }
+  }
+  catch (exception& e)
+  {
+    cerr << e.what();
+    if (fstp.getNullFlush()) {
+      fputws_unlocked('\0', output);
+    }
+
+    exit(1);
+  }
 
   fclose(input);
   fclose(output); 

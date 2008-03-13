@@ -31,7 +31,7 @@ using namespace std;
 
 class Dest
 {
-private:
+private: 
   int size;
   int *out_tag;
   Node **dest;
@@ -69,7 +69,7 @@ private:
     out_tag = NULL;
     dest = NULL;  
   }
-  
+
 public:
   Dest()
   {
@@ -86,7 +86,7 @@ public:
     init();
     copy(d);
   }
-  
+
   Dest & operator=(Dest const &d)
   {
     if(this != &d)
@@ -94,7 +94,7 @@ public:
       destroy();
       copy(d);
     }
-    return *this; 
+    return *this;
   }
 };
 
