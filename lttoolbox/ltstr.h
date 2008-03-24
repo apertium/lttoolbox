@@ -21,6 +21,7 @@
 
 #include <string>
 #include <cwchar>
+#include <cstring>
 
 using namespace std;
 
