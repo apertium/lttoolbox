@@ -21,6 +21,7 @@
 
 #include <cstdio>
 #include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -38,6 +39,14 @@ public:
    * @param output output stream.
    */
   static void multibyte_write(unsigned int value, FILE *output);
+
+  /**
+   * Encodes an integer value and writes it into the output stream
+   * @see multibyte_read()
+   * @param value integer to write.
+   * @param output output stream.
+   */
+  static void multibyte_write(unsigned int value, ostream &os);
   
   /**
    * Read and decode an integer from the input stream.
@@ -46,7 +55,15 @@ public:
    * @return the integer value readed.
    */
   static unsigned int multibyte_read(FILE *input);
-  
+
+  /**
+   * Read and decode an integer from the input stream.
+   * @see multibyte_read()
+   * @param input input stream.
+   * @return the integer value readed.
+   */
+  static unsigned int multibyte_read(istream &is);
+
   /**
    * This method allows to write a wide string to an output stream
    * using its UCSencoding as integer.
