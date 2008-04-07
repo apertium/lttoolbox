@@ -255,6 +255,10 @@ private:
   size_t firstNotAlpha(wstring const &sf);
 
   void analysis_wrapper_null_flush(FILE *input, FILE *output);
+  void generation_wrapper_null_flush(FILE *input, FILE *output,
+                                     GenerationMode mode);
+  void postgeneration_wrapper_null_flush(FILE *input, FILE *output);
+  void transliteration_wrapper_null_flush(FILE *input, FILE *output);
   
 public:
   FSTProcessor();

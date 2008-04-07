@@ -681,14 +681,69 @@ FSTProcessor::analysis_wrapper_null_flush(FILE *input, FILE *output)
     int code = fflush(output);
     if(code != 0) 
     {
-        cerr << "Could not flush output " << errno << endl;
+        wcerr << L"Could not flush output " << errno << endl;
     }
   }
 }
 
 void
+FSTProcessor::generation_wrapper_null_flush(FILE *input, FILE *output, 
+                                            GenerationMode mode)
+{
+  setNullFlush(false);
+  while(true) 
+  {
+    generation(input, output, mode);
+    fputwc_unlocked(L'\0', output);
+    int code = fflush(output);
+    if(code != 0) 
+    {
+        wcerr << L"Could not flush output " << errno << endl;
+    }
+  }
+}
+
+void
+FSTProcessor::postgeneration_wrapper_null_flush(FILE *input, FILE *output)
+{
+  setNullFlush(false);
+  while(true) 
+  {
+    postgeneration(input, output);
+    fputwc_unlocked(L'\0', output);
+    int code = fflush(output);
+    if(code != 0) 
+    {
+        wcerr << L"Could not flush output " << errno << endl;
+    }
+  }
+}
+
+void
+FSTProcessor::transliteration_wrapper_null_flush(FILE *input, FILE *output)
+{
+  setNullFlush(false);
+  while(true) 
+  {
+    transliteration(input, output);
+    fputwc_unlocked(L'\0', output);
+    int code = fflush(output);
+    if(code != 0) 
+    {
+        wcerr << L"Could not flush output " << errno << endl;
+    }
+  }
+}
+
+
+void
 FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
 {
+  if(getNullFlush())
+  {
+    generation_wrapper_null_flush(input, output, mode);
+  }
+
   State current_state = initial_state;
   wstring sf = L"";
  
@@ -786,6 +841,11 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
 void
 FSTProcessor::postgeneration(FILE *input, FILE *output)
 {
+  if(getNullFlush())
+  {
+    postgeneration_wrapper_null_flush(input, output);
+  }
+
   bool skip_mode = true;
   State current_state = initial_state;
   wstring lf = L"";
@@ -947,6 +1007,11 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
 void
 FSTProcessor::transliteration(FILE *input, FILE *output)
 {
+  if(getNullFlush())
+  {
+    transliteration_wrapper_null_flush(input, output);
+  }
+
   State current_state = initial_state;
   wstring lf = L"";
   wstring sf = L"";
