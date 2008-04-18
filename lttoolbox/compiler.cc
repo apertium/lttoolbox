@@ -725,7 +725,7 @@ Compiler::procNodeACX()
   {
     acx_current_char = static_cast<int>(attrib(L"value")[0]);
   }
-  else if(nombre == L"char-equiv")
+  else if(nombre == L"equiv-char")
   {
     acx_map[acx_current_char].insert(static_cast<int>(attrib(L"value")[0]));
   }
