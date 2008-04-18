@@ -67,6 +67,26 @@ Compiler::~Compiler()
 }
 
 void
+Compiler::parseACX(string const &fichero, wstring const &dir)
+{
+  if(dir == COMPILER_RESTRICTION_LR_VAL)
+  {
+    reader = xmlReaderForFile(fichero.c_str(), NULL, 0);
+    if(reader == NULL)
+    {
+      cerr << "Error: cannot open '" << fichero << "'." << endl;
+      exit(EXIT_FAILURE);
+    }
+    int ret = xmlTextReaderRead(reader);
+    while(ret == 1)
+    {
+      procNodeACX();
+      ret = xmlTextReaderRead(reader);
+    }
+  }
+}
+
+void
 Compiler::parse(string const &fichero, wstring const &dir)
 {
   direction = dir;
@@ -180,10 +200,15 @@ Compiler::matchTransduction(list<int> const &pi,
   }
   else
   {
+    map<int, set<int> >::iterator acx_map_ptr;
+    int rsymbol;
+
     while(true)
     {
       int etiqueta;
-
+      
+      acx_map_ptr = acx_map.end();
+      
       if(izqda == limizqda && dcha == limdcha)
       {
         break;
@@ -196,16 +221,30 @@ Compiler::matchTransduction(list<int> const &pi,
       else if(dcha == limdcha)
       {
         etiqueta = alphabet(*izqda, 0);
+        acx_map_ptr = acx_map.find(*izqda);
+        rsymbol = 0;
         izqda++;
       }
       else
       {
         etiqueta = alphabet(*izqda, *dcha);
+        acx_map_ptr = acx_map.find(*izqda);
+        rsymbol = *dcha;
         izqda++;
         dcha++;
       }
 
-      estado = t.insertSingleTransduction(etiqueta, estado);
+      int nuevo_estado = t.insertSingleTransduction(etiqueta, estado);
+      
+      if(acx_map_ptr != acx_map.end())
+      {
+        for(set<int>::iterator it = acx_map_ptr->second.begin(); 
+            it != acx_map_ptr->second.end(); it++)
+        { 
+          t.linkStates(estado, nuevo_estado, alphabet(*it ,rsymbol));
+        }
+      }
+      estado = nuevo_estado;
     }
   }
 
@@ -666,6 +705,39 @@ Compiler::procEntry()
       wcerr << L">'." << endl; 
       exit(EXIT_FAILURE);
     }
+  }
+}
+
+void
+Compiler::procNodeACX()
+{
+  xmlChar  const *xnombre = xmlTextReaderConstName(reader);
+  wstring nombre = XMLParseUtil::towstring(xnombre);
+  if(nombre == L"#text")
+  {
+    /* ignore */
+  }
+  else if(nombre == L"analysis-chars")
+  {
+    /* ignore */
+  }
+  else if(nombre == L"char")
+  {
+    acx_current_char = static_cast<int>(attrib(L"value")[0]);
+  }
+  else if(nombre == L"char-equiv")
+  {
+    acx_map[acx_current_char].insert(static_cast<int>(attrib(L"value")[0]));
+  }
+  else if(nombre == L"#comment")
+  {
+    /* ignore */
+  }
+  else
+  {
+    wcerr << L"Error in ACX file (" << xmlTextReaderGetParserLineNumber(reader);
+    wcerr << L"): Invalid node '<" << nombre << L">'." << endl;
+    exit(EXIT_FAILURE);
   }
 }
 

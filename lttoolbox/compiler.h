@@ -94,6 +94,16 @@ private:
    */
   map<wstring, map<wstring, int, Ltstr>, Ltstr> postsuffix_paradigms;
 
+  /**
+   * Mapping of aliases of characters specified in ACX files
+   */
+  map<int, set<int> > acx_map;
+  
+  /**
+   * Original char being mapped
+   */
+  int acx_current_char; 
+
   /*    
   static string range(char const a, char const b);
   string readAlphabet();
@@ -103,6 +113,12 @@ private:
    * Method to parse an XML Node
    */
   void procNode();
+
+  /**
+   * Method to parse an XML Node in ACX files
+   */
+  void procNodeACX();
+
 
   /**
    * Parse the &lt;alphabet&gt; element
@@ -264,6 +280,12 @@ public:
    * Compile dictionary to letter transducers
    */
   void parse(string const &fichero, wstring const &dir);
+
+  /**
+   * Read ACX file
+   */
+  void parseACX(string const &fichero, wstring const &dir);
+
   
   /**
    * Write the result of compilation 

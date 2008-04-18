@@ -31,7 +31,7 @@ void endProgram(char *name)
   if(name != NULL)
   {
     cout << basename(name) << " v" << PACKAGE_VERSION <<": build a letter transducer from a dictionary" << endl;
-    cout << "USAGE: " << basename(name) << " lr | rl dictionary_file output_file" << endl;
+    cout << "USAGE: " << basename(name) << " lr | rl dictionary_file output_file [acx_file]" << endl;
     cout << "Modes:" << endl;
     cout << "  lr:     left-to-right compilation" << endl;
     cout << "  rl:     right-to-left compilation" << endl;
@@ -42,15 +42,22 @@ void endProgram(char *name)
 
 int main(int argc, char *argv[])
 {
-  if(argc != 4)
+  if(argc != 4 && argc != 5)
   {
     endProgram(argv[0]);
   }
+
   string opc = argv[1];
 
   Compiler c;
+  
+  
   if(opc == "lr")
   {
+    if(argc == 5)
+    {
+      c.parseACX(argv[4], Compiler::COMPILER_RESTRICTION_LR_VAL);
+    }
     c.parse(argv[2], Compiler::COMPILER_RESTRICTION_LR_VAL);
   }
   else if(opc == "rl")
