@@ -3,7 +3,8 @@ h_sources = alphabet.h buffer.h compiler.h compression.h endian_util.h \
             entry_token.h expander.h fst_processor.h lt_locale.h ltstr.h \
             match_exe.h match_node.h match_state.h my_stdio.h node.h \
             pattern_list.h pool.h regexp_compiler.h sorted_vector.h state.h \
-            transducer.h trans_exe.h xml_parse_util.h lttools_config.h
+            transducer.h trans_exe.h xml_parse_util.h lttools_config.h \
+            exception.h
 cc_sources = alphabet.cc compiler.cc compression.cc entry_token.cc \
              expander.cc fst_processor.cc lt_locale.cc match_exe.cc \
              match_node.cc match_state.cc node.cc pattern_list.cc \
