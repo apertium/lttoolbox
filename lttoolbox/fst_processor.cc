@@ -674,7 +674,7 @@ void
 FSTProcessor::analysis_wrapper_null_flush(FILE *input, FILE *output)
 {
   setNullFlush(false);
-  while(true) 
+  while(!feof(input)) 
   {
     analysis(input, output);
     fputwc_unlocked(L'\0', output);
@@ -691,7 +691,7 @@ FSTProcessor::generation_wrapper_null_flush(FILE *input, FILE *output,
                                             GenerationMode mode)
 {
   setNullFlush(false);
-  while(true) 
+  while(!feof(input)) 
   {
     generation(input, output, mode);
     fputwc_unlocked(L'\0', output);
@@ -707,7 +707,7 @@ void
 FSTProcessor::postgeneration_wrapper_null_flush(FILE *input, FILE *output)
 {
   setNullFlush(false);
-  while(true) 
+  while(!feof(input)) 
   {
     postgeneration(input, output);
     fputwc_unlocked(L'\0', output);
@@ -723,7 +723,7 @@ void
 FSTProcessor::transliteration_wrapper_null_flush(FILE *input, FILE *output)
 {
   setNullFlush(false);
-  while(true) 
+  while(!feof(input)) 
   {
     transliteration(input, output);
     fputwc_unlocked(L'\0', output);
