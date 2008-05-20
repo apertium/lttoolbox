@@ -22,8 +22,6 @@
 #ifndef _IOHEADER_
 #define _IOHEADER_
 
-#include <lttoolbox/lttools_config.h>
-
 #include <cstdio>
 
 // Check individually all '_unlocked' functions because using
