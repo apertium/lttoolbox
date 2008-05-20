@@ -19,6 +19,7 @@
 
 #include <lttoolbox/trans_exe.h>
 #include <lttoolbox/compression.h>
+#include <lttoolbox/lttools_config.h>
 #include <lttoolbox/my_stdio.h>
 
 TransExe::TransExe()
