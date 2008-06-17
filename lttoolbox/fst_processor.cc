@@ -639,16 +639,32 @@ FSTProcessor::analysis(FILE *input, FILE *output)
         unsigned int limit = firstNotAlpha(sf);
         unsigned int size = sf.size();
         limit = (limit == static_cast<unsigned int>(wstring::npos)?size:limit);
-        input_buffer.back(1+(size-limit));
-        printUnknownWord(sf.substr(0, limit), output);
+        if(limit == 0)
+        {
+          input_buffer.back(sf.size());
+          fputwc_unlocked(sf[0], output);          
+        }
+        else
+        { 
+          input_buffer.back(1+(size-limit));
+          printUnknownWord(sf.substr(0, limit), output);
+        }
       }
       else if(lf == L"")
       {
         unsigned int limit = firstNotAlpha(sf);
         unsigned int size = sf.size();
         limit = (limit == static_cast<unsigned int >(wstring::npos)?size:limit);
-        input_buffer.back(1+(size-limit));
-        printUnknownWord(sf.substr(0, limit), output);
+        if(limit == 0)
+        {
+          input_buffer.back(sf.size());
+          fputwc_unlocked(sf[0], output);          
+        }
+        else
+        { 
+          input_buffer.back(1+(size-limit));
+          printUnknownWord(sf.substr(0, limit), output);
+        }
       }
       else
       {
