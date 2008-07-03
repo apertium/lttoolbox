@@ -54,7 +54,7 @@ XMLParseUtil::latin1(xmlChar const *input)
 #ifdef WIN32
   unsigned char* output = (unsigned char*) alloca(outputlen);
 #else
-  unsigned char output[outputlen];
+  unsigned char* output = new unsigned char[outputlen];
 #endif
   
   if(UTF8Toisolat1(output, &outputlen, input, &inputlen) != 0)
@@ -63,6 +63,11 @@ XMLParseUtil::latin1(xmlChar const *input)
 
   output[outputlen] = 0;
   string result = reinterpret_cast<char *>(output);
+#ifdef WIN32
+  free(output);
+#else
+  delete output;
+#endif  
   return result;  
 }
 
