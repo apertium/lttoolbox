@@ -122,9 +122,14 @@ XMLParseUtil::stows(string const &str)
 #ifdef WIN32
   wchar_t* result = (wchar_t*) alloca(str.size());  
 #else
-  wchar_t result[str.size()];
+  wchar_t* result = new wchar_t[str.size()];
 #endif
   mbstowcs(result, str.c_str(), str.size());
   wstring result2 = result;
+#ifdef WIN32
+  free(result);
+#else
+  delete result;
+#endif
   return result2;
 }
