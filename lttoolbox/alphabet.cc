@@ -74,7 +74,8 @@ Alphabet::includeSymbol(wstring const &s)
 {
   if(slexic.find(s) == slexic.end())
   {
-    slexic[s] = -(slexic.size());
+    int slexic_size = slexic.size();
+    slexic[s] = -(slexic_size+1);
     slexicinv.push_back(s);
   }
 }
@@ -85,7 +86,8 @@ Alphabet::operator()(int const c1, int const c2)
   pair<int, int> tmp = pair<int, int>(c1, c2);
   if(spair.find(tmp) == spair.end())
   {
-    spair[tmp] = spair.size() - 1;
+    int spair_size = spair.size();
+    spair[tmp] = spair_size;
     spairinv.push_back(tmp);
   }
   
@@ -158,7 +160,8 @@ Alphabet::read(FILE *input)
     int first = Compression::multibyte_read(input);
     int second = Compression::multibyte_read(input);
     pair<int, int> tmp(first - bias, second - bias);
-    a_new.spair[tmp] = a_new.spair.size() - 1;
+	int spair_size = a_new.spair.size();
+    a_new.spair[tmp] = spair_size;
     a_new.spairinv.push_back(tmp);
   }
   
