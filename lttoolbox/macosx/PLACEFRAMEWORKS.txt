@@ -1,0 +1,5 @@
+Place frameworks in this directory:
+
+libexslt.framework
+libxml.framework
+libxslt.framework
