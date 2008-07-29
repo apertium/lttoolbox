@@ -369,6 +369,11 @@ FSTProcessor::classifyFinals()
       postblank.insert(it->second.getFinals().begin(),
                        it->second.getFinals().end());
     }
+    else if(endsWith(it->first, L"@preblank"))
+    {
+      preblank.insert(it->second.getFinals().begin(),
+                       it->second.getFinals().end());
+    }
     else
     {
       wcerr << L"Error: Unsupported transducer type for '";
@@ -490,6 +495,7 @@ FSTProcessor::initAnalysis()
   all_finals = standard;
   all_finals.insert(inconditional.begin(), inconditional.end());
   all_finals.insert(postblank.begin(), postblank.end());
+  all_finals.insert(preblank.begin(), preblank.end());
 }
 
 void
@@ -527,6 +533,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
 
   bool last_incond = false;
   bool last_postblank = false;
+  bool last_preblank = false;
   State current_state = initial_state;
   wstring lf = L"";
   wstring sf = L"";
@@ -559,6 +566,17 @@ FSTProcessor::analysis(FILE *input, FILE *output)
         last_postblank = true;
         last = input_buffer.getPos();      
       }
+      else if(current_state.isFinal(preblank))
+      {
+        bool firstupper = iswupper(sf[0]);
+        bool uppercase = firstupper && iswupper(sf[sf.size()-1]);
+
+        lf = current_state.filterFinals(all_finals, alphabet,
+                                        escaped_chars,
+                                        uppercase, firstupper);
+        last_preblank = true;
+        last = input_buffer.getPos();      
+      }
       else if(!isAlphabetic(val))
       {
         bool firstupper = iswupper(sf[0]);
@@ -568,6 +586,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
                                         escaped_chars, 
                                         uppercase, firstupper);
         last_postblank = false;
+        last_preblank = false;
         last_incond = false;
         last = input_buffer.getPos();
       }
@@ -577,6 +596,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
       lf = L"/*";
       lf.append(sf);
       last_postblank = false;
+      last_preblank = false;
       last_incond = false;
       last = input_buffer.getPos();
     }
@@ -623,6 +643,14 @@ FSTProcessor::analysis(FILE *input, FILE *output)
         printWord(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
 		  lf, output);
 	fputwc_unlocked(L' ', output);
+        input_buffer.setPos(last);
+        input_buffer.back(1);
+      }
+      else if(last_preblank)
+      {
+	fputwc_unlocked(L' ', output);
+        printWord(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
+		  lf, output);
         input_buffer.setPos(last);
         input_buffer.back(1);
       }
@@ -679,6 +707,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
       sf = L"";
       last_incond = false;
       last_postblank = false;
+      last_preblank = false;
     }
   }
   
