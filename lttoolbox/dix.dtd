@@ -17,6 +17,10 @@
 	n ID #REQUIRED
 >
 	<!-- n: symbol (tag) name -->
+<!ATTLIST sdef
+        c CDATA  #IMPLIED
+>
+        <!-- c: symbol (tag) comment -->
 	
 <!ELEMENT pardefs (pardef+)>
 	<!-- paradigm definition section -->
@@ -27,6 +31,11 @@
 	n CDATA #REQUIRED
 >
 	<!-- n: paradigm name -->
+<!ATTLIST pardef
+        c CDATA  #IMPLIED
+>
+        <!-- c: comment about paradigm -->
+
 	
 <!ELEMENT section (e+)>
 	<!-- dictionary section -->
