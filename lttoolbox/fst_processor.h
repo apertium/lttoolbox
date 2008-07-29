@@ -80,9 +80,14 @@ private:
    * Set of final states of postblank sections in the dictionaries
    */    
   set<Node *> postblank;
+
+  /**
+   * Set of final states of preblank sections in the dictionaries
+   */    
+  set<Node *> preblank;
   
   /**
-   * Merge of 'inconditional', 'standard' and 'postblank sets
+   * Merge of 'inconditional', 'standard', 'postblank' and 'preblank' sets
    */
   set<Node *> all_finals;
    
