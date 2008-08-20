@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 2.6)
+
 PROJECT (apertium-3.0)
 
 INCLUDE(CheckSymbolExists)
@@ -16,9 +18,16 @@ IF (WIN32)
 	INCLUDE_DIRECTORIES (${WIN32_DIR})
 	SET (EXTRA_SOURCES "${WIN32_DIR}/getopt.c" "${WIN32_DIR}/libgen.c")
 
+	# Set this to the location of your installation
 	SET (LIBXML2_BASE        "C:/Program Files/LibXML")
 	SET (LIBXML2_INCLUDE_DIR "${LIBXML2_BASE}/include")
 	SET (LIBXML2_LIBRARIES   "${LIBXML2_BASE}/lib/libxml2.lib")
+
+	# You may not need this; feel free to comment out
+	# Otherwise, change to the location of your installation
+	SET (ICONV_BASE        "C:/Documents and Settings/Joe/My Documents/Visual Studio 2008/Projects/iconv-1.9.2.win32")
+	SET (ICONV_INCLUDE_DIR "${ICONV_BASE}/include")
+	SET (ICONV_LIBRARIES   "${ICONV_BASE}/lib/iconv.lib")
 
 	ADD_DEFINITIONS (-D_CRT_SECURE_NO_WARNINGS)
 ENDIF (WIN32)
