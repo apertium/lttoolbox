@@ -2,6 +2,7 @@ FIND_PACKAGE (LibXml2 REQUIRED)
 
 INCLUDE_DIRECTORIES (${LIBXML2_INCLUDE_DIR})
 ADD_DEFINITIONS (${LIBXML2_DEFINITIONS})
+INCLUDE_DIRECTORIES (${ICONV_INCLUDE_DIR})
 
 ADD_LIBRARY (lttoolbox3 ${LTTOOLBOX_SHARED} alphabet.cc compiler.cc compression.cc entry_token.cc
              expander.cc fst_processor.cc lt_locale.cc match_exe.cc
@@ -9,7 +10,7 @@ ADD_LIBRARY (lttoolbox3 ${LTTOOLBOX_SHARED} alphabet.cc compiler.cc compression.
              regexp_compiler.cc sorted_vector.cc state.cc transducer.cc
              trans_exe.cc xml_parse_util.cc ${EXTRA_SOURCES})
 
-TARGET_LINK_LIBRARIES (lttoolbox3 ${LIBXML2_LIBRARIES})
+TARGET_LINK_LIBRARIES (lttoolbox3 ${LIBXML2_LIBRARIES} ${ICONV_LIBRARIES})
 
 ADD_EXECUTABLE (lt-proc lt_proc.cc)
 TARGET_LINK_LIBRARIES (lt-proc lttoolbox3)
