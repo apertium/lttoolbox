@@ -44,4 +44,4 @@ man_MANS = lt-comp.1 lt-expand.1 lt-proc.1
 INCLUDES = -I$(top_srcdir) $(LTTOOLBOX_CFLAGS)
 CLEANFILES = *~
 
-EXTRA_DIST = dix.dtd $(man_MANS)
+EXTRA_DIST = dix.dtd CMakeLists.txt $(man_MANS)
