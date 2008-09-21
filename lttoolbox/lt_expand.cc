@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
   switch(argc)
   {
     case 2:
-      input = fopen(argv[1], "r");
+      input = fopen(argv[1], "rb");
       if(input == NULL)
       {
         cerr << "Error: Cannot open file '" << argv[1] << "'." << endl;
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
       break;
     
     case 3:
-      input = fopen(argv[1], "r");
+      input = fopen(argv[1], "rb");
       if(input == NULL)
       {
         cerr << "Error: Cannot open file '" << argv[1] << "'." << endl;
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
       }
       fclose(input);
 
-      output = fopen(argv[2], "w");
+      output = fopen(argv[2], "wb");
       if(output == NULL)
       {
         cerr << "Error: Cannot open file '" << argv[2] << "'." << endl;
