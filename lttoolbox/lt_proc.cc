@@ -153,13 +153,13 @@ int main(int argc, char *argv[])
       endProgram(argv[0]);
     }
     
-    input = fopen(argv[optind+1], "r");
+    input = fopen(argv[optind+1], "rb");
     if(input == NULL || ferror(input))
     {
       endProgram(argv[0]);
     }
     
-    output= fopen(argv[optind+2], "w");
+    output= fopen(argv[optind+2], "wb");
     if(output == NULL || ferror(output))
     {
       endProgram(argv[0]);
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
       endProgram(argv[0]);
     }
     
-    input = fopen(argv[optind+1], "r");
+    input = fopen(argv[optind+1], "rb");
     if(input == NULL || ferror(input))
     {
       endProgram(argv[0]);
