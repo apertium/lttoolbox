@@ -297,7 +297,16 @@ Expander::procEntry(FILE *output)
   wstring entrname=this->attrib(Compiler::COMPILER_LEMMA_ATTR);
   
   if(this->attrib(Compiler::COMPILER_IGNORE_ATTR) == L"yes")
-  {
+  {    
+    int ret = xmlTextReaderRead(reader);
+    if(ret != 1)
+    {
+      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+      wcerr << L"): Parse error." << endl;
+      exit(EXIT_FAILURE);
+    }
+    wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+    skip(name, Compiler::COMPILER_ENTRY_ELEM);
     return;
   }
   
