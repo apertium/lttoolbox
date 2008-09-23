@@ -307,6 +307,7 @@ Expander::procEntry(FILE *output)
     }
     wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
     skip(name, Compiler::COMPILER_ENTRY_ELEM);
+    ret = xmlTextReaderRead(reader);
     return;
   }
   
