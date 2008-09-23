@@ -296,6 +296,11 @@ Expander::procEntry(FILE *output)
   wstring atributo=this->attrib(Compiler::COMPILER_RESTRICTION_ATTR);
   wstring entrname=this->attrib(Compiler::COMPILER_LEMMA_ATTR);
   
+  if(this->attrib(Compiler::COMPILER_IGNORE_ATTR) == L"yes")
+  {
+    return;
+  }
+  
   EntList items, items_lr, items_rl;
   if(atributo == Compiler::COMPILER_RESTRICTION_LR_VAL)
   {
