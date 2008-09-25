@@ -26,6 +26,11 @@
 #include <iostream>
 #include <libgen.h>
 
+#ifdef WIN32
+#include <io.h>
+#include <fcntl.h>
+#endif
+
 using namespace std;
 
 void endProgram(char *name)
@@ -199,6 +204,11 @@ int main(int argc, char *argv[])
   {
     endProgram(argv[0]);
   }
+
+#ifdef WIN32
+  	_setmode(_fileno(input), _O_U8TEXT);
+	_setmode(_fileno(output), _O_U8TEXT);
+#endif
 
   try
   {
