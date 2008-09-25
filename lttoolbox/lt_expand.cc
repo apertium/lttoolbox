@@ -25,6 +25,11 @@
 #include <libgen.h>
 #include <string>
 
+#ifdef WIN32
+#include <io.h>
+#include <fcntl.h>
+#endif
+
 using namespace std;
 
 void endProgram(char *name)
@@ -75,6 +80,10 @@ int main(int argc, char *argv[])
       endProgram(argv[0]);
       break;
   }
+
+#ifdef WIN32
+  _setmode(_fileno(output), _O_U8TEXT);
+#endif
 
   Expander e;
   e.expand(argv[1], output);
