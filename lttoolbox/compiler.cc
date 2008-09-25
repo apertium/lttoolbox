@@ -201,7 +201,7 @@ Compiler::matchTransduction(list<int> const &pi,
   else
   {
     map<int, set<int> >::iterator acx_map_ptr;
-    int rsymbol;
+    int rsymbol = 0;
 
     while(true)
     {
