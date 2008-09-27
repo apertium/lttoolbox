@@ -10,7 +10,7 @@ cc_sources = alphabet.cc compiler.cc compression.cc entry_token.cc \
              regexp_compiler.cc sorted_vector.cc state.cc transducer.cc \
              trans_exe.cc xml_parse_util.cc
 
-library_includedir = $(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION).0/$(GENERIC_LIBRARY_NAME)
+library_includedir = $(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION).$(GENERIC_MINOR_VERSION)/$(GENERIC_LIBRARY_NAME)
 library_include_HEADERS = $(h_sources)
 
 bin_PROGRAMS = lt-comp lt-proc lt-expand
