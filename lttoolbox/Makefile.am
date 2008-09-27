@@ -1,5 +1,5 @@
 
-h_sources = alphabet.h buffer.h compiler.h compression.h endian_util.h \
+h_sources = alphabet.h buffer.h compiler.h compression.h  \
             entry_token.h expander.h fst_processor.h lt_locale.h ltstr.h \
             match_exe.h match_node.h match_state.h my_stdio.h node.h \
             pattern_list.h pool.h regexp_compiler.h sorted_vector.h state.h \

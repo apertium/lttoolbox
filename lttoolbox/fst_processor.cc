@@ -861,7 +861,7 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
     {
       // do nothing
     }
-    else if(sf.size() > 0 && sf[0] == L'*' || sf[0] == L'%')
+    else if(sf.size() > 0 && (sf[0] == L'*' || sf[0] == L'%'))
     {
       alphabet.getSymbol(sf, val);
     }
