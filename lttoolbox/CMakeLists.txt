@@ -29,7 +29,7 @@ INSTALL (TARGETS lt-proc lt-comp lt-expand lttoolbox3
 FILE(GLOB HEADERS *.h)
 
 INSTALL (FILES ${HEADERS}
-         DESTINATION include/lttoolbox-3.0/lttoolbox)
+         DESTINATION include/lttoolbox-3.1/lttoolbox)
 
 INSTALL (FILES dix.dtd
-         DESTINATION share/lttoolbox-3.0)
+         DESTINATION share/lttoolbox-3.1)
