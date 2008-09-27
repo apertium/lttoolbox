@@ -10,7 +10,7 @@ cc_sources = alphabet.cc compiler.cc compression.cc entry_token.cc \
              regexp_compiler.cc sorted_vector.cc state.cc transducer.cc \
              trans_exe.cc xml_parse_util.cc
 
-library_includedir = $(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION).$(GENERIC_MINOR_VERSION)/$(GENERIC_LIBRARY_NAME)
+library_includedir = $(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/$(GENERIC_LIBRARY_NAME)
 library_include_HEADERS = $(h_sources)
 
 bin_PROGRAMS = lt-comp lt-proc lt-expand
@@ -27,16 +27,16 @@ lttoolboxlib = $(prefix)/lib
 lttoolbox_DATA = dix.dtd
 
 lt_comp_SOURCES = lt_comp.cc  
-lt_comp_LDADD = liblttoolbox$(GENERIC_API_VERSION).la
-lt_comp_LDFLAGS = -llttoolbox$(GENERIC_API_VERSION) $(LTTOOLBOX_LIBS)
+lt_comp_LDADD = liblttoolbox$(GENERIC_MAJOR_VERSION).la
+lt_comp_LDFLAGS = -llttoolbox$(GENERIC_MAJOR_VERSION) $(LTTOOLBOX_LIBS)
 
 lt_proc_SOURCES = lt_proc.cc
-lt_proc_LDADD = liblttoolbox$(GENERIC_API_VERSION).la
-lt_proc_LDFLAGS = -llttoolbox$(GENERIC_API_VERSION) $(LTTOOLBOX_LIBS)
+lt_proc_LDADD = liblttoolbox$(GENERIC_MAJOR_VERSION).la
+lt_proc_LDFLAGS = -llttoolbox$(GENERIC_MAJOR_VERSION) $(LTTOOLBOX_LIBS)
 
 lt_expand_SOURCES = lt_expand.cc
-lt_expand_LDADD = liblttoolbox$(GENERIC_API_VERSION).la
-lt_expand_LDFLAGS = -llttoolbox$(GENERIC_API_VERSION) $(LTTOOLBOX_LIBS)
+lt_expand_LDADD = liblttoolbox$(GENERIC_MAJOR_VERSION).la
+lt_expand_LDFLAGS = -llttoolbox$(GENERIC_MAJOR_VERSION) $(LTTOOLBOX_LIBS)
 
 
 man_MANS = lt-comp.1 lt-expand.1 lt-proc.1
