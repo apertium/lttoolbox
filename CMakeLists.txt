@@ -22,7 +22,7 @@ IF (WIN32)
 	SET (LIBXML2_INCLUDE_DIR "${LIBXML2_BASE}/include")
 	SET (LIBXML2_LIBRARIES   "${LIBXML2_BASE}/lib/libxml2.lib")
 
-	SET (ICONV_BASE        "C:/Program\ Files/iconv")
+	SET (ICONV_BASE        "C:/Program Files/iconv")
 	SET (ICONV_INCLUDE_DIR "${ICONV_BASE}/include")
 	SET (ICONV_LIBRARIES   "${ICONV_BASE}/lib/iconv.lib")
 
