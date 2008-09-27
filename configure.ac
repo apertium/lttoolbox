@@ -6,7 +6,7 @@ AC_PREREQ(2.52)
 m4_define([required_libxml_version], [2.6.17])
 
 AC_INIT([lttoolbox/lttoolbox.h], [3.1.0], [sortiz@users.sourceforge.net])
-AC_CONFIG_HEADER([lttoolbox/lttools_config.h])
+AC_CONFIG_HEADER([lttoolbox/lttoolbox_config.h])
 
 GENERIC_LIBRARY_NAME=lttoolbox
 

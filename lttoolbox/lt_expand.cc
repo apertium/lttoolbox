@@ -18,7 +18,7 @@
  */
 
 #include <lttoolbox/expander.h>
-#include <lttoolbox/lttools_config.h>
+#include <lttoolbox/lttoolbox_config.h>
 
 #include <cstdlib>
 #include <iostream>

@@ -17,7 +17,7 @@
  * 02111-1307, USA.
  */
 #include <lttoolbox/fst_processor.h>
-#include <lttoolbox/lttools_config.h>
+#include <lttoolbox/lttoolbox_config.h>
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/lt_locale.h>
 

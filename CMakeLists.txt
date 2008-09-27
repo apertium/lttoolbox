@@ -56,7 +56,7 @@ BOOL_CHECK_SYMBOL_EXISTS (fgetwc_unlocked stdio.h HAVE_DECL_FGETWC_UNLOCKED)
 BOOL_CHECK_SYMBOL_EXISTS (fputwc_unlocked stdio.h HAVE_DECL_FPUTWC_UNLOCKED)
 BOOL_CHECK_SYMBOL_EXISTS (fputws_unlocked stdio.h HAVE_DECL_FPUTWS_UNLOCKED)
 
-CONFIGURE_FILE (${PROJECT_SOURCE_DIR}/lttoolbox/lttools_config.h.cmake_in ${PROJECT_SOURCE_DIR}/lttoolbox/lttools_config.h)
+CONFIGURE_FILE (${PROJECT_SOURCE_DIR}/lttoolbox/lttoolbox_config.h.cmake_in ${PROJECT_SOURCE_DIR}/lttoolbox/lttoolbox_config.h)
 
 # Recurse into the "Hello" and "Demo" subdirectories.  This does not actually
 # cause another cmake executable to run.  The same process will walk through
