@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (apertium-3.0)
+PROJECT (apertium-3.1)
 
 INCLUDE(CheckSymbolExists)
 
@@ -18,14 +18,11 @@ IF (WIN32)
 	INCLUDE_DIRECTORIES (${WIN32_DIR})
 	SET (EXTRA_SOURCES "${WIN32_DIR}/getopt.c" "${WIN32_DIR}/libgen.c")
 
-	# Set this to the location of your installation
 	SET (LIBXML2_BASE        "C:/Program Files/LibXML")
 	SET (LIBXML2_INCLUDE_DIR "${LIBXML2_BASE}/include")
 	SET (LIBXML2_LIBRARIES   "${LIBXML2_BASE}/lib/libxml2.lib")
 
-	# You may not need this; feel free to comment out
-	# Otherwise, change to the location of your installation
-	SET (ICONV_BASE        "C:/Documents and Settings/Joe/My Documents/Visual Studio 2008/Projects/iconv-1.9.2.win32")
+	SET (ICONV_BASE        "C:/Program\ Files/iconv")
 	SET (ICONV_INCLUDE_DIR "${ICONV_BASE}/include")
 	SET (ICONV_LIBRARIES   "${ICONV_BASE}/lib/iconv.lib")
 
@@ -34,9 +31,9 @@ ENDIF (WIN32)
 
 SET (PACKAGE_BUGREPORT sortiz@users.sourceforge.net)
 SET (PACKAGE_NAME      lttoolbox/lttoolbox.h)
-SET (PACKAGE_STRING    lttoolbox/lttoolbox.h 3.0.1)
+SET (PACKAGE_STRING    lttoolbox/lttoolbox.h 3.1.0)
 SET (PACKAGE_TARNAME   lttoolbox-lttoolbox-h)
-SET (PACKAGE_VERSION   3.0.1)
+SET (PACKAGE_VERSION   3.1.0)
 
 MACRO (BOOL_CHECK_SYMBOL_EXISTS SYMBOL HEADER VAR)
 	CHECK_SYMBOL_EXISTS (${SYMBOL} ${HEADER} ${VAR})
