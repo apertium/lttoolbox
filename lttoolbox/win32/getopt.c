@@ -14,7 +14,7 @@ in the public domain.
 
 /*LINTLIBRARY*/
 
-extern int strlen();
+extern unsigned int strlen();
 extern int strcmp();
 extern char *strchr();
 extern int write();
