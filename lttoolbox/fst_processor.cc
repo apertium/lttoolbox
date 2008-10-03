@@ -798,7 +798,7 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
   int val;
   while((val = readGeneration(input, output)) != 0x7fffffff)
   {
-    if(val == L'$')
+    if(val == L'$' && outOfWord)
     {
       if(sf[0] == L'*' || sf[0] == L'%')
       {
