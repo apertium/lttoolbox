@@ -99,6 +99,11 @@ void
 State::apply(int const input)
 {
   vector<TNodeState> new_state;
+  if(input == 0)
+  {
+    state = new_state;
+    return;
+  }
   
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
@@ -127,6 +132,12 @@ void
 State::apply(int const input, int const alt)
 {
   vector<TNodeState> new_state;
+  if(input == 0 || alt == 0)
+  {
+    state = new_state;
+    return;
+  }
+
   
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
