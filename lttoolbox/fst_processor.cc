@@ -1219,7 +1219,7 @@ FSTProcessor::biltrans(wstring const &input_word, bool with_delim)
     
     if(current_state.size() == 0)
     { 
-      if(symbol != L"")
+      if(symbol != L"" && result != L"")
       {
         queue.append(symbol);
       }
@@ -1304,10 +1304,10 @@ FSTProcessor::biltransWithQueue(wstring const &input_word, bool with_delim)
   
   bool firstupper = iswupper(input_word[start_point]);
   bool uppercase = firstupper && iswupper(input_word[start_point+1]);
-
+  
   for(unsigned int i = start_point; i <= end_point; i++)
   {
-    int val;
+    int val = 0;
     wstring symbol = L"";
  
     if(input_word[i] == L'\\')
@@ -1361,7 +1361,7 @@ FSTProcessor::biltransWithQueue(wstring const &input_word, bool with_delim)
     
     if(current_state.size() == 0)
     { 
-      if(symbol != L"")
+      if(symbol != L"" && result != L"")
       {
         queue.append(symbol);
       }
