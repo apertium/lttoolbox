@@ -796,8 +796,15 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
  
   skipUntil(input, output, L'^');
   int val;
+
   while((val = readGeneration(input, output)) != 0x7fffffff)
   {
+    if(sf == L"" && val == L'=')
+    {
+      fputwc(L'=', output);
+      val = readGeneration(input, output);
+    }
+    
     if(val == L'$' && outOfWord)
     {
       if(sf[0] == L'*' || sf[0] == L'%')
@@ -861,7 +868,7 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
     {
       // do nothing
     }
-    else if(sf.size() > 0 && (sf[0] == L'*' || sf[0] == L'%'))
+    else if(sf.size() > 0 && (sf[0] == L'*' || sf[0] == L'%' ))
     {
       alphabet.getSymbol(sf, val);
     }
@@ -1148,6 +1155,7 @@ FSTProcessor::biltrans(wstring const &input_word, bool with_delim)
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
   wstring queue = L"";
+  bool mark = false;
   
   if(with_delim == false)
   {
@@ -1158,6 +1166,12 @@ FSTProcessor::biltrans(wstring const &input_word, bool with_delim)
   if(input_word[start_point] == L'*')
   {
     return input_word;
+  }
+  
+  if(input_word[start_point] == L'=')
+  {
+    start_point++;
+    mark = true;
   }
   
   bool firstupper = iswupper(input_word[start_point]);
@@ -1209,11 +1223,25 @@ FSTProcessor::biltrans(wstring const &input_word, bool with_delim)
                                          uppercase, firstupper, 0);
       if(with_delim)
       {      
-        result[0] = L'^';
+        if(mark)
+        {
+          result = L"^="+result.substr(1);
+        }
+        else
+        {
+          result[0] = L'^';
+        }
       }
       else
       {
-        result = result.substr(1);
+        if(mark)
+        {
+          result = L"=" + result.substr(1);
+        }
+        else
+        {
+          result = result.substr(1);
+        }
       }
     }
     
@@ -1290,6 +1318,7 @@ FSTProcessor::biltransWithQueue(wstring const &input_word, bool with_delim)
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
   wstring queue = L"";
+  bool mark = false;
   
   if(with_delim == false)
   {
@@ -1302,6 +1331,12 @@ FSTProcessor::biltransWithQueue(wstring const &input_word, bool with_delim)
     return pair<wstring, int>(input_word, 0);
   }
   
+  if(input_word[start_point] == L'=')
+  {
+    start_point++;
+    mark = true;
+  }
+
   bool firstupper = iswupper(input_word[start_point]);
   bool uppercase = firstupper && iswupper(input_word[start_point+1]);
   
@@ -1350,12 +1385,26 @@ FSTProcessor::biltransWithQueue(wstring const &input_word, bool with_delim)
                                          escaped_chars,
                                          uppercase, firstupper, 0);
       if(with_delim)
-      {      
-        result[0] = L'^';
+      {
+        if(mark)
+        {
+          result = L"^=" + result.substr(1);
+        }
+        else
+        {      
+          result[0] = L'^';
+        }
       }
       else
       {
-        result = result.substr(1);
+        if(mark)
+        {
+          result = L"=" + result.substr(1);
+        }
+        else
+        {
+          result = result.substr(1);
+        }
       }
     }
     
@@ -1431,6 +1480,7 @@ FSTProcessor::biltransWithoutQueue(wstring const &input_word, bool with_delim)
   wstring result = L"";
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
+  bool mark = false;
   
   if(with_delim == false)
   {
@@ -1443,6 +1493,12 @@ FSTProcessor::biltransWithoutQueue(wstring const &input_word, bool with_delim)
     return input_word;
   }
   
+  if(input_word[start_point] == L'=')
+  {
+    start_point++;
+    mark = true;
+  }
+
   bool firstupper = iswupper(input_word[start_point]);
   bool uppercase = firstupper && iswupper(input_word[start_point+1]);
 
@@ -1492,11 +1548,25 @@ FSTProcessor::biltransWithoutQueue(wstring const &input_word, bool with_delim)
                                          uppercase, firstupper, 0);
       if(with_delim)
       {      
-        result[0] = L'^';
+        if(mark)
+        {
+          result = L"^=" + result.substr(1);
+        }
+        else
+        {
+          result[0] = L'^';
+        }
       }
       else
       {
-        result = result.substr(1);
+        if(mark)
+        {
+          result = L"=" + result.substr(1);
+        }
+        else
+        {
+          result = result.substr(1);
+        }
       }
     }
     
