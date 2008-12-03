@@ -253,6 +253,9 @@ private:
    */
   void printUnknownWord(wstring const &sf, FILE *output);
 
+  vector<wstring> numbers;
+  int readTMAnalysis(FILE *input);
+  
   unsigned int lastBlank(wstring const &str);
   void printSpace(wchar_t const val, FILE *output);
   void skipUntil(FILE *input, FILE *output, wint_t const character);
@@ -264,18 +267,22 @@ private:
                                      GenerationMode mode);
   void postgeneration_wrapper_null_flush(FILE *input, FILE *output);
   void transliteration_wrapper_null_flush(FILE *input, FILE *output);
-  
+
+
+  bool isLastBlankTM;  
 public:
   FSTProcessor();
   ~FSTProcessor();
 
   void initAnalysis();
+  void initTMAnalysis();
   void initSAO(){initAnalysis();};
   void initGeneration();
   void initPostgeneration();
   void initBiltrans();
   
   void analysis(FILE *input = stdin, FILE *output = stdout);
+  void tm_analysis(FILE *input = stdin, FILE *output = stdout);
   void generation(FILE *input = stdin, FILE *output = stdout, GenerationMode mode = gm_unknown);
   void postgeneration(FILE *input = stdin, FILE *output = stdout); 
   void transliteration(FILE *input = stdin, FILE *output = stdout); 

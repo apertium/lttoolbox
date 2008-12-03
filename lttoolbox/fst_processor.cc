@@ -149,6 +149,78 @@ FSTProcessor::readAnalysis(FILE *input)
 }
 
 int
+FSTProcessor::readTMAnalysis(FILE *input)
+{
+  isLastBlankTM = false;
+  if(!input_buffer.isEmpty())
+  {
+    return input_buffer.next();
+  }
+
+  wchar_t val = static_cast<wchar_t>(fgetwc_unlocked(input));
+  int altval = 0;
+  if(feof(input))
+  {
+    return 0;
+  }
+
+  if(escaped_chars.find(val) != escaped_chars.end() || iswdigit(val))
+  {
+    switch(val)
+    {
+      case L'<':
+        altval = static_cast<int>(alphabet(readFullBlock(input, L'<', L'>')));
+	input_buffer.add(altval);
+        return altval;
+
+      case L'[':
+        blankqueue.push(readFullBlock(input, L'[', L']'));
+        input_buffer.add(static_cast<int>(L' '));
+        isLastBlankTM = true;
+        return static_cast<int>(L' ');
+        
+      case L'\\':
+        val = static_cast<wchar_t>(fgetwc_unlocked(input));
+        if(escaped_chars.find(val) == escaped_chars.end())
+        {
+          streamError();
+        }
+        input_buffer.add(static_cast<int>(val));
+        return val;
+      case L'0':
+      case L'1':
+      case L'2':
+      case L'3':
+      case L'4':
+      case L'5':
+      case L'6':
+      case L'7':
+      case L'8':
+      case L'9':
+        {
+          wstring ws = L"";
+          do
+          {
+            ws += val;
+            val = static_cast<wchar_t>(fgetwc_unlocked(input));
+          } while(iswdigit(val));
+          ungetwc(val, input);
+          input_buffer.add(alphabet(L"<n>"));
+          numbers.push_back(ws);
+          return alphabet(L"<n>");
+        }
+        break;
+
+      default:
+        streamError();
+    }                   
+  }
+
+  input_buffer.add(val);
+  return val;
+}
+
+int
 FSTProcessor::readPostgeneration(FILE *input)
 {
   if(!input_buffer.isEmpty())
@@ -499,6 +571,20 @@ FSTProcessor::initAnalysis()
 }
 
 void
+FSTProcessor::initTMAnalysis()
+{
+  calcInitial();
+
+  for(map<wstring, TransExe, Ltstr>::iterator it = transducers.begin(),
+                                             limit = transducers.end();
+      it != limit; it++)
+  {
+    all_finals.insert(it->second.getFinals().begin(), 
+                      it->second.getFinals().end());
+  }
+}
+
+void
 FSTProcessor::initGeneration()
 {
   calcInitial();  
@@ -778,6 +864,130 @@ FSTProcessor::transliteration_wrapper_null_flush(FILE *input, FILE *output)
         wcerr << L"Could not flush output " << errno << endl;
     }
   }
+}
+
+void
+FSTProcessor::tm_analysis(FILE *input, FILE *output)
+{
+  State current_state = initial_state;
+  wstring lf = L"";
+  wstring sf = L"";
+  int last = 0;
+
+  while(wchar_t val = readTMAnalysis(input))
+  {
+    // test for final states
+    if(current_state.isFinal(all_finals))
+    {
+      if(iswpunct(val))
+      {
+        lf = current_state.filterFinalsTM(all_finals, alphabet, 
+					  escaped_chars,
+                                          blankqueue, numbers).substr(1);
+        last = input_buffer.getPos();
+        numbers.clear();
+      }
+    }
+    else if(sf == L"" && iswspace(val)) 
+    {
+      lf.append(sf);
+      last = input_buffer.getPos();
+    }
+
+    if(!iswupper(val))
+    {
+      current_state.step(val);
+    }
+    else
+    {
+      current_state.step(val, towlower(val));
+    }
+      
+    if(current_state.size() != 0)
+    {
+      if(val == -1)
+      {
+        sf.append(numbers[numbers.size()-1]);
+      }
+      else if(isLastBlankTM && val == L' ')
+      {
+        sf.append(blankqueue.back());
+      }
+      else
+      {
+        alphabet.getSymbol(sf, val);
+      }
+    }
+    else
+    {
+      if((iswspace(val) || iswpunct(val)) && sf == L"")
+      {
+        if(iswspace(val))
+        {
+          printSpace(val, output);
+        }
+        else
+        {
+          if(isEscaped(val))
+          {
+            fputwc_unlocked(L'\\', output);
+          }
+          fputwc_unlocked(val, output);
+        }
+      }
+      else if(!iswspace(val) && !iswpunct(val) && 
+              ((sf.size()-input_buffer.diffPrevPos(last)) > lastBlank(sf) || 
+               lf == L""))
+      {
+        do
+        {
+          if(val == -1)
+          {
+            sf.append(numbers[numbers.size()-1]);
+          }
+          else if(isLastBlankTM && val == L' ')
+          {
+            sf.append(blankqueue.back());
+          }
+          else
+          {
+            alphabet.getSymbol(sf, val);
+          }
+        }         
+        while((val = readTMAnalysis(input)) && !iswspace(val) && !iswpunct(val));
+
+        unsigned int limit = sf.find(L' ');
+        unsigned int size = sf.size();
+        limit = (limit == static_cast<unsigned int>(wstring::npos)?size:limit);
+        input_buffer.back(1+(size-limit));
+        fputws_unlocked(sf.substr(0, limit).c_str(), output);
+      }
+      else if(lf == L"")
+      {
+        unsigned int limit = sf.find(L' ');
+        unsigned int size = sf.size();
+        limit = (limit == static_cast<unsigned int >(wstring::npos)?size:limit);
+        input_buffer.back(1+(size-limit));
+        fputws_unlocked(sf.substr(0, limit).c_str(), output);
+
+      }
+      else
+      {
+        fputwc_unlocked(L'[', output);
+        fputws_unlocked(lf.c_str(), output);
+        fputwc_unlocked(L']', output);
+        input_buffer.setPos(last);
+        input_buffer.back(1);
+      }
+	
+      current_state = initial_state;
+      lf = L"";
+      sf = L"";
+    }
+  }
+  
+  // print remaining blanks
+  flushBlanks(output);
 }
 
 

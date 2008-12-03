@@ -1,0 +1,49 @@
+.TH lt-comp 1 2006-03-08 "" ""
+.SH NAME
+lt-comp \- This application is part of the lexical processing modules
+and tools (
+.B lttoolbox
+)
+.PP
+This tool is part of the apertium machine translation
+architecture: \fBhttp://apertium.sf.net\fR.
+.SH SYNOPSIS
+.B lt-comp
+[
+.B lr \fR| 
+.B rl
+] dictionary_file output_file
+.PP
+.SH DESCRIPTION
+.BR lt-comp 
+Is the application responsible of compiling dictionaries used by
+\fBlt-proc\fR in \fIApertium\fR into a compact and efficient
+representation (a class of finite-state transducers called augmented
+letter transducers).
+.PP
+.SH OPTIONS
+.TP
+.B lr
+The resulting transducer will process dictionary entries
+\fIleft-to-right\fR.
+.TP
+.B rl
+The resulting transducer will process dictionary entries
+\fIright-to-left\fR.
+.SH FILES
+.B dictionary_file
+The input dictionary.
+.PP
+.B output_file
+The compiled dictionary (a finite state transducer).
+
+.SH SEE ALSO
+.I lt-proc\fR(1),
+.I lt-expand\fR(1),
+.I apertium-tagger\fR(1),
+.I apertium-translator\fR(1).
+.SH BUGS
+Lots of...lurking in the dark and waiting for you!
+.SH AUTHOR
+(c) 2005,2006 Universitat d'Alacant / Universidad de Alicante. All rights
+reserved.
