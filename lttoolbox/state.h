@@ -22,6 +22,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <queue>
 
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/node.h>
@@ -183,6 +184,12 @@ public:
    * @true if the state is final
    */
   bool isFinal(set<Node *> const &finals) const;
+
+  wstring filterFinalsTM(set<Node *> const &finals, 
+			 Alphabet const &alphabet,
+                         set<wchar_t> const &escaped_chars,
+			 queue<wstring> &blanks, 
+                         vector<wstring> &numbers) const;
 };
 
 #endif

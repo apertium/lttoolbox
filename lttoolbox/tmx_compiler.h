@@ -16,23 +16,27 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
  * 02111-1307, USA.
  */
-#ifndef _TMXPREPROCESSOR_
-#define _TMXPREPROCESSOR_
+#ifndef _TMXCOMPILER_
+#define _TMXCOMPILER_
 
 #include <lttoolbox/alphabet.h>
+#include <lttoolbox/regexp_compiler.h>
+#include <lttoolbox/entry_token.h>
 #include <lttoolbox/ltstr.h>
+#include <lttoolbox/transducer.h>
 
 #include <map>
 #include <string>
 #include <set>
 #include <libxml/xmlreader.h>
+#include <iostream>
 
 using namespace std;
 
 /**
  * A compiler of dictionaries to letter transducers
  */
-class TMXPreprocessor
+class TMXCompiler
 {
 private:
   /**
@@ -41,19 +45,41 @@ private:
   xmlTextReaderPtr reader;
   
   /**
-   * List of characters to be considered alphabetic
-   */
-  wstring letters;
-  
-  /**
    * Identifier of all the symbols during the compilation
    */
-  Alphabet alphabet;  
+  Alphabet alphabet;
+
+  /**
+   * Main transducer representing the TM
+   */  
+  Transducer transducer;  
+
+  /**
+   * Origin language
+   */
+  wstring origin_language;
+
+  /**
+   * Meta language
+   */
+  wstring meta_language;
   
   /**
    * Method to parse an XML Node
    */
   void procNode();
+
+  /**
+   * Parse the &lt;tu&gt; element
+   */
+  void procTU();
+
+  /**
+   * Insert a tu into the transducer
+   * @param origin left part
+   * @param meta right part
+   */
+  void insertTU(vector<int> const &origin, vector<int> const &meta);
 
   /**
    * Gets an attribute value with their name and the current context
@@ -96,72 +122,50 @@ private:
    */
   bool allBlanks();
 
+  wstring getTag(size_t const &val) const;
+  void trim(vector<int> &v) const;
+  void align(vector<int> &origin, vector<int> &meta);
+  unsigned int numberLength(vector<int> &v, unsigned int const position) const;
+  bool vectorcmp(vector<int> const &orig, unsigned int const begin_orig,
+                       vector<int> const &meta, unsigned int const begin_meta,
+                       unsigned const int length) const;
+  void split(vector<int> const &v, vector<vector<int> > &sv, int const symbol) const;
+  void align_blanks(vector<int> &o, vector<int> &m);
+  vector<int> join(vector<vector<int> > const &v, int const s) const;
+
+  static void printvector(vector<int> const &v, wostream &wos = std::wcout);  //eliminar este método
+  
 public:
 
   /*
    * Constants to represent the element and the attributes of
-   * dictionaries
+   * translation memories in TMX format
    */
-  static wstring const TMX_BODY_ELEM;
-  static wstring const TMX_HEADER_ELEM;
-  static wstring const TMX_MAP_ELEM;
-  static wstring const TMX_NOTE_ELEM;
-  static wstring const TMX_PROP_ELEM;
-  static wstring const TMX_SEG_ELEM;
-  static wstring const TMX_TMX_ELEM;
-  static wstring const TMX_TU_ELEM;
-  static wstring const TMX_TUV_ELEM;
-  static wstring const TMX_UDE_ELEM;
-  static wstring const TMX_BPT_ELEM;
-  static wstring const TMX_EPT_ELEM;
-  static wstring const TMX_HI_ELEM;
-  static wstring const TMX_IT_ELEM;
-  static wstring const TMX_PH_ELEM;
-  static wstring const TMX_SUB_ELEM;
-  static wstring const TMX_UT_ELEM;
-  static wstring const TMX_ADMINLANG_ATTR;
-  static wstring const TMX_ASSOC_ATTR;
-  static wstring const TMX_BASE_ATTR;
-  static wstring const TMX_CHANGEDATE_ATTR;
-  static wstring const TMX_CHANGEID_ATTR;
-  static wstring const TMX_CODE_ATTR;
-  static wstring const TMX_CREATIONDATE_ATTR;
-  static wstring const TMX_CREATIONID_ATTR;
-  static wstring const TMX_CREATIONTOOL_ATTR;
-  static wstring const TMX_CREATIONTOOLVERSION_ATTR;
-  static wstring const TMX_DATATYPE_ATTR;
-  static wstring const TMX_ENT_ATTR;
-  static wstring const TMX_I_ATTR;
-  static wstring const TMX_LASTUSAGEDATE_ATTR;
-  static wstring const TMX_NAME_ATTR;
-  static wstring const TMX_O_ENCODING_ATTR;
-  static wstring const TMX_O_TMF_ATTR;
-  static wstring const TMX_POS_ATTR;
-  static wstring const TMX_SEGTYPE_ATTR;
-  static wstring const TMX_SRCLANG_ATTR;
-  static wstring const TMX_SUBST_ATTR;
-  static wstring const TMX_TUID_ATTR;
-  static wstring const TMX_TYPE_ATTR;
-  static wstring const TMX_UNICODE_ATTR;
-  static wstring const TMX_USAGECOUNT_ATTR;
-  static wstring const TMX_VERSION_ATTR;
-  static wstring const TMX_X_ATTR;
-  static wstring const TMX_XML_LANG_ATTR;
+  static wstring const TMX_COMPILER_TMX_ELEM;
+  static wstring const TMX_COMPILER_HEADER_ELEM;
+  static wstring const TMX_COMPILER_BODY_ELEM;
+  static wstring const TMX_COMPILER_TU_ELEM;
+  static wstring const TMX_COMPILER_TUV_ELEM;
+  static wstring const TMX_COMPILER_HI_ELEM;
+  static wstring const TMX_COMPILER_PH_ELEM;
+  static wstring const TMX_COMPILER_XMLLANG_ATTR;
+  static wstring const TMX_COMPILER_SEG_ELEM;
+
 
   /**
-   * Copnstructor
+   * Constructor
    */
-  TMXPreprocessor();
+  TMXCompiler();
 
   /**
    * Destructor
    */
-  ~TMXPreprocessor();
+  ~TMXCompiler();
 
   /**
    * Compile dictionary to letter transducers
    */
-  void parse(string const &filename, wstring const &dir);
+  void parse(string const &fichero, wstring const &lo, wstring const &lm);
   
   /**
    * Write the result of compilation 

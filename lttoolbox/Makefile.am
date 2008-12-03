@@ -3,17 +3,17 @@ h_sources = alphabet.h buffer.h compiler.h compression.h  \
             entry_token.h expander.h fst_processor.h lt_locale.h ltstr.h \
             match_exe.h match_node.h match_state.h my_stdio.h node.h \
             pattern_list.h pool.h regexp_compiler.h sorted_vector.h state.h \
-            transducer.h trans_exe.h xml_parse_util.h exception.h
+            transducer.h trans_exe.h xml_parse_util.h exception.h tmx_compiler.h
 cc_sources = alphabet.cc compiler.cc compression.cc entry_token.cc \
              expander.cc fst_processor.cc lt_locale.cc match_exe.cc \
              match_node.cc match_state.cc node.cc pattern_list.cc \
              regexp_compiler.cc sorted_vector.cc state.cc transducer.cc \
-             trans_exe.cc xml_parse_util.cc
+             trans_exe.cc xml_parse_util.cc tmx_compiler.cc
 
 library_includedir = $(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/$(GENERIC_LIBRARY_NAME)
 library_include_HEADERS = $(h_sources)
 
-bin_PROGRAMS = lt-comp lt-proc lt-expand
+bin_PROGRAMS = lt-comp lt-proc lt-expand lt-tmxcomp lt-tmxproc
 instdir = lttoolbox
 
 lib_LTLIBRARIES= liblttoolbox3.la
@@ -38,8 +38,15 @@ lt_expand_SOURCES = lt_expand.cc
 lt_expand_LDADD = liblttoolbox$(GENERIC_MAJOR_VERSION).la
 lt_expand_LDFLAGS = -llttoolbox$(GENERIC_MAJOR_VERSION) $(LTTOOLBOX_LIBS)
 
+lt_tmxcomp_SOURCES = lt_tmxcomp.cc  
+lt_tmxcomp_LDADD = liblttoolbox$(GENERIC_MAJOR_VERSION).la
+lt_tmxcomp_LDFLAGS = -llttoolbox$(GENERIC_MAJOR_VERSION) $(LTTOOLBOX_LIBS)
 
-man_MANS = lt-comp.1 lt-expand.1 lt-proc.1
+lt_tmxproc_SOURCES = lt_tmxproc.cc
+lt_tmxproc_LDADD = liblttoolbox$(GENERIC_MAJOR_VERSION).la
+lt_tmxproc_LDFLAGS = -llttoolbox$(GENERIC_MAJOR_VERSION) $(LTTOOLBOX_LIBS)
+
+man_MANS = lt-comp.1 lt-expand.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1
 
 INCLUDES = -I$(top_srcdir) $(LTTOOLBOX_CFLAGS)
 CLEANFILES = *~

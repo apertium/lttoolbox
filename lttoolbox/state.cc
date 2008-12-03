@@ -331,3 +331,109 @@ State::filterFinalsSAO(set<Node *> const &finals,
   return result;
 }
 
+wstring
+State::filterFinalsTM(set<Node *> const &finals, 
+		      Alphabet const &alphabet,
+                      set<wchar_t> const &escaped_chars,
+                      queue<wstring> &blankqueue, vector<wstring> &numbers) const
+{
+  wstring result = L"";
+
+  for(size_t i = 0, limit = state.size(); i != limit; i++)
+  {
+    if(finals.find(state[i].where) != finals.end())
+    {
+      result += L'/';
+      for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
+      {
+        if(escaped_chars.find((*(state[i].sequence))[j]) != escaped_chars.end())
+        {
+          result += L'\\';
+        }
+        alphabet.getSymbol(result, (*(state[i].sequence))[j]);
+      }
+    }
+  }
+
+
+  wstring result2 = L"";
+  vector<wstring> fragmentos;
+  fragmentos.push_back(L"");
+  
+  for(unsigned int i = 0, limit = result.size(); i != limit ; i++)
+  {
+    if(result[i] == L')')
+    {
+      fragmentos.push_back(L"");
+    }
+    else
+    {
+      fragmentos[fragmentos.size()-1] += result[i];
+    }
+  }
+  
+  for(unsigned int i = 0, limit = fragmentos.size(); i != limit; i++)
+  {
+    if(i != limit -1)
+    {
+      if(fragmentos[i].substr(fragmentos[i].size()-2) == L"(#")
+      {
+        wstring whitespace = L" ";
+        if(blankqueue.size() != 0)
+	{
+          whitespace = blankqueue.front().substr(1);
+	  blankqueue.pop();
+	  whitespace = whitespace.substr(0, whitespace.size() - 1);
+        }  
+        fragmentos[i] = fragmentos[i].substr(0, fragmentos[i].size()-2) +
+	                whitespace;
+      }
+      else
+      {
+        bool sustituido = false;
+	for(int j = fragmentos[i].size() - 1; j >= 0; j--)
+	{
+	  if(fragmentos[i].size()-j > 3 && fragmentos[i][j] == L'\\' && 
+	     fragmentos[i][j+1] == L'@' && fragmentos[i][j+2] == L'(')
+	  {
+	    int num = 0;
+	    bool correcto = true;
+	    for(unsigned int k = (unsigned int) j+3, limit2 = fragmentos[i].size();
+		k != limit2; k++)
+	    {
+	      if(iswdigit(fragmentos[i][k]))
+	      {
+		num = num * 10;
+		num += (int) fragmentos[i][k] - 48;	
+	      }
+	      else
+	      {
+		correcto = false;
+		break;
+	      }
+	    }
+	    if(correcto)
+	    {
+	      fragmentos[i] = fragmentos[i].substr(0, j) + numbers[num - 1];
+	      sustituido = true;
+	      break;
+	    }
+	  }
+	}
+	if(sustituido == false)
+	{
+	  fragmentos[i] += L')';
+	}
+      }
+    }    
+  }
+  
+  result = L"";
+
+  for(unsigned int i = 0, limit = fragmentos.size(); i != limit; i++)
+  {
+    result += fragmentos[i];
+  }
+  
+  return result;
+}
