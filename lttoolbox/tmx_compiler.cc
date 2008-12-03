@@ -534,7 +534,7 @@ TMXCompiler::numberLength(vector<int> &v, unsigned int const position) const
 {
   for(unsigned int i = position, limit = v.size(); i < limit; i++)
   {
-    if(!iswnumber(v[i]) && (v[i] != L'.' || i == position) && (v[i] != L',' || i == position))
+    if(!iswdigit(v[i]) && (v[i] != L'.' || i == position) && (v[i] != L',' || i == position))
     {
       if(i == position)
       {
