@@ -124,18 +124,10 @@ XMLParseUtil::towstring(xmlChar const * input)
 wstring 
 XMLParseUtil::stows(string const &str)
 {
-#ifdef WIN32
-  wchar_t* result = (wchar_t*) alloca(str.size()+1);  
-#else
   wchar_t* result = new wchar_t[str.size()+1];
-#endif
   size_t retval = mbstowcs(result, str.c_str(), str.size());
   result[retval] = L'\0';
   wstring result2 = result;
-#ifdef WIN32
-  free(result);
-#else
-  delete result;
-#endif
+  delete[] result;
   return result2;
 }
