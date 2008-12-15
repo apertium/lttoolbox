@@ -127,9 +127,10 @@ XMLParseUtil::stows(string const &str)
 #ifdef WIN32
   wchar_t* result = (wchar_t*) alloca(str.size());  
 #else
-  wchar_t* result = new wchar_t[str.size()];
+  wchar_t* result = new wchar_t[str.size()+1];
 #endif
-  mbstowcs(result, str.c_str(), str.size());
+  size_t retval = mbstowcs(result, str.c_str(), str.size());
+  result[retval] = L'\0';
   wstring result2 = result;
 #ifdef WIN32
   free(result);
