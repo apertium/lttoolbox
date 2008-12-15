@@ -190,6 +190,11 @@ TMXCompiler::insertTU(vector<int> const &origin, vector<int> const &meta)
     return;
   }
   
+  if(origin[0] == alphabet(L"<b>") || meta[0] == alphabet(L"<b>"))
+  {
+    return;
+  }
+  
   if(origin.size() != 0 && meta.size() != 0)
   {
     int source = transducer.getInitial();
