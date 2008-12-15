@@ -125,7 +125,7 @@ wstring
 XMLParseUtil::stows(string const &str)
 {
 #ifdef WIN32
-  wchar_t* result = (wchar_t*) alloca(str.size());  
+  wchar_t* result = (wchar_t*) alloca(str.size()+1);  
 #else
   wchar_t* result = new wchar_t[str.size()+1];
 #endif
