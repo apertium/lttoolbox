@@ -939,6 +939,7 @@ FSTProcessor::tm_analysis(FILE *input, FILE *output)
               ((sf.size()-input_buffer.diffPrevPos(last)) > lastBlank(sf) || 
                lf == L""))
       {
+      
         do
         {
           if(val == -1)
@@ -956,19 +957,50 @@ FSTProcessor::tm_analysis(FILE *input, FILE *output)
         }         
         while((val = readTMAnalysis(input)) && !iswspace(val) && !iswpunct(val));
 
+        if(val == 0)
+        {
+          fputws_unlocked(sf.c_str(), output);
+          return;
+        }
+
+        input_buffer.back(1);
+        fputws_unlocked(sf.c_str(), output);
+
+        while(blankqueue.size() > 0)
+        {
+          if(blankqueue.size() == 1 && isLastBlankTM)
+          {
+            break;
+          }
+          blankqueue.pop();
+        }        
+
+/*
         unsigned int limit = sf.find(L' ');
         unsigned int size = sf.size();
         limit = (limit == static_cast<unsigned int>(wstring::npos)?size:limit);
         input_buffer.back(1+(size-limit));
         fputws_unlocked(sf.substr(0, limit).c_str(), output);
-      }
+*/      }
       else if(lf == L"")
       {
-        unsigned int limit = sf.find(L' ');
+/*        unsigned int limit = sf.find(L' ');
         unsigned int size = sf.size();
         limit = (limit == static_cast<unsigned int >(wstring::npos)?size:limit);
         input_buffer.back(1+(size-limit));
         fputws_unlocked(sf.substr(0, limit).c_str(), output);
+*/
+        input_buffer.back(1);
+        fputws_unlocked(sf.c_str(), output);
+
+        while(blankqueue.size() > 0)
+        {
+          if(blankqueue.size() == 1 && isLastBlankTM)
+          {
+            break;
+          }
+          blankqueue.pop();
+        }        
 
       }
       else

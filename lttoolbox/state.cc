@@ -359,7 +359,7 @@ State::filterFinalsTM(set<Node *> const &finals,
   wstring result2 = L"";
   vector<wstring> fragmentos;
   fragmentos.push_back(L"");
-  
+ 
   for(unsigned int i = 0, limit = result.size(); i != limit ; i++)
   {
     if(result[i] == L')')
@@ -376,7 +376,7 @@ State::filterFinalsTM(set<Node *> const &finals,
   {
     if(i != limit -1)
     {
-      if(fragmentos[i].substr(fragmentos[i].size()-2) == L"(#")
+      if(fragmentos[i].size() >=2 && fragmentos[i].substr(fragmentos[i].size()-2) == L"(#")
       {
         wstring whitespace = L" ";
         if(blankqueue.size() != 0)

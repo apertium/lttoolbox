@@ -294,10 +294,27 @@ TMXCompiler::align_blanks(vector<int> &o, vector<int> &m)
         sm[i].push_back(0);
       }*/
     } 
+    o = join(so, L' ');
+    m = join(sm, L')');
   }
-  
-  o = join(so, L' ');
-  m = join(sm, L')');
+  else
+  {
+    for(unsigned int i = 0, limit = so.size(); i != limit; i++)
+    {
+      trim(so[i]);
+    }
+    for(unsigned int i = 0, limit = sm.size(); i != limit; i++)
+    {
+      trim(sm[i]);
+      if(sm.size() - 1 != i)
+      {
+        sm[i].push_back(L'(');
+        sm[i].push_back(L'#');
+      }
+    }
+    o = join(so, L' ');
+    m = join(sm, L')');
+  }
 }
 
 void
@@ -365,8 +382,16 @@ TMXCompiler::procTU()
   
   trim(origin);
   trim(meta);
+//  wcout << L"DESPUES DE TRIM\n";
+//  printvector(origin);
+//  printvector(meta);
+
   align(origin, meta);
+//  wcout << L"DESPUES DE ALIGN\n";
+//  printvector(origin);
+//  printvector(meta);
   align_blanks(origin, meta);
+//  wcout << L"DESPUES DE ALIGNBLANKS\n";
 //  printvector(origin);
 //  printvector(meta);
   insertTU(origin, meta);
@@ -517,7 +542,12 @@ TMXCompiler::align(vector<int> &origin, vector<int> &meta)
       
       if(!tocado)
       {
-        for(unsigned int j = i; j != nl; i++, j++)
+        if((unsigned int) i >= nl)
+        {
+          return;
+        }          
+
+        for(unsigned int j = i; j < nl; i++, j++)
         {
           modified_meta.push_back(meta[i]);
         }
