@@ -717,13 +717,6 @@ FSTProcessor::analysis(FILE *input, FILE *output)
           fputwc_unlocked(val, output);
         }
       }
-      else if(last_incond)
-      {
-        printWord(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
-		  lf, output);
-        input_buffer.setPos(last);
-        input_buffer.back(1);
-      }
       else if(last_postblank)
       {
         printWord(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
@@ -735,6 +728,13 @@ FSTProcessor::analysis(FILE *input, FILE *output)
       else if(last_preblank)
       {
 	fputwc_unlocked(L' ', output);
+        printWord(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
+		  lf, output);
+        input_buffer.setPos(last);
+        input_buffer.back(1);
+      }
+      else if(last_incond)
+      {
         printWord(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
 		  lf, output);
         input_buffer.setPos(last);
