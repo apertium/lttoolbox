@@ -46,7 +46,7 @@ enum GenerationMode
 };
 
 /**
- * Class that implement the FST-based modules of the system
+ * Class that implements the FST-based modules of the system
  */
 class FSTProcessor
 {
@@ -55,22 +55,22 @@ private:
    * Transducers in FSTP
    */
   map<wstring, TransExe, Ltstr> transducers;
-  
+
   /**
    * Current state of lexical analysis
    */
   State current_state;
-  
+
   /**
    * Initial state of every token
    */
   State initial_state;
-  
+
   /**
-   * Set of final states of incoditional sections in the dictionaries
+   * Set of final states of inconditional sections in the dictionaries
    */
   set<Node *> inconditional;
-  
+
   /**
    * Set of final states of standard sections in the dictionaries
    */
@@ -78,83 +78,83 @@ private:
 
   /**
    * Set of final states of postblank sections in the dictionaries
-   */    
+   */
   set<Node *> postblank;
 
   /**
    * Set of final states of preblank sections in the dictionaries
-   */    
+   */
   set<Node *> preblank;
-  
+
   /**
    * Merge of 'inconditional', 'standard', 'postblank' and 'preblank' sets
    */
   set<Node *> all_finals;
-   
+
   /**
-   * Queue of blanks, used in reading methods 
+   * Queue of blanks, used in reading methods
    */
   queue<wstring> blankqueue;
-  
+
   /**
    * Set of characters being considered alphabetics
    */
   set<wchar_t> alphabetic_chars;
-  
+
   /**
    * Set of characters to escape with a backslash
    */
   set<wchar_t> escaped_chars;
-  
+
   /**
    * Alphabet
    */
   Alphabet alphabet;
-  
+
   /**
    * Input buffer
    */
-  Buffer<int> input_buffer; 
-  
+  Buffer<int> input_buffer;
+
   /**
    * Begin of the transducer
    */
   Node root;
-  
+
   /**
    * true if the position of input stream is out of a word
    */
   bool outOfWord;
-  
-  
+
+
   /**
-   * if true, makes always difference between uppercase and lowercase 
+   * if true, makes always difference between uppercase and lowercase
    * characters
    */
   bool caseSensitive;
-  
+
   /**
    * if true, flush the output when the null character is found
    */
   bool nullFlush;
-  
+
   /**
    * Prints an error of input stream and exits
    */
   void streamError();
-  
+
   /**
    * Reads a character that is defined in the set of escaped_chars
    * @param input the stream to read from
    * @return code of the character
    */
   wchar_t readEscaped(FILE *input);
-  
+
   /**
    * Reads a block from the stream input, enclosed by delim1 and delim2
    * @param input the stream being read
    * @param delim1 the delimiter of the beginning of the sequence
-   * @param delim1 the delimiter of the end of the sequence   
+   * @param delim1 the delimiter of the end of the sequence
    */
   wstring readFullBlock(FILE *input, wchar_t const delim1, wchar_t const delim2);
 
@@ -164,10 +164,10 @@ private:
    * @return true if it's alphabetic
    */
   bool isAlphabetic(wchar_t const c) const;
-  
+
   /**
    * Tests if a character is in the set of escaped_chars
-   * @param c the character code provided by de user
+   * @param c the character code provided by the user
    * @return true if it is in the set
    */
   bool isEscaped(wchar_t const c) const;
@@ -192,39 +192,39 @@ private:
    * @return the next symbol in the stream
    */
   int readGeneration(FILE *input, FILE *output);
-  
+
   /**
    * Read text from stream (SAO version)
    * @param input the stream to read
    * @return the next symbol in the stream
-   */  
+   */
   int readSAO(FILE *input);
-  
+
   /**
    * Flush all the blanks remaining in the current process
    * @param output stream to write blanks
    */
   void flushBlanks(FILE *output);
-  
+
   /**
    * Calculate the initial state of parsing
    */
   void calcInitial();
-  
+
   /**
    * Calculate all the results of the word being parsed
    */
   void classifyFinals();
-  
+
   /**
-   * Write a string to an output stream, 
-   * @param str the string to write scaping characters
+   * Write a string to an output stream,
+   * @param str the string to write, escaping characters
    * @param output the stream to write in
    */
   void writeEscaped(wstring const &str, FILE *output);
 
   /**
-   * Checks if an string ends with a partiuclar suffix
+   * Checks if an string ends with a particular suffix
    * @param str the string to test
    * @param the searched suffix
    * @returns true if 'str' has the suffix 'suffix'
@@ -235,7 +235,7 @@ private:
    * Prints a word
    * @param sf surface form of the word
    * @param lf lexical form of the word
-   * @param output stream where the word is written 
+   * @param output stream where the word is written
    */
   void printWord(wstring const &sf, wstring const &lf, FILE *output);
 
@@ -255,7 +255,7 @@ private:
 
   vector<wstring> numbers;
   int readTMAnalysis(FILE *input);
-  
+
   unsigned int lastBlank(wstring const &str);
   void printSpace(wchar_t const val, FILE *output);
   void skipUntil(FILE *input, FILE *output, wint_t const character);
@@ -269,7 +269,7 @@ private:
   void transliteration_wrapper_null_flush(FILE *input, FILE *output);
 
 
-  bool isLastBlankTM;  
+  bool isLastBlankTM;
 public:
   FSTProcessor();
   ~FSTProcessor();
@@ -280,21 +280,21 @@ public:
   void initGeneration();
   void initPostgeneration();
   void initBiltrans();
-  
+
   void analysis(FILE *input = stdin, FILE *output = stdout);
   void tm_analysis(FILE *input = stdin, FILE *output = stdout);
   void generation(FILE *input = stdin, FILE *output = stdout, GenerationMode mode = gm_unknown);
-  void postgeneration(FILE *input = stdin, FILE *output = stdout); 
-  void transliteration(FILE *input = stdin, FILE *output = stdout); 
+  void postgeneration(FILE *input = stdin, FILE *output = stdout);
+  void transliteration(FILE *input = stdin, FILE *output = stdout);
   wstring biltrans(wstring const &input_word, bool with_delim = true);
   pair<wstring, int> biltransWithQueue(wstring const &input_word, bool with_delim = true);
   wstring biltransWithoutQueue(wstring const &input_word, bool with_delim = true);
-  void SAO(FILE *input = stdin, FILE *output = stdout);  
-  
+  void SAO(FILE *input = stdin, FILE *output = stdout);
+
   void load(FILE *input);
 
   bool valid() const;
-  
+
   void setCaseSensitiveMode(bool const value);
   void setNullFlush(bool const value);
   bool getNullFlush();
