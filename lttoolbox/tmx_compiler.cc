@@ -531,7 +531,7 @@ TMXCompiler::align(vector<int> &origin, vector<int> &meta)
             {
               modified_meta.push_back(valor[k]);
             }
-            delete valor;
+            delete[] valor;
             modified_meta.push_back(L')');
             i += nl-1;
             tocado = true;
