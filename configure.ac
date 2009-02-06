@@ -134,12 +134,7 @@ iconv (cd, NULL, NULL, NULL, NULL);],[
 		ICONV_LIBS="${ICONV_LIBS} -liconv"
 		LIBS="${_libs}"
 		LDFLAGS="${_ldflags}"],[
-        ac_have_iconv=no])]))
-
-		if test "$ac_have_iconv" = no 
-then
-  AC_MSG_ERROR([Missing iconv: lttoolbox requires libxml2 with iconv support])
-fi
+        AC_MSG_ERROR([Missing iconv. lttoolbox requires libxml2 with iconv support])])]))
 
 
 PKG_CHECK_MODULES(LTTOOLBOX, [dnl
