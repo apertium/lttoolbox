@@ -8,6 +8,8 @@ m4_define([required_libxml_version], [2.6.17])
 AC_INIT([lttoolbox/lttoolbox.h], [3.1.0], [sortiz@users.sourceforge.net])
 AC_CONFIG_HEADER([lttoolbox/lttoolbox_config.h])
 
+AC_CANONICAL_SYSTEM
+
 GENERIC_LIBRARY_NAME=lttoolbox
 
 # Release versioning
@@ -82,6 +84,15 @@ else
     fi
   fi
 fi
+
+case "${target_os}" in
+  mingw*)
+  echo "Found MinGW: Also considering MSYS paths"
+  CFLAGS="$CFLAGS -L/lib -I/include"
+  CXXFLAGS="$CXXFLAGS -L/lib -I/include"
+  CPPFLAGS="$CPPFLAGS -I/include"
+  ;;
+esac
 
 AC_PROG_CXX
 AM_PROG_LIBTOOL
