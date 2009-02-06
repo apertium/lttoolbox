@@ -26,6 +26,10 @@
 #include <iostream>
 #include <libxml/encoding.h>
 
+#ifdef _WIN32
+#define swprintf _snwprintf
+#endif
+
 using namespace std;
 
 wstring const TMXCompiler::TMX_COMPILER_TMX_ELEM     = L"tmx";
