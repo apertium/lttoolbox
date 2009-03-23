@@ -22,21 +22,44 @@
 #include <cstdlib>
 #include <iostream>
 
+void 
+Compression::writeByte(unsigned char byte, FILE *output)
+{
+  if(fwrite_unlocked(&byte, 1, 1, output) != 1)
+  {
+    wcerr << L"I/O Error writing" << endl;
+    exit(EXIT_FAILURE);
+  }  
+}
+
+unsigned char
+Compression::readByte(FILE *input)
+{
+  unsigned char value;
+  if(fread_unlocked(&value, 1, 1, input) != 1)
+  {
+    wcerr << L"I/O Error reading" << endl;
+    exit(EXIT_FAILURE);
+  }
+
+  return value;
+}
+
 void
 Compression::multibyte_write(unsigned int value, FILE *output)
 {
   if(value < 0x00000040)
   {
     unsigned char byte = (unsigned char) value;
-    fwrite_unlocked(&byte, 1, 1, output);
+    writeByte(byte, output);
   }
   else if(value < 0x00004000)
   {
     unsigned char low = (unsigned char) value;
     unsigned char up =  (unsigned char) (value >> 8);
     up = up | 0x40;
-    fwrite_unlocked(&up, 1, 1, output);
-    fwrite_unlocked(&low, 1, 1, output);
+    writeByte(up, output);
+    writeByte(low, output);
   }
   else if(value < 0x00400000)
   {
@@ -44,9 +67,9 @@ Compression::multibyte_write(unsigned int value, FILE *output)
     unsigned char middle = (unsigned char) (value >> 8);
     unsigned char up = (unsigned char) (value >> 16);
     up = up | 0x80; 
-    fwrite_unlocked(&up, 1, 1, output);
-    fwrite_unlocked(&middle, 1, 1, output);
-    fwrite_unlocked(&low, 1, 1, output);
+    writeByte(up, output);
+    writeByte(middle, output);
+    writeByte(low, output);
   }
   else if(value < 0x40000000)
   {
@@ -55,10 +78,10 @@ Compression::multibyte_write(unsigned int value, FILE *output)
     unsigned char middleup = (unsigned char) (value >> 16);
     unsigned char up = (unsigned char) (value >> 24);
     up = up | 0xc0; 
-    fwrite_unlocked(&up, 1, 1, output);
-    fwrite_unlocked(&middleup, 1, 1, output);
-    fwrite_unlocked(&middlelow, 1, 1, output);
-    fwrite_unlocked(&low, 1, 1, output);
+    writeByte(up, output);
+    writeByte(middleup, output);
+    writeByte(middlelow, output);
+    writeByte(low, output);
   }
   else
   {
@@ -118,10 +141,9 @@ Compression::multibyte_write(unsigned int value, ostream &output)
 unsigned int
 Compression::multibyte_read(FILE *input)
 {
-  unsigned char up;
   unsigned int result = 0;
 
-  fread_unlocked(&up, 1, 1, input);
+  unsigned char up = readByte(input);
   if(up < 0x40)
   {
     result = (unsigned int) up;
@@ -131,8 +153,7 @@ Compression::multibyte_read(FILE *input)
     up = up & 0x3f;
     unsigned int aux = (unsigned int) up;
     aux = aux << 8;
-    unsigned char low;
-    fread_unlocked(&low, 1, 1, input);
+    unsigned char low = readByte(input);
     result = (unsigned int) low;
     result = result | aux;
   }
@@ -141,13 +162,11 @@ Compression::multibyte_read(FILE *input)
     up = up & 0x3f;
     unsigned int aux = (unsigned int) up;
     aux = aux << 8;
-    unsigned char middle;
-    fread_unlocked(&middle, 1, 1, input);
+    unsigned char middle = readByte(input);
     result = (unsigned int) middle;
     aux = result | aux;
     aux = aux << 8;
-    unsigned char low;
-    fread_unlocked(&low, 1, 1, input);
+    unsigned char low = readByte(input);
     result = (unsigned int) low;
     result = result | aux;
   }
@@ -156,18 +175,15 @@ Compression::multibyte_read(FILE *input)
     up = up & 0x3f;
     unsigned int aux = (unsigned int) up;
     aux = aux << 8;
-    unsigned char middleup;
-    fread_unlocked(&middleup, 1, 1, input);
+    unsigned char middleup = readByte(input);
     result = (unsigned int) middleup;
     aux = result | aux;
     aux = aux << 8;
-    unsigned char middlelow;
-    fread_unlocked(&middlelow, 1, 1, input);
+    unsigned char middlelow = readByte(input);
     result = (unsigned int) middlelow;
     aux = result | aux;
     aux = aux << 8;
-    unsigned char low;
-    fread_unlocked(&low, 1, 1, input);
+    unsigned char low = readByte(input);
     result = (unsigned int) low;
     result = result | aux;
   }

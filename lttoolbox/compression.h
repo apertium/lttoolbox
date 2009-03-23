@@ -31,6 +31,21 @@ using namespace std;
  */
 class Compression
 {
+private:
+  /**
+   * Writing a byte
+   * @param byte char to write.
+   * @param output output stream.
+   */
+  static void writeByte(unsigned char byte, FILE *output);
+
+  /**
+   * Readinging a byte
+   * @param input input stream
+   * @return the value of the next byte in the input
+   */
+  static unsigned char readByte(FILE *input);
+
 public:
   /**
    * Encodes an integer value and writes it into the output stream
