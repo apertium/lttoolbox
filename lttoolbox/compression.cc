@@ -38,8 +38,9 @@ Compression::readByte(FILE *input)
   unsigned char value;
   if(fread_unlocked(&value, 1, 1, input) != 1)
   {
-    wcerr << L"I/O Error reading" << endl;
-    exit(EXIT_FAILURE);
+//    Not uncomment this code since
+//    wcerr << L"I/O Error reading" << endl;
+//    exit(EXIT_FAILURE);
   }
 
   return value;
