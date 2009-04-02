@@ -22,9 +22,9 @@ available here:
 http://sourceforge.net/project/showfiles.php?group_id=204414
 
 MSys, by default, installs binaries to /bin; pkg-config is written
-to not run from that location; it must be installed elsewhere.
+to not run from that location: it must be installed elsewhere.
 
-/bin/install doesn't work on MSYS. After lttoolbox has build, you will 
+/bin/install doesn't work on MSYS. After lttoolbox has built, you will 
 need to do this:
 
   cp lttoolbox/liblttoolbox3.a /lib
