@@ -50,20 +50,24 @@ int main(int argc, char *argv[])
   }
 
   string opc = argv[1];
-  wchar_t lo[opc.size()+1];
-  wchar_t lm[opc.size()+1];
+  wchar_t* lo = new wchar_t[opc.size()+1];
+  wchar_t* lm = new wchar_t[opc.size()+1];
 
   
   
   if(((size_t) -1 == mbstowcs(lo, opc.substr(0, opc.find('-')).c_str(), opc.size()))|| 
      ((size_t) -1 == mbstowcs(lm, opc.substr(opc.find('-')+1).c_str(), opc.size())))
   {
+    delete[] lo;
+    delete[] lm;
     endProgram(argv[0]);
   }
 
   TMXCompiler c;
 
   c.parse(argv[2], lo, lm);
+  delete[] lo;
+  delete[] lm;
 
   FILE *output = fopen(argv[3], "w");
   if(!output)
