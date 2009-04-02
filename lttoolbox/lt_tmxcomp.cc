@@ -18,7 +18,7 @@
  */
 #include <lttoolbox/tmx_compiler.h>
 #include <lttoolbox/lttoolbox_config.h>
-#include <lt_locale.h>
+#include <lttoolbox/lt_locale.h>
 #include <cstdlib>
 #include <iostream>
 #include <libgen.h>
