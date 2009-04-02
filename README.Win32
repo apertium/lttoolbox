@@ -1,0 +1,57 @@
+Building lttoolbox on Win32
+---------------------------
+
+1. Cygwin
+
+Current versions of Cygwin (up to the 1.7 beta) do not have support for
+wstring; you cannot build lttoolbox using Cygwin.
+
+
+
+2. MinGW
+
+The only supported version of MinGW is TDM-GCC: 
+http://www.tdragon.net/recentgcc/
+
+The supported build environment is MSYS with MSysDTK 
+(http://www.mingw.org)
+
+pkgconfig, libxml2, libxslt, pkgconfig, glib, gettext, iconv, zlib, 
+libgcrypt, and libgpg-error are all required. Binary packages are 
+available here:
+http://sourceforge.net/project/showfiles.php?group_id=204414
+
+MSys, by default, installs binaries to /bin; pkg-config is written
+to not run from that location; it must be installed elsewhere.
+
+/bin/install doesn't work on MSYS. After lttoolbox has build, you will 
+need to do this:
+
+  cp lttoolbox/liblttoolbox3.a /lib
+  cp lttoolbox/liblttoolbox3.lai /lib/liblttoolbox3.la
+  mkdir /include/lttoolbox
+  cp lttoolbox/*.h /include/lttoolbox
+  cp lttoolbox-3.1.pc /lib/pkgconfig
+
+
+
+3. Microsoft Visual C++
+
+lttoolbox has only been build using Visual C++ 2008 Express Edition.
+It may work with other versions, but we have no way of testing it.
+
+The Visual C++ .sln file is built using CMake. Only CMake 2.6 has been
+tested.
+
+Dependencies:
+
+lttoolbox depends on libxml (and so on zlib and iconv), and for normal 
+use requires xsltproc from libxslt. We only support building against 
+the binaries distributed at http://xmlsoft.org/sources/win32/
+
+The default directories that the CMake configuration checks for these are:
+
+    libxml  : C:\Program Files\libxml
+    zlib    : C:\Program Files\zlib
+	iconv   : C:\Program Files\iconv
+    libxslt : C:\Program Files\libxslt
