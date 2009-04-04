@@ -53,5 +53,6 @@ The default directories that the CMake configuration checks for these are:
 
     libxml  : C:\Program Files\libxml
     zlib    : C:\Program Files\zlib
-	iconv   : C:\Program Files\iconv
+    iconv   : C:\Program Files\iconv
     libxslt : C:\Program Files\libxslt
+
