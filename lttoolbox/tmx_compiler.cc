@@ -40,7 +40,9 @@ wstring const TMXCompiler::TMX_COMPILER_TUV_ELEM     = L"tuv";
 wstring const TMXCompiler::TMX_COMPILER_HI_ELEM      = L"hi";
 wstring const TMXCompiler::TMX_COMPILER_PH_ELEM      = L"ph";
 wstring const TMXCompiler::TMX_COMPILER_XMLLANG_ATTR = L"xml:lang";
+wstring const TMXCompiler::TMX_COMPILER_LANG_ATTR    = L"lang";
 wstring const TMXCompiler::TMX_COMPILER_SEG_ELEM     = L"seg";
+wstring const TMXCompiler::TMX_COMPILER_PROP_ELEM    = L"prop";
 
 TMXCompiler::TMXCompiler()
 {
@@ -334,7 +336,12 @@ TMXCompiler::procTU()
   {
     if(name == TMX_COMPILER_TUV_ELEM && type != XML_READER_TYPE_END_ELEMENT)
     {
-      wstring const l = attrib(TMX_COMPILER_XMLLANG_ATTR);
+      wstring l = attrib(TMX_COMPILER_XMLLANG_ATTR);
+      if(l == L"")
+      {
+        l = attrib(TMX_COMPILER_LANG_ATTR);
+      }
+      
       vector<int> *ref;
       if(l == meta_language)
       {
@@ -422,6 +429,10 @@ TMXCompiler::procNode()
     /* ignorar */
   }
   else if(nombre == TMX_COMPILER_BODY_ELEM)
+  {
+    /* ignorar */
+  }
+  else if(nombre == TMX_COMPILER_PROP_ELEM)
   {
     /* ignorar */
   }
