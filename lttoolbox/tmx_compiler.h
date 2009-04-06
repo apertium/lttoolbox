@@ -149,7 +149,9 @@ public:
   static wstring const TMX_COMPILER_HI_ELEM;
   static wstring const TMX_COMPILER_PH_ELEM;
   static wstring const TMX_COMPILER_XMLLANG_ATTR;
+  static wstring const TMX_COMPILER_LANG_ATTR;  
   static wstring const TMX_COMPILER_SEG_ELEM;
+  static wstring const TMX_COMPILER_PROP_ELEM;
 
 
   /**
@@ -173,6 +175,5 @@ public:
    */
   void write(FILE *fd);
 };
-
 
 #endif
