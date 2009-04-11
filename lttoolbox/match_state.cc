@@ -55,7 +55,7 @@ MatchState::operator =(MatchState const &s)
 void 
 MatchState::destroy()
 {
-  delete state;
+  delete[] state;
 }
 
 void
