@@ -37,7 +37,7 @@ SortedVector::copy(SortedVector const &o)
 void
 SortedVector::destroy()
 {
-  delete sv;
+  delete[] sv;
 }
 
 SortedVector::SortedVector(int const fixed_size)
