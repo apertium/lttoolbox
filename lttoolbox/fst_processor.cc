@@ -22,7 +22,7 @@
 
 #include <iostream>
 
-#include <errno.h>
+#include <cerrno>
 
 using namespace std;
 

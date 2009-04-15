@@ -65,6 +65,17 @@ private:
   wstring meta_language;
   
   /**
+   * Origin language code in the TMX
+   */
+  wstring origin_language_inner_code;
+
+  /**
+   * Origin language code in the TMX
+   */
+  wstring meta_language_inner_code;
+
+
+  /**
    * Method to parse an XML Node
    */
   void procNode();
@@ -174,6 +185,19 @@ public:
    * @param fd the stream where write the result
    */
   void write(FILE *fd);
+
+  /**
+   * Set origin language inner code
+   * @param code the code of the origin language into the TMX file being compiled
+   */
+  void setOriginLanguageCode(wstring const &code);
+
+  /**
+   * Set meta language inner code
+   * @param code the code of the meta language into the TMX file being compiled
+   */
+  void setMetaLanguageCode(wstring const &code);
+ 
 };
 
 #endif

@@ -655,3 +655,16 @@ TMXCompiler::printvector(vector<int> const &v, wostream &os)
   }
   os << endl;
 }
+
+void 
+TMXCompiler::setOriginLanguageCode(wstring const &code)
+{
+  // nada
+}
+
+void 
+TMXCompiler::setMetaLanguageCode(wstring const &code)
+{
+  // nada
+}
+
