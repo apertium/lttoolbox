@@ -262,7 +262,6 @@ FSTProcessor::readPostgeneration(FILE *input)
   }
 }
 
-
 void
 FSTProcessor::skipUntil(FILE *input, FILE *output, wint_t const character)
 {
@@ -274,23 +273,36 @@ FSTProcessor::skipUntil(FILE *input, FILE *output, wint_t const character)
       return;
     }
 
-    if(val == L'\\')
+    switch(val)
     {
-      val = fgetwc_unlocked(input);
-      if(feof(input))
-      {
-	return;
-      }
-      fputwc_unlocked(L'\\', output);
-      fputwc_unlocked(val, output);
-    }
-    else if(val == character)
-    {
-      return;
-    }
-    else
-    {
-      fputwc_unlocked(val, output);
+      case L'\\':
+        val = fgetwc_unlocked(input);
+        if(feof(input))
+        {
+	  return;
+        }
+        fputwc_unlocked(L'\\', output);
+        fputwc_unlocked(val, output);
+        break;
+      
+      case L'\0':
+        fputwc_unlocked(val, output);
+        if(nullFlush)
+        {
+          fflush(output);
+        }
+        break;
+      
+      default:
+        if(val == character)
+        {
+          return;
+        }
+        else
+        {
+          fputwc_unlocked(val, output);
+        }
+        break;
     }
   }
 }
