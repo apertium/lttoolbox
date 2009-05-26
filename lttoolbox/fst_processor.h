@@ -139,6 +139,11 @@ private:
   bool nullFlush;
 
   /**
+   * nullFlush property for the skipUntil function 
+   */
+  bool nullFlushGeneration;
+
+  /**
    * Prints an error of input stream and exits
    */
   void streamError();

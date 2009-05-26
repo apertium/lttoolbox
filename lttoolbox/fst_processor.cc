@@ -42,6 +42,7 @@ FSTProcessor::FSTProcessor()
   
   caseSensitive = false;
   nullFlush = false;
+  nullFlushGeneration = false;
 }
 
 FSTProcessor::~FSTProcessor()
@@ -287,7 +288,7 @@ FSTProcessor::skipUntil(FILE *input, FILE *output, wint_t const character)
       
       case L'\0':
         fputwc_unlocked(val, output);
-        if(nullFlush)
+        if(nullFlushGeneration)
         {
           fflush(output);
         }
@@ -834,6 +835,8 @@ FSTProcessor::generation_wrapper_null_flush(FILE *input, FILE *output,
                                             GenerationMode mode)
 {
   setNullFlush(false);
+  nullFlushGeneration = true;
+  
   while(!feof(input)) 
   {
     generation(input, output, mode);
