@@ -118,8 +118,7 @@ then
   AC_MSG_ERROR([You don't have pkg-config installed])
 fi
 
-PKG_CHECK_MODULES(LTTOOLBOX, [
-  libxml-2.0 >= required_libxml_version])
+PKG_CHECK_MODULES(LTTOOLBOX, [libxml-2.0 >= required_libxml_version])
 
 # Check for wide strings
 AC_DEFUN([AC_CXX_WSTRING],[
