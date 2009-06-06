@@ -118,8 +118,8 @@ then
   AC_MSG_ERROR([You don't have pkg-config installed])
 fi
 
-dnl Check for iconv, rather than just trusting that libxml hass support
-dnl http://mail.gnome.org/archives/xml/2001-July/msg00014.html
+# Check for iconv, rather than just trusting that libxml has support
+# http://mail.gnome.org/archives/xml/2001-July/msg00014.html
 AC_CHECK_HEADER(iconv.h,
 	AC_MSG_CHECKING(for iconv)
 	AC_TRY_LINK([#include <stdlib.h>
