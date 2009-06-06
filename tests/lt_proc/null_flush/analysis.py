@@ -51,7 +51,7 @@ class OnlyValidInput(unittest.TestCase, NullFlushTest):
                    "^very much/very much<adv>$"]
         outputs = [s + "^./.<sent>$[][\n]\x00" for s in outputs]
 
-        self.proc = ApertiumProcess(["../lttoolbox/lt-proc", "-z", "data/en-af.automorf.bin"])
+        self.proc = ApertiumProcess(["../lttoolbox/.libs/lt-proc", "-z", "data/en-af.automorf.bin"])
         self.assertEqualPipeOutput(self.proc, inputs, outputs)
 
 
@@ -67,7 +67,7 @@ class OnlyInvalidInput(unittest.TestCase, NullFlushTest):
 
         errorOutputs = itertools.repeat("Error: Malformed input stream.\x00")
 
-        self.proc = ApertiumProcess(["../lttoolbox/lt-proc", "-z", "data/en-af.automorf.bin"])
+        self.proc = ApertiumProcess(["../lttoolbox/.libs/lt-proc", "-z", "data/en-af.automorf.bin"])
         self.assertEqualPipeOutput(self.proc, inputs, outputs, errorOutputs)
 
 
@@ -94,7 +94,7 @@ class ValidAndInvalidInputs(unittest.TestCase, NullFlushTest):
                         "Error: Malformed input stream.\x00",
                         "\x00"]
 
-        self.proc = ApertiumProcess(["../lttoolbox/lt-proc", "-z", "data/en-af.automorf.bin"])
+        self.proc = ApertiumProcess(["../lttoolbox/.libs/lt-proc", "-z", "data/en-af.automorf.bin"])
         self.assertEqualPipeOutput(self.proc, inputs, outputs, errorOutputs)
 
 ############################################################################################################
@@ -136,7 +136,7 @@ class OnlyValidInputWithStdinClose(unittest.TestCase, NullFlushTest):
                         u"\x00",
                         u"\x00\x00"]
 
-        self.assertEqualPipeOutput(["../lttoolbox/lt-proc", "-z", "data/en-af.automorf.bin"], inputs, outputs, errorOutputs)
+        self.assertEqualPipeOutput(["../lttoolbox/.libs/lt-proc", "-z", "data/en-af.automorf.bin"], inputs, outputs, errorOutputs)
 
 
 class OnlyInvalidInputWithStdinClose(unittest.TestCase, NullFlushTest):
@@ -157,5 +157,5 @@ class OnlyInvalidInputWithStdinClose(unittest.TestCase, NullFlushTest):
                       1,
                       0]
 
-        self.assertEqualPipeOutput(["../lttoolbox/lt-proc", "-z", "data/en-af.automorf.bin"], 
+        self.assertEqualPipeOutput(["../lttoolbox/.libs/lt-proc", "-z", "data/en-af.automorf.bin"], 
                                    inputs, outputs, errorOutputs, errorCodes)

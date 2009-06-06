@@ -1,4 +1,4 @@
-import time
+import time, cmd;
 from subproc import Popen, PIPE
 
 class ApertiumProcess(Popen):
@@ -35,6 +35,8 @@ class ApertiumProcess(Popen):
     def kill(self):
         import os
         try:
+	    print self.pid;
+	    os.system('kill -9 ' + self.pid);
             os.kill(self.pid, 9)
         except OSError:
             pass # if we get here, the process either never started, or has already died
