@@ -118,37 +118,7 @@ then
   AC_MSG_ERROR([You don't have pkg-config installed])
 fi
 
-# Check for iconv, rather than just trusting that libxml has support
-# http://mail.gnome.org/archives/xml/2001-July/msg00014.html
-AC_CHECK_HEADER(iconv.h,
-	AC_MSG_CHECKING(for iconv)
-	AC_TRY_LINK([#include <stdlib.h>
-#include <iconv.h>],[
-iconv_t cd = iconv_open ("","");
-iconv (cd, NULL, NULL, NULL, NULL);],[
-	    AC_MSG_RESULT(yes)
-	    WITH_ICONV=1],[
-	    AC_MSG_RESULT(no)
-	    AC_MSG_CHECKING(for iconv in -liconv)
-
-	    _ldflags="${LDFLAGS}"
-	    _libs="${LIBS}"
-	    LDFLAGS="${LDFLAGS} ${ICONV_LIBS}"
-	    LIBS="${LIBS} -liconv"
-
-	    AC_TRY_LINK([#include <stdlib.h>
-#include <iconv.h>],[
-iconv_t cd = iconv_open ("","");
-iconv (cd, NULL, NULL, NULL, NULL);],[
-		AC_MSG_RESULT(yes)
-		WITH_ICONV=1
-		ICONV_LIBS="${ICONV_LIBS} -liconv"
-		LIBS="${_libs}"
-		LDFLAGS="${_ldflags}"],[
-        AC_MSG_ERROR([Missing iconv. lttoolbox requires libxml2 with iconv support])])]))
-
-
-PKG_CHECK_MODULES(LTTOOLBOX, [dnl
+PKG_CHECK_MODULES(LTTOOLBOX, [
   libxml-2.0 >= required_libxml_version])
 
 # Check for wide strings
