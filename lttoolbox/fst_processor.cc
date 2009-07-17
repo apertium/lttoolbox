@@ -32,6 +32,8 @@ FSTProcessor::FSTProcessor()
   // escaped_chars chars
   escaped_chars.insert(L'[');
   escaped_chars.insert(L']');
+  escaped_chars.insert(L'{');
+  escaped_chars.insert(L'}');
   escaped_chars.insert(L'^');
   escaped_chars.insert(L'$');
   escaped_chars.insert(L'/');
