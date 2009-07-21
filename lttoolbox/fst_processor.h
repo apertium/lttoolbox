@@ -134,6 +134,12 @@ private:
   bool caseSensitive;
 
   /**
+   * if true, uses the dictionary case, discarding surface case 
+   * information
+   */
+  bool dictionaryCase;
+
+  /**
    * if true, flush the output when the null character is found
    */
   bool nullFlush;
@@ -301,6 +307,7 @@ public:
   bool valid() const;
 
   void setCaseSensitiveMode(bool const value);
+  void setDictionaryCaseMode(bool const value);
   void setNullFlush(bool const value);
   bool getNullFlush();
 };
