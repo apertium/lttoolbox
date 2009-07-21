@@ -43,6 +43,7 @@ FSTProcessor::FSTProcessor()
   escaped_chars.insert(L'>');
   
   caseSensitive = false;
+  dictionaryCase = false;
   nullFlush = false;
   nullFlushGeneration = false;
 }
@@ -639,6 +640,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
   wstring lf = L"";
   wstring sf = L"";
   int last = 0;
+  bool firstupper = false, uppercase = false;
 
   while(wchar_t val = readAnalysis(input))
   {
@@ -647,8 +649,11 @@ FSTProcessor::analysis(FILE *input, FILE *output)
     {
       if(current_state.isFinal(inconditional))
       {
-        bool firstupper = iswupper(sf[0]);
-        bool uppercase = firstupper && iswupper(sf[sf.size()-1]);
+        if(!dictionaryCase)
+        {
+          firstupper = iswupper(sf[0]);
+          uppercase = firstupper && iswupper(sf[sf.size()-1]);
+        }
 
         lf = current_state.filterFinals(all_finals, alphabet,
                                         escaped_chars,
@@ -658,8 +663,11 @@ FSTProcessor::analysis(FILE *input, FILE *output)
       }
       else if(current_state.isFinal(postblank))
       {
-        bool firstupper = iswupper(sf[0]);
-        bool uppercase = firstupper && iswupper(sf[sf.size()-1]);
+        if(!dictionaryCase)
+        {
+          firstupper = iswupper(sf[0]);
+          uppercase = firstupper && iswupper(sf[sf.size()-1]);
+        }
 
         lf = current_state.filterFinals(all_finals, alphabet,
                                         escaped_chars,
@@ -669,8 +677,11 @@ FSTProcessor::analysis(FILE *input, FILE *output)
       }
       else if(current_state.isFinal(preblank))
       {
-        bool firstupper = iswupper(sf[0]);
-        bool uppercase = firstupper && iswupper(sf[sf.size()-1]);
+        if(!dictionaryCase)
+        {
+          firstupper = iswupper(sf[0]);
+          uppercase = firstupper && iswupper(sf[sf.size()-1]);
+        }
 
         lf = current_state.filterFinals(all_finals, alphabet,
                                         escaped_chars,
@@ -680,8 +691,11 @@ FSTProcessor::analysis(FILE *input, FILE *output)
       }
       else if(!isAlphabetic(val))
       {
-        bool firstupper = iswupper(sf[0]);
-        bool uppercase = firstupper && iswupper(sf[sf.size()-1]);
+        if(!dictionaryCase)
+        {
+          firstupper = iswupper(sf[0]);
+          uppercase = firstupper && iswupper(sf[sf.size()-1]);
+        }
 
         lf = current_state.filterFinals(all_finals, alphabet, 
                                         escaped_chars, 
@@ -2116,6 +2130,12 @@ void
 FSTProcessor::setCaseSensitiveMode(bool const value)
 {
   caseSensitive = value;
+}
+
+void
+FSTProcessor::setDictionaryCaseMode(bool const value)
+{
+  dictionaryCase = value;
 }
 
 void

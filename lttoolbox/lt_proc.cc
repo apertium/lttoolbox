@@ -48,6 +48,7 @@ void endProgram(char *name)
   cout << "  -s, --sao:              SAO annotation system input processing" << endl;
   cout << "  -t, --transliteration:  apply transliteration dictionary" << endl;
   cout << "  -z, --null-flush:       flush output on the null character " << endl;
+  cout << "  -w, --dictionary-case:  use dictionary case instead of surface case" << endl;
   cout << "  -v, --version:          version" << endl;
   cout << "  -h, --help:             show this help" << endl;
 #else
@@ -59,6 +60,7 @@ void endProgram(char *name)
   cout << "  -s:   SAO annotation system input processing" << endl;
   cout << "  -t:   apply transliteration dictionary" << endl;
   cout << "  -z:   flush output on the null character " << endl;
+  cout << "  -w:   use dictionary case instead of surface case" << endl;
   cout << "  -v:   version" << endl;
   cout << "  -h:   show this help" << endl;
 #endif
@@ -89,6 +91,7 @@ int main(int argc, char *argv[])
       {"sao",             0, 0, 's'},
       {"transliteration", 0, 0, 't'},
       {"null-flush",      0, 0, 'z'},
+      {"dictionary-case", 0, 0, 'w'},
       {"version",	  0, 0, 'v'},
       {"case-sensitive",  0, 0, 'c'},
       {"help",            0, 0, 'h'}
@@ -99,9 +102,9 @@ int main(int argc, char *argv[])
   {
 #if HAVE_GETOPT_LONG
     int option_index;
-    int c = getopt_long(argc, argv, "acgndpstzvh", long_options, &option_index);
+    int c = getopt_long(argc, argv, "acgndpstzwvh", long_options, &option_index);
 #else
-    int c = getopt(argc, argv, "acgndpstzvh");
+    int c = getopt(argc, argv, "acgndpstzwvh");
 #endif    
 
     if(c == -1)
@@ -134,6 +137,10 @@ int main(int argc, char *argv[])
 
     case 'z':
       fstp.setNullFlush(true);
+      break;
+
+    case 'w':
+      fstp.setDictionaryCaseMode(true);
       break;
 
     case 'v':
