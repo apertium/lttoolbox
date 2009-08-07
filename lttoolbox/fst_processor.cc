@@ -1176,6 +1176,7 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
   wstring lf = L"";
   wstring sf = L"";
   int last = 0;
+  set<wchar_t> empty_escaped_chars;
 
   while(wchar_t val = readPostgeneration(input))
   {
@@ -1207,7 +1208,7 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
         bool firstupper = iswupper(sf[1]);
         bool uppercase = sf.size() > 1 && firstupper && iswupper(sf[2]);
         lf = current_state.filterFinals(all_finals, alphabet,
-					escaped_chars,
+					empty_escaped_chars,
 					uppercase, firstupper, 0);
 
         // case of the beggining of the next word
