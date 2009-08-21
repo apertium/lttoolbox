@@ -6,13 +6,6 @@ INCLUDE(CheckSymbolExists)
 
 INCLUDE_DIRECTORIES (.)
 
-SET (BUILD_SHARED_LIB ON CACHE BOOL
-     "Build a shared library containing the lttoolbox routines")
-
-IF (BUILD_SHARED_LIB)
-   SET (LTTOOLBOX_SHARED SHARED)
-ENDIF (BUILD_SHARED_LIB)
-
 IF (WIN32)
 	SET (WIN32_DIR "${PROJECT_SOURCE_DIR}/lttoolbox/win32")
 	INCLUDE_DIRECTORIES (${WIN32_DIR})
