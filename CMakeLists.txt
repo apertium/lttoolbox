@@ -53,6 +53,15 @@ BOOL_CHECK_SYMBOL_EXISTS (fgetwc_unlocked stdio.h HAVE_DECL_FGETWC_UNLOCKED)
 BOOL_CHECK_SYMBOL_EXISTS (fputwc_unlocked stdio.h HAVE_DECL_FPUTWC_UNLOCKED)
 BOOL_CHECK_SYMBOL_EXISTS (fputws_unlocked stdio.h HAVE_DECL_FPUTWS_UNLOCKED)
 
+BOOL_CHECK_SYMBOL_EXISTS (_fputs_nolock  stdio.h HAVE_DECL_FPUTS_NOLOCK)
+BOOL_CHECK_SYMBOL_EXISTS (_fgetc_nolock  stdio.h HAVE_DECL_FGETC_NOLOCK)
+BOOL_CHECK_SYMBOL_EXISTS (_fputc_nolock  stdio.h HAVE_DECL_FPUTC_NOLOCK)
+BOOL_CHECK_SYMBOL_EXISTS (_fwrite_nolock stdio.h HAVE_DECL_FWRITE_NOLOCK)
+BOOL_CHECK_SYMBOL_EXISTS (_fread_nolock  stdio.h HAVE_DECL_FREAD_NOLOCK)
+BOOL_CHECK_SYMBOL_EXISTS (_fgetwc_nolock stdio.h HAVE_DECL_FGETWC_NOLOCK)
+BOOL_CHECK_SYMBOL_EXISTS (_fputwc_nolock stdio.h HAVE_DECL_FPUTWC_NOLOCK)
+BOOL_CHECK_SYMBOL_EXISTS (_fputws_nolock stdio.h HAVE_DECL_FPUTWS_NOLOCK)
+
 CONFIGURE_FILE (${PROJECT_SOURCE_DIR}/lttoolbox/lttoolbox_config.h.cmake_in ${PROJECT_SOURCE_DIR}/lttoolbox/lttoolbox_config.h)
 
 # Recurse into the "Hello" and "Demo" subdirectories.  This does not actually
