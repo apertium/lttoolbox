@@ -6,7 +6,7 @@ INCLUDE(CheckSymbolExists)
 
 INCLUDE_DIRECTORIES (.)
 
-SET (BUILD_SHARED_LIB OFF CACHE BOOL
+SET (BUILD_SHARED_LIB ON CACHE BOOL
      "Build a shared library containing the lttoolbox routines")
 
 IF (BUILD_SHARED_LIB)
