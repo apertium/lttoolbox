@@ -31,9 +31,9 @@ ENDIF (WIN32)
 
 SET (PACKAGE_BUGREPORT sortiz@users.sourceforge.net)
 SET (PACKAGE_NAME      lttoolbox/lttoolbox.h)
-SET (PACKAGE_STRING    lttoolbox/lttoolbox.h 3.1.0)
+SET (PACKAGE_STRING    lttoolbox/lttoolbox.h 3.1.2)
 SET (PACKAGE_TARNAME   lttoolbox-lttoolbox-h)
-SET (PACKAGE_VERSION   3.1.0)
+SET (PACKAGE_VERSION   3.1.2)
 
 MACRO (BOOL_CHECK_SYMBOL_EXISTS SYMBOL HEADER VAR)
 	CHECK_SYMBOL_EXISTS (${SYMBOL} ${HEADER} ${VAR})
