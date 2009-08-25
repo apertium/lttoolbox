@@ -60,39 +60,52 @@ fi
 if test x$ARCH = xppc
 then
   AC_MSG_RESULT([PowerPC])
-  CFLAGS="-Wall -ansi -mpowerpc -maltivec -fno-pic -fomit-frame-pointer $CFLAGS"
-  CXXFLAGS="-Wall -ansi -mpowerpc -maltivec -fno-pic -fomit-frame-pointer $CXXFLAGS"
+  CFLAGS="-Wall -mpowerpc -maltivec -fno-pic -fomit-frame-pointer $CFLAGS"
+  CXXFLAGS="-Wall -mpowerpc -maltivec -fno-pic -fomit-frame-pointer $CXXFLAGS"
 else
   if test x$ARCH = xi686
   then
     AC_MSG_RESULT([i686])
-    CFLAGS="-Wall -ansi -march=i686 -O3 -fomit-frame-pointer -funroll-loops $CFLAGS"
-    CXXFLAGS="-Wall -ansi -march=i686 -O3 \
+    CFLAGS="-Wall -march=i686 -O3 -fomit-frame-pointer -funroll-loops $CFLAGS"
+    CXXFLAGS="-Wall -march=i686 -O3 \
               -fomit-frame-pointer -funroll-loops $CXXFLAGS"
   
   else
     if test x$ARCH = xx86_64
     then
       AC_MSG_RESULT([x86_64])
-      CFLAGS="-Wall -ansi -O3 -mtune=nocona -fomit-frame-pointer -funroll-loops $CFLAGS"
-      CXXFLAGS="-Wall -ansi -O3 -mtune=nocona \
+      CFLAGS="-Wall -O3 -mtune=nocona -fomit-frame-pointer -funroll-loops $CFLAGS"
+      CXXFLAGS="-Wall -O3 -mtune=nocona \
               -fomit-frame-pointer -funroll-loops $CXXFLAGS"
     else
       AC_MSG_RESULT([Other])
-      CFLAGS="-Wall -ansi -O3 $CFLAGS"
-      CXXFLAGS="-Wall -ansi -O3 $CXXFLAGS"
+      CFLAGS="-Wall -O3 $CFLAGS"
+      CXXFLAGS="-Wall -O3 $CXXFLAGS"
     fi
   fi
 fi
 
-case "${target_os}" in
+AC_CANONICAL_HOST
+
+MINGW_PRESENT=no
+
+case "${host_os}" in
   mingw*)
   echo "Found MinGW: Also considering MSYS paths"
   CFLAGS="$CFLAGS -L/lib -I/include"
   CXXFLAGS="$CXXFLAGS -L/lib -I/include"
   CPPFLAGS="$CPPFLAGS -I/include"
+  
+  MINGW_PRESENT=yes
   ;;
 esac
+
+if test x$MINGW_PRESENT = xno
+then
+	CFLAGS="$CFLAGS -ansi"
+	CXXFLAGS="$CXXFLAGS -ansi"
+	CPPFLAGS="$CPPFLAGS -ansi"
+fi
 
 AC_PROG_CXX
 AM_PROG_LIBTOOL
