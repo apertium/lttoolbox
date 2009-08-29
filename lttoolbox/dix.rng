@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DTD for the format of dictionaries -->
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <define name="dictionary">
+    <element name="dictionary">
+      <ref name="attlist.dictionary"/>
+      <optional>
+        <ref name="alphabet"/>
+      </optional>
+      <optional>
+        <ref name="sdefs"/>
+      </optional>
+      <optional>
+        <ref name="pardefs"/>
+      </optional>
+      <oneOrMore>
+        <ref name="section"/>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="attlist.dictionary" combine="interleave">
+    <empty/>
+  </define>
+  <!--  root element -->
+  <define name="alphabet">
+    <element name="alphabet">
+      <ref name="attlist.alphabet"/>
+      <text/>
+    </element>
+  </define>
+  <define name="attlist.alphabet" combine="interleave">
+    <empty/>
+  </define>
+  <!-- alphabetic character list -->
+  <define name="sdefs">
+    <element name="sdefs">
+      <ref name="attlist.sdefs"/>
+      <oneOrMore>
+        <ref name="sdef"/>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="attlist.sdefs" combine="interleave">
+    <empty/>
+  </define>
+  <!-- symbol definition section -->
+  <define name="sdef">
+    <element name="sdef">
+      <ref name="attlist.sdef"/>
+      <empty/>
+    </element>
+  </define>
+  <!-- symbol definition -->
+  <define name="attlist.sdef" combine="interleave">
+    <attribute name="n">
+      <data type="ID"/>
+    </attribute>
+  </define>
+  <!-- n: symbol (tag) name -->
+  <define name="attlist.sdef" combine="interleave">
+    <optional>
+      <attribute name="c"/>
+    </optional>
+  </define>
+  <!-- c: symbol (tag) comment -->
+  <define name="pardefs">
+    <element name="pardefs">
+      <ref name="attlist.pardefs"/>
+      <oneOrMore>
+        <ref name="pardef"/>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="attlist.pardefs" combine="interleave">
+    <empty/>
+  </define>
+  <!-- paradigm definition section -->
+  <define name="pardef">
+    <element name="pardef">
+      <ref name="attlist.pardef"/>
+      <oneOrMore>
+        <ref name="e"/>
+      </oneOrMore>
+    </element>
+  </define>
+  <!-- paradigm definition -->
+  <define name="attlist.pardef" combine="interleave">
+    <attribute name="n"/>
+  </define>
+  <!-- n: paradigm name -->
+  <define name="attlist.pardef" combine="interleave">
+    <optional>
+      <attribute name="c"/>
+    </optional>
+  </define>
+  <!-- c: comment about paradigm -->
+  <define name="section">
+    <element name="section">
+      <ref name="attlist.section"/>
+      <oneOrMore>
+        <ref name="e"/>
+      </oneOrMore>
+    </element>
+  </define>
+  <!-- dictionary section -->
+  <define name="attlist.section" combine="interleave">
+    <attribute name="id">
+      <data type="ID"/>
+    </attribute>
+    <attribute name="type">
+      <choice>
+        <value>standard</value>
+        <value>inconditional</value>
+        <value>postblank</value>
+        <value>preblank</value>
+      </choice>
+    </attribute>
+  </define>
+  <!-- id: dictionary section identifier -->
+  <!-- type: dictionary section type -->
+  <define name="e">
+    <element name="e">
+      <ref name="attlist.e"/>
+      <oneOrMore>
+        <choice>
+          <ref name="i"/>
+          <ref name="p"/>
+          <ref name="par"/>
+          <ref name="re"/>
+        </choice>
+      </oneOrMore>
+    </element>
+  </define>
+  <!-- entry -->
+  <define name="attlist.e" combine="interleave">
+    <optional>
+      <attribute name="r">
+        <choice>
+          <value>LR</value>
+          <value>RL</value>
+        </choice>
+      </attribute>
+    </optional>
+    <optional>
+      <attribute name="lm"/>
+    </optional>
+    <optional>
+      <attribute name="a"/>
+    </optional>
+    <optional>
+      <attribute name="c"/>
+    </optional>
+    <optional>
+      <attribute name="i"/>
+    </optional>
+    <optional>
+      <attribute name="slr"/>
+    </optional>
+    <optional>
+      <attribute name="srl"/>
+    </optional>
+  </define>
+  <!--
+    r: restriction LR: left-to-right,
+    RL: right-to-left
+  -->
+  <!-- lm: lemma -->
+  <!-- a: author -->
+  <!-- c: comment -->
+  <!-- i: ignore ('yes') means ignore, otherwise it is not ignored) -->
+  <!-- slr: translation sense when translating from left to right -->
+  <!-- srl: translation sense when translating from right to left -->
+  <define name="par">
+    <element name="par">
+      <ref name="attlist.par"/>
+      <empty/>
+    </element>
+  </define>
+  <!-- reference to paradigm -->
+  <define name="attlist.par" combine="interleave">
+    <attribute name="n"/>
+  </define>
+  <!-- n: paradigm name -->
+  <define name="i">
+    <element name="i">
+      <ref name="attlist.i"/>
+      <zeroOrMore>
+        <choice>
+          <text/>
+          <ref name="b"/>
+          <ref name="s"/>
+          <ref name="g"/>
+          <ref name="j"/>
+          <ref name="a"/>
+        </choice>
+      </zeroOrMore>
+    </element>
+  </define>
+  <define name="attlist.i" combine="interleave">
+    <empty/>
+  </define>
+  <!-- identity -->
+  <define name="re">
+    <element name="re">
+      <ref name="attlist.re"/>
+      <text/>
+    </element>
+  </define>
+  <define name="attlist.re" combine="interleave">
+    <empty/>
+  </define>
+  <!-- regular expression identification -->
+  <define name="p">
+    <element name="p">
+      <ref name="attlist.p"/>
+      <ref name="l"/>
+      <ref name="r"/>
+    </element>
+  </define>
+  <define name="attlist.p" combine="interleave">
+    <empty/>
+  </define>
+  <!-- pair of strings -->
+  <define name="l">
+    <element name="l">
+      <ref name="attlist.l"/>
+      <zeroOrMore>
+        <choice>
+          <text/>
+          <ref name="a"/>
+          <ref name="b"/>
+          <ref name="g"/>
+          <ref name="j"/>
+          <ref name="s"/>
+        </choice>
+      </zeroOrMore>
+    </element>
+  </define>
+  <define name="attlist.l" combine="interleave">
+    <empty/>
+  </define>
+  <!-- left part of p -->
+  <define name="r">
+    <element name="r">
+      <ref name="attlist.r"/>
+      <zeroOrMore>
+        <choice>
+          <text/>
+          <ref name="a"/>
+          <ref name="b"/>
+          <ref name="g"/>
+          <ref name="j"/>
+          <ref name="s"/>
+        </choice>
+      </zeroOrMore>
+    </element>
+  </define>
+  <define name="attlist.r" combine="interleave">
+    <empty/>
+  </define>
+  <!-- right part of p -->
+  <define name="a">
+    <element name="a">
+      <ref name="attlist.a"/>
+      <empty/>
+    </element>
+  </define>
+  <define name="attlist.a" combine="interleave">
+    <empty/>
+  </define>
+  <!-- post-generator wake-up mark -->
+  <define name="b">
+    <element name="b">
+      <ref name="attlist.b"/>
+      <empty/>
+    </element>
+  </define>
+  <define name="attlist.b" combine="interleave">
+    <empty/>
+  </define>
+  <!-- blank chars block mark -->
+  <define name="g">
+    <element name="g">
+      <ref name="attlist.g"/>
+      <zeroOrMore>
+        <choice>
+          <text/>
+          <ref name="a"/>
+          <ref name="b"/>
+          <ref name="j"/>
+          <ref name="s"/>
+        </choice>
+      </zeroOrMore>
+    </element>
+  </define>
+  <!-- mark special groups in lemmas -->
+  <define name="attlist.g" combine="interleave">
+    <optional>
+      <attribute name="i"/>
+    </optional>
+  </define>
+  <!-- i is used to co-index groups in the left with those -->
+  <!-- on the right of a pair -->
+  <define name="j">
+    <element name="j">
+      <ref name="attlist.j"/>
+      <empty/>
+    </element>
+  </define>
+  <define name="attlist.j" combine="interleave">
+    <empty/>
+  </define>
+  <!-- join lexical forms -->
+  <define name="s">
+    <element name="s">
+      <ref name="attlist.s"/>
+      <empty/>
+    </element>
+  </define>
+  <!-- reference to symbol (tag) -->
+  <define name="attlist.s" combine="interleave">
+    <attribute name="n">
+      <data type="IDREF"/>
+    </attribute>
+  </define>
+  <start>
+    <choice>
+      <ref name="dictionary"/>
+    </choice>
+  </start>
+</grammar>
+<!-- n: symbol (tag) name -->
