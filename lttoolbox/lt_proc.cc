@@ -26,10 +26,7 @@
 #include <iostream>
 #include <libgen.h>
 
-#ifdef WIN32
-#if defined(__MINGW32__)
-#define __MSVCRT_VERSION__  0x0800
-#endif
+#ifdef _MSC_VER
 #include <io.h>
 #include <fcntl.h>
 #endif
@@ -215,7 +212,7 @@ int main(int argc, char *argv[])
     endProgram(argv[0]);
   }
 
-#ifdef WIN32
+#ifdef _MSC_VER
   	_setmode(_fileno(input), _O_U8TEXT);
 	_setmode(_fileno(output), _O_U8TEXT);
 #endif
