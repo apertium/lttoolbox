@@ -5,7 +5,7 @@ AC_PREREQ(2.52)
 
 m4_define([required_libxml_version], [2.6.17])
 
-AC_INIT([lttoolbox/lttoolbox.h], [3.1.2], [sortiz@users.sourceforge.net])
+AC_INIT([lttoolbox/lttoolbox.h], [3.2.0], [sortiz@users.sourceforge.net])
 AC_CONFIG_HEADER([lttoolbox/lttoolbox_config.h])
 
 AC_CANONICAL_SYSTEM
@@ -14,8 +14,8 @@ GENERIC_LIBRARY_NAME=lttoolbox
 
 # Release versioning
 GENERIC_MAJOR_VERSION=3
-GENERIC_MINOR_VERSION=1
-GENERIC_MICRO_VERSION=2
+GENERIC_MINOR_VERSION=2
+GENERIC_MICRO_VERSION=0
 
 # API version (often = GENERIC_MAJOR_VERSION.GENERIC_MINOR_VERSION)
 GENERIC_API_VERSION=$GENERIC_MAJOR_VERSION.$GENERIC_MINOR_VERSION
@@ -177,4 +177,4 @@ fputc_unlocked, fputs_unlocked, fgetwc_unlocked, fputwc_unlocked, fputws_unlocke
                 
 AC_CHECK_FUNCS([setlocale strdup getopt_long])
 
-AC_OUTPUT([Makefile lttoolbox-3.1.pc lttoolbox/Makefile])
+AC_OUTPUT([Makefile lttoolbox-3.2.pc lttoolbox/Makefile])
