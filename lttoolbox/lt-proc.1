@@ -11,6 +11,7 @@ architecture: \fBhttp://www.apertium.org\fR.
 .B lt-proc
 [
 .B \-a \fR| 
+.B \-b \fR| 
 .B \-c \fR| 
 .B \-g \fR|
 .B \-n \fR|
@@ -29,6 +30,7 @@ architecture: \fBhttp://www.apertium.org\fR.
 .B \-\-case-sensitive \fR|
 .B \-\-generation \fR|
 .B \-\-non-marked-gen \fR|
+.B \-\-tagged-gen \fR|
 .B \-\-post-generation \fR|
 .B \-\-sao \fR|
 .B \-\-transliteration \fR|
@@ -100,6 +102,10 @@ lexical form, by suitably inflecting it.
 .B \-n, \-\-non-marked-gen
 Morphological generation (like \fB-g\fR) but without unknown word
 marks (asterisk `*').
+.TP
+.B \-b, \-\-tagged-gen
+Morphological generation (like \fB-g\fR) but retaining part-of-speech
+tags.
 .TP
 .B \-p, \-\-post-generation
 Performs orthographical operations such as contractions and
