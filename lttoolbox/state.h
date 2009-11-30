@@ -60,7 +60,7 @@ private:
   /**
    * Pool of wchar_t vectors, for efficience (static class)
    */
-  static Pool<vector<int> > pool;  
+  Pool<vector<int> > *pool;  
 
   /**
    * Copy function
@@ -96,7 +96,7 @@ public:
   /**
    * Constructor
    */
-  State();
+  State(Pool<vector<int> > *);
 
   /**
    * Destructor

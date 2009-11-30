@@ -21,10 +21,9 @@
 #include <cstring>
 #include <cwctype>
 
-Pool<vector<int> > State::pool(4, vector<int>(50));
-
-State::State()
+State::State(Pool<vector<int> > *p)
 {
+  pool = p;
 }
  
 State::~State()
@@ -55,7 +54,7 @@ State::destroy()
   // release references
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
-    pool.release(state[i].sequence);
+    pool->release(state[i].sequence);
   }
 
   state.clear();
@@ -67,14 +66,15 @@ State::copy(State const &s)
   // release references
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
-    pool.release(state[i].sequence);
+    pool->release(state[i].sequence);
   }
 
   state = s.state;
+  pool = s.pool;
 
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
-    vector<int> *tmp = pool.get();
+    vector<int> *tmp = pool->get();
     *tmp = *(state[i].sequence);
     state[i].sequence = tmp;
   }
@@ -90,7 +90,7 @@ void
 State::init(Node *initial)
 {
   state.clear();
-  state.push_back(TNodeState(initial,pool.get(),false));
+  state.push_back(TNodeState(initial,pool->get(),false));
   state[0].sequence->clear();
   epsilonClosure();  
 }  
@@ -113,7 +113,7 @@ State::apply(int const input)
     {
       for(int j = 0; j != it->second.size; j++)
       {
-        vector<int> *new_v = pool.get();
+        vector<int> *new_v = pool->get();
         *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
@@ -122,7 +122,7 @@ State::apply(int const input)
         new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
       }
     }
-    pool.release(state[i].sequence);
+    pool->release(state[i].sequence);
   }
   
   state = new_state;
@@ -147,7 +147,7 @@ State::apply(int const input, int const alt)
     {
       for(int j = 0; j != it->second.size; j++)
       {
-        vector<int> *new_v = pool.get();
+        vector<int> *new_v = pool->get();
         *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
@@ -161,7 +161,7 @@ State::apply(int const input, int const alt)
     {
       for(int j = 0; j != it->second.size; j++)
       {
-        vector<int> *new_v = pool.get();
+        vector<int> *new_v = pool->get();
         *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
@@ -170,7 +170,7 @@ State::apply(int const input, int const alt)
         new_state.push_back(TNodeState(it->second.dest[j], new_v, true));
       }
     }
-    pool.release(state[i].sequence);
+    pool->release(state[i].sequence);
   }
 
   state = new_state;
@@ -187,7 +187,7 @@ State::epsilonClosure()
     {
       for(int j = 0 ; j != it2->second.size; j++)
       {
-        vector<int> *tmp = pool.get();
+        vector<int> *tmp = pool->get();
         *tmp = *(state[i].sequence);
         if(it2->second.out_tag[j] != 0)
         {
@@ -289,6 +289,7 @@ State::filterFinalsSAO(set<Node *> const &finals,
 		       bool uppercase, bool firstupper, int firstchar) const
 {
   wstring result = L"";
+  wstring annot = L"";
   
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
@@ -304,9 +305,9 @@ State::filterFinalsSAO(set<Node *> const &finals,
         }
         if(alphabet.isTag((*(state[i].sequence))[j]))
         {
-          result += L'&';
-          alphabet.getSymbol(result, (*(state[i].sequence))[j]);
-          result[result.size()-1] = L';';
+          annot = L"";
+          alphabet.getSymbol(annot, (*(state[i].sequence))[j]);
+          result += L'&'+annot.substr(1,annot.length()-2)+L';';
         }
         else
         {

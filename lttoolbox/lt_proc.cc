@@ -87,6 +87,7 @@ int main(int argc, char *argv[])
       {"generation",      0, 0, 'g'},
       {"non-marked-gen",  0, 0, 'n'},
       {"debugged-gen",    0, 0, 'd'},
+      {"tagged-gen",      0, 0, 'b'},
       {"post-generation", 0, 0, 'p'},
       {"sao",             0, 0, 's'},
       {"transliteration", 0, 0, 't'},
@@ -102,9 +103,9 @@ int main(int argc, char *argv[])
   {
 #if HAVE_GETOPT_LONG
     int option_index;
-    int c = getopt_long(argc, argv, "acgndpstzwvh", long_options, &option_index);
+    int c = getopt_long(argc, argv, "abcgndpstzwvh", long_options, &option_index);
 #else
-    int c = getopt(argc, argv, "acgndpstzwvh");
+    int c = getopt(argc, argv, "abcgndpstzwvh");
 #endif    
 
     if(c == -1)
@@ -119,6 +120,7 @@ int main(int argc, char *argv[])
       break;
       
     case 'a':
+    case 'b':
     case 'g':
     case 'n':
     case 'd':
@@ -237,6 +239,11 @@ int main(int argc, char *argv[])
         fstp.initGeneration();
         checkValidity(fstp);
         fstp.generation(input, output, gm_all);
+      
+      case 'b':
+        fstp.initGeneration();
+        checkValidity(fstp);
+        fstp.generation(input, output, gm_tagged);
       
       case 'p':
         fstp.initPostgeneration();

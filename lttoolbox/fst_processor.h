@@ -42,7 +42,8 @@ enum GenerationMode
 {
   gm_clean,      // clear all
   gm_unknown,    // display unknown words, clear transfer and generation tags
-  gm_all         // display all
+  gm_all,        // display all
+  gm_tagged      // tagged generation
 };
 
 /**
@@ -56,15 +57,17 @@ private:
    */
   map<wstring, TransExe, Ltstr> transducers;
 
+  Pool<vector<int> > *pool;
+
   /**
    * Current state of lexical analysis
    */
-  State current_state;
+  State *current_state;
 
   /**
    * Initial state of every token
    */
-  State initial_state;
+  State *initial_state;
 
   /**
    * Set of final states of inconditional sections in the dictionaries
