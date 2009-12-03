@@ -32,6 +32,10 @@ LtLocale::tryToSetLocale()
     return;
   }
  
-  wcerr << L"Warning: unsupported locale, fallback to \"C\"" << endl;
+  cerr << "Warning: unsupported locale, fallback to \"C\"" << endl;
+#ifdef __CYGWIN__
+  setlocale(LC_ALL, "C.UTF-8");
+#else
   setlocale(LC_ALL, "C");
+#endif
 }
