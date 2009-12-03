@@ -20,6 +20,9 @@
 
 #include <clocale>
 #include <iostream>
+#ifdef __MINGW32__
+#include <windows.h>
+#endif
 
 using namespace std;
 
@@ -27,15 +30,19 @@ using namespace std;
 void
 LtLocale::tryToSetLocale()
 {
+#if !defined(__CYGWIN__) && !defined (__MINGW32__)
   if(setlocale(LC_CTYPE, "") != NULL)
   {
     return;
   }
  
   cerr << "Warning: unsupported locale, fallback to \"C\"" << endl;
+#endif
 #ifdef __CYGWIN__
   setlocale(LC_ALL, "C.UTF-8");
-#else
-  setlocale(LC_ALL, "C");
+#endif
+#ifdef __MINGW32__
+  SetConsoleInputCP(65001);
+  SetConsoleOutputCP(65001);
 #endif
 }
