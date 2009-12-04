@@ -87,7 +87,7 @@ fi
 
 AC_CANONICAL_HOST
 
-MINGW_PRESENT=no
+USE_ANSI=yes
 
 case "${host_os}" in
   mingw*)
@@ -96,11 +96,15 @@ case "${host_os}" in
   CXXFLAGS="$CXXFLAGS -L/lib -I/include"
   CPPFLAGS="$CPPFLAGS -I/include"
   
-  MINGW_PRESENT=yes
+  USE_ANSI=no
+  ;;
+  cygwin*)
+  echo "Found Cygwin: -ansi unset"
+  USE_ANSI=no
   ;;
 esac
 
-if test x$MINGW_PRESENT = xno
+if test x$USE_ANSI = xyes
 then
 	CFLAGS="$CFLAGS -ansi"
 	CXXFLAGS="$CXXFLAGS -ansi"
