@@ -135,6 +135,10 @@ Compiler::procAlphabet()
     {          
       xmlChar const *valor = xmlTextReaderConstValue(reader);
       letters = XMLParseUtil::towstring(valor);
+      if(letters == L"\n")  // libxml2 returns '\n' for <alphabet></alphabet>, should be empty
+      {
+        letters = L"";
+      } 
     }
     else
     {
