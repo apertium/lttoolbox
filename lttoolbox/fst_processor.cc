@@ -633,6 +633,176 @@ FSTProcessor::initBiltrans()
   initGeneration();
 }
 
+
+
+
+wstring
+FSTProcessor::decompose(wstring w) 
+{
+        State current_state = *initial_state;
+
+        vector<vector<wstring> > elements;
+        bool firstupper = false, uppercase = false, last = false;
+        unsigned int index = 0;
+
+        if(w.length() < 7) // Heuristic: Do not try and decompound short words
+        {
+          return L"";
+        }
+        //wcerr << L"+ decompose: " << w << endl;
+
+        for (unsigned int i = 0; i < w.length(); i++) 
+        { 
+          //if(i == (w.length() - 1)) 
+          if(i == (w.length())) 
+          {
+            last = true;
+          }
+
+          State previous_state = current_state;
+
+          unsigned int val = w.at(i);
+
+          //wcerr << L"++ [" << last << L"][" << current_state.size() << L"] decompose: " << w.at(i) << endl;
+
+          if(last) 
+          {
+            previous_state = current_state;
+          }
+          else 
+          {
+            previous_state = current_state;
+
+            if (current_state.size() != 0) 
+            {
+              if (!isAlphabetic(val) && iswupper(val) && !caseSensitive) 
+              {
+                current_state.step(val, towlower(val)); 
+              } 
+              else 
+              {
+                //wcerr << L"+++ step: " << w.at(i) << endl;
+                current_state.step(val);
+              }
+            }
+          }
+          if(i == (w.length())-1) 
+          {
+            last = true;
+          }
+         
+          if (current_state.size() == 0 || last) 
+          {
+            //wcerr << L"+++ [" << last << L"][" << current_state.size() << L"]" << endl;
+            if(current_state.isFinal(all_finals)) 
+            {
+              previous_state = current_state;
+            }
+
+            if(previous_state.isFinal(all_finals)) 
+            {
+              firstupper = iswupper(w.at(0));
+              wstring result = previous_state.filterFinals(all_finals, alphabet,
+                                        escaped_chars,
+                                        uppercase, firstupper);
+
+              result = result.substr(1, result.size());
+              //wcerr << L"++++ result[" << index << L"]: " <<  result << endl;
+              vector<wstring> lfs;
+              wstring::size_type pos;
+              
+              pos = result.find(L'/');
+              if(pos == wstring::npos) 
+              {
+                lfs.push_back(result);
+              } 
+              else
+              {
+                while(pos != wstring::npos) 
+                {
+                  lfs.push_back(result.substr(0, pos));
+                  result.erase(0, pos + 1);
+                  pos = result.find(L'/');
+                }
+                lfs.push_back(result.substr(0, pos));
+              }
+              elements.push_back(lfs); // Add final analysis
+              index++;
+            }
+            else
+            {
+              return L"";
+            }
+
+            if (!last) 
+            {
+              current_state = *initial_state;
+              i--; 
+            }
+          }
+        }
+
+        //wcerr << L"+++ index: " << index << endl;
+        if(index > 3 || index < 2)  // Heuristic: Only permit binary/trinary compounds
+        {
+          return L"";
+        }
+
+        wstring lf = L"";
+
+        if(index != elements.size()) 
+        {
+          //wcerr << L"++ index != elements.size(): " << index << L" != " << elements.size() << endl;
+          return L"";
+        }
+
+        vector<wstring> first_elements = elements.at(0);
+        vector<wstring> second_elements = elements.at(1);
+
+        if(first_elements.size() == 0 || second_elements.size() == 0) 
+        {
+          //wcerr << L"++ first or second empty" << endl;
+          return L"";
+        }
+ 
+        if(index == 2) 
+        {  
+          for(unsigned int j = 0; j < first_elements.size(); j++)
+          {
+            for(unsigned int y = 0; y < second_elements.size(); y++) 
+            {
+              wstring analysis = first_elements.at(j) + L"+" + second_elements.at(y);
+              lf = lf + L"/" + analysis;
+              //wcerr << L"++++++ [" << j << L"][" << y << L"] compound_analysis: " << analysis << endl;
+            }
+          }
+        }
+        else if(index == 3)  
+        {
+          vector<wstring> third_elements = elements.at(2);
+
+          for(unsigned int j = 0; j < first_elements.size(); j++)
+          {
+            for(unsigned int k = 0; k < second_elements.size(); k++)
+            {
+              for(unsigned int y = 0; y < third_elements.size(); y++) 
+              {
+                wstring analysis = first_elements.at(j) + L"+" + second_elements.at(k) + L"+" + third_elements.at(y);
+                lf = lf + L"/" + analysis;
+                //wcerr << L"++++++ [" << j << L"][" << y << L"] compound_analysis: " << analysis << endl;
+              }
+            }
+          }
+
+        } 
+        else 
+        {
+          return L"";
+        }
+        //wcerr << L"+ decompose: " << lf << endl;
+        return lf;
+}
+
 void
 FSTProcessor::analysis(FILE *input, FILE *output)
 {
@@ -798,7 +968,24 @@ FSTProcessor::analysis(FILE *input, FILE *output)
         else
         { 
           input_buffer.back(1+(size-limit));
-          printUnknownWord(sf.substr(0, limit), output);
+          wstring unknown_word = sf.substr(0, limit);
+          if(compoundDecomposition) 
+          {
+            wstring compound = L"";
+            compound = decompose(unknown_word);
+            if(compound != L"") 
+            {
+              printWord(unknown_word, compound, output);
+            }
+            else 
+            {
+              printUnknownWord(unknown_word, output);
+            }
+          } 
+          else 
+          {
+            printUnknownWord(unknown_word, output);
+          }
         }
       }
       else if(lf == L"")
@@ -814,7 +1001,25 @@ FSTProcessor::analysis(FILE *input, FILE *output)
         else
         { 
           input_buffer.back(1+(size-limit));
-          printUnknownWord(sf.substr(0, limit), output);
+          wstring unknown_word = sf.substr(0, limit);
+          if(compoundDecomposition) 
+          {
+            wstring compound = L"";
+            compound = decompose(unknown_word);
+            if(compound != L"") 
+            {
+              printWord(unknown_word, compound, output);
+            }
+            else 
+            {
+              printUnknownWord(unknown_word, output);
+            }
+          } 
+          else 
+          {
+            printUnknownWord(unknown_word, output);
+          }
+
         }
       }
       else
@@ -1440,6 +1645,175 @@ FSTProcessor::transliteration(FILE *input, FILE *output)
   // print remaining blanks
   flushBlanks(output);
 }
+
+wstring
+FSTProcessor::biltransfull(wstring const &input_word, bool with_delim)
+{
+  State current_state = *initial_state;
+  wstring result = L"";
+  unsigned int start_point = 1;
+  unsigned int end_point = input_word.size()-2;
+  wstring queue = L"";
+  bool mark = false;
+  
+  if(with_delim == false)
+  {
+    start_point = 0;
+    end_point = input_word.size()-1;
+  }
+
+  if(input_word[start_point] == L'*')
+  {
+    return input_word;
+  }
+  
+  if(input_word[start_point] == L'=')
+  {
+    start_point++;
+    mark = true;
+  }
+  
+  bool firstupper = iswupper(input_word[start_point]);
+  bool uppercase = firstupper && iswupper(input_word[start_point+1]);
+
+  for(unsigned int i = start_point; i <= end_point; i++)
+  {
+    int val;
+    wstring symbol = L"";
+ 
+    if(input_word[i] == L'\\')
+    {
+      i++;
+      val = static_cast<int>(input_word[i]);
+    }
+    else if(input_word[i] == L'<')
+    {
+      symbol = L'<';
+      for(unsigned int j = i + 1; j <= end_point; j++)
+      {
+	symbol += input_word[j];
+	if(input_word[j] == L'>')
+	{
+	  i = j;
+	  break;
+	}
+      }
+      val = alphabet(symbol);
+    }
+    else
+    {
+      val = static_cast<int>(input_word[i]);
+    }
+    if(current_state.size() != 0)
+    {
+      if(!alphabet.isTag(val) && iswupper(val) && !caseSensitive)
+      {
+	current_state.step(val, towlower(val));
+      }
+      else
+      {
+	current_state.step(val);
+      }
+    }
+    if(current_state.isFinal(all_finals)) 
+    {
+      result = current_state.filterFinals(all_finals, alphabet,
+                                         escaped_chars,
+                                         uppercase, firstupper, 0);
+      if(with_delim)
+      {      
+        if(mark)
+        {
+          result = L"^="+result.substr(1);
+        }
+        else
+        {
+          result[0] = L'^';
+        }
+      }
+      else
+      {
+        if(mark)
+        {
+          result = L"=" + result.substr(1);
+        }
+        else
+        {
+          result = result.substr(1);
+        }
+      }
+    }
+    
+    if(current_state.size() == 0)
+    { 
+      if(symbol != L"" && result != L"")
+      {
+        queue.append(symbol);
+      }
+      else
+      {
+	// word is not present
+        if(with_delim)
+	{
+          result = L"^@" + input_word.substr(1);  
+	}
+        else
+	{
+          result = L"@" + input_word;
+	}
+        return result;  
+      }      
+    }
+  }
+
+  if(start_point < (end_point - 3)) 
+  {
+    return L"^$";
+  }
+  // attach unmatched queue automatically
+
+  if(queue != L"")
+  {
+    wstring result_with_queue = L"";    
+    bool multiple_translation = false;
+    for(unsigned int i = 0, limit = result.size(); i != limit; i++)
+    {
+      switch(result[i])
+      {
+        case L'\\':
+          result_with_queue += L'\\';
+	  i++;
+          break;
+     
+        case L'/':
+          result_with_queue.append(queue);
+	  multiple_translation = true;
+	  break;
+    
+        default:
+          break;
+      }
+      result_with_queue += result[i];
+    }
+    result_with_queue.append(queue);
+
+    if(with_delim)
+    {
+      result_with_queue += L'$';
+    }
+    return result_with_queue;
+  }
+  else
+  {
+    if(with_delim)
+    {
+      result += L'$';
+    }
+    return result;
+  }
+}
+
+
 
 wstring
 FSTProcessor::biltrans(wstring const &input_word, bool with_delim)
@@ -2148,6 +2522,12 @@ FSTProcessor::removeTags(wstring const &str)
 }
 
 void
+FSTProcessor::setDecompoundingMode(bool const value)
+{
+  compoundDecomposition = value;
+}
+
+void
 FSTProcessor::setCaseSensitiveMode(bool const value)
 {
   caseSensitive = value;
@@ -2163,6 +2543,12 @@ void
 FSTProcessor::setNullFlush(bool const value)
 {
   nullFlush = value;
+}
+
+bool
+FSTProcessor::getDecompoundingMode()
+{
+  return compoundDecomposition;
 }
 
 bool

@@ -45,6 +45,7 @@ void endProgram(char *name)
   cout << "  -n, --non-marked-gen    morph. generation without unknown word marks" << endl;
   cout << "  -d, --debugged-gen      morph. generation with all the stuff" <<endl;
   cout << "  -p, --post-generation:  post-generation" << endl;
+  cout << "  -e, --decompose-compounds: try to decompose unknown word as compounds" << endl;
   cout << "  -s, --sao:              SAO annotation system input processing" << endl;
   cout << "  -t, --transliteration:  apply transliteration dictionary" << endl;
   cout << "  -z, --null-flush:       flush output on the null character " << endl;
@@ -57,6 +58,7 @@ void endProgram(char *name)
   cout << "  -g:   morphological generation" << endl;
   cout << "  -n:   morph. generation without unknown word marks" << endl;
   cout << "  -p:   post-generation" << endl;
+  cout << "  -e:   try to decompose unknown words as compounds" << endl;
   cout << "  -s:   SAO annotation system input processing" << endl;
   cout << "  -t:   apply transliteration dictionary" << endl;
   cout << "  -z:   flush output on the null character " << endl;
@@ -103,9 +105,9 @@ int main(int argc, char *argv[])
   {
 #if HAVE_GETOPT_LONG
     int option_index;
-    int c = getopt_long(argc, argv, "abcgndpstzwvh", long_options, &option_index);
+    int c = getopt_long(argc, argv, "abcegndpstzwvh", long_options, &option_index);
 #else
-    int c = getopt(argc, argv, "abcgndpstzwvh");
+    int c = getopt(argc, argv, "abcegndpstzwvh");
 #endif    
 
     if(c == -1)
@@ -117,6 +119,10 @@ int main(int argc, char *argv[])
     {
     case 'c':
       fstp.setCaseSensitiveMode(true);
+      break;
+
+    case 'e':
+      fstp.setDecompoundingMode(true);
       break;
       
     case 'a':

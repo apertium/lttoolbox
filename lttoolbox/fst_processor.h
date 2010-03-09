@@ -129,7 +129,6 @@ private:
    */
   bool outOfWord;
 
-
   /**
    * if true, makes always difference between uppercase and lowercase
    * characters
@@ -151,6 +150,11 @@ private:
    * nullFlush property for the skipUntil function 
    */
   bool nullFlushGeneration;
+
+  /**
+   * try analysing unknown words as compounds
+   */
+  bool compoundDecomposition;
 
   /**
    * Prints an error of input stream and exits
@@ -192,6 +196,13 @@ private:
    * @return the next symbol in the stream
    */
   int readAnalysis(FILE *input);
+
+  /**
+   * Read text from stream (generation version, also used in generation)
+   * @param input the stream to read
+   * @return the next symbol in the stream
+   */
+  int readDecomposition(FILE *input, FILE *output);
 
   /**
    * Read text from stream (postgeneration version)
@@ -274,6 +285,7 @@ private:
   void printSpace(wchar_t const val, FILE *output);
   void skipUntil(FILE *input, FILE *output, wint_t const character);
   static wstring removeTags(wstring const &str);
+  wstring decompose(wstring str);
   size_t firstNotAlpha(wstring const &sf);
 
   void analysis_wrapper_null_flush(FILE *input, FILE *output);
@@ -294,13 +306,16 @@ public:
   void initGeneration();
   void initPostgeneration();
   void initBiltrans();
+  void initDecomposition();
 
   void analysis(FILE *input = stdin, FILE *output = stdout);
   void tm_analysis(FILE *input = stdin, FILE *output = stdout);
   void generation(FILE *input = stdin, FILE *output = stdout, GenerationMode mode = gm_unknown);
   void postgeneration(FILE *input = stdin, FILE *output = stdout);
   void transliteration(FILE *input = stdin, FILE *output = stdout);
+  void decomposition(FILE *input = stdin, FILE *output = stdout);
   wstring biltrans(wstring const &input_word, bool with_delim = true);
+  wstring biltransfull(wstring const &input_word, bool with_delim = true);
   pair<wstring, int> biltransWithQueue(wstring const &input_word, bool with_delim = true);
   wstring biltransWithoutQueue(wstring const &input_word, bool with_delim = true);
   void SAO(FILE *input = stdin, FILE *output = stdout);
@@ -313,6 +328,8 @@ public:
   void setDictionaryCaseMode(bool const value);
   void setNullFlush(bool const value);
   bool getNullFlush();
+  void setDecompoundingMode(bool const value);
+  bool getDecompoundingMode();
 };
 
 #endif
