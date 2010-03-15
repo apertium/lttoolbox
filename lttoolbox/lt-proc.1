@@ -1,4 +1,4 @@
-﻿.TH lt-proc 1 2006-03-23 "" ""
+.TH lt-proc 1 2006-03-23 "" ""
 .SH NAME
 lt-proc \- This application is part of the lexical processing modules
 and tools (
@@ -13,6 +13,7 @@ architecture: \fBhttp://www.apertium.org\fR.
 .B \-a \fR| 
 .B \-b \fR| 
 .B \-c \fR| 
+.B \-e \fR| 
 .B \-g \fR|
 .B \-n \fR|
 .B \-p \fR|
@@ -36,6 +37,7 @@ architecture: \fBhttp://www.apertium.org\fR.
 .B \-\-transliteration \fR|
 .B \-\-null-flush
 .B \-\-dictionary-case
+.B \-\-decompose-compounds \fR|
 .B \-\-version \fR|
 .B \-\-help
 ] fst_file [input_file [output_file]]
@@ -90,6 +92,9 @@ forms analysis produces output like the one in these examples:
 .TP
 .B \-c, \-\-case-sensitive
 Use the literal case of the incoming characters
+.TP
+.B \-e, \-\-decompose-compounds
+Try to treat unknown words as compounds, and decompose them.
 .TP
 .B \-w, \-\-dictionary-case
 Use the case information contained in the lexicon, instead of the surface
