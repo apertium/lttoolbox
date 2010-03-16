@@ -44,6 +44,7 @@ FSTProcessor::FSTProcessor()
   
   caseSensitive = false;
   dictionaryCase = false;
+  compoundDecomposition = false;
   nullFlush = false;
   nullFlushGeneration = false;
 
