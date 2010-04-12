@@ -28,6 +28,7 @@ architecture: \fBhttp://www.apertium.org\fR.
 .B lt-proc
 [
 .B \-\-analysis \fR| 
+.B \-\-bilingual \fR|
 .B \-\-case-sensitive \fR|
 .B \-\-generation \fR|
 .B \-\-non-marked-gen \fR|
@@ -89,6 +90,13 @@ forms analysis produces output like the one in these examples:
 \ \fI"cantar"\fR \-> `\fI^cantar/cantar<vblex><inf>$\fR' or
 \ `\fI"daba"\fR \->
 \ `\fI^daba/dar<vblex><pii><p1><sg>/dar<vblex><pii><p3><sg>$\fR'.
+.TP
+.B \-b, \-\-bilingual
+Does lexical transference, attaching queues of morphological symbols
+not specified in the dictionaries. As the analysis mode, supports
+multiple lexical forms in the target language for a given lexical
+form in the source language. Works tipically with the output of
+apertium-pretransfer.
 .TP
 .B \-c, \-\-case-sensitive
 Use the literal case of the incoming characters

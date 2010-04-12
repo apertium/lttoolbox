@@ -265,6 +265,15 @@ private:
   void printWord(wstring const &sf, wstring const &lf, FILE *output);
 
   /**
+   * Prints a word (Bilingual version)
+   * @param sf surface form of the word
+   * @param lf lexical form of the word
+   * @param output stream where the word is written
+   */
+  void printWordBilingual(wstring const &sf, wstring const &lf, FILE *output);
+
+
+  /**
    * Prints a word, SAO version
    * @param lf lexical form
    * @param output stream where the word is written
@@ -289,11 +298,13 @@ private:
   size_t firstNotAlpha(wstring const &sf);
 
   void analysis_wrapper_null_flush(FILE *input, FILE *output);
+  void bilingual_wrapper_null_flush(FILE *input, FILE *output);
   void generation_wrapper_null_flush(FILE *input, FILE *output,
                                      GenerationMode mode);
   void postgeneration_wrapper_null_flush(FILE *input, FILE *output);
   void transliteration_wrapper_null_flush(FILE *input, FILE *output);
-
+  
+  wstring compose(wstring const &lexforms, wstring const &queue) const;
 
   bool isLastBlankTM;
 public:
@@ -316,6 +327,7 @@ public:
   void decomposition(FILE *input = stdin, FILE *output = stdout);
   wstring biltrans(wstring const &input_word, bool with_delim = true);
   wstring biltransfull(wstring const &input_word, bool with_delim = true);
+  void bilingual(FILE *input = stdin, FILE *output = stdout);
   pair<wstring, int> biltransWithQueue(wstring const &input_word, bool with_delim = true);
   wstring biltransWithoutQueue(wstring const &input_word, bool with_delim = true);
   void SAO(FILE *input = stdin, FILE *output = stdout);

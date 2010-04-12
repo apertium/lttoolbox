@@ -493,12 +493,20 @@ FSTProcessor::writeEscaped(wstring const &str, FILE *output)
   } 
 }
 
-
 void
 FSTProcessor::printWord(wstring const &sf, wstring const &lf, FILE *output)
 {
   fputwc_unlocked(L'^', output);
   writeEscaped(sf, output);
+  fputws_unlocked(lf.c_str(), output);
+  fputwc_unlocked(L'$', output);
+}
+
+void
+FSTProcessor::printWordBilingual(wstring const &sf, wstring const &lf, FILE *output)
+{
+  fputwc_unlocked(L'^', output);
+  fputws_unlocked(sf.c_str(), output);
   fputws_unlocked(lf.c_str(), output);
   fputwc_unlocked(L'$', output);
 }
@@ -633,9 +641,6 @@ FSTProcessor::initBiltrans()
 {
   initGeneration();
 }
-
-
-
 
 wstring
 FSTProcessor::decompose(wstring w) 
@@ -1976,6 +1981,140 @@ FSTProcessor::biltrans(wstring const &input_word, bool with_delim)
       result += L'$';
     }
     return result;
+  }
+}
+
+void
+FSTProcessor::bilingual_wrapper_null_flush(FILE *input, FILE *output)
+{
+  setNullFlush(false);
+  nullFlushGeneration = true;
+  
+  while(!feof(input)) 
+  {
+    bilingual(input, output);
+    fputwc_unlocked(L'\0', output);
+    int code = fflush(output);
+    if(code != 0) 
+    {
+        wcerr << L"Could not flush output " << errno << endl;
+    }
+  }
+}
+
+wstring
+FSTProcessor::compose(wstring const &lexforms, wstring const &queue) const
+{
+  wstring result = L"";
+  
+  for(unsigned int i = 1; i< lexforms.size(); i++)
+  {
+    if(lexforms[i] == L'\\')
+    {
+      result += L'\\';
+      i++;
+    }
+    else if(lexforms[i] == L'/')
+    {
+      result.append(queue);
+    }
+    result += lexforms[i];
+  }
+  
+  return L"/" + result + queue;
+}
+
+void
+FSTProcessor::bilingual(FILE *input, FILE *output)
+{
+  if(getNullFlush())
+  {
+    bilingual_wrapper_null_flush(input, output);
+  }
+
+  State current_state = *initial_state;
+  wstring sf = L"";
+  wstring queue = L"";
+  wstring result = L"";
+  
+  outOfWord = false;
+ 
+  skipUntil(input, output, L'^');
+  int val;
+
+  while((val = readGeneration(input, output)) != 0x7fffffff)
+  {
+    if(val == L'$' && outOfWord)
+    {
+      if(sf[0] == L'*')
+      {
+        printWordBilingual(sf, L"/"+sf, output);
+      }
+      else if(result != L"")
+      {
+        printWordBilingual(sf, compose(result, queue), output);
+      }
+      else
+      {
+        printWordBilingual(sf, L"/@"+sf, output);
+      }
+  
+      queue = L"";
+      result = L"";
+      current_state = *initial_state;
+      sf = L"";
+    }
+    else if(iswspace(val) && sf.size() == 0)
+    {
+      // do nothing
+    }
+    else if(sf.size() > 0 && sf[0] == L'*')
+    {
+      if(escaped_chars.find(val) != escaped_chars.end())
+      {
+        sf += L'\\';
+      }
+      alphabet.getSymbol(sf, val);
+    }
+    else
+    {
+      if(escaped_chars.find(val) != escaped_chars.end())
+      {
+        sf += L'\\';
+      }
+      alphabet.getSymbol(sf,val);
+      if(current_state.size() != 0)
+      {
+	if(!alphabet.isTag(val) && iswupper(val) && !caseSensitive)
+	{
+	  current_state.step(val, towlower(val));
+	}
+	else
+	{
+	  current_state.step(val);
+	}
+      }
+      if(current_state.isFinal(all_finals))
+      {
+        bool uppercase = sf.size() > 1 && iswupper(sf[1]);
+        bool firstupper= iswupper(sf[0]);
+
+        result = current_state.filterFinals(all_finals, alphabet,
+                                            escaped_chars,
+                                            uppercase, firstupper, 0);     
+      }
+      if(current_state.size() == 0 && result != L"")
+      {
+        if(alphabet.isTag(val))
+        {
+          alphabet.getSymbol(queue, val);
+        }
+        else
+        {
+          result = L"";
+        }
+      }
+    }
   }
 }
 

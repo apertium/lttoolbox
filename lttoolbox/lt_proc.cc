@@ -36,10 +36,11 @@ using namespace std;
 void endProgram(char *name)
 {
   cout << basename(name) << ": process a stream with a letter transducer" << endl;
-  cout << "USAGE: " << basename(name) << " [-c] [-a|-g|-n|-d|-p|-s|-t] fst_file [input_file [output_file]]" << endl;
+  cout << "USAGE: " << basename(name) << " [-c] [-a|-g|-n|-d|-p|-s|-t|-b] fst_file [input_file [output_file]]" << endl;
   cout << "Options:" << endl;
 #if HAVE_GETOPT_LONG
   cout << "  -a, --analysis:         morphological analysis (default behavior)" << endl;
+  cout << "  -b, --bilingual:        lexical transference" << endl;
   cout << "  -c, --case-sensitive:   use the literal case of the incoming characters" << endl;
   cout << "  -g, --generation:       morphological generation" << endl;
   cout << "  -n, --non-marked-gen    morph. generation without unknown word marks" << endl;
@@ -86,10 +87,11 @@ int main(int argc, char *argv[])
   static struct option long_options[]=
     {
       {"analysis",        0, 0, 'a'},
+      {"bilingual",       0, 0, 'b'},
       {"generation",      0, 0, 'g'},
       {"non-marked-gen",  0, 0, 'n'},
       {"debugged-gen",    0, 0, 'd'},
-      {"tagged-gen",      0, 0, 'b'},
+      {"tagged-gen",      0, 0, 'l'},
       {"post-generation", 0, 0, 'p'},
       {"sao",             0, 0, 's'},
       {"transliteration", 0, 0, 't'},
@@ -105,9 +107,9 @@ int main(int argc, char *argv[])
   {
 #if HAVE_GETOPT_LONG
     int option_index;
-    int c = getopt_long(argc, argv, "abcegndpstzwvh", long_options, &option_index);
+    int c = getopt_long(argc, argv, "abceglndpstzwvh", long_options, &option_index);
 #else
-    int c = getopt(argc, argv, "abcegndpstzwvh");
+    int c = getopt(argc, argv, "abceglndpstzwvh");
 #endif    
 
     if(c == -1)
@@ -127,6 +129,7 @@ int main(int argc, char *argv[])
       
     case 'a':
     case 'b':
+    case 'l':
     case 'g':
     case 'n':
     case 'd':
@@ -246,7 +249,7 @@ int main(int argc, char *argv[])
         checkValidity(fstp);
         fstp.generation(input, output, gm_all);
       
-      case 'b':
+      case 'l':
         fstp.initGeneration();
         checkValidity(fstp);
         fstp.generation(input, output, gm_tagged);
@@ -267,6 +270,12 @@ int main(int argc, char *argv[])
         fstp.initPostgeneration(); 
         checkValidity(fstp);
         fstp.transliteration(input, output);
+        break;
+        
+      case 'b':
+        fstp.initBiltrans();
+        checkValidity(fstp);
+        fstp.bilingual(input, output);
         break;
       
       case 'a':
