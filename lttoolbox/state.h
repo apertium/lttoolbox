@@ -92,6 +92,8 @@ private:
    */
   void epsilonClosure();
 
+  bool lastPartHasRequiredSymbol(const vector<int> &seq, int requiredSymbol, int separationSymbol);
+
 public:
   /**
    * Constructor
@@ -135,11 +137,28 @@ public:
    */
   void step(int const input, int const alt);
 
+  void step_case(wchar_t val, bool caseSensitive);
+
   /**
    * Init the state with the initial node and empty output
    * @param initial the initial node of the transducer
    */
   void init(Node *initial);
+
+  /**
+    * Remove states not containing a specific symbol in their last 'part', and states 
+    * with more than a number of 'parts'
+    * @param requieredSymbol the symbol requiered in the last part
+    * @param separationSymbol the symbol that represent the separation between two parts
+    * @param compound_max_elements the maximum part number allowed
+    */
+  void pruneCompounds(int requiredSymbol, int separationSymbol, int compound_max_elements);
+
+  /**
+    * Remove states containing a forbidden symbol
+    * @param forbiddenSymbol the symbol forbidden
+    */
+	void pruneStatesWithForbiddenSymbol(int forbiddenSymbol);
 
   /**
    * Print all outputs of current parsing, preceded by a bar '/',
@@ -156,8 +175,8 @@ public:
   wstring filterFinals(set<Node *> const &finals, Alphabet const &a,
                       set<wchar_t> const &escaped_chars,
                       bool uppercase = false,
-		      bool firstupper = false,
-		      int firstchar = 0) const;
+                      bool firstupper = false,
+                      int firstchar = 0) const;
 
   /**
    * Same as previous one, but  the output is adapted to the SAO system
@@ -173,8 +192,19 @@ public:
   wstring filterFinalsSAO(set<Node *> const &finals, Alphabet const &a,
                       set<wchar_t> const &escaped_chars,
                       bool uppercase = false,
-		      bool firstupper = false,
-		      int firstchar = 0) const;
+                      bool firstupper = false,
+                      int firstchar = 0) const;
+
+
+  /**
+   * Find final states, remove those that not has a requiredSymbol and 'restart' each of them as the 
+   * set of initial states, but remembering the sequence and adding a separationSymbol
+   * @param finals
+   * @param requiredSymbol
+   * @param restart_state
+   * @param separationSymbol
+   */
+    void restartFinals(const set<Node *> &finals, int requiredSymbol, State *restart_state, int separationSymbol);
 
 
   /**
@@ -184,6 +214,11 @@ public:
    * @true if the state is final
    */
   bool isFinal(set<Node *> const &finals) const;
+
+  /**
+   * Return the full states string (to allow debuging...) using a Java ArrayList.toString style
+   */
+  wstring getReadableString(const Alphabet &a);
 
   wstring filterFinalsTM(set<Node *> const &finals, 
 			 Alphabet const &alphabet,

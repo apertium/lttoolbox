@@ -221,3 +221,9 @@ Alphabet::decode(int const code) const
 {
   return spairinv[code];
 }
+
+
+void Alphabet::setSymbol(int symbol, wstring newSymbolString) {
+  //Should be a special character!
+  if (symbol < 0) slexicinv[-symbol-1] = newSymbolString;
+}

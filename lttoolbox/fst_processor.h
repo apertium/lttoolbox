@@ -154,7 +154,28 @@ private:
   /**
    * try analysing unknown words as compounds
    */
-  bool compoundDecomposition;
+  bool do_decomposition;
+
+  /**
+   * Symbol of CompoundOnlyL
+   */
+  int compoundOnlyLSymbol;
+
+  /**
+   * Symbol of CompoundR
+   */
+  int compoundRSymbol;
+
+  /**
+   * Show or not the controls symbols (as compoundRSymbol)
+   */
+   bool showControlSymbols;
+
+  /**
+   * Max compound elements
+   * Hard coded for now, but there might come a switch one day
+   */
+  int compound_max_elements;
 
   /**
    * Prints an error of input stream and exits
@@ -287,6 +308,8 @@ private:
    */
   void printUnknownWord(wstring const &sf, FILE *output);
 
+  void initDecompositionSymbols();
+
   vector<wstring> numbers;
   int readTMAnalysis(FILE *input);
 
@@ -294,7 +317,7 @@ private:
   void printSpace(wchar_t const val, FILE *output);
   void skipUntil(FILE *input, FILE *output, wint_t const character);
   static wstring removeTags(wstring const &str);
-  wstring decompose(wstring str);
+  wstring compoundAnalysis(wstring str);
   size_t firstNotAlpha(wstring const &sf);
 
   void analysis_wrapper_null_flush(FILE *input, FILE *output);
@@ -340,7 +363,6 @@ public:
   void setDictionaryCaseMode(bool const value);
   void setNullFlush(bool const value);
   bool getNullFlush();
-  void setDecompoundingMode(bool const value);
   bool getDecompoundingMode();
 };
 
