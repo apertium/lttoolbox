@@ -44,9 +44,13 @@ FSTProcessor::FSTProcessor()
   
   caseSensitive = false;
   dictionaryCase = false;
-  compoundDecomposition = false;
+  do_decomposition = false;
   nullFlush = false;
   nullFlushGeneration = false;
+  showControlSymbols = false;
+  compoundOnlyLSymbol = 0;
+  compoundRSymbol = 0;
+  compound_max_elements = 4;
 
   pool = new Pool<vector<int> >(4, vector<int>(50));
 
@@ -642,7 +646,89 @@ FSTProcessor::initBiltrans()
   initGeneration();
 }
 
+
 wstring
+FSTProcessor::compoundAnalysis(wstring input_word) {
+    const int MAX_COMBINATIONS = 500;
+    //wcerr << L"compoundAnalysis(input_word = " << input_word << L")" << endl;
+
+    State current_state = *initial_state;
+
+    bool firstupper = iswupper(input_word.at(0));
+    bool uppercase = firstupper && (input_word.size() > 1) && iswupper(input_word.at(1));
+    
+    for(unsigned int i=0; i<input_word.size(); i++) {
+        wchar_t val=input_word.at(i);
+
+        //wcerr << val << L" før step " << i << L" current_state = " << current_state.getReadableString(alphabet) << endl;
+        current_state.step_case(val, caseSensitive);
+        
+        if(current_state.size() > MAX_COMBINATIONS) {
+            wcerr << L"Warning: compoundAnalysis's MAX_COMBINATIONS exceeded for '" << input_word << L"'" << endl;
+            wcerr << L"         gave up at char " << i << L" '" << val << L"'." << endl;
+
+            wstring nullString = L"";
+            return  nullString;
+        }
+
+        //wcerr << val << L" eft step " << i << L" current_state = " << current_state.getReadableString(alphabet) << endl;
+
+        if(i < input_word.size()-1)
+            current_state.restartFinals(all_finals, compoundOnlyLSymbol, initial_state, '+');
+        
+        //wcerr << val << " eft rest " << i << " current_state = " << current_state.getReadableString(alphabet) << endl;
+        //wcerr << i << " result = "  << current_state.filterFinals(all_finals, alphabet, escaped_chars, uppercase, firstupper) << endl;
+        //wcerr << i << " -- size = " << current_state.size() << endl;
+
+        if(current_state.size()==0) {
+            wstring nullString = L"";
+            return nullString;
+        }
+    }
+
+    current_state.pruneCompounds(compoundRSymbol, '+', compound_max_elements);
+    wstring result = current_state.filterFinals(all_finals, alphabet, escaped_chars, uppercase, firstupper);
+    //wcerr << L"rrresult = " << result << endl;
+    
+    return result;
+}
+
+
+
+void 
+FSTProcessor::initDecompositionSymbols() {
+  if ((compoundOnlyLSymbol=alphabet(L"<:co:only-L>")) == 0
+     && (compoundOnlyLSymbol=alphabet(L"<:compound:only-L>")) == 0
+     && (compoundOnlyLSymbol=alphabet(L"<@co:only-L>")) == 0
+     && (compoundOnlyLSymbol=alphabet(L"<@compound:only-L>")) == 0
+     && (compoundOnlyLSymbol=alphabet(L"<compound-only-L>")) == 0)
+  {
+    wcerr << L"Warning: Decomposition symbol <:compound:only-L> not found" << endl;
+  }
+  else if (!showControlSymbols)
+      alphabet.setSymbol(compoundOnlyLSymbol, L"");
+
+  if ((compoundRSymbol=alphabet(L"<:co:R>")) == 0
+     && (compoundRSymbol=alphabet(L"<:compound:R>")) == 0
+     && (compoundRSymbol=alphabet(L"<@co:R>")) == 0
+     && (compoundRSymbol=alphabet(L"<@compound:R>")) == 0
+     && (compoundRSymbol=alphabet(L"<compound-R>")) == 0) 
+  {
+    wcerr << L"Warning: Decomposition symbol <:compound:R> not found" << endl;
+  }
+  else if (!showControlSymbols)
+      alphabet.setSymbol(compoundRSymbol, L"");
+}
+
+
+void 
+FSTProcessor::initDecomposition() {
+  do_decomposition = true;
+  initAnalysis();
+  initDecompositionSymbols();
+}
+
+/*wstring
 FSTProcessor::decompose(wstring w) 
 {
         State current_state = *initial_state;
@@ -807,7 +893,7 @@ FSTProcessor::decompose(wstring w)
         }
         //wcerr << L"+ decompose: " << lf << endl;
         return lf;
-}
+}*/
 
 void
 FSTProcessor::analysis(FILE *input, FILE *output)
@@ -839,6 +925,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
           uppercase = firstupper && iswupper(sf[sf.size()-1]);
         }
 
+        if (compoundOnlyLSymbol!=0) current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
         lf = current_state.filterFinals(all_finals, alphabet,
                                         escaped_chars,
                                         uppercase, firstupper);
@@ -853,6 +940,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
           uppercase = firstupper && iswupper(sf[sf.size()-1]);
         }
 
+        if (compoundOnlyLSymbol!=0) current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
         lf = current_state.filterFinals(all_finals, alphabet,
                                         escaped_chars,
                                         uppercase, firstupper);
@@ -867,6 +955,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
           uppercase = firstupper && iswupper(sf[sf.size()-1]);
         }
 
+        if (compoundOnlyLSymbol!=0) current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
         lf = current_state.filterFinals(all_finals, alphabet,
                                         escaped_chars,
                                         uppercase, firstupper);
@@ -881,6 +970,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
           uppercase = firstupper && iswupper(sf[sf.size()-1]);
         }
 
+        if (compoundOnlyLSymbol!=0) current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
         lf = current_state.filterFinals(all_finals, alphabet, 
                                         escaped_chars, 
                                         uppercase, firstupper);
@@ -975,10 +1065,10 @@ FSTProcessor::analysis(FILE *input, FILE *output)
         { 
           input_buffer.back(1+(size-limit));
           wstring unknown_word = sf.substr(0, limit);
-          if(compoundDecomposition) 
+          if(do_decomposition) 
           {
             wstring compound = L"";
-            compound = decompose(unknown_word);
+            compound = compoundAnalysis(unknown_word);
             if(compound != L"") 
             {
               printWord(unknown_word, compound, output);
@@ -1008,10 +1098,10 @@ FSTProcessor::analysis(FILE *input, FILE *output)
         { 
           input_buffer.back(1+(size-limit));
           wstring unknown_word = sf.substr(0, limit);
-          if(compoundDecomposition) 
+          if(do_decomposition) 
           {
             wstring compound = L"";
-            compound = decompose(unknown_word);
+            compound = compoundAnalysis(unknown_word);
             if(compound != L"") 
             {
               printWord(unknown_word, compound, output);
@@ -2661,11 +2751,6 @@ FSTProcessor::removeTags(wstring const &str)
   return str;
 }
 
-void
-FSTProcessor::setDecompoundingMode(bool const value)
-{
-  compoundDecomposition = value;
-}
 
 void
 FSTProcessor::setCaseSensitiveMode(bool const value)
@@ -2688,7 +2773,7 @@ FSTProcessor::setNullFlush(bool const value)
 bool
 FSTProcessor::getDecompoundingMode()
 {
-  return compoundDecomposition;
+  return do_decomposition;
 }
 
 bool

@@ -123,10 +123,7 @@ int main(int argc, char *argv[])
       fstp.setCaseSensitiveMode(true);
       break;
 
-    case 'e':
-      fstp.setDecompoundingMode(true);
-      break;
-      
+    case 'e':      
     case 'a':
     case 'b':
     case 'l':
@@ -276,6 +273,12 @@ int main(int argc, char *argv[])
         fstp.initBiltrans();
         checkValidity(fstp);
         fstp.bilingual(input, output);
+        break;
+
+      case 'e':
+        fstp.initDecomposition();
+        checkValidity(fstp);
+        fstp.analysis(input, output);
         break;
       
       case 'a':

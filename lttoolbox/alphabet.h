@@ -145,6 +145,13 @@ public:
    */
   bool isTag(int const symbol) const;
 
+  /**
+   * Sets an already existing symbol to represent a new value
+   * @param symbol the code of the symbol to set
+   * @param newSymbolString the new string for this symbol
+   */
+  void setSymbol(int symbol, wstring newSymbolString);
+
   pair<int, int> const & decode(int const code) const;
   
 };
