@@ -412,6 +412,100 @@ FSTProcessor::readGeneration(FILE *input, FILE *output)
   return 0x7fffffff;
 }
 
+pair<wstring, int>
+FSTProcessor::readBilingual(FILE *input, FILE *output)
+{
+  wint_t val = fgetwc_unlocked(input);
+  wstring symbol = L"";
+
+  if(feof(input))
+  {
+    return pair<wstring, int>(symbol, 0x7fffffff);
+  }
+  
+  if(outOfWord)
+  {
+    if(val == L'^')
+    {
+      val = fgetwc_unlocked(input);
+      if(feof(input))
+      {
+        return pair<wstring, int>(symbol, 0x7fffffff);
+      }
+    }
+    else if(val == L'\\')
+    {
+      fputwc_unlocked(val, output);
+      val = fgetwc_unlocked(input);
+      if(feof(input))
+      {
+        return pair<wstring, int>(symbol, 0x7fffffff);
+      }
+      fputwc_unlocked(val,output);
+      skipUntil(input, output, L'^');
+      val = fgetwc_unlocked(input);
+      if(feof(input))
+      {
+        return pair<wstring, int>(symbol, 0x7fffffff);
+      }
+    }
+    else
+    {
+      fputwc_unlocked(val, output);
+      skipUntil(input, output, L'^');
+      val = fgetwc_unlocked(input);
+      if(feof(input))
+      {
+        return pair<wstring, int>(symbol, 0x7fffffff);
+      }
+    }
+    outOfWord = false;
+  }
+
+  if(val == L'\\')
+  {
+    val = fgetwc_unlocked(input);
+    return pair<wstring, int>(symbol, val);
+  }
+  else if(val == L'$')
+  {
+    outOfWord = true;
+    return pair<wstring, int>(symbol, static_cast<int>(L'$'));
+  }
+  else if(val == L'<')
+  {
+    wstring cad = L"";
+    cad += static_cast<wchar_t>(val);
+    while((val = fgetwc_unlocked(input)) != L'>')
+    {
+      if(feof(input))
+      {
+	streamError();
+      }
+      cad += static_cast<wchar_t>(val);
+    }
+    cad += static_cast<wchar_t>(val);
+
+    int res = alphabet(cad);
+    
+    if (res == 0) {
+	    symbol = cad;
+    }
+    return pair<wstring, int>(symbol, res);
+  }
+  else if(val == L'[')
+  {
+    fputws_unlocked(readFullBlock(input, L'[', L']').c_str(), output);
+    return readBilingual(input, output);
+  }
+  else
+  {
+    return pair<wstring, int>(symbol, val);
+  }
+
+  return pair<wstring, int>(symbol, 0x7fffffff);
+}
+
 void
 FSTProcessor::flushBlanks(FILE *output)
 {  
@@ -2123,17 +2217,27 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
   }
 
   State current_state = *initial_state;
-  wstring sf = L"";
-  wstring queue = L"";
-  wstring result = L"";
+  wstring sf = L"";		// source language analysis
+  wstring queue = L"";		// symbols to be added to each target
+  wstring result = L"";		// result of looking up analysis in bidix
   
   outOfWord = false;
  
   skipUntil(input, output, L'^');
-  int val;
-
-  while((val = readGeneration(input, output)) != 0x7fffffff)
+  pair<wstring,int> tr;		// readBilingual return value, containing:
+  int val;			// the alphabet value of current symbol, and
+  wstring symbol = L"";		// the current symbol as a string
+  
+  while(true)			// ie. while(val != 0x7fffffff)
   {
+    tr = readBilingual(input, output);
+    symbol = tr.first;
+    val = tr.second;
+    if (val == 0x7fffffff) 
+    {
+      break;
+    }
+    
     if(val == L'$' && outOfWord)
     {
       if(sf[0] == L'*')
@@ -2164,7 +2268,11 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
       {
         sf += L'\\';
       }
-      alphabet.getSymbol(sf, val);
+      alphabet.getSymbol(sf, val); // add symbol to sf iff alphabetic
+      if(val == 0)  // non-alphabetic, possibly unknown tag; add to sf
+      {
+	sf += symbol;
+      }      
     }
     else
     {
@@ -2172,7 +2280,11 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
       {
         sf += L'\\';
       }
-      alphabet.getSymbol(sf,val);
+      alphabet.getSymbol(sf, val); // add symbol to sf iff alphabetic
+      if(val == 0)  // non-alphabetic, possibly unknown tag; add to sf
+      {
+	sf += symbol;
+      }      
       if(current_state.size() != 0)
       {
 	if(!alphabet.isTag(val) && iswupper(val) && !caseSensitive)
@@ -2199,10 +2311,13 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
         {
           alphabet.getSymbol(queue, val);
         }
-        else
-        {
-          result = L"";
-        }
+	else
+	{
+	  // We already have a result, but there are still more tags
+	  // in the analysis; these are not consumed, but output as
+	  // target language tags (added to result on end-of-word)
+	  queue += symbol;
+	}
       }
     }
   }

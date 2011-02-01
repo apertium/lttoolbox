@@ -240,6 +240,13 @@ private:
   int readGeneration(FILE *input, FILE *output);
 
   /**
+   * Read text from stream (biltrans version)
+   * @param input the stream to read
+   * @return the queue of 0-symbols, and the next symbol in the stream
+   */
+  pair<wstring, int> readBilingual(FILE *input, FILE *output);
+
+  /**
    * Read text from stream (SAO version)
    * @param input the stream to read
    * @return the next symbol in the stream
