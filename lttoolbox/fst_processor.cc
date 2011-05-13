@@ -1153,7 +1153,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
         if(limit == 0)
         {
           input_buffer.back(sf.size());
-          fputwc_unlocked(sf[0], output);          
+          writeEscaped(sf.substr(0,1), output);          
         }
         else
         { 
@@ -1186,7 +1186,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
         if(limit == 0)
         {
           input_buffer.back(sf.size());
-          fputwc_unlocked(sf[0], output);          
+          writeEscaped(sf.substr(0,1), output);
         }
         else
         { 
