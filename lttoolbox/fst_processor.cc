@@ -742,15 +742,12 @@ FSTProcessor::initBiltrans()
 
 
 wstring
-FSTProcessor::compoundAnalysis(wstring input_word) {
+FSTProcessor::compoundAnalysis(wstring input_word, bool uppercase, bool firstupper) {
     const int MAX_COMBINATIONS = 500;
     //wcerr << L"compoundAnalysis(input_word = " << input_word << L")" << endl;
 
     State current_state = *initial_state;
 
-    bool firstupper = iswupper(input_word.at(0));
-    bool uppercase = firstupper && (input_word.size() > 1) && iswupper(input_word.at(1));
-    
     for(unsigned int i=0; i<input_word.size(); i++) {
         wchar_t val=input_word.at(i);
 
@@ -1161,8 +1158,14 @@ FSTProcessor::analysis(FILE *input, FILE *output)
           wstring unknown_word = sf.substr(0, limit);
           if(do_decomposition) 
           {
+            if(!dictionaryCase)
+            {
+              firstupper = iswupper(sf[0]);
+              uppercase = firstupper && iswupper(sf[sf.size()-1]);
+            }
+
             wstring compound = L"";
-            compound = compoundAnalysis(unknown_word);
+            compound = compoundAnalysis(unknown_word, uppercase, firstupper);
             if(compound != L"") 
             {
               printWord(unknown_word, compound, output);
@@ -1194,8 +1197,14 @@ FSTProcessor::analysis(FILE *input, FILE *output)
           wstring unknown_word = sf.substr(0, limit);
           if(do_decomposition) 
           {
+            if(!dictionaryCase)
+            {
+              firstupper = iswupper(sf[0]);
+              uppercase = firstupper && iswupper(sf[sf.size()-1]);
+            }
+
             wstring compound = L"";
-            compound = compoundAnalysis(unknown_word);
+            compound = compoundAnalysis(unknown_word, uppercase, firstupper);
             if(compound != L"") 
             {
               printWord(unknown_word, compound, output);
