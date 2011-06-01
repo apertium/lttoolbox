@@ -324,7 +324,7 @@ private:
   void printSpace(wchar_t const val, FILE *output);
   void skipUntil(FILE *input, FILE *output, wint_t const character);
   static wstring removeTags(wstring const &str);
-  wstring compoundAnalysis(wstring str);
+  wstring compoundAnalysis(wstring str, bool uppercase, bool firstupper);
   size_t firstNotAlpha(wstring const &sf);
 
   void analysis_wrapper_null_flush(FILE *input, FILE *output);
