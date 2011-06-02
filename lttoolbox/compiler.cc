@@ -481,6 +481,13 @@ Compiler::procPar()
   EntryToken e;
   wstring nomparadigma = attrib(COMPILER_N_ATTR);
 
+  if(current_paradigm != L"" && nomparadigma == current_paradigm)
+  {
+    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+    wcerr << L"): Paradigm refers to itself '" << nomparadigma << L"'." <<endl;
+    exit(EXIT_FAILURE);
+  }
+
   if(paradigms.find(nomparadigma) == paradigms.end())
   {
     wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
