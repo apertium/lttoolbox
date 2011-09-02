@@ -2236,6 +2236,7 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
   pair<wstring,int> tr;		// readBilingual return value, containing:
   int val;			// the alphabet value of current symbol, and
   wstring symbol = L"";		// the current symbol as a string
+  bool seentags = false;  // have we seen any tags at all in the analysis?
   
   while(true)			// ie. while(val != 0x7fffffff)
   {
@@ -2249,6 +2250,16 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
     
     if(val == L'$' && outOfWord)
     {
+      if(!seentags)        // if no tags: only return complete matches
+      {
+        bool uppercase = sf.size() > 1 && iswupper(sf[1]);
+        bool firstupper= iswupper(sf[0]);
+
+        result = current_state.filterFinals(all_finals, alphabet,
+                                            escaped_chars,
+                                            uppercase, firstupper, 0);
+      }
+      
       if(sf[0] == L'*')
       {
         printWordBilingual(sf, L"/"+sf, output);
@@ -2266,6 +2277,7 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
       result = L"";
       current_state = *initial_state;
       sf = L"";
+      seentags = false;
     }
     else if(iswspace(val) && sf.size() == 0)
     {
@@ -2293,6 +2305,10 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
       if(val == 0)  // non-alphabetic, possibly unknown tag; add to sf
       {
 	sf += symbol;
+      }
+      if(alphabet.isTag(val) || val == 0) 
+      {
+        seentags = true;
       }      
       if(current_state.size() != 0)
       {
@@ -2316,17 +2332,23 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
       }
       if(current_state.size() == 0 && result != L"")
       {
-        if(alphabet.isTag(val))
+        // We already have a result, but there is still more to read
+        // of the analysis; following tags are not consumed, but
+        // output as target language tags (added to result on
+        // end-of-word)
+        if(alphabet.isTag(val)) // known tag
         {
           alphabet.getSymbol(queue, val);
         }
-	else
-	{
-	  // We already have a result, but there are still more tags
-	  // in the analysis; these are not consumed, but output as
-	  // target language tags (added to result on end-of-word)
-	  queue += symbol;
-	}
+        else if (val == 0) // non-alphabetic, possibly unknown tag
+        {
+          queue += symbol;
+        }
+        else
+        {
+          // There are no more alive transductions and the current symbol is not a tag -- unknown word!
+          result = L"";
+        }
       }
     }
   }
@@ -2341,6 +2363,7 @@ FSTProcessor::biltransWithQueue(wstring const &input_word, bool with_delim)
   unsigned int end_point = input_word.size()-2;
   wstring queue = L"";
   bool mark = false;
+  bool seentags = false;  // have we seen any tags at all in the analysis?
   
   if(with_delim == false)
   {
@@ -2374,6 +2397,7 @@ FSTProcessor::biltransWithQueue(wstring const &input_word, bool with_delim)
     }
     else if(input_word[i] == L'<')
     {
+      seentags = true;
       symbol = L'<';
       for(unsigned int j = i + 1; j <= end_point; j++)
       {
@@ -2431,26 +2455,45 @@ FSTProcessor::biltransWithQueue(wstring const &input_word, bool with_delim)
     }
     
     if(current_state.size() == 0)
-    { 
+    {
       if(symbol != L"" && result != L"")
       {
         queue.append(symbol);
       }
       else
       {
-	// word is not present
+        // word is not present
         if(with_delim)
-	{
+        {
           result = L"^@" + input_word.substr(1);  
-	}
+        }
         else
-	{
+        {
           result = L"@" + input_word;
-	}
+        }
         return pair<wstring, int>(result, 0);  
       }      
     }
   }
+
+  if (!seentags
+      && L"" == current_state.filterFinals(all_finals, alphabet,
+                                           escaped_chars,
+                                           uppercase, firstupper, 0)) 
+  {
+    // word is not present
+    if(with_delim)
+    {
+      result = L"^@" + input_word.substr(1);  
+    }
+    else
+    {
+      result = L"@" + input_word;
+    }
+    return pair<wstring, int>(result, 0);  
+  }
+        
+
 
   // attach unmatched queue automatically
 
