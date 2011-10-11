@@ -18,6 +18,7 @@
  */
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
+#include <lttoolbox/alphabet.h>
 #include <lttoolbox/lttoolbox_config.h>
 #include <lttoolbox/my_stdio.h>
 
@@ -608,4 +609,50 @@ Transducer::reverse(int const epsilon_tag)
   initial = *(finals.begin());
   finals.clear();
   finals.insert(tmp);
+}
+
+void
+Transducer::show(Alphabet &alphabet, FILE *output, int const epsilon_tag)
+{
+  joinFinals(epsilon_tag);
+
+  map<int, multimap<int, int> > temporal;
+
+  for(map<int, multimap<int, int> >::iterator it = transitions.begin(); it != transitions.end(); it++)
+  {
+    multimap<int, int> aux = it->second;
+  
+    for(multimap<int, int>::iterator it2 = aux.begin(); it2 != aux.end(); it2++) 
+    {
+      pair<int, int> t = alphabet.decode(it2->first);
+      fwprintf(output, L"%d\t", it->first);
+      fwprintf(output, L"%d\t", it2->second);
+      wstring l = L"";
+      alphabet.getSymbol(l, t.first);
+      if(l == L"")  // If we find an epsilon
+      {
+        fwprintf(output, L"ε\t", l.c_str());
+      }
+      else 
+      {
+        fwprintf(output, L"%S\t", l.c_str());
+      }
+      wstring r = L"";
+      alphabet.getSymbol(r, t.second);
+      if(r == L"")  // If we find an epsilon
+      {
+        fwprintf(output, L"ε\t", r.c_str());
+      }
+      else 
+      {
+        fwprintf(output, L"%S\t", r.c_str());
+      }
+      fwprintf(output, L"\n");
+    } 
+  } 
+
+  for(set<int>::iterator it3 = finals.begin(); it3 != finals.end(); it3++)
+  {
+    fwprintf(output, L"%d\n", *it3);
+  }
 }
