@@ -101,6 +101,137 @@ State::init(Node *initial)
   epsilonClosure();  
 }  
 
+/*
+void
+State::apply(wstring const input, map<int, MatchExe> &t, Alphabet &a, FILE *err)
+{
+  vector<TNodeState> new_state;
+  fwprintf(err, L" apply: %S\n", input.c_str());
+  if(input == L"")
+  {
+    state = new_state;
+    return;
+  }
+  
+  for(size_t i = 0, limit = state.size(); i != limit; i++)
+  {
+    map<int, Dest>::const_iterator it;
+
+    //it = state[i].where->transitions.find(input);
+    for(map<int, Dest>::const_iterator it = state[i].where->transitions.begin(); 
+        it != state[i].where->transitions.end(); it++)
+    { 
+      MatchExe me = t[it->first];
+      MatchState ms;
+      fwprintf(err, L"    it->first: %d\n", it->first);
+      bool found = false;
+      ms.clear();
+      ms.init(me.getInitial());
+     
+      for(wstring::const_iterator it9 = input.begin(); it9 != input.end(); it9++) 
+      {
+        fwprintf(err, L"    %C:%C = %d (%d)\n", *it9, *it9, a(*it9, *it9), ms.size());
+        if(ms.size() == 0)
+        { 
+          break;
+        }
+        ms.step(a(*it9, *it9));
+      } 
+      int val = ms.classifyFinals(me.getFinals());
+      if(val != -1) 
+      { 
+        found = true;
+      }
+
+      //found = t[it->first].recognise(input, a, err); 
+      wstring sym = L"";
+      a.getSymbol(sym, it->first, false);
+      fwprintf(err, L"  state: %d, transition: %d\n", i, it->first);
+      fwprintf(err, L"  recognise(%S, %S) = %d ", sym.c_str(), input.c_str(), found);
+    
+      // if recognised
+      // if(it != state[i].where->transitions.end())
+      if(found)
+      {
+        for(int j = 0; j != it->second.size; j++)
+        {
+          vector<int> *new_v = pool->get();
+          *new_v = *(state[i].sequence);
+          if(it->first != 0)
+          {
+            new_v->push_back(it->second.out_tag[j]);
+          }
+          new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
+        }
+        fwprintf(err, L"recognised.\n");
+      }
+      else
+      {
+        fwprintf(err, L"not recognised.\n");
+      }
+    }
+    pool->release(state[i].sequence);
+  }
+  
+  state = new_state;
+}
+*/
+
+
+void
+State::apply(wstring const input, map<int, Transducer> &t, Alphabet &a, FILE *err)
+{
+  vector<TNodeState> new_state;
+  //fwprintf(err, L" apply: %S\n", input.c_str());
+  if(input == L"")
+  {
+    state = new_state;
+    return;
+  }
+  
+  for(size_t i = 0, limit = state.size(); i != limit; i++)
+  {
+    map<int, Dest>::const_iterator it;
+
+    //it = state[i].where->transitions.find(input);
+    for(map<int, Dest>::const_iterator it = state[i].where->transitions.begin(); 
+        it != state[i].where->transitions.end(); it++)
+    { 
+      bool found = false;
+      found = t[it->first].recognise(input, a, err); 
+      wstring sym = L"";
+      a.getSymbol(sym, it->first, false);
+      //fwprintf(err, L"  state: %d, transition: %d, tsize: %d\n", i, it->first, t[it->first].size());
+      //fwprintf(err, L"  recognise(%S, %S) = %d ", sym.c_str(), input.c_str(), found);
+    
+      // if recognised
+      // if(it != state[i].where->transitions.end())
+      if(found)
+      {
+        for(int j = 0; j != it->second.size; j++)
+        {
+          vector<int> *new_v = pool->get();
+          *new_v = *(state[i].sequence);
+          if(it->first != 0)
+          {
+            new_v->push_back(it->second.out_tag[j]);
+          }
+          new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
+        }
+        //fwprintf(err, L"recognised.\n");
+      }
+      else
+      {
+        //fwprintf(err, L"not recognised.\n");
+      }
+  
+    }
+      pool->release(state[i].sequence);
+  }
+  
+  state = new_state;
+}
+
 void
 State::apply(int const input)
 {
@@ -203,6 +334,22 @@ State::epsilonClosure()
       }          
     }
   }
+}
+
+/*
+void
+State::step(wstring const input, map<int, MatchExe> &transducers, Alphabet &a, FILE *err)
+{
+  apply(input, transducers, a, err);
+  epsilonClosure();
+}
+*/
+
+void
+State::step(wstring const input, map<int, Transducer> &transducers, Alphabet &a, FILE *err)
+{
+  apply(input, transducers, a, err);
+  epsilonClosure();
 }
 
 void

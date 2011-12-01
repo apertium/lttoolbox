@@ -19,6 +19,7 @@
 #ifndef _STATE_
 #define _STATE_
 
+#include <map>
 #include <set>
 #include <string>
 #include <vector>
@@ -27,6 +28,9 @@
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/node.h>
 #include <lttoolbox/pool.h>
+#include <lttoolbox/match_exe.h>
+#include <lttoolbox/match_state.h>
+#include <lttoolbox/transducer.h>
 
 using namespace std;
 
@@ -79,6 +83,10 @@ private:
    */
   void apply(int const input);
 
+  void apply(wstring const input, map<int, Transducer> &t, Alphabet &a, FILE *err = stderr);
+
+  //void apply(wstring const input, map<int, MatchExe> &t, Alphabet &a, FILE *err = stderr);
+
   /**
    * Make a transition, version for lowercase and uppercase letters
    * @param input the input symbol
@@ -129,6 +137,10 @@ public:
    * @param input the input symbol
    */
   void step(int const input);
+
+  void step(wstring const input, map<int, Transducer> &t, Alphabet &a, FILE *err = stderr);
+
+  //void step(wstring const input, map<int, MatchExe> &t, Alphabet &a, FILE *err = stderr);
 
   /**
    * step = apply + epsilonClosure
