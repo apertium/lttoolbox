@@ -656,3 +656,48 @@ Transducer::show(Alphabet &alphabet, FILE *output, int const epsilon_tag)
     fwprintf(output, L"%d\n", *it3);
   }
 }
+
+
+bool
+Transducer::recognise(wstring patro, Alphabet &a, FILE *err)
+{
+  bool accepted = false;
+  vector<int> states ;
+  states.push_back(getInitial());
+  
+  // For each of the characters in the input string
+  for(wstring::iterator it = patro.begin(); it != patro.end(); it++)  
+  {
+    vector<int> new_state;
+    int sym = *it;
+    // For each of the current alive states
+    for(vector<int>::iterator it2 = states.begin(); it2 != states.end(); it2++)
+    {
+      multimap<int, int> p = transitions[*it2];
+      // For each of the transitions in the state
+      for(multimap<int, int>::iterator it3 = p.begin(); it3 != p.end(); it3++)
+      { 
+        
+	pair<int, int> t = a.decode(it3->first);
+        wstring l = L"";
+        a.getSymbol(l, t.first);
+        //fwprintf(err, L"step: %S %C (%d), state: %d, trans: %S, targ: %d\n", patro.c_str(), *it, sym, *it2, l.c_str(), it3->second);
+        if(l.find(*it) != wstring::npos || l == L"")
+        {
+          new_state.push_back(it3->second); 
+        }
+      }
+    }
+    states = new_state;
+  }
+  for(vector<int>::iterator it4 = states.begin(); it4 != states.end(); it4++)
+  {
+    if(isFinal(*it4)) 
+    {
+      accepted = true;
+    }
+  }
+
+  return accepted;
+}
+
