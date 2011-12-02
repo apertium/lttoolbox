@@ -146,6 +146,13 @@ public:
   bool isFinal(int const state) const;
 
   /**
+   * Test if a pattern is recognised by the FST
+   * @param a widestring of the pattern to be recognised
+   * @return true if the pattern is recognised by the transducer
+   */
+  bool recognise(wstring patro, Alphabet &a, FILE *err = stderr);
+
+  /**
    * Set the state as a final or not, yes by default
    * @param state the state
    * @param value if true, the state is set as final state
