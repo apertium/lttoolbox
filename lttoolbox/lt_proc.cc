@@ -36,35 +36,37 @@ using namespace std;
 void endProgram(char *name)
 {
   cout << basename(name) << ": process a stream with a letter transducer" << endl;
-  cout << "USAGE: " << basename(name) << " [-c] [-a|-g|-n|-d|-p|-s|-t|-b] fst_file [input_file [output_file]]" << endl;
+  cout << "USAGE: " << basename(name) << " [ -a | -b | -c | -d | -e | -g | -n | -p | -s | -t | -v | -h -z -w ] fst_file [input_file [output_file]]" << endl;
   cout << "Options:" << endl;
 #if HAVE_GETOPT_LONG
   cout << "  -a, --analysis:         morphological analysis (default behavior)" << endl;
   cout << "  -b, --bilingual:        lexical transference" << endl;
   cout << "  -c, --case-sensitive:   use the literal case of the incoming characters" << endl;
+  cout << "  -d, --debugged-gen      morph. generation with all the stuff" <<endl;
+  cout << "  -e, --decompose-nouns:  Try to decompound unknown words" << endl;
   cout << "  -g, --generation:       morphological generation" << endl;
   cout << "  -n, --non-marked-gen    morph. generation without unknown word marks" << endl;
-  cout << "  -d, --debugged-gen      morph. generation with all the stuff" <<endl;
   cout << "  -p, --post-generation:  post-generation" << endl;
-  cout << "  -e, --decompose-compounds: try to decompose unknown word as compounds" << endl;
   cout << "  -s, --sao:              SAO annotation system input processing" << endl;
   cout << "  -t, --transliteration:  apply transliteration dictionary" << endl;
+  cout << "  -v, --version:          version" << endl;
   cout << "  -z, --null-flush:       flush output on the null character " << endl;
   cout << "  -w, --dictionary-case:  use dictionary case instead of surface case" << endl;
-  cout << "  -v, --version:          version" << endl;
   cout << "  -h, --help:             show this help" << endl;
 #else
   cout << "  -a:   morphological analysis (default behavior)" << endl;
+  cout << "  -b:   lecixal transference" << endl;
   cout << "  -c:   use the literal case of the incoming characters" << endl;
+  cout << "  -d:   morph. generation with all the stuff" << endl;
+  cout << "  -e:   try to decompose unknown words as compounds" << endl;
   cout << "  -g:   morphological generation" << endl;
   cout << "  -n:   morph. generation without unknown word marks" << endl;
   cout << "  -p:   post-generation" << endl;
-  cout << "  -e:   try to decompose unknown words as compounds" << endl;
   cout << "  -s:   SAO annotation system input processing" << endl;
   cout << "  -t:   apply transliteration dictionary" << endl;
+  cout << "  -v:   version" << endl;
   cout << "  -z:   flush output on the null character " << endl;
   cout << "  -w:   use dictionary case instead of surface case" << endl;
-  cout << "  -v:   version" << endl;
   cout << "  -h:   show this help" << endl;
 #endif
   exit(EXIT_FAILURE);
