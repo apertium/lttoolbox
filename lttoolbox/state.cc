@@ -368,7 +368,8 @@ State::step(int const input, int const alt)
 
 
 void 
-State::step_case(wchar_t val, bool caseSensitive) {
+State::step_case(wchar_t val, bool caseSensitive) 
+{
   if (!iswupper(val) || caseSensitive) {
     step(val);
   } else {
@@ -606,7 +607,8 @@ State::filterFinalsTM(set<Node *> const &finals,
 
 
 void
-State::pruneCompounds(int requiredSymbol, int separationSymbol, int compound_max_elements) {
+State::pruneCompounds(int requiredSymbol, int separationSymbol, int compound_max_elements) 
+{
   int minNoOfCompoundElements = compound_max_elements;
   int *noOfCompoundElements = new int[state.size()];
 
@@ -646,7 +648,8 @@ State::pruneCompounds(int requiredSymbol, int separationSymbol, int compound_max
 
 
 void
-State::pruneStatesWithForbiddenSymbol(int forbiddenSymbol) {
+State::pruneStatesWithForbiddenSymbol(int forbiddenSymbol) 
+{
   vector<TNodeState>::iterator it = state.begin();
   while(it != state.end()) {
     vector<int> *seq = (*it).sequence;
@@ -665,7 +668,8 @@ State::pruneStatesWithForbiddenSymbol(int forbiddenSymbol) {
 
 
 bool
-State::lastPartHasRequiredSymbol(const vector<int> &seq, int requiredSymbol, int separationSymbol) {
+State::lastPartHasRequiredSymbol(const vector<int> &seq, int requiredSymbol, int separationSymbol) 
+{
   // state is final - it should be restarted it with all elements in stateset restart_state, with old symbols conserved
   bool restart=false;
   for (int n=seq.size()-1; n>=0; n--) {
@@ -683,7 +687,8 @@ State::lastPartHasRequiredSymbol(const vector<int> &seq, int requiredSymbol, int
 
 
 void
-State::restartFinals(const set<Node *> &finals, int requiredSymbol, State *restart_state, int separationSymbol) {
+State::restartFinals(const set<Node *> &finals, int requiredSymbol, State *restart_state, int separationSymbol) 
+{
 
   for (unsigned int i=0;  i<state.size(); i++) {
     TNodeState state_i = state.at(i);
@@ -711,7 +716,8 @@ State::restartFinals(const set<Node *> &finals, int requiredSymbol, State *resta
 
 
 wstring
-State::getReadableString(const Alphabet &a) {
+State::getReadableString(const Alphabet &a) 
+{
   wstring retval = L"[";
 
   for(unsigned int i=0; i<state.size(); i++) {
