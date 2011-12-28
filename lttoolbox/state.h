@@ -67,12 +67,6 @@ private:
   Pool<vector<int> > *pool;  
 
   /**
-   * Copy function
-   * @param s the state to be copied
-   */
-  void copy(State const &s);
-
-  /**
    * Destroy function
    */
   void destroy();
@@ -103,6 +97,14 @@ private:
   bool lastPartHasRequiredSymbol(const vector<int> &seq, int requiredSymbol, int separationSymbol);
 
 public:
+
+  /**
+   * Copy function
+   * @param s the state to be copied
+   */
+  void copy(State const &s);
+
+
   /**
    * Constructor
    */
@@ -206,6 +208,26 @@ public:
                       bool uppercase = false,
                       bool firstupper = false,
                       int firstchar = 0) const;
+
+
+  /**
+   * Same as previous one, but  the output is adapted to the LRX system
+   * @param finals the set of final nodes
+   * @param a the alphabet to decode strings
+   * @param escaped_chars the set of chars to be preceded with one 
+   *                      backslash
+   * @param uppercase true if the word is uppercase
+   * @param firstupper true if the first letter of a word is uppercase
+   * @param firstchar first character of the word
+   * @return the result of the transduction
+   */
+  vector<wstring> filterFinalsLRX(set<Node *> const &finals, Alphabet const &a,
+                      set<wchar_t> const &escaped_chars,
+                      bool uppercase = false,
+                      bool firstupper = false,
+                      int firstchar = 0) const;
+
+
 
 
   /**
