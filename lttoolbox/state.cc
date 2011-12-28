@@ -447,6 +447,67 @@ State::filterFinals(set<Node *> const &finals,
   return result;
 }
 
+
+vector<wstring>
+State::filterFinalsLRX(set<Node *> const &finals, 
+		    Alphabet const &alphabet,
+		    set<wchar_t> const &escaped_chars,
+		    bool uppercase, bool firstupper, int firstchar) const
+{
+  vector<wstring> results;
+  wstring result = L"";
+
+  for(size_t i = 0, limit = state.size(); i != limit; i++)
+  {
+    if(finals.find(state[i].where) != finals.end())
+    {
+      if(state[i].dirty)
+      {
+        results.push_back(result); 
+        result = L"";
+        //result += L'/';
+        unsigned int const first_char = result.size() + firstchar;
+        for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
+        {
+          if(escaped_chars.find((*(state[i].sequence))[j]) != escaped_chars.end())
+          {
+            result += L'\\';
+          }
+          alphabet.getSymbol(result, (*(state[i].sequence))[j], uppercase);
+        }
+        if(firstupper)
+        {
+  	  if(result[first_char] == L'~')
+	  {
+	    // skip post-generation mark
+	    result[first_char+1] = towupper(result[first_char+1]);
+	  }
+	  else
+	  {
+            result[first_char] = towupper(result[first_char]);
+	  }
+        }
+      }
+      else
+      {
+        //result += L'/';
+        results.push_back(result);
+        result = L"";
+        for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
+        {
+          if(escaped_chars.find((*(state[i].sequence))[j]) != escaped_chars.end())
+          {
+            result += L'\\';
+          }
+          alphabet.getSymbol(result, (*(state[i].sequence))[j]);
+        }
+      }
+    }
+  }
+  
+  return results;
+}
+
 wstring
 State::filterFinalsSAO(set<Node *> const &finals, 
 		       Alphabet const &alphabet,
