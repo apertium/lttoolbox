@@ -13,6 +13,7 @@ architecture: \fBhttp://www.apertium.org\fR.
 .B \-a \fR| 
 .B \-b \fR| 
 .B \-c \fR| 
+.B \-d \fR| 
 .B \-e \fR| 
 .B \-g \fR|
 .B \-n \fR|
@@ -30,6 +31,8 @@ architecture: \fBhttp://www.apertium.org\fR.
 .B \-\-analysis \fR| 
 .B \-\-bilingual \fR|
 .B \-\-case-sensitive \fR|
+.B \-\-debugged-gen \fR|
+.B \-\-decompose-nouns \fR|
 .B \-\-generation \fR|
 .B \-\-non-marked-gen \fR|
 .B \-\-tagged-gen \fR|
@@ -100,6 +103,9 @@ apertium-pretransfer.
 .TP
 .B \-c, \-\-case-sensitive
 Use the literal case of the incoming characters
+.TP
+.B \-d, \-\-debugged-gen
+Morph. generation with all the stuff
 .TP
 .B \-e, \-\-decompose-compounds
 Try to treat unknown words as compounds, and decompose them.
