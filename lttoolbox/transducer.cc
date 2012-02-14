@@ -662,19 +662,21 @@ bool
 Transducer::recognise(wstring patro, Alphabet &a, FILE *err)
 {
   bool accepted = false;
-  vector<int> states ;
-  states.push_back(getInitial());
-  
+  set<int> states ;
+
+  set<int> myclosure1 = closure(getInitial(), 0); 
+  states.insert(myclosure1.begin(), myclosure1.end()); 
   // For each of the characters in the input string
   for(wstring::iterator it = patro.begin(); it != patro.end(); it++)  
   {
-    vector<int> new_state;
+    set<int> new_state;        //Transducer::closure(int const state, int const epsilon_tag)
     int sym = *it;
     // For each of the current alive states
-    for(vector<int>::iterator it2 = states.begin(); it2 != states.end(); it2++)
+    for(set<int>::iterator it2 = states.begin(); it2 != states.end(); it2++)
     {
       multimap<int, int> p = transitions[*it2];
-      // For each of the transitions in the state
+      // For each of the transitions in the state 
+
       for(multimap<int, int>::iterator it3 = p.begin(); it3 != p.end(); it3++)
       { 
         
@@ -684,13 +686,15 @@ Transducer::recognise(wstring patro, Alphabet &a, FILE *err)
         //fwprintf(err, L"step: %S %C (%d), state: %d, trans: %S, targ: %d\n", patro.c_str(), *it, sym, *it2, l.c_str(), it3->second);
         if(l.find(*it) != wstring::npos || l == L"")
         {
-          new_state.push_back(it3->second); 
+          set<int> myclosure = closure(it3->second, 0);
+          new_state.insert(myclosure.begin(), myclosure.end());
+          wcerr << L"Size alives: " <<new_state.size() << endl;  
         }
       }
     }
     states = new_state;
   }
-  for(vector<int>::iterator it4 = states.begin(); it4 != states.end(); it4++)
+  for(set<int>::iterator it4 = states.begin(); it4 != states.end(); it4++)
   {
     if(isFinal(*it4)) 
     {
