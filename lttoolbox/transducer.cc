@@ -688,7 +688,7 @@ Transducer::recognise(wstring patro, Alphabet &a, FILE *err)
         {
           set<int> myclosure = closure(it3->second, 0);
           new_state.insert(myclosure.begin(), myclosure.end());
-          wcerr << L"Size alives: " <<new_state.size() << endl;  
+          //wcerr << L"Size alives: " <<new_state.size() << endl;  
         }
       }
     }
