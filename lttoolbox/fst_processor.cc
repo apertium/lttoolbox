@@ -52,17 +52,14 @@ FSTProcessor::FSTProcessor()
   compoundRSymbol = 0;
   compound_max_elements = 4;
 
-  pool = new Pool<vector<int> >(4, vector<int>(50));
-
-  initial_state = new State(pool);
-  current_state = new State(pool);
+  initial_state = new State();
+  current_state = new State();
 }
 
 FSTProcessor::~FSTProcessor()
 {
   delete current_state;
   delete initial_state;
-  delete pool;
 }
 
 void
