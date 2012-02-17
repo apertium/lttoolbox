@@ -57,8 +57,6 @@ private:
    */
   map<wstring, TransExe, Ltstr> transducers;
 
-  Pool<vector<int> > *pool;
-
   /**
    * Current state of lexical analysis
    */

@@ -27,7 +27,6 @@
 
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/node.h>
-#include <lttoolbox/pool.h>
 #include <lttoolbox/match_exe.h>
 #include <lttoolbox/match_state.h>
 #include <lttoolbox/transducer.h>
@@ -60,11 +59,6 @@ private:
   };
   
   vector<TNodeState> state;
-
-  /**
-   * Pool of wchar_t vectors, for efficience (static class)
-   */
-  Pool<vector<int> > *pool;  
 
   /**
    * Destroy function
@@ -108,7 +102,7 @@ public:
   /**
    * Constructor
    */
-  State(Pool<vector<int> > *);
+  State();
 
   /**
    * Destructor
