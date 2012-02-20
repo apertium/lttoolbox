@@ -693,6 +693,7 @@ State::pruneCompounds(int requiredSymbol, int separationSymbol, int compound_max
   int i=0;
   while(it != state.end()) {
     if (noOfCompoundElements[i] > minNoOfCompoundElements) {
+      delete (*it).sequence;
       it = state.erase(it);
       //wcerr << L"Prune - State number " << i << L" removed!" << endl;
     }
@@ -715,6 +716,7 @@ State::pruneStatesWithForbiddenSymbol(int forbiddenSymbol)
     for(int i = seq->size()-1; i>=0; i--) {
       if(seq->at(i) == forbiddenSymbol) {
         i=-1;
+        delete (*it).sequence;
         it = state.erase(it);
         found = true;
       }
