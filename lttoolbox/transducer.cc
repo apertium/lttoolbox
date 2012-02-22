@@ -657,6 +657,21 @@ Transducer::show(Alphabet &alphabet, FILE *output, int const epsilon_tag)
   }
 }
 
+int 
+Transducer::getStateSize(int const state)
+{
+ set<int> states;
+ set<int> myclosure1 = closure(state, 0);
+ states.insert(myclosure1.begin(), myclosure1.end());
+ int num_transitions = 0;
+
+ for(set<int>::iterator it2 = states.begin(); it2 != states.end(); it2++)
+ {
+   num_transitions += transitions[*it2].size();
+ }
+
+ return num_transitions;
+}
 
 bool
 Transducer::recognise(wstring patro, Alphabet &a, FILE *err)
