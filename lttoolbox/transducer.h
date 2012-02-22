@@ -255,6 +255,12 @@ public:
   bool isEmpty(int const state) const;
 
   /**
+   * Returns the number of transitions from a given state
+   * @return the number of transitions
+   */
+  int getStateSize(int const state);
+
+  /**
    * Write method
    * @param output the stream to write to
    * @param decalage offset to sum to the tags
