@@ -176,7 +176,7 @@ State::apply(wstring const input, map<int, MatchExe> &t, Alphabet &a, FILE *err)
 
 
 void
-State::apply(wstring const input, map<int, Transducer> &t, Alphabet &a, FILE *err)
+State::apply(wstring const input, map<int, Transducer> &t, map<int, wchar_t> &sc, Alphabet &a, FILE *err)
 {
   vector<TNodeState> new_state;
   //fwprintf(err, L" apply: %S\n", input.c_str());
@@ -185,6 +185,7 @@ State::apply(wstring const input, map<int, Transducer> &t, Alphabet &a, FILE *er
     state = new_state;
     return;
   }
+  wchar_t first_letter = input.at(0);
   
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
@@ -194,10 +195,14 @@ State::apply(wstring const input, map<int, Transducer> &t, Alphabet &a, FILE *er
     for(map<int, Dest>::const_iterator it = state[i].where->transitions.begin(); 
         it != state[i].where->transitions.end(); it++)
     { 
+      if(first_letter != sc[it->first] && sc[it->first] != L'*')
+      {
+        continue;
+      }
       bool found = false;
-      found = t[it->first].recognise(input, a, err); 
-      wstring sym = L"";
-      a.getSymbol(sym, it->first, false);
+      found = t[it->first].recognise(input, a, err);
+      //wstring sym = L"";
+      //a.getSymbol(sym, it->first, false);
       //fwprintf(err, L"  state: %d, transition: %d, tsize: %d\n", i, it->first, t[it->first].size());
       //fwprintf(err, L"  recognise(%S, %S) = %d ", sym.c_str(), input.c_str(), found);
     
@@ -343,9 +348,9 @@ State::step(wstring const input, map<int, MatchExe> &transducers, Alphabet &a, F
 */
 
 void
-State::step(wstring const input, map<int, Transducer> &transducers, Alphabet &a, FILE *err)
+State::step(wstring const input, map<int, Transducer> &transducers, map<int, wchar_t> &symbol_first, Alphabet &a, FILE *err)
 {
-  apply(input, transducers, a, err);
+  apply(input, transducers, symbol_first, a, err);
   epsilonClosure();
 }
 

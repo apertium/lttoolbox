@@ -71,7 +71,7 @@ private:
    */
   void apply(int const input);
 
-  void apply(wstring const input, map<int, Transducer> &t, Alphabet &a, FILE *err = stderr);
+  void apply(wstring const input, map<int, Transducer> &t, map<int, wchar_t> &sa, Alphabet &a, FILE *err = stderr);
 
   //void apply(wstring const input, map<int, MatchExe> &t, Alphabet &a, FILE *err = stderr);
 
@@ -134,7 +134,7 @@ public:
    */
   void step(int const input);
 
-  void step(wstring const input, map<int, Transducer> &t, Alphabet &a, FILE *err = stderr);
+  void step(wstring const input, map<int, Transducer> &t, map<int, wchar_t> &sa, Alphabet &a, FILE *err = stderr);
 
   //void step(wstring const input, map<int, MatchExe> &t, Alphabet &a, FILE *err = stderr);
 
@@ -166,7 +166,7 @@ public:
     * Remove states containing a forbidden symbol
     * @param forbiddenSymbol the symbol forbidden
     */
-	void pruneStatesWithForbiddenSymbol(int forbiddenSymbol);
+  void pruneStatesWithForbiddenSymbol(int forbiddenSymbol);
 
   /**
    * Print all outputs of current parsing, preceded by a bar '/',
