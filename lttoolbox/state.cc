@@ -176,7 +176,7 @@ State::apply(wstring const input, map<int, MatchExe> &t, Alphabet &a, FILE *err)
 
 
 void
-State::apply(wstring const input, map<int, Transducer> &t, map<int, wchar_t> &sc, Alphabet &a, FILE *err)
+State::apply(wstring const input, map<int, Transducer> &t, map<int, wchar_t> &sc, map<wchar_t, set<int> > &cs, Alphabet &a, FILE *err)
 {
   vector<TNodeState> new_state;
   //fwprintf(err, L" apply: %S\n", input.c_str());
@@ -189,11 +189,36 @@ State::apply(wstring const input, map<int, Transducer> &t, map<int, wchar_t> &sc
   
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
-    map<int, Dest>::const_iterator it;
-
     //it = state[i].where->transitions.find(input);
-    for(map<int, Dest>::const_iterator it = state[i].where->transitions.begin(); 
-        it != state[i].where->transitions.end(); it++)
+
+    map<int, Dest> dest_cache;
+    if(cs[first_letter].size() > 0)
+    {
+      fwprintf(err, L"[state.c] %S %C : %d %d\n", input.c_str(), first_letter, sc.size(), cs.size());
+      map<int, Dest>::const_iterator it;
+      for(set<int>::const_iterator it2 = cs[first_letter].begin(); it2 != cs[first_letter].end(); it2++)
+      { 
+        it = state[i].where->transitions.find(*it2);
+        if(it != state[i].where->transitions.end())
+        {
+          dest_cache[it->first] = it->second; 
+        }
+      }
+    }
+
+    fwprintf(err, L"[state.c] dest_cache  (i): %d\n", dest_cache.size());
+    if(dest_cache.size() == 0) 
+    {
+      dest_cache = state[i].where->transitions;
+    }
+    fwprintf(err, L"[state.c] dest_cache (ii): %d\n", dest_cache.size());
+ 
+    // state->where->transitions = map<int, Dest> = <input_sym, [output, destination_state]>
+//    for(map<int, Dest>::const_iterator it = state[i].where->transitions.begin(); 
+//        it != state[i].where->transitions.end(); it++)
+ 
+    for(map<int, Dest>::const_iterator it = dest_cache.begin(); it != dest_cache.end(); it++)
+
     { 
       if(first_letter != sc[it->first] && sc[it->first] != L'*')
       {
@@ -201,24 +226,25 @@ State::apply(wstring const input, map<int, Transducer> &t, map<int, wchar_t> &sc
       }
       bool found = false;
       found = t[it->first].recognise(input, a, err);
-      //wstring sym = L"";
-      //a.getSymbol(sym, it->first, false);
-      //fwprintf(err, L"  state: %d, transition: %d, tsize: %d\n", i, it->first, t[it->first].size());
-      //fwprintf(err, L"  recognise(%S, %S) = %d ", sym.c_str(), input.c_str(), found);
+      wstring sym = L"";
+      a.getSymbol(sym, it->first, false);
+      fwprintf(err, L"  state: %d, transition: %d, tsize: %d\n", i, it->first, t[it->first].size());
+      fwprintf(err, L"  recognise(%S, %S) = %d ", sym.c_str(), input.c_str(), found);
     
       // if recognised
       // if(it != state[i].where->transitions.end())
       if(found)
       {
-        for(int j = 0; j != it->second.size; j++)
+        map<int, Dest>::const_iterator it3 = state[i].where->transitions.find(it->first);
+        for(int j = 0; j != it3->second.size; j++)
         {
           vector<int> *new_v = new vector<int>();
           *new_v = *(state[i].sequence);
-          if(it->first != 0)
+          if(it3->first != 0)
           {
-            new_v->push_back(it->second.out_tag[j]);
+            new_v->push_back(it3->second.out_tag[j]);
           }
-          new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
+          new_state.push_back(TNodeState(it3->second.dest[j], new_v, state[i].dirty||false));
         }
         //fwprintf(err, L"recognised.\n");
       }
@@ -348,9 +374,9 @@ State::step(wstring const input, map<int, MatchExe> &transducers, Alphabet &a, F
 */
 
 void
-State::step(wstring const input, map<int, Transducer> &transducers, map<int, wchar_t> &symbol_first, Alphabet &a, FILE *err)
+State::step(wstring const input, map<int, Transducer> &transducers, map<int, wchar_t> &symbol_first, map<wchar_t, set<int> > &first_symbol, Alphabet &a, FILE *err)
 {
-  apply(input, transducers, symbol_first, a, err);
+  apply(input, transducers, symbol_first, first_symbol, a, err);
   epsilonClosure();
 }
 
@@ -465,7 +491,6 @@ State::filterFinalsLRX(set<Node *> const &finals,
     {
       if(state[i].dirty)
       {
-        results.push_back(result); 
         result = L"";
         //result += L'/';
         unsigned int const first_char = result.size() + firstchar;
@@ -489,11 +514,11 @@ State::filterFinalsLRX(set<Node *> const &finals,
             result[first_char] = towupper(result[first_char]);
 	  }
         }
+        results.push_back(result); 
       }
       else
       {
         //result += L'/';
-        results.push_back(result);
         result = L"";
         for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
         {
@@ -503,10 +528,11 @@ State::filterFinalsLRX(set<Node *> const &finals,
           }
           alphabet.getSymbol(result, (*(state[i].sequence))[j]);
         }
+        results.push_back(result);
       }
     }
   }
-  
+    
   return results;
 }
 
