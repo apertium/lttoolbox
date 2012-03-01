@@ -46,7 +46,7 @@ private:
   {
     Node *where;
     vector<int> *sequence;
-    bool dirty;
+    bool dirty; // What does "dirty" mean ? 
     
     TNodeState(Node * const &w, vector<int> * const &s, bool const &d): where(w), sequence(s), dirty(d){}
     TNodeState & operator=(TNodeState const &other)
@@ -71,7 +71,7 @@ private:
    */
   void apply(int const input);
 
-  void apply(wstring const input, map<int, Transducer> &t, map<int, wchar_t> &sa, Alphabet &a, FILE *err = stderr);
+  void apply(wstring const input, map<int, Transducer> &t, map<int, wchar_t> &sa, map<wchar_t, set<int> > &cs, Alphabet &a, FILE *err = stderr);
 
   //void apply(wstring const input, map<int, MatchExe> &t, Alphabet &a, FILE *err = stderr);
 
@@ -134,7 +134,7 @@ public:
    */
   void step(int const input);
 
-  void step(wstring const input, map<int, Transducer> &t, map<int, wchar_t> &sa, Alphabet &a, FILE *err = stderr);
+  void step(wstring const input, map<int, Transducer> &t, map<int, wchar_t> &sa, map<wchar_t, set<int> > &cs, Alphabet &a, FILE *err = stderr);
 
   //void step(wstring const input, map<int, MatchExe> &t, Alphabet &a, FILE *err = stderr);
 
