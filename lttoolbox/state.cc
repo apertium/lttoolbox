@@ -194,7 +194,7 @@ State::apply(wstring const input, map<int, Transducer> &t, map<int, wchar_t> &sc
     map<int, Dest> dest_cache;
     if(cs[first_letter].size() > 0)
     {
-      fwprintf(err, L"[state.c] %S %C : %d %d\n", input.c_str(), first_letter, sc.size(), cs.size());
+      //fwprintf(err, L"[state.c] %S %C : %d %d\n", input.c_str(), first_letter, sc.size(), cs.size());
       map<int, Dest>::const_iterator it;
       for(set<int>::const_iterator it2 = cs[first_letter].begin(); it2 != cs[first_letter].end(); it2++)
       { 
@@ -206,12 +206,12 @@ State::apply(wstring const input, map<int, Transducer> &t, map<int, wchar_t> &sc
       }
     }
 
-    fwprintf(err, L"[state.c] dest_cache  (i): %d\n", dest_cache.size());
+    //fwprintf(err, L"[state.c] dest_cache  (i): %d\n", dest_cache.size());
     if(dest_cache.size() == 0) 
     {
       dest_cache = state[i].where->transitions;
     }
-    fwprintf(err, L"[state.c] dest_cache (ii): %d\n", dest_cache.size());
+    //fwprintf(err, L"[state.c] dest_cache (ii): %d\n", dest_cache.size());
  
     // state->where->transitions = map<int, Dest> = <input_sym, [output, destination_state]>
 //    for(map<int, Dest>::const_iterator it = state[i].where->transitions.begin(); 
@@ -228,8 +228,8 @@ State::apply(wstring const input, map<int, Transducer> &t, map<int, wchar_t> &sc
       found = t[it->first].recognise(input, a, err);
       wstring sym = L"";
       a.getSymbol(sym, it->first, false);
-      fwprintf(err, L"  state: %d, transition: %d, tsize: %d\n", i, it->first, t[it->first].size());
-      fwprintf(err, L"  recognise(%S, %S) = %d ", sym.c_str(), input.c_str(), found);
+      //fwprintf(err, L"  state: %d, transition: %d, tsize: %d\n", i, it->first, t[it->first].size());
+      //fwprintf(err, L"  recognise(%S, %S) = %d ", sym.c_str(), input.c_str(), found);
     
       // if recognised
       // if(it != state[i].where->transitions.end())
