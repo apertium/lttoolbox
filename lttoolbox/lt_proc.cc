@@ -40,11 +40,12 @@ void endProgram(char *name)
   cout << "Options:" << endl;
 #if HAVE_GETOPT_LONG
   cout << "  -a, --analysis:         morphological analysis (default behavior)" << endl;
-  cout << "  -b, --bilingual:        lexical transference" << endl;
+  cout << "  -b, --bilingual:        lexical transfer" << endl;
   cout << "  -c, --case-sensitive:   use the literal case of the incoming characters" << endl;
   cout << "  -d, --debugged-gen      morph. generation with all the stuff" <<endl;
   cout << "  -e, --decompose-nouns:  Try to decompound unknown words" << endl;
   cout << "  -g, --generation:       morphological generation" << endl;
+  cout << "  -l, --tagged-gen:       morphological generation keeping lexical forms" << endl;
   cout << "  -n, --non-marked-gen    morph. generation without unknown word marks" << endl;
   cout << "  -p, --post-generation:  post-generation" << endl;
   cout << "  -s, --sao:              SAO annotation system input processing" << endl;
@@ -55,11 +56,12 @@ void endProgram(char *name)
   cout << "  -h, --help:             show this help" << endl;
 #else
   cout << "  -a:   morphological analysis (default behavior)" << endl;
-  cout << "  -b:   lecixal transference" << endl;
+  cout << "  -b:   lexical transfer" << endl;
   cout << "  -c:   use the literal case of the incoming characters" << endl;
   cout << "  -d:   morph. generation with all the stuff" << endl;
   cout << "  -e:   try to decompose unknown words as compounds" << endl;
   cout << "  -g:   morphological generation" << endl;
+  cout << "  -l:   morphological generation keeping lexical forms" << endl;
   cout << "  -n:   morph. generation without unknown word marks" << endl;
   cout << "  -p:   post-generation" << endl;
   cout << "  -s:   SAO annotation system input processing" << endl;
