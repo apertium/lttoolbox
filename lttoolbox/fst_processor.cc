@@ -1486,7 +1486,7 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
       fputwc(L'=', output);
       val = readGeneration(input, output);
     }
-    
+
     if(val == L'$' && outOfWord)
     {
       if(sf[0] == L'*' || sf[0] == L'%')
@@ -1550,8 +1550,11 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
         }
         else if(mode == gm_unknown)
         {
-          fputwc_unlocked(L'#', output);
-          writeEscaped(removeTags(sf), output);
+          if(sf != L"")
+          {
+            fputwc_unlocked(L'#', output);
+            writeEscaped(removeTags(sf), output);
+          }
         }
       }
   
