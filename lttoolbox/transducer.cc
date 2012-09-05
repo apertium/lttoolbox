@@ -687,6 +687,7 @@ Transducer::recognise(wstring patro, Alphabet &a, FILE *err)
     set<int> new_state;        //Transducer::closure(int const state, int const epsilon_tag)
     int sym = *it;
     // For each of the current alive states
+    //fwprintf(err, L"step: %S %C (%d)\n", patro.c_str(), *it, sym);
     for(set<int>::iterator it2 = states.begin(); it2 != states.end(); it2++)
     {
       multimap<int, int> p = transitions[*it2];
@@ -698,12 +699,17 @@ Transducer::recognise(wstring patro, Alphabet &a, FILE *err)
 	pair<int, int> t = a.decode(it3->first);
         wstring l = L"";
         a.getSymbol(l, t.first);
-        //fwprintf(err, L"step: %S %C (%d), state: %d, trans: %S, targ: %d\n", patro.c_str(), *it, sym, *it2, l.c_str(), it3->second);
-        if(l.find(*it) != wstring::npos || l == L"")
+        //wstring r = L"";
+        //a.getSymbol(r, t.second);
+
+        //fwprintf(err, L"  -> state: %d, trans: %S:%S, targ: %d\n", *it2, (l == L"") ?  L"ε" : l.c_str(),  (r == L"") ?  L"ε" : r.c_str(), it3->second);
+        //if(l.find(*it) != wstring::npos || l == L"" )
+        if(l.find(*it) != wstring::npos)
         {
           set<int> myclosure = closure(it3->second, 0);
+          //wcerr << L"Before closure alives: " <<new_state.size() << endl;  
           new_state.insert(myclosure.begin(), myclosure.end());
-          //wcerr << L"Size alives: " <<new_state.size() << endl;  
+          //wcerr << L"After closure alives: " <<new_state.size() << endl;  
         }
       }
     }
