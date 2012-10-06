@@ -13,7 +13,7 @@ cc_sources = alphabet.cc compiler.cc compression.cc entry_token.cc \
 library_includedir = $(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/$(GENERIC_LIBRARY_NAME)
 library_include_HEADERS = $(h_sources)
 
-bin_PROGRAMS = lt-comp lt-proc lt-expand lt-tmxcomp lt-tmxproc
+bin_PROGRAMS = lt-comp lt-proc lt-expand lt-tmxcomp lt-tmxproc lt-print
 instdir = lttoolbox
 
 lib_LTLIBRARIES= liblttoolbox3.la
@@ -25,6 +25,10 @@ lttoolboxinclude = $(prefix)/include
 lttoolboxlib = $(prefix)/lib 
 
 lttoolbox_DATA = dix.dtd
+
+lt_print_SOURCES = lt_print.cc  
+lt_print_LDADD = liblttoolbox$(GENERIC_MAJOR_VERSION).la
+lt_print_LDFLAGS = -llttoolbox$(GENERIC_MAJOR_VERSION) $(LTTOOLBOX_LIBS)
 
 lt_comp_SOURCES = lt_comp.cc  
 lt_comp_LDADD = liblttoolbox$(GENERIC_MAJOR_VERSION).la
@@ -45,6 +49,16 @@ lt_tmxcomp_LDFLAGS = -llttoolbox$(GENERIC_MAJOR_VERSION) $(LTTOOLBOX_LIBS)
 lt_tmxproc_SOURCES = lt_tmxproc.cc
 lt_tmxproc_LDADD = liblttoolbox$(GENERIC_MAJOR_VERSION).la
 lt_tmxproc_LDFLAGS = -llttoolbox$(GENERIC_MAJOR_VERSION) $(LTTOOLBOX_LIBS)
+
+#lt-validate-dictionary: Makefile.am validate-header.sh
+#	@echo "Creating lt-validate-dictionary script"
+#	@echo "#!$(BASH)" > $@
+#	@cat validate-header.sh >> $@
+#	@echo "$(XMLLINT) --dtdvalid $(apertiumdir)/dix.dtd --noout \$$FILE1 && exit 0;" >> $@
+#	@echo "exit 1;" >> $@
+#	@chmod a+x $@
+
+
 
 man_MANS = lt-comp.1 lt-expand.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1
 
