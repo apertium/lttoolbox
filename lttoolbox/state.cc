@@ -98,168 +98,6 @@ State::init(Node *initial)
   epsilonClosure();  
 }  
 
-/*
-void
-State::apply(wstring const input, map<int, MatchExe> &t, Alphabet &a, FILE *err)
-{
-  vector<TNodeState> new_state;
-  fwprintf(err, L" apply: %S\n", input.c_str());
-  if(input == L"")
-  {
-    state = new_state;
-    return;
-  }
-  
-  for(size_t i = 0, limit = state.size(); i != limit; i++)
-  {
-    map<int, Dest>::const_iterator it;
-
-    //it = state[i].where->transitions.find(input);
-    for(map<int, Dest>::const_iterator it = state[i].where->transitions.begin(); 
-        it != state[i].where->transitions.end(); it++)
-    { 
-      MatchExe me = t[it->first];
-      MatchState ms;
-      fwprintf(err, L"    it->first: %d\n", it->first);
-      bool found = false;
-      ms.clear();
-      ms.init(me.getInitial());
-     
-      for(wstring::const_iterator it9 = input.begin(); it9 != input.end(); it9++) 
-      {
-        fwprintf(err, L"    %C:%C = %d (%d)\n", *it9, *it9, a(*it9, *it9), ms.size());
-        if(ms.size() == 0)
-        { 
-          break;
-        }
-        ms.step(a(*it9, *it9));
-      } 
-      int val = ms.classifyFinals(me.getFinals());
-      if(val != -1) 
-      { 
-        found = true;
-      }
-
-      //found = t[it->first].recognise(input, a, err); 
-      wstring sym = L"";
-      a.getSymbol(sym, it->first, false);
-      fwprintf(err, L"  state: %d, transition: %d\n", i, it->first);
-      fwprintf(err, L"  recognise(%S, %S) = %d ", sym.c_str(), input.c_str(), found);
-    
-      // if recognised
-      // if(it != state[i].where->transitions.end())
-      if(found)
-      {
-        for(int j = 0; j != it->second.size; j++)
-        {
-          vector<int> *new_v = pool->get();
-          *new_v = *(state[i].sequence);
-          if(it->first != 0)
-          {
-            new_v->push_back(it->second.out_tag[j]);
-          }
-          new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
-        }
-        fwprintf(err, L"recognised.\n");
-      }
-      else
-      {
-        fwprintf(err, L"not recognised.\n");
-      }
-    }
-    pool->release(state[i].sequence);
-  }
-  
-  state = new_state;
-}
-*/
-
-
-void
-State::apply(wstring const input, map<int, Transducer> &t, map<int, wchar_t> &sc, map<wchar_t, set<int> > &cs, Alphabet &a, FILE *err)
-{
-  vector<TNodeState> new_state;
-  //fwprintf(err, L" apply: %S\n", input.c_str());
-  if(input == L"")
-  {
-    state = new_state;
-    return;
-  }
-  wchar_t first_letter = input.at(0);
-  
-  for(size_t i = 0, limit = state.size(); i != limit; i++)
-  {
-    //it = state[i].where->transitions.find(input);
-
-    map<int, Dest> dest_cache;
-    if(cs[first_letter].size() > 0)
-    {
-      //fwprintf(err, L"[state.c] %S %C : %d %d\n", input.c_str(), first_letter, sc.size(), cs.size());
-      map<int, Dest>::const_iterator it;
-      for(set<int>::const_iterator it2 = cs[first_letter].begin(); it2 != cs[first_letter].end(); it2++)
-      { 
-        it = state[i].where->transitions.find(*it2);
-        if(it != state[i].where->transitions.end())
-        {
-          dest_cache[it->first] = it->second; 
-        }
-      }
-    }
-
-    //fwprintf(err, L"[state.c] dest_cache  (i): %d\n", dest_cache.size());
-    if(dest_cache.size() == 0) 
-    {
-      dest_cache = state[i].where->transitions;
-    }
-    //fwprintf(err, L"[state.c] dest_cache (ii): %d\n", dest_cache.size());
- 
-    // state->where->transitions = map<int, Dest> = <input_sym, [output, destination_state]>
-//    for(map<int, Dest>::const_iterator it = state[i].where->transitions.begin(); 
-//        it != state[i].where->transitions.end(); it++)
- 
-    for(map<int, Dest>::const_iterator it = dest_cache.begin(); it != dest_cache.end(); it++)
-
-    { 
-      if(first_letter != sc[it->first] && sc[it->first] != L'*')
-      {
-        continue;
-      }
-      bool found = false;
-      found = t[it->first].recognise(input, a, err);
-      wstring sym = L"";
-      a.getSymbol(sym, it->first, false);
-      //fwprintf(err, L"  state: %d, transition: %d, tsize: %d\n", i, it->first, t[it->first].size());
-      //fwprintf(err, L"  recognise(%S, %S) = %d ", sym.c_str(), input.c_str(), found);
-    
-      // if recognised
-      // if(it != state[i].where->transitions.end())
-      if(found)
-      {
-        map<int, Dest>::const_iterator it3 = state[i].where->transitions.find(it->first);
-        for(int j = 0; j != it3->second.size; j++)
-        {
-          vector<int> *new_v = new vector<int>();
-          *new_v = *(state[i].sequence);
-          if(it3->first != 0)
-          {
-            new_v->push_back(it3->second.out_tag[j]);
-          }
-          new_state.push_back(TNodeState(it3->second.dest[j], new_v, state[i].dirty||false));
-        }
-        //fwprintf(err, L"recognised.\n");
-      }
-      else
-      {
-        //fwprintf(err, L"not recognised.\n");
-      }
-  
-    }
-    delete state[i].sequence;
-  }
-  
-  state = new_state;
-}
-
 void
 State::apply(int const input)
 {
@@ -364,22 +202,6 @@ State::epsilonClosure()
   }
 }
 
-/*
-void
-State::step(wstring const input, map<int, MatchExe> &transducers, Alphabet &a, FILE *err)
-{
-  apply(input, transducers, a, err);
-  epsilonClosure();
-}
-*/
-
-void
-State::step(wstring const input, map<int, Transducer> &transducers, map<int, wchar_t> &symbol_first, map<wchar_t, set<int> > &first_symbol, Alphabet &a, FILE *err)
-{
-  apply(input, transducers, symbol_first, first_symbol, a, err);
-  epsilonClosure();
-}
-
 void
 State::step(int const input)
 {
@@ -476,65 +298,58 @@ State::filterFinals(set<Node *> const &finals,
 }
 
 
-vector<wstring>
+set<pair<wstring, vector<wstring> > >
 State::filterFinalsLRX(set<Node *> const &finals, 
 		    Alphabet const &alphabet,
 		    set<wchar_t> const &escaped_chars,
 		    bool uppercase, bool firstupper, int firstchar) const
 {
-  vector<wstring> results;
-  wstring result = L"";
+  set<pair<wstring, vector<wstring> > > results;
+
+  vector<wstring> current_result;
+  wstring rule_id = L""; 
+
+  // /<$><select>station<n><ANY_TAG><$><skip><6>/<$><select>station<n><ANY_TAG><$><skip><6>
+
+  // if <$> current_result.push_back(current_word)
+  // if /   results.insert(current_result)
 
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     if(finals.find(state[i].where) != finals.end())
     {
-      if(state[i].dirty)
+      current_result.clear();
+      rule_id = L"";
+      wstring current_word = L"";
+      for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
       {
-        result = L"";
-        //result += L'/';
-        unsigned int const first_char = result.size() + firstchar;
-        for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
+        if(escaped_chars.find((*(state[i].sequence))[j]) != escaped_chars.end())
         {
-          if(escaped_chars.find((*(state[i].sequence))[j]) != escaped_chars.end())
+          current_word += L'\\';
+        }
+        wstring sym = L"";
+        alphabet.getSymbol(sym, (*(state[i].sequence))[j], uppercase);
+        if(sym == L"<$>") 
+        { 
+          if(current_word != L"")  
           {
-            result += L'\\';
+            current_result.push_back(current_word); 
           }
-          alphabet.getSymbol(result, (*(state[i].sequence))[j], uppercase);
+          current_word = L"";
         }
-        if(firstupper)
+        else 
         {
-  	  if(result[first_char] == L'~')
-	  {
-	    // skip post-generation mark
-	    result[first_char+1] = towupper(result[first_char+1]);
-	  }
-	  else
-	  {
-            result[first_char] = towupper(result[first_char]);
-	  }
+          current_word += sym; 
         }
-        results.push_back(result); 
       }
-      else
-      {
-        //result += L'/';
-        result = L"";
-        for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
-        {
-          if(escaped_chars.find((*(state[i].sequence))[j]) != escaped_chars.end())
-          {
-            result += L'\\';
-          }
-          alphabet.getSymbol(result, (*(state[i].sequence))[j]);
-        }
-        results.push_back(result);
-      }
+      rule_id = current_word;
+      results.insert(make_pair(rule_id, current_result)); 
     }
   }
     
   return results;
 }
+
 
 wstring
 State::filterFinalsSAO(set<Node *> const &finals, 
