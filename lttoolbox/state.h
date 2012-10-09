@@ -78,6 +78,8 @@ private:
    */
   void apply(int const input, int const alt);
 
+  void apply(int const input, int const alt1, int const alt2);
+
   /**
    * Calculate the epsilon closure over the current state, replacing
    * its content.
@@ -137,7 +139,12 @@ public:
    */
   void step(int const input, int const alt);
 
+  void step(int const input, int const alt1, int const alt2);
+
   void step_case(wchar_t val, bool caseSensitive);
+
+  void step_case(wchar_t val, wchar_t val2, bool caseSensitive);
+
 
   /**
    * Init the state with the initial node and empty output
