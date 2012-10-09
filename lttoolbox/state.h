@@ -71,10 +71,6 @@ private:
    */
   void apply(int const input);
 
-  void apply(wstring const input, map<int, Transducer> &t, map<int, wchar_t> &sa, map<wchar_t, set<int> > &cs, Alphabet &a, FILE *err = stderr);
-
-  //void apply(wstring const input, map<int, MatchExe> &t, Alphabet &a, FILE *err = stderr);
-
   /**
    * Make a transition, version for lowercase and uppercase letters
    * @param input the input symbol
@@ -133,10 +129,6 @@ public:
    * @param input the input symbol
    */
   void step(int const input);
-
-  void step(wstring const input, map<int, Transducer> &t, map<int, wchar_t> &sa, map<wchar_t, set<int> > &cs, Alphabet &a, FILE *err = stderr);
-
-  //void step(wstring const input, map<int, MatchExe> &t, Alphabet &a, FILE *err = stderr);
 
   /**
    * step = apply + epsilonClosure
@@ -215,11 +207,13 @@ public:
    * @param firstchar first character of the word
    * @return the result of the transduction
    */
-  vector<wstring> filterFinalsLRX(set<Node *> const &finals, Alphabet const &a,
+
+  set<pair<wstring, vector<wstring> > > filterFinalsLRX(set<Node *> const &finals, Alphabet const &a,
                       set<wchar_t> const &escaped_chars,
                       bool uppercase = false,
                       bool firstupper = false,
                       int firstchar = 0) const;
+
 
 
 
