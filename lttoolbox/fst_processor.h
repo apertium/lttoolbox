@@ -128,6 +128,12 @@ private:
   bool outOfWord;
 
   /**
+   * true if we're automatically removing surface forms.
+   */
+  bool biltransSurfaceForms;
+
+
+  /**
    * if true, makes always difference between uppercase and lowercase
    * characters
    */
@@ -366,6 +372,7 @@ public:
 
   void setCaseSensitiveMode(bool const value);
   void setDictionaryCaseMode(bool const value);
+  void setBiltransSurfaceForms(bool const value);
   void setNullFlush(bool const value);
   bool getNullFlush();
   bool getDecompoundingMode();

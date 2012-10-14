@@ -47,6 +47,7 @@ void endProgram(char *name)
   cout << "  -g, --generation:       morphological generation" << endl;
   cout << "  -l, --tagged-gen:       morphological generation keeping lexical forms" << endl;
   cout << "  -n, --non-marked-gen    morph. generation without unknown word marks" << endl;
+  cout << "  -o, --surf-bilingual:   lexical transfer with surface forms" << endl;
   cout << "  -p, --post-generation:  post-generation" << endl;
   cout << "  -s, --sao:              SAO annotation system input processing" << endl;
   cout << "  -t, --transliteration:  apply transliteration dictionary" << endl;
@@ -63,6 +64,7 @@ void endProgram(char *name)
   cout << "  -g:   morphological generation" << endl;
   cout << "  -l:   morphological generation keeping lexical forms" << endl;
   cout << "  -n:   morph. generation without unknown word marks" << endl;
+  cout << "  -o:   lexical transfer with surface forms" << endl;
   cout << "  -p:   post-generation" << endl;
   cout << "  -s:   SAO annotation system input processing" << endl;
   cout << "  -t:   apply transliteration dictionary" << endl;
@@ -92,6 +94,7 @@ int main(int argc, char *argv[])
     {
       {"analysis",        0, 0, 'a'},
       {"bilingual",       0, 0, 'b'},
+      {"surf-bilingual",  0, 0, 'o'},
       {"generation",      0, 0, 'g'},
       {"non-marked-gen",  0, 0, 'n'},
       {"debugged-gen",    0, 0, 'd'},
@@ -111,9 +114,9 @@ int main(int argc, char *argv[])
   {
 #if HAVE_GETOPT_LONG
     int option_index;
-    int c = getopt_long(argc, argv, "abceglndpstzwvh", long_options, &option_index);
+    int c = getopt_long(argc, argv, "abceglndopstzwvh", long_options, &option_index);
 #else
-    int c = getopt(argc, argv, "abceglndpstzwvh");
+    int c = getopt(argc, argv, "abceglndopstzwvh");
 #endif    
 
     if(c == -1)
@@ -130,6 +133,7 @@ int main(int argc, char *argv[])
     case 'e':      
     case 'a':
     case 'b':
+    case 'o':
     case 'l':
     case 'g':
     case 'n':
@@ -273,6 +277,13 @@ int main(int argc, char *argv[])
         fstp.transliteration(input, output);
         break;
         
+      case 'o':
+        fstp.initBiltrans();
+        checkValidity(fstp);
+        fstp.setBiltransSurfaceForms(true);
+        fstp.bilingual(input, output);
+        break;
+   
       case 'b':
         fstp.initBiltrans();
         checkValidity(fstp);
