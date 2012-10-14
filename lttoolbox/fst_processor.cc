@@ -2237,12 +2237,34 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
   int val;			// the alphabet value of current symbol, and
   wstring symbol = L"";		// the current symbol as a string
   bool seentags = false;  // have we seen any tags at all in the analysis?
+
+  bool seensurface = false;
+  wstring surface = L"";
   
   while(true)			// ie. while(val != 0x7fffffff)
   {
     tr = readBilingual(input, output);
     symbol = tr.first;
     val = tr.second;
+
+    //fwprintf(stderr, L"> %S : %C : %d\n", tr.first.c_str(), tr.second, tr.second);
+    if(biltransSurfaceForms && !seensurface && !outOfWord) 
+    {
+      while(val != L'/' && val != 0x7fffffff) 
+      {
+        surface = surface + symbol; 
+        alphabet.getSymbol(surface, val);
+        tr = readBilingual(input, output);
+        symbol = tr.first;
+        val = tr.second;
+        //fwprintf(stderr, L" == %S : %C : %d => %S\n", symbol.c_str(), val, val, surface.c_str());
+      }
+      seensurface = true;
+      tr = readBilingual(input, output);
+      symbol = tr.first;
+      val = tr.second;
+    }
+
     if (val == 0x7fffffff) 
     {
       break;
@@ -2269,10 +2291,18 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
         printWordBilingual(sf, compose(result, queue), output);
       }
       else
-      {
-        printWordBilingual(sf, L"/@"+sf, output);
+      { //xxx
+        if(biltransSurfaceForms) 
+        {
+          printWordBilingual(surface, L"/@"+surface, output);
+        }
+        else
+        { 
+          printWordBilingual(sf, L"/@"+sf, output);
+        }
       }
-  
+      seensurface = false;
+      surface = L""; 
       queue = L"";
       result = L"";
       current_state = *initial_state;
@@ -2918,6 +2948,12 @@ FSTProcessor::removeTags(wstring const &str)
   return str;
 }
 
+
+void
+FSTProcessor::setBiltransSurfaceForms(bool const value)
+{
+  biltransSurfaceForms = value;
+}
 
 void
 FSTProcessor::setCaseSensitiveMode(bool const value)
