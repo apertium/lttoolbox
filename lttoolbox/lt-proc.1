@@ -12,6 +12,7 @@ architecture: \fBhttp://www.apertium.org\fR.
 [
 .B \-a \fR| 
 .B \-b \fR| 
+.B \-o \fR| 
 .B \-c \fR| 
 .B \-d \fR| 
 .B \-e \fR| 
@@ -30,6 +31,7 @@ architecture: \fBhttp://www.apertium.org\fR.
 [
 .B \-\-analysis \fR| 
 .B \-\-bilingual \fR|
+.B \-\-surf-bilingual \fR|
 .B \-\-case-sensitive \fR|
 .B \-\-debugged-gen \fR|
 .B \-\-decompose-nouns \fR|
@@ -101,6 +103,12 @@ multiple lexical forms in the target language for a given lexical
 form in the source language. Works tipically with the output of
 apertium-pretransfer.
 .TP
+.B \-o, \-\-surf-bilingual
+As with \-b, but takes input from apertium\-tagger \-p , with
+surface forms, and if the lexical form is not found in the bilingual
+dictionary, it outputs the surface form of the word. 
+.TP
+
 .B \-c, \-\-case-sensitive
 Use the literal case of the incoming characters
 .TP
