@@ -48,6 +48,7 @@ FSTProcessor::FSTProcessor()
   nullFlush = false;
   nullFlushGeneration = false;
   showControlSymbols = false;
+  biltransSurfaceForms = false;  
   compoundOnlyLSymbol = 0;
   compoundRSymbol = 0;
   compound_max_elements = 4;
