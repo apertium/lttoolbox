@@ -57,6 +57,10 @@ then ARCH=$($(which uname) -m)
 else ARCH=$($(which arch))
 fi
 
+if test x$(dpkg-architecture -qDEB_HOST_ARCH) = xpowerpcspe
+then ARCH=powerpcspe
+fi
+
 if test x$ARCH = xppc
 then
   AC_MSG_RESULT([PowerPC])
