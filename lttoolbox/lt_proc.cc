@@ -46,6 +46,7 @@ void endProgram(char *name)
   cout << "  -e, --decompose-nouns:  Try to decompound unknown words" << endl;
   cout << "  -g, --generation:       morphological generation" << endl;
   cout << "  -l, --tagged-gen:       morphological generation keeping lexical forms" << endl;
+  cout << "  -m, --tagged-nm-gen:    same as -l but without unknown word marks" << endl;                              
   cout << "  -n, --non-marked-gen    morph. generation without unknown word marks" << endl;
   cout << "  -o, --surf-bilingual:   lexical transfer with surface forms" << endl;
   cout << "  -p, --post-generation:  post-generation" << endl;
@@ -99,6 +100,7 @@ int main(int argc, char *argv[])
       {"non-marked-gen",  0, 0, 'n'},
       {"debugged-gen",    0, 0, 'd'},
       {"tagged-gen",      0, 0, 'l'},
+      {"tagged-nm-gen",   0, 0, 'm'},
       {"post-generation", 0, 0, 'p'},
       {"sao",             0, 0, 's'},
       {"transliteration", 0, 0, 't'},
@@ -135,6 +137,7 @@ int main(int argc, char *argv[])
     case 'b':
     case 'o':
     case 'l':
+    case 'm':
     case 'g':
     case 'n':
     case 'd':
@@ -253,11 +256,19 @@ int main(int argc, char *argv[])
         fstp.initGeneration();
         checkValidity(fstp);
         fstp.generation(input, output, gm_all);
+        break;
       
       case 'l':
         fstp.initGeneration();
         checkValidity(fstp);
         fstp.generation(input, output, gm_tagged);
+        break;
+
+      case 'm':
+        fstp.initGeneration();
+        checkValidity(fstp);
+        fstp.generation(input, output, gm_tagged_nm);
+        break;
       
       case 'p':
         fstp.initPostgeneration();

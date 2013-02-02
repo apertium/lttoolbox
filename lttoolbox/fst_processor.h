@@ -43,7 +43,8 @@ enum GenerationMode
   gm_clean,      // clear all
   gm_unknown,    // display unknown words, clear transfer and generation tags
   gm_all,        // display all
-  gm_tagged      // tagged generation
+  gm_tagged,     // tagged generation
+  gm_tagged_nm   // clean tagged generation
 };
 
 /**
