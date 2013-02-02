@@ -1515,6 +1515,10 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
         {
           writeEscaped(removeTags(sf), output);
         }
+        else if(mode == gm_tagged)
+        {
+          writeEscaped(removeTags(sf), output);
+        }
       }
       else if(current_state.isFinal(all_finals))
       {
