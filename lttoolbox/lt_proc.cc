@@ -116,9 +116,9 @@ int main(int argc, char *argv[])
   {
 #if HAVE_GETOPT_LONG
     int option_index;
-    int c = getopt_long(argc, argv, "abceglndopstzwvh", long_options, &option_index);
+    int c = getopt_long(argc, argv, "abceglmndopstzwvh", long_options, &option_index);
 #else
-    int c = getopt(argc, argv, "abceglndopstzwvh");
+    int c = getopt(argc, argv, "abceglmndopstzwvh");
 #endif    
 
     if(c == -1)
