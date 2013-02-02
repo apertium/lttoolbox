@@ -1492,7 +1492,7 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
     {
       if(sf[0] == L'*' || sf[0] == L'%')
       {
-	if(mode != gm_clean)
+	if(mode != gm_clean && mode != gm_tagged_nm)
         {
 	  writeEscaped(sf, output);
 	}
@@ -1519,13 +1519,17 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
         {
           writeEscaped(removeTags(sf), output);
         }
+        else if(mode == gm_tagged_nm)
+        {
+          writeEscaped(removeTags(sf.substr(1)), output);
+        }
       }
       else if(current_state.isFinal(all_finals))
       {
         bool uppercase = sf.size() > 1 && iswupper(sf[1]);
         bool firstupper= iswupper(sf[0]);
 
-        if(mode == gm_tagged)
+        if(mode == gm_tagged || mode == gm_tagged_nm)
         {
 	  fputwc_unlocked(L'^', output);
         }
@@ -1534,7 +1538,7 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
                                                   escaped_chars,
                                                   uppercase, firstupper).substr(1).c_str(),
 						  output);
-        if(mode == gm_tagged)
+        if(mode == gm_tagged || mode == gm_tagged_nm)
         {
 	  fputwc_unlocked(L'/', output);
 	  fputws_unlocked(sf.c_str(), output);
@@ -1560,6 +1564,15 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
             fputwc_unlocked(L'#', output);
             writeEscaped(removeTags(sf), output);
           }
+        }
+        else if(mode == gm_tagged)
+        {
+          fputwc_unlocked(L'#', output);
+          writeEscaped(removeTags(sf), output);
+        }
+        else if(mode == gm_tagged_nm)
+        {
+          writeEscaped(removeTags(sf), output);        
         }
       }
   
