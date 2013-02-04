@@ -590,6 +590,27 @@ FSTProcessor::writeEscaped(wstring const &str, FILE *output)
 }
 
 void
+FSTProcessor::writeEscapedWithTags(wstring const &str, FILE *output)
+{
+  for(unsigned int i = 0, limit = str.size(); i < limit; i++)
+  {    
+    if(str[i] == L'<' && i >=1 && str[i-1] != L'\\')
+    {
+      fputws_unlocked(str.substr(i).c_str(), output);
+      return;
+    }
+
+    if(escaped_chars.find(str[i]) != escaped_chars.end())
+    {
+      fputwc_unlocked(L'\\', output);
+    }
+    fputwc_unlocked(str[i], output);
+  } 
+}
+
+
+
+void
 FSTProcessor::printWord(wstring const &sf, wstring const &lf, FILE *output)
 {
   fputwc_unlocked(L'^', output);
@@ -1541,7 +1562,8 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
         if(mode == gm_tagged || mode == gm_tagged_nm)
         {
 	  fputwc_unlocked(L'/', output);
-	  fputws_unlocked(sf.c_str(), output);
+	  writeEscapedWithTags(sf, output);
+//	  fputws_unlocked(sf.c_str(), output);
 	  fputwc_unlocked(L'$', output);
         }
 
