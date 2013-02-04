@@ -281,6 +281,16 @@ private:
    */
   void writeEscaped(wstring const &str, FILE *output);
 
+
+  /**
+   * Write a string to an output stream, escaping all escapable characters
+   * but keeping symbols without escaping
+   * @param str the string to write, escaping characters
+   * @param output the stream to write in
+   */
+  void writeEscapedWithTags(wstring const &str, FILE *output);
+
+
   /**
    * Checks if an string ends with a particular suffix
    * @param str the string to test
