@@ -1517,9 +1517,17 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
         {
 	  writeEscaped(sf, output);
 	}
-	else
+	else if (mode == gm_clean)
 	{
 	  writeEscaped(sf.substr(1), output);
+	}
+	else if(mode == gm_tagged_nm)
+	{
+	  fputwc_unlocked(L'^', output);        
+	  writeEscaped(removeTags(sf.substr(1)), output);
+	  fputwc_unlocked(L'/', output);          
+          writeEscapedWithTags(sf, output);
+	  fputwc_unlocked(L'$', output);
 	}
       }
       else if(sf[0] == L'@')
@@ -1541,8 +1549,12 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
           writeEscaped(removeTags(sf), output);
         }
         else if(mode == gm_tagged_nm)
-        {
-          writeEscaped(removeTags(sf.substr(1)), output);
+        { 
+	  fputwc_unlocked(L'^', output);        
+	  writeEscaped(removeTags(sf.substr(1)), output);
+	  fputwc_unlocked(L'/', output);          
+          writeEscapedWithTags(sf, output);
+	  fputwc_unlocked(L'$', output);
         }
       }
       else if(current_state.isFinal(all_finals))
@@ -1563,7 +1575,6 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
         {
 	  fputwc_unlocked(L'/', output);
 	  writeEscapedWithTags(sf, output);
-//	  fputws_unlocked(sf.c_str(), output);
 	  fputwc_unlocked(L'$', output);
         }
 
@@ -1594,7 +1605,12 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
         }
         else if(mode == gm_tagged_nm)
         {
-          writeEscaped(removeTags(sf), output);        
+	  fputwc_unlocked(L'^', output);        
+	  writeEscaped(removeTags(sf), output);
+	  fputwc_unlocked(L'/', output);          
+	  fputwc_unlocked(L'#', output);          
+          writeEscapedWithTags(sf, output);
+	  fputwc_unlocked(L'$', output);
         }
       }
   
