@@ -648,7 +648,7 @@ Compiler::procEntry()
   if((atributo != L"" && atributo != direction) 
    || ignore == COMPILER_IGNORE_YES_VAL
    || (altval != L"" && altval != alt)
-   || (direction == COMPILER_RESTRICTION_RL_VAL && varval != "" && varval != variant))
+   || (direction == COMPILER_RESTRICTION_RL_VAL && varval != L"" && varval != variant))
   {
     // parse to the end of the entry
     wstring name = L"";
