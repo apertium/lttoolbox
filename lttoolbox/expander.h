@@ -42,6 +42,16 @@ private:
   xmlTextReaderPtr reader;
   
   /**
+   * The alt value
+   */
+  wstring alt;
+  
+  /**
+   * The variant value
+   */
+  wstring variant;
+  
+  /**
    * The paradigm being compiled
    */
   wstring current_paradigm;
@@ -186,6 +196,17 @@ public:
    * Compile dictionary to letter transducers
    */
   void expand(string const &fichero, FILE *output);
+  /**
+   * Set the alt value to use in compilation
+   * @param a the value
+   */
+   void setAltValue(string const &a);
+
+  /**
+   * Set the variant value to use in compilation
+   * @param v the value
+   */
+   void setVariantValue(string const &v);
 };
 
 

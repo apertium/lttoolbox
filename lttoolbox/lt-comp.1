@@ -10,6 +10,22 @@ architecture: \fBhttp://www.apertium.org\fR.
 .SH SYNOPSIS
 .B lt-comp
 [
+.B \-a \fR| 
+.B \-v \fR| 
+.B \-h
+]
+[
+.B lr \fR| 
+.B rl
+] dictionary_file output_file
+.PP
+.B lt-comp
+[
+.B \-\-alt \fR| 
+.B \-\-var \fR| 
+.B \-\-help
+]
+[
 .B lr \fR| 
 .B rl
 ] dictionary_file output_file
@@ -22,6 +38,15 @@ representation (a class of finite-state transducers called augmented
 letter transducers).
 .PP
 .SH OPTIONS
+.TP
+.B \-a, \-\-alt
+Sets the value of the \fIalt\fR attribute to use in compilation
+.TP
+.B \-v, \-\-var
+Sets the value of the \fIv\fR attribute to use in compilation
+.TP
+.B \-h, \-\-help
+Prints a short help message
 .TP
 .B lr
 The resulting transducer will process dictionary entries

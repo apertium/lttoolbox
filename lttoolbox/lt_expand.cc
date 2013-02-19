@@ -24,6 +24,7 @@
 #include <iostream>
 #include <libgen.h>
 #include <string>
+#include <getopt.h>
 
 #ifdef _MSC_VER
 #include <io.h>
@@ -45,14 +46,57 @@ void endProgram(char *name)
 int main(int argc, char *argv[])
 {
   FILE *input = NULL, *output = NULL;
+  Expander e;
 
-  switch(argc)
+#if HAVE_GETOPT_LONG
+  int option_index=0;
+#endif
+
+  while (true) {
+#if HAVE_GETOPT_LONG
+    static struct option long_options[] =
+    {
+      {"alt",      required_argument, 0, 'a'},
+      {"var",      required_argument, 0, 'v'},
+      {"help",     no_argument,       0, 'h'}, 
+      {0, 0, 0, 0}
+    };
+
+    int cnt=getopt_long(argc, argv, "a:v:h", long_options, &option_index);
+#else
+    int cnt=getopt(argc, argv, "a:v:h");
+#endif
+    if (cnt==-1)
+      break;
+
+    switch (cnt)
+    {
+      case 'a':
+        e.setAltValue(optarg);
+        break;
+
+      case 'v':
+        e.setVariantValue(optarg);
+        break;
+
+      case 'h':
+      default:
+        endProgram(argv[0]);
+        break;
+    }
+  }
+
+  string infile;
+  string outfile;
+
+  switch(argc - optind + 1)
   {
     case 2:
-      input = fopen(argv[1], "rb");
+      infile = argv[argc-1];
+      input = fopen(infile.c_str(), "rb");
       if(input == NULL)
       {
-        cerr << "Error: Cannot open file '" << argv[1] << "'." << endl;
+        cerr << "Error: Cannot open file '" << infile << "'." << endl;
         exit(EXIT_FAILURE);
       }      
       fclose(input);
@@ -60,18 +104,20 @@ int main(int argc, char *argv[])
       break;
     
     case 3:
-      input = fopen(argv[1], "rb");
+      infile = argv[argc-2];
+      input = fopen(infile.c_str(), "rb");
       if(input == NULL)
       {
-        cerr << "Error: Cannot open file '" << argv[1] << "'." << endl;
+        cerr << "Error: Cannot open file '" << infile << "'." << endl;
         exit(EXIT_FAILURE);
       }
       fclose(input);
 
-      output = fopen(argv[2], "wb");
+      outfile = argv[argc-1];
+      output = fopen(argv[argc-1], "wb");
       if(output == NULL)
       {
-        cerr << "Error: Cannot open file '" << argv[2] << "'." << endl;
+        cerr << "Error: Cannot open file '" << outfile << "'." << endl;
         exit(EXIT_FAILURE);
       }
       break;
@@ -85,8 +131,7 @@ int main(int argc, char *argv[])
   _setmode(_fileno(output), _O_U8TEXT);
 #endif
 
-  Expander e;
-  e.expand(argv[1], output);
+  e.expand(infile, output);
   fclose(output);
   
   return EXIT_SUCCESS;

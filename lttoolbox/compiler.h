@@ -44,6 +44,16 @@ private:
   xmlTextReaderPtr reader;
   
   /**
+   * The alt value
+   */
+  wstring alt;
+  
+  /**
+   * The variant value
+   */
+  wstring variant;
+  
+  /**
    * The paradigm being compiled
    */
   wstring current_paradigm;
@@ -264,6 +274,8 @@ public:
   static wstring const COMPILER_LEMMA_ATTR;
   static wstring const COMPILER_IGNORE_ATTR;
   static wstring const COMPILER_IGNORE_YES_VAL;
+  static wstring const COMPILER_ALT_ATTR;
+  static wstring const COMPILER_V_ATTR;
 
 
   /**
@@ -292,6 +304,18 @@ public:
    * @param fd the stream where write the result
    */
   void write(FILE *fd);
+
+  /**
+   * Set the alt value to use in compilation
+   * @param a the value
+   */
+   void setAltValue(string const &a);
+
+  /**
+   * Set the variant value to use in compilation
+   * @param v the value
+   */
+   void setVariantValue(string const &v);
 };
 
 

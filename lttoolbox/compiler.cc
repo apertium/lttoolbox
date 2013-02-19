@@ -56,6 +56,8 @@ wstring const Compiler::COMPILER_GROUP_ELEM         = L"g";
 wstring const Compiler::COMPILER_LEMMA_ATTR         = L"lm";
 wstring const Compiler::COMPILER_IGNORE_ATTR        = L"i";
 wstring const Compiler::COMPILER_IGNORE_YES_VAL     = L"yes";
+wstring const Compiler::COMPILER_ALT_ATTR           = L"alt";
+wstring const Compiler::COMPILER_V_ATTR             = L"v";
 
 Compiler::Compiler()
 {
@@ -639,9 +641,14 @@ Compiler::procEntry()
 {
   wstring atributo=this->attrib(COMPILER_RESTRICTION_ATTR);
   wstring ignore = this->attrib(COMPILER_IGNORE_ATTR);
+  wstring altval = this->attrib(COMPILER_ALT_ATTR);
+  wstring varval = this->attrib(COMPILER_V_ATTR);
 
   // if entry is masked by a restriction of direction or an ignore mark
-  if((atributo != L"" && atributo != direction) || ignore == COMPILER_IGNORE_YES_VAL)
+  if((atributo != L"" && atributo != direction) 
+   || ignore == COMPILER_IGNORE_YES_VAL
+   || (altval != L"" && altval != alt)
+   || (direction == COMPILER_RESTRICTION_RL_VAL && varval != "" && varval != variant))
   {
     // parse to the end of the entry
     wstring name = L"";
@@ -851,4 +858,16 @@ Compiler::write(FILE *output)
     Compression::wstring_write(it->first, output);
     it->second.write(output);
   }
+}
+
+void
+Compiler::setAltValue(string const &a)
+{
+  alt = XMLParseUtil::stows(a);
+}
+
+void
+Compiler::setVariantValue(string const &v)
+{
+  variant = XMLParseUtil::stows(v);
 }
