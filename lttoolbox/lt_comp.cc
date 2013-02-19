@@ -53,6 +53,9 @@ int main(int argc, char *argv[])
   int option_index=0;
 #endif
 
+  string vl;
+  string vr;
+
   while (true) {
 #if HAVE_GETOPT_LONG
     static struct option long_options[] =
@@ -83,11 +86,13 @@ int main(int argc, char *argv[])
         break;
 
       case 'l':
-        c.setVariantLeftValue(optarg);
+        vl = optarg;
+        c.setVariantLeftValue(vl);
         break;
 
       case 'r':
-        c.setVariantRightValue(optarg);
+        vr = optarg;
+        c.setVariantRightValue(vr);
         break;
 
       case 'h':
@@ -124,6 +129,11 @@ int main(int argc, char *argv[])
 
   if(opc == "lr")
   {
+    if(vr == "" && vl != "")
+    {
+      cout << "Error: -l specified, but mode is lr" << endl;
+      endProgram(argv[0]);
+    }
     if(acxfile != "")
     {
       c.parseACX(acxfile, Compiler::COMPILER_RESTRICTION_LR_VAL);
@@ -132,6 +142,11 @@ int main(int argc, char *argv[])
   }
   else if(opc == "rl")
   {
+    if(vl == "" && vr != "")
+    {
+      cout << "Error: -r specified, but mode is rl" << endl;
+      endProgram(argv[0]);
+    }
     c.parse(infile, Compiler::COMPILER_RESTRICTION_RL_VAL);
   }
   else
