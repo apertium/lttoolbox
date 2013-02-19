@@ -12,6 +12,8 @@ architecture: \fBhttp://www.apertium.org\fR.
 [
 .B \-a \fR| 
 .B \-v \fR| 
+.B \-l \fR| 
+.B \-r \fR| 
 .B \-h
 ]
 [
@@ -23,6 +25,8 @@ architecture: \fBhttp://www.apertium.org\fR.
 [
 .B \-\-alt \fR| 
 .B \-\-var \fR| 
+.B \-\-var\-left \fR| 
+.B \-\-var\-right \fR| 
 .B \-\-help
 ]
 [
@@ -43,7 +47,14 @@ letter transducers).
 Sets the value of the \fIalt\fR attribute to use in compilation
 .TP
 .B \-v, \-\-var
-Sets the value of the \fIv\fR attribute to use in compilation
+Sets the value of the \fIv\fR attribute to use in compilation. 
+This should only be used with monodixes; for bidixes, see \-l and \-r
+.TP
+.B \-l, \-\-var\-left
+Sets the value of the \fIvl\fR attribute for use in compilation of bidixes
+.TP
+.B \-r, \-\-var\-right
+Sets the value of the \fIvr\fR attribute for use in compilation of bidixes
 .TP
 .B \-h, \-\-help
 Prints a short help message

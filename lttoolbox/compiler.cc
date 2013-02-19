@@ -58,6 +58,8 @@ wstring const Compiler::COMPILER_IGNORE_ATTR        = L"i";
 wstring const Compiler::COMPILER_IGNORE_YES_VAL     = L"yes";
 wstring const Compiler::COMPILER_ALT_ATTR           = L"alt";
 wstring const Compiler::COMPILER_V_ATTR             = L"v";
+wstring const Compiler::COMPILER_VL_ATTR            = L"vl";
+wstring const Compiler::COMPILER_VR_ATTR            = L"vr";
 
 Compiler::Compiler()
 {
@@ -643,12 +645,16 @@ Compiler::procEntry()
   wstring ignore = this->attrib(COMPILER_IGNORE_ATTR);
   wstring altval = this->attrib(COMPILER_ALT_ATTR);
   wstring varval = this->attrib(COMPILER_V_ATTR);
+  wstring varl   = this->attrib(COMPILER_VL_ATTR);
+  wstring varr   = this->attrib(COMPILER_VR_ATTR);
 
   // if entry is masked by a restriction of direction or an ignore mark
   if((atributo != L"" && atributo != direction) 
    || ignore == COMPILER_IGNORE_YES_VAL
    || (altval != L"" && altval != alt)
-   || (direction == COMPILER_RESTRICTION_RL_VAL && varval != L"" && varval != variant))
+   || (direction == COMPILER_RESTRICTION_RL_VAL && varval != L"" && varval != variant)
+   || (direction == COMPILER_RESTRICTION_RL_VAL && varl != L"" && varl != variant_left)
+   || (direction == COMPILER_RESTRICTION_LR_VAL && varr != L"" && varr != variant_right))
   {
     // parse to the end of the entry
     wstring name = L"";
@@ -870,4 +876,16 @@ void
 Compiler::setVariantValue(string const &v)
 {
   variant = XMLParseUtil::stows(v);
+}
+
+void
+Compiler::setVariantLeftValue(string const &v)
+{
+  variant_left = XMLParseUtil::stows(v);
+}
+
+void
+Compiler::setVariantRightValue(string const &v)
+{
+  variant_right = XMLParseUtil::stows(v);
 }

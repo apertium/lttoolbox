@@ -297,11 +297,16 @@ Expander::procEntry(FILE *output)
   wstring entrname=this->attrib(Compiler::COMPILER_LEMMA_ATTR);
   wstring altval = this->attrib(Compiler::COMPILER_ALT_ATTR);
   wstring varval = this->attrib(Compiler::COMPILER_V_ATTR);
+  wstring varl   = this->attrib(Compiler::COMPILER_VL_ATTR);
+  wstring varr   = this->attrib(Compiler::COMPILER_VR_ATTR);
   
   wstring myname = L"";
   if(this->attrib(Compiler::COMPILER_IGNORE_ATTR) == L"yes"
    || altval != L"" && altval != alt
-   || (varval != L"" && varval != variant && atributo == Compiler::COMPILER_RESTRICTION_RL_VAL))
+   || (varval != L"" && varval != variant && atributo == Compiler::COMPILER_RESTRICTION_RL_VAL)
+   || ((varl != L"" && varl != variant_left) && (varr != L"" && varr != variant_right))
+   || (varl != L"" && varl != variant_left && atributo == Compiler::COMPILER_RESTRICTION_RL_VAL)
+   || (varr != L"" && varr != variant_right && atributo == Compiler::COMPILER_RESTRICTION_LR_VAL))
   {    
     do
     {
@@ -320,11 +325,14 @@ Expander::procEntry(FILE *output)
   }
   
   EntList items, items_lr, items_rl;
-  if(atributo == Compiler::COMPILER_RESTRICTION_LR_VAL || (varval != L"" && varval != variant && atributo != Compiler::COMPILER_RESTRICTION_RL_VAL))
+  if(atributo == Compiler::COMPILER_RESTRICTION_LR_VAL 
+   || (varval != L"" && varval != variant && atributo != Compiler::COMPILER_RESTRICTION_RL_VAL)
+   || varl != L"" && varl != variant_left)
   {
     items_lr.push_back(pair<wstring, wstring>(L"", L""));
   }
-  else if(atributo == Compiler::COMPILER_RESTRICTION_RL_VAL)
+  else if(atributo == Compiler::COMPILER_RESTRICTION_RL_VAL
+        || (varr != L"" && varr != variant_right))
   {
     items_rl.push_back(pair<wstring, wstring>(L"", L""));
   }
@@ -609,4 +617,16 @@ void
 Expander::setVariantValue(string const &v)
 {
   variant = XMLParseUtil::stows(v);
+}
+
+void
+Expander::setVariantLeftValue(string const &v)
+{
+  variant_left = XMLParseUtil::stows(v);
+}
+
+void
+Expander::setVariantRightValue(string const &v)
+{
+  variant_right = XMLParseUtil::stows(v);
 }

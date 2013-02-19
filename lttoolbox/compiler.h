@@ -47,12 +47,22 @@ private:
    * The alt value
    */
   wstring alt;
-  
+
   /**
-   * The variant value
+   * The variant value (monodix)
    */
   wstring variant;
   
+  /**
+   * The variant value (left side of bidix)
+   */
+  wstring variant_left;
+  
+  /**
+   * The variant value (right side of bidix)
+   */
+  wstring variant_right;
+    
   /**
    * The paradigm being compiled
    */
@@ -276,6 +286,8 @@ public:
   static wstring const COMPILER_IGNORE_YES_VAL;
   static wstring const COMPILER_ALT_ATTR;
   static wstring const COMPILER_V_ATTR;
+  static wstring const COMPILER_VL_ATTR;
+  static wstring const COMPILER_VR_ATTR;
 
 
   /**
@@ -316,6 +328,18 @@ public:
    * @param v the value
    */
    void setVariantValue(string const &v);
+
+  /**
+   * Set the variant_left value to use in compilation
+   * @param v the value
+   */
+   void setVariantLeftValue(string const &v);
+
+  /**
+   * Set the variant_right value to use in compilation
+   * @param v the value
+   */
+   void setVariantRightValue(string const &v);
 };
 
 

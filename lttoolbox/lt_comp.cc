@@ -34,7 +34,9 @@ void endProgram(char *name)
     cout << basename(name) << " v" << PACKAGE_VERSION <<": build a letter transducer from a dictionary" << endl;
     cout << "USAGE: " << basename(name) << " [-avh] lr | rl dictionary_file output_file [acx_file]" << endl;
     cout << "  -v:     set language variant" << endl;
-    cout << "  -a:     set alternative" << endl;
+    cout << "  -a:     set alternative (monodix)" << endl;
+    cout << "  -l:     set left language variant (bidix)" << endl;
+    cout << "  -r:     set right language variant (bidix)" << endl;
     cout << "Modes:" << endl;
     cout << "  lr:     left-to-right compilation" << endl;
     cout << "  rl:     right-to-left compilation" << endl;
@@ -55,15 +57,17 @@ int main(int argc, char *argv[])
 #if HAVE_GETOPT_LONG
     static struct option long_options[] =
     {
-      {"alt",      required_argument, 0, 'a'},
-      {"var",      required_argument, 0, 'v'},
-      {"help",     no_argument,       0, 'h'}, 
+      {"alt",       required_argument, 0, 'a'},
+      {"var",       required_argument, 0, 'v'},
+      {"var-left",  required_argument, 0, 'l'},
+      {"var-right", required_argument, 0, 'r'},
+      {"help",      no_argument,       0, 'h'}, 
       {0, 0, 0, 0}
     };
 
-    int cnt=getopt_long(argc, argv, "a:v:h", long_options, &option_index);
+    int cnt=getopt_long(argc, argv, "a:v:l:r:h", long_options, &option_index);
 #else
-    int cnt=getopt(argc, argv, "a:v:h");
+    int cnt=getopt(argc, argv, "a:v:l:r:h");
 #endif
     if (cnt==-1)
       break;
@@ -76,6 +80,14 @@ int main(int argc, char *argv[])
 
       case 'v':
         c.setVariantValue(optarg);
+        break;
+
+      case 'l':
+        c.setVariantLeftValue(optarg);
+        break;
+
+      case 'r':
+        c.setVariantRightValue(optarg);
         break;
 
       case 'h':
