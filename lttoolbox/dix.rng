@@ -165,6 +165,12 @@
     <optional>
       <attribute name="v"/>
     </optional>
+    <optional>
+      <attribute name="vl"/>
+    </optional>
+    <optional>
+      <attribute name="vr"/>
+    </optional>
   </define>
   <!--
     r: restriction LR: left-to-right,
@@ -177,7 +183,9 @@
   <!-- slr: translation sense when translating from left to right -->
   <!-- srl: translation sense when translating from right to left -->
   <!-- alt: alternative entries are omitted if not selected -->
-  <!-- v: variant sets direction restrictions based on language variant -->
+  <!-- v: variant sets (monodix) direction restrictions based on language variant -->
+  <!-- vl: variant left sets direction restrictions based on language variant for language on left of bidix -->
+  <!-- vr: variant right sets direction restrictions based on language variant for language on right of bidix -->
   <define name="par">
     <element name="par">
       <ref name="attlist.par"/>

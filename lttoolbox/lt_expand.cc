@@ -38,7 +38,7 @@ void endProgram(char *name)
   if(name != NULL)
   {
     cout << basename(name) << " v" << PACKAGE_VERSION <<": expand the contents of a dictionary file" << endl;
-    cout << "USAGE: " << basename(name) << " dictionary_file [output_file]" << endl;
+    cout << "USAGE: " << basename(name) << " [-avlrh] dictionary_file [output_file]" << endl;
   }
   exit(EXIT_FAILURE);
 }
@@ -56,15 +56,17 @@ int main(int argc, char *argv[])
 #if HAVE_GETOPT_LONG
     static struct option long_options[] =
     {
-      {"alt",      required_argument, 0, 'a'},
-      {"var",      required_argument, 0, 'v'},
-      {"help",     no_argument,       0, 'h'}, 
+      {"alt",       required_argument, 0, 'a'},
+      {"var",       required_argument, 0, 'v'},
+      {"var-left",  required_argument, 0, 'l'},
+      {"var-right", required_argument, 0, 'r'},
+      {"help",      no_argument,       0, 'h'}, 
       {0, 0, 0, 0}
     };
 
-    int cnt=getopt_long(argc, argv, "a:v:h", long_options, &option_index);
+    int cnt=getopt_long(argc, argv, "a:v:l:r:h", long_options, &option_index);
 #else
-    int cnt=getopt(argc, argv, "a:v:h");
+    int cnt=getopt(argc, argv, "a:v:l:r:h");
 #endif
     if (cnt==-1)
       break;
@@ -77,6 +79,14 @@ int main(int argc, char *argv[])
 
       case 'v':
         e.setVariantValue(optarg);
+        break;
+
+      case 'l':
+        e.setVariantLeftValue(optarg);
+        break;
+
+      case 'r':
+        e.setVariantRightValue(optarg);
         break;
 
       case 'h':

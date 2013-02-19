@@ -76,6 +76,8 @@
 	srl CDATA #IMPLIED
 	alt CDATA #IMPLIED
 	v CDATA #IMPLIED
+	vl CDATA #IMPLIED
+	vr CDATA #IMPLIED
 >
 	<!-- r: restriction LR: left-to-right,
 			    RL: right-to-left -->
@@ -86,7 +88,9 @@
 	<!-- slr: translation sense when translating from left to right -->
 	<!-- srl: translation sense when translating from right to left --> 
 	<!-- alt: alternative entries are omitted if not selected -->
-	<!-- v: variant sets direction restrictions based on language variant -->
+	<!-- v: variant sets (monodix) direction restrictions based on language variant -->
+	<!-- vl: variant left sets direction restrictions based on language variant for language on left of bidix -->
+	<!-- vr: variant right sets direction restrictions based on language variant for language on right of bidix -->
 <!ELEMENT par EMPTY>
 	<!-- reference to paradigm -->
 <!ATTLIST par

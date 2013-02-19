@@ -12,6 +12,8 @@ architecture: \fBhttp://www.apertium.org\fR.
 [
 .B \-a \fR| 
 .B \-v \fR| 
+.B \-l \fR| 
+.B \-r \fR| 
 .B \-h
 ]
 dictionary_file [output_file]
@@ -20,6 +22,8 @@ dictionary_file [output_file]
 [
 .B \-\-alt \fR| 
 .B \-\-var \fR| 
+.B \-\-var\-left \fR| 
+.B \-\-var\-right \fR| 
 .B \-\-help
 ]
 dictionary_file [output_file]
@@ -39,7 +43,13 @@ output if it is missing.
 Sets the value of the \fIalt\fR attribute to use in expansion
 .TP
 .B \-v, \-\-var
-Sets the value of the \fIv\fR attribute to use in expansion
+Sets the value of the \fIv\fR attribute to use in expansion of monodixes
+.TP
+.B \-l, \-\-var\-left
+Sets the value of the \fIvl\fR attribute to use in expansion of bidixes
+.TP
+.B \-r, \-\-var\-right
+Sets the value of the \fIvr\fR attribute to use in expansion of bidixes
 .TP
 .B \-h, \-\-help
 Prints a short help message
