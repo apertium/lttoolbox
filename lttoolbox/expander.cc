@@ -295,9 +295,13 @@ Expander::procEntry(FILE *output)
 {
   wstring atributo=this->attrib(Compiler::COMPILER_RESTRICTION_ATTR);
   wstring entrname=this->attrib(Compiler::COMPILER_LEMMA_ATTR);
+  wstring altval = this->attrib(Compiler::COMPILER_ALT_ATTR);
+  wstring varval = this->attrib(Compiler::COMPILER_V_ATTR);
   
   wstring myname = L"";
-  if(this->attrib(Compiler::COMPILER_IGNORE_ATTR) == L"yes")
+  if(this->attrib(Compiler::COMPILER_IGNORE_ATTR) == L"yes"
+   || altval != L"" && altval != alt
+   || (varval != L"" && varval != variant && atributo == Compiler::COMPILER_RESTRICTION_RL_VAL))
   {    
     do
     {
@@ -316,7 +320,7 @@ Expander::procEntry(FILE *output)
   }
   
   EntList items, items_lr, items_rl;
-  if(atributo == Compiler::COMPILER_RESTRICTION_LR_VAL)
+  if(atributo == Compiler::COMPILER_RESTRICTION_LR_VAL || (varval != L"" && varval != variant && atributo != Compiler::COMPILER_RESTRICTION_RL_VAL))
   {
     items_lr.push_back(pair<wstring, wstring>(L"", L""));
   }
@@ -593,4 +597,16 @@ Expander::append(EntList &result,
     it->first.append(endings.first);
     it->second.append(endings.second);
   }
+}
+
+void
+Expander::setAltValue(string const &a)
+{
+  alt = XMLParseUtil::stows(a);
+}
+
+void
+Expander::setVariantValue(string const &v)
+{
+  variant = XMLParseUtil::stows(v);
 }

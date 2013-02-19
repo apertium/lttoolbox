@@ -159,6 +159,12 @@
     <optional>
       <attribute name="srl"/>
     </optional>
+    <optional>
+      <attribute name="alt"/>
+    </optional>
+    <optional>
+      <attribute name="v"/>
+    </optional>
   </define>
   <!--
     r: restriction LR: left-to-right,
@@ -170,6 +176,8 @@
   <!-- i: ignore ('yes') means ignore, otherwise it is not ignored) -->
   <!-- slr: translation sense when translating from left to right -->
   <!-- srl: translation sense when translating from right to left -->
+  <!-- alt: alternative entries are omitted if not selected -->
+  <!-- v: variant sets direction restrictions based on language variant -->
   <define name="par">
     <element name="par">
       <ref name="attlist.par"/>

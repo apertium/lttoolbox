@@ -23,6 +23,7 @@
 #include <iostream>
 #include <libgen.h>
 #include <string>
+#include <getopt.h>
 
 using namespace std;
 
@@ -31,7 +32,9 @@ void endProgram(char *name)
   if(name != NULL)
   {
     cout << basename(name) << " v" << PACKAGE_VERSION <<": build a letter transducer from a dictionary" << endl;
-    cout << "USAGE: " << basename(name) << " lr | rl dictionary_file output_file [acx_file]" << endl;
+    cout << "USAGE: " << basename(name) << " [-avh] lr | rl dictionary_file output_file [acx_file]" << endl;
+    cout << "  -v:     set language variant" << endl;
+    cout << "  -a:     set alternative" << endl;
     cout << "Modes:" << endl;
     cout << "  lr:     left-to-right compilation" << endl;
     cout << "  rl:     right-to-left compilation" << endl;
@@ -42,37 +45,92 @@ void endProgram(char *name)
 
 int main(int argc, char *argv[])
 {
-  if(argc != 4 && argc != 5)
-  {
-    endProgram(argv[0]);
-  }
-
-  string opc = argv[1];
-
   Compiler c;
   
-  
+#if HAVE_GETOPT_LONG
+  int option_index=0;
+#endif
+
+  while (true) {
+#if HAVE_GETOPT_LONG
+    static struct option long_options[] =
+    {
+      {"alt",      required_argument, 0, 'a'},
+      {"var",      required_argument, 0, 'v'},
+      {"help",     no_argument,       0, 'h'}, 
+      {0, 0, 0, 0}
+    };
+
+    int cnt=getopt_long(argc, argv, "a:v:h", long_options, &option_index);
+#else
+    int cnt=getopt(argc, argv, "a:v:h");
+#endif
+    if (cnt==-1)
+      break;
+
+    switch (cnt)
+    {
+      case 'a':
+        c.setAltValue(optarg);
+        break;
+
+      case 'v':
+        c.setVariantValue(optarg);
+        break;
+
+      case 'h':
+      default:
+        endProgram(argv[0]);
+        break;
+    }
+  }
+
+  string opc;
+  string infile;
+  string outfile;
+  string acxfile;
+
+  switch(argc - optind + 1)
+  {
+    case 5:
+      opc = argv[argc-4];
+      infile = argv[argc-3];
+      outfile = argv[argc-2];
+      acxfile = argv[argc-1];
+      break;
+
+    case 4:
+      opc = argv[argc-3];
+      infile = argv[argc-2];
+      outfile = argv[argc-1];
+      break;
+
+    default:
+      endProgram(argv[0]);
+      break;
+  }
+
   if(opc == "lr")
   {
-    if(argc == 5)
+    if(acxfile != "")
     {
-      c.parseACX(argv[4], Compiler::COMPILER_RESTRICTION_LR_VAL);
+      c.parseACX(acxfile, Compiler::COMPILER_RESTRICTION_LR_VAL);
     }
-    c.parse(argv[2], Compiler::COMPILER_RESTRICTION_LR_VAL);
+    c.parse(infile, Compiler::COMPILER_RESTRICTION_LR_VAL);
   }
   else if(opc == "rl")
   {
-    c.parse(argv[2], Compiler::COMPILER_RESTRICTION_RL_VAL);
+    c.parse(infile, Compiler::COMPILER_RESTRICTION_RL_VAL);
   }
   else
   {
     endProgram(argv[0]);
   }
 
-  FILE *output = fopen(argv[3], "wb");
+  FILE *output = fopen(outfile.c_str(), "wb");
   if(!output)
   {
-    cerr << "Error: Cannot open file '" << argv[2] << "'." << endl;
+    cerr << "Error: Cannot open file '" << outfile << "'." << endl;
     exit(EXIT_FAILURE);
   }
   c.write(output);
