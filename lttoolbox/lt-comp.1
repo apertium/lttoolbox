@@ -44,19 +44,25 @@ letter transducers).
 .SH OPTIONS
 .TP
 .B \-a, \-\-alt
-Sets the value of the \fIalt\fR attribute to use in compilation
+Sets the value of the \fIalt\fR attribute to use in compilation.
+
+Note that if no value is set, all entries containing an \fIalt\fR
+attribute are omitted.
 .TP
 .B \-v, \-\-var
 Sets the value of the \fIv\fR attribute to use in compilation. 
-This should only be used with monodixes; for bidixes, see \-l and \-r
+This should only be used with monodixes; for bidixes, see \-l and \-r.
+
+Note that if no value is set, all entries containing a \fIv\fR
+attribute are considered to be \fIleft-to-right\fR.
 .TP
 .B \-l, \-\-var\-left
-Sets the value of the \fIvl\fR attribute for use in compilation of bidixes
+Sets the value of the \fIvl\fR attribute for use in compilation of bidixes.
 "Left" here refers to the side of the dictionary, so this option is only valid
 in \fIrl\fR mode.
 .TP
 .B \-r, \-\-var\-right
-Sets the value of the \fIvr\fR attribute for use in compilation of bidixes
+Sets the value of the \fIvr\fR attribute for use in compilation of bidixes.
 "Right" here refers to the side of the dictionary, so this option is only valid
 in \fIlr\fR mode.
 .TP
