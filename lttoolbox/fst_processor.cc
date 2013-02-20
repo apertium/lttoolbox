@@ -1035,7 +1035,10 @@ FSTProcessor::analysis(FILE *input, FILE *output)
           uppercase = firstupper && iswupper(sf[sf.size()-1]);
         }
 
-        if (compoundOnlyLSymbol!=0) current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
+        if(do_decomposition && compoundOnlyLSymbol != 0) 
+        {
+          current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
+        }
         lf = current_state.filterFinals(all_finals, alphabet,
                                         escaped_chars,
                                         uppercase, firstupper);
@@ -1050,7 +1053,10 @@ FSTProcessor::analysis(FILE *input, FILE *output)
           uppercase = firstupper && iswupper(sf[sf.size()-1]);
         }
 
-        if (compoundOnlyLSymbol!=0) current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
+        if(do_decomposition && compoundOnlyLSymbol != 0) 
+        {
+          current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
+        }
         lf = current_state.filterFinals(all_finals, alphabet,
                                         escaped_chars,
                                         uppercase, firstupper);
@@ -1065,7 +1071,10 @@ FSTProcessor::analysis(FILE *input, FILE *output)
           uppercase = firstupper && iswupper(sf[sf.size()-1]);
         }
 
-        if (compoundOnlyLSymbol!=0) current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
+        if(do_decomposition && compoundOnlyLSymbol != 0) 
+        {
+          current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
+        }
         lf = current_state.filterFinals(all_finals, alphabet,
                                         escaped_chars,
                                         uppercase, firstupper);
@@ -1080,7 +1089,10 @@ FSTProcessor::analysis(FILE *input, FILE *output)
           uppercase = firstupper && iswupper(sf[sf.size()-1]);
         }
 
-        if (compoundOnlyLSymbol!=0) current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
+        if(do_decomposition && compoundOnlyLSymbol != 0) 
+        {
+          current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
+        }
         lf = current_state.filterFinals(all_finals, alphabet, 
                                         escaped_chars, 
                                         uppercase, firstupper);
