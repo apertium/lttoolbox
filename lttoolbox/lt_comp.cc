@@ -65,12 +65,13 @@ int main(int argc, char *argv[])
       {"var-left",  required_argument, 0, 'l'},
       {"var-right", required_argument, 0, 'r'},
       {"help",      no_argument,       0, 'h'}, 
+      {"verbose",   no_argument,       0, 'V'}, 
       {0, 0, 0, 0}
     };
 
-    int cnt=getopt_long(argc, argv, "a:v:l:r:h", long_options, &option_index);
+    int cnt=getopt_long(argc, argv, "a:v:l:r:hV", long_options, &option_index);
 #else
-    int cnt=getopt(argc, argv, "a:v:l:r:h");
+    int cnt=getopt(argc, argv, "a:v:l:r:hV");
 #endif
     if (cnt==-1)
       break;
@@ -93,6 +94,10 @@ int main(int argc, char *argv[])
       case 'r':
         vr = optarg;
         c.setVariantRightValue(vr);
+        break;
+
+      case 'V':
+        c.setVerbose(true);
         break;
 
       case 'h':
