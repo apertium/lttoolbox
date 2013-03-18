@@ -421,6 +421,12 @@ Compiler::procIdentity()
     }
   }
   
+  if(verbose && first_element && (both_sides.front() == (int)L' ')) 
+  {
+    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+    wcerr << L"): Entry begins with space." << endl; 
+  }
+  first_element = false; 
   EntryToken e;
   e.setSingleTransduction(both_sides, both_sides);
   return e;
@@ -448,6 +454,13 @@ Compiler::procTransduction()
       readString(lhs, name);
     }
   }
+
+  if(verbose && first_element && (lhs.front() == (int)L' ')) 
+  {
+    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+    wcerr << L"): Entry begins with space." << endl;
+  }
+  first_element = false;
  
   skip(name, COMPILER_RIGHT_ELEM);
 
@@ -484,6 +497,7 @@ Compiler::procPar()
 {
   EntryToken e;
   wstring nomparadigma = attrib(COMPILER_N_ATTR);
+  first_element = false;
 
   if(current_paradigm != L"" && nomparadigma == current_paradigm)
   {
@@ -681,6 +695,11 @@ Compiler::procEntry()
     }
     wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
     skipBlanks(name);
+
+    if(current_paradigm == L"" && verbose)
+    {
+      first_element = true;
+    }
 
     int tipo = xmlTextReaderNodeType(reader);
     if(name == COMPILER_PAIR_ELEM)
@@ -888,4 +907,10 @@ void
 Compiler::setVariantRightValue(string const &v)
 {
   variant_right = XMLParseUtil::stows(v);
+}
+
+void
+Compiler::setVerbose(bool verbosity)
+{
+  verbose = verbosity;
 }

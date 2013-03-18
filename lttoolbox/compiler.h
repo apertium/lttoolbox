@@ -85,6 +85,16 @@ private:
   wstring letters;
   
   /**
+   * Set verbose mode: warnings which may or may not be correct
+   */
+  bool verbose;
+
+  /**
+   * First element (of an entry)
+   */
+  bool first_element;
+
+  /**
    * Identifier of all the symbols during the compilation
    */
   Alphabet alphabet;  
@@ -291,7 +301,7 @@ public:
 
 
   /**
-   * Copnstructor
+   * Constructor
    */
   Compiler();
 
@@ -318,28 +328,33 @@ public:
   void write(FILE *fd);
 
   /**
+   * Set verbose output
+   */
+  void setVerbose(bool verbosity = false);
+
+  /**
    * Set the alt value to use in compilation
    * @param a the value
    */
-   void setAltValue(string const &a);
+  void setAltValue(string const &a);
 
   /**
    * Set the variant value to use in compilation
    * @param v the value
    */
-   void setVariantValue(string const &v);
+  void setVariantValue(string const &v);
 
   /**
    * Set the variant_left value to use in compilation
    * @param v the value
    */
-   void setVariantLeftValue(string const &v);
+  void setVariantLeftValue(string const &v);
 
   /**
    * Set the variant_right value to use in compilation
    * @param v the value
    */
-   void setVariantRightValue(string const &v);
+  void setVariantRightValue(string const &v);
 };
 
 
