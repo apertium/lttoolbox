@@ -48,6 +48,7 @@ void endProgram(char *name)
 int main(int argc, char *argv[])
 {
   Compiler c;
+  c.setVerbose(false);
   
 #if HAVE_GETOPT_LONG
   int option_index=0;
