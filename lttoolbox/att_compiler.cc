@@ -90,11 +90,11 @@ AttCompiler::symbol_code(const wstring& symbol)
 }
 
 void 
-AttCompiler::parse(char const* const file_name, char const* const dir) 
+AttCompiler::parse(string const &file_name, wstring const &dir) 
 {
   clear();
 
-  wifstream infile(file_name);  // TODO: error checking
+  wifstream infile(file_name.c_str());  // TODO: error checking
   vector<wstring> tokens;
   wstring line;
   bool first_line = true;       // First line -- see below
@@ -305,5 +305,5 @@ AttCompiler::write(FILE *output)
   Compression::wstring_write(L"final@inconditional", output);
   Transducer punct_fst = extract_transducer(PUNCT);
   punct_fst.write(output);
-  fclose(output);
+//  fclose(output);
 }
