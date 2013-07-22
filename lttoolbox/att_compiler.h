@@ -120,7 +120,7 @@ public:
    * Reads the AT&T format file @p file_name. The transducer and the alphabet
    * are both cleared before reading the new file.
    */
-  void parse(char const* const file_name, char const* const dir);
+  void parse(string const &file_name, wstring const &dir);
 
   /** Writes the transducer to @p file_name in lt binary format. */
 
