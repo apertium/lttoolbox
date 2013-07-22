@@ -161,14 +161,29 @@ AttCompiler::extract_transducer(TransducerType type)
   _extract_transducer(type, starting_state, transducer, corr, visited);
 
   /* The final states. */
+  bool noFinals = true;
   for (set<int>::const_iterator f = finals.begin(); f != finals.end(); ++f) 
   {
     if (corr.find(*f) != corr.end()) 
     {
       transducer.setFinal(corr[*f]);
+      noFinals = false;
     }
   }
 
+/*
+  if(noFinals)
+  {
+    wcerr << L"No final states (" << type << ")" << endl;
+    wcerr << L"  were:" << endl;
+    wcerr << L"\t" ;
+    for (set<int>::const_iterator f = finals.begin(); f != finals.end(); ++f) 
+    {
+      wcerr << *f << L" ";
+    }
+    wcerr << endl;
+  }
+*/
   return transducer;
 }
 
@@ -293,21 +308,32 @@ void
 AttCompiler::write(FILE *output) 
 {
 //  FILE* output = fopen(file_name, "w");
+  Transducer punct_fst = extract_transducer(PUNCT);
+
   /* Non-multichar symbols. */
   Compression::wstring_write(wstring(letters.begin(), letters.end()), output);
   /* Multichar symbols. */
   alphabet.write(output);
   /* And now the FST. */
-  Compression::multibyte_write(2, output);
+  if(punct_fst.numberOfTransitions() == 0)
+  {
+    Compression::multibyte_write(1, output);
+  }
+  else
+  {
+    Compression::multibyte_write(2, output);
+  }
   Compression::wstring_write(L"main@standard", output);
   Transducer word_fst = extract_transducer(WORD);
   word_fst.write(output);
   wcout << L"main@standard" << " " << word_fst.size();
   wcout << " " << word_fst.numberOfTransitions() << endl;
   Compression::wstring_write(L"final@inconditional", output);
-  Transducer punct_fst = extract_transducer(PUNCT);
-  punct_fst.write(output);
-  wcout << L"final@inconditional" << " " << punct_fst.size();
-  wcout << " " << punct_fst.numberOfTransitions() << endl;
+  if(punct_fst.numberOfTransitions() != 0) 
+  {
+    punct_fst.write(output);
+    wcout << L"final@inconditional" << " " << punct_fst.size();
+    wcout << " " << punct_fst.numberOfTransitions() << endl;
+  }
 //  fclose(output);
 }
