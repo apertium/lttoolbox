@@ -54,7 +54,7 @@ AttCompiler::clear()
 void 
 AttCompiler::convert_hfst(wstring& symbol) 
 {
-  if (symbol == L"@0@") 
+  if (symbol == L"@0@" || symbol == L"ε") 
   {
     symbol = L"";
   } 
