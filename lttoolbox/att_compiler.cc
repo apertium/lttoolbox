@@ -302,8 +302,12 @@ AttCompiler::write(FILE *output)
   Compression::wstring_write(L"main@standard", output);
   Transducer word_fst = extract_transducer(WORD);
   word_fst.write(output);
+  wcout << L"main@standard" << " " << word_fst.size();
+  wcout << " " << word_fst.numberOfTransitions() << endl;
   Compression::wstring_write(L"final@inconditional", output);
   Transducer punct_fst = extract_transducer(PUNCT);
   punct_fst.write(output);
+  wcout << L"final@inconditional" << " " << punct_fst.size();
+  wcout << " " << punct_fst.numberOfTransitions() << endl;
 //  fclose(output);
 }
