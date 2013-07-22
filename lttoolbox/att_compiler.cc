@@ -28,6 +28,7 @@ using namespace std;
 AttCompiler::AttCompiler()
 {
   LtLocale::tryToSetLocale();
+  locale::global(locale("")); // what's going on here ? o__O
 }
 
 AttCompiler::~AttCompiler()
