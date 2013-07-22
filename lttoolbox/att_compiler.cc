@@ -99,6 +99,7 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
   vector<wstring> tokens;
   wstring line;
   bool first_line = true;       // First line -- see below
+  bool seen_input_symbol = false;
 
   while (getline(infile, line)) 
   {
@@ -134,6 +135,16 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
       lower = tokens[3];
       convert_hfst(upper);
       convert_hfst(lower);
+      if(upper != L"")
+      {
+        seen_input_symbol = true; 
+      }
+      /* skip lines that have an empty left side and output 
+         if we haven't seen an input symbol */
+      if(upper == L"" && lower != L"" && !seen_input_symbol) 
+      {
+        continue;
+      }
       int tag = alphabet(symbol_code(upper), symbol_code(lower));
       /* We don't read the weights, even if they are defined. */
       source->transductions.push_back(Transduction(to, upper, lower, tag));
