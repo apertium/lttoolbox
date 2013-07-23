@@ -131,8 +131,16 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
     else 
     {
       to = convert(tokens[1]);
-      upper = tokens[2];
-      lower = tokens[3];
+      if(dir == L"RL")
+      {
+        upper = tokens[3];
+        lower = tokens[2];
+      }
+      else
+      {
+        upper = tokens[2];
+        lower = tokens[3];
+      }
       convert_hfst(upper);
       convert_hfst(lower);
       if(upper != L"")
