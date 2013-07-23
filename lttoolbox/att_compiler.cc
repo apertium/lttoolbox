@@ -107,12 +107,24 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
     int from, to;
     wstring upper, lower;
 
+    if (line.length() == 0 && first_line) 
+    {
+      cerr << "Error: empty file '" << file_name << "'." << endl;
+      exit(EXIT_FAILURE);
+    }
+    if (first_line && line.find(L"\t") == wstring::npos)
+    {
+      cerr << "Error: invalid format '" << file_name << "'." << endl;
+      exit(EXIT_FAILURE);
+    }
+
     /* Empty line. */
     if (line.length() == 0) 
     {
       continue;
     }
     split(line, L'\t', tokens);
+
     from = convert(tokens[0]);
 
     AttNode* source = get_node(from);
