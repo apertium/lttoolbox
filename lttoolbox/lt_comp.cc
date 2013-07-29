@@ -17,6 +17,7 @@
  * 02111-1307, USA.
  */
 #include <lttoolbox/compiler.h>
+#include <lttoolbox/att_compiler.h>
 #include <lttoolbox/lttoolbox_config.h>
 
 #include <cstdlib>
@@ -26,6 +27,16 @@
 #include <getopt.h>
 
 using namespace std;
+
+/* 
+ * Error function that does nothing so that when we fallback from
+ * XML to AT&T, the user doesn't get a message unless it's really
+ * invalid XML.
+ */ 
+void errorFunc(void *ctx, const char *msg, ...) 
+{
+  return;
+} 
 
 void endProgram(char *name)
 {
@@ -47,7 +58,9 @@ void endProgram(char *name)
 
 int main(int argc, char *argv[])
 {
+  char ttype = 'x'; 
   Compiler c;
+  AttCompiler a; 
   c.setVerbose(false);
   
 #if HAVE_GETOPT_LONG
@@ -133,6 +146,27 @@ int main(int argc, char *argv[])
       break;
   }
 
+  xmlTextReaderPtr reader;
+  reader = xmlReaderForFile(infile.c_str(), NULL, 0);
+  xmlGenericErrorFunc handler = (xmlGenericErrorFunc)errorFunc;
+  initGenericErrorDefaultFunc(&handler);
+  if(reader != NULL)
+  {
+    int ret = xmlTextReaderRead(reader);
+    if(ret != 1)
+    {
+      ttype = 'a';
+    }
+    xmlFreeTextReader(reader);
+    xmlCleanupParser();
+  }
+  else
+  {
+    ttype = 'a';
+  }
+  initGenericErrorDefaultFunc(NULL);
+  
+
   if(opc == "lr")
   {
     if(vr == "" && vl != "")
@@ -144,7 +178,14 @@ int main(int argc, char *argv[])
     {
       c.parseACX(acxfile, Compiler::COMPILER_RESTRICTION_LR_VAL);
     }
-    c.parse(infile, Compiler::COMPILER_RESTRICTION_LR_VAL);
+    if(ttype == 'a') 
+    {
+      a.parse(infile, Compiler::COMPILER_RESTRICTION_LR_VAL);
+    }
+    else
+    {
+      c.parse(infile, Compiler::COMPILER_RESTRICTION_LR_VAL);
+    }
   }
   else if(opc == "rl")
   {
@@ -153,7 +194,15 @@ int main(int argc, char *argv[])
       cout << "Error: -r specified, but mode is rl" << endl;
       endProgram(argv[0]);
     }
-    c.parse(infile, Compiler::COMPILER_RESTRICTION_RL_VAL);
+    if(ttype == 'a')
+    {
+      a.parse(infile, Compiler::COMPILER_RESTRICTION_RL_VAL);
+    }
+    else
+    {
+      c.parse(infile, Compiler::COMPILER_RESTRICTION_RL_VAL);
+    }
+    
   }
   else
   {
@@ -166,6 +215,13 @@ int main(int argc, char *argv[])
     cerr << "Error: Cannot open file '" << outfile << "'." << endl;
     exit(EXIT_FAILURE);
   }
-  c.write(output);
+  if(ttype == 'a') 
+  {
+    a.write(output);
+  }
+  else
+  {
+    c.write(output);
+  }
   fclose(output);
 }
