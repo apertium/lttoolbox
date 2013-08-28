@@ -21,14 +21,11 @@
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
-#include <lttoolbox/lt_locale.h>
 
 using namespace std;
 
 AttCompiler::AttCompiler()
 {
-  LtLocale::tryToSetLocale();
-  locale::global(locale("")); // what's going on here ? o__O
 }
 
 AttCompiler::~AttCompiler()
