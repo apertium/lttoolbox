@@ -63,7 +63,6 @@ wstring const Compiler::COMPILER_VR_ATTR            = L"vr";
 
 Compiler::Compiler()
 {
-  LtLocale::tryToSetLocale();
 }
 
 Compiler::~Compiler()

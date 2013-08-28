@@ -19,6 +19,7 @@
 #include <lttoolbox/compiler.h>
 #include <lttoolbox/att_compiler.h>
 #include <lttoolbox/lttoolbox_config.h>
+#include <lttoolbox/lt_locale.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -174,16 +175,18 @@ int main(int argc, char *argv[])
       cout << "Error: -l specified, but mode is lr" << endl;
       endProgram(argv[0]);
     }
-    if(acxfile != "")
-    {
-      c.parseACX(acxfile, Compiler::COMPILER_RESTRICTION_LR_VAL);
-    }
     if(ttype == 'a') 
     {
+      locale::global(locale(""));    
       a.parse(infile, Compiler::COMPILER_RESTRICTION_LR_VAL);
     }
     else
     {
+      LtLocale::tryToSetLocale();
+      if(acxfile != "")
+      {
+        c.parseACX(acxfile, Compiler::COMPILER_RESTRICTION_LR_VAL);
+      }    
       c.parse(infile, Compiler::COMPILER_RESTRICTION_LR_VAL);
     }
   }
@@ -196,13 +199,14 @@ int main(int argc, char *argv[])
     }
     if(ttype == 'a')
     {
+      locale::global(locale(""));
       a.parse(infile, Compiler::COMPILER_RESTRICTION_RL_VAL);
     }
     else
     {
+      LtLocale::tryToSetLocale();
       c.parse(infile, Compiler::COMPILER_RESTRICTION_RL_VAL);
-    }
-    
+    }    
   }
   else
   {
