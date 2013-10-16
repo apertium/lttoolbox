@@ -177,7 +177,11 @@ int main(int argc, char *argv[])
     }
     if(ttype == 'a') 
     {
+#ifdef __APPLE__
       LtLocale::tryToSetLocale();
+#else
+      locale::global(locale(""));;
+#endif
       a.parse(infile, Compiler::COMPILER_RESTRICTION_LR_VAL);
     }
     else
@@ -199,7 +203,11 @@ int main(int argc, char *argv[])
     }
     if(ttype == 'a')
     {
+#ifdef __APPLE__
       LtLocale::tryToSetLocale();
+#else
+      locale::global(locale(""));;
+#endif
       a.parse(infile, Compiler::COMPILER_RESTRICTION_RL_VAL);
     }
     else
