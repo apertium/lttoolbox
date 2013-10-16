@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
     }
     if(ttype == 'a') 
     {
-      locale::global(locale(""));    
+      LtLocale::tryToSetLocale();
       a.parse(infile, Compiler::COMPILER_RESTRICTION_LR_VAL);
     }
     else
@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
     }
     if(ttype == 'a')
     {
-      locale::global(locale(""));
+      LtLocale::tryToSetLocale();
       a.parse(infile, Compiler::COMPILER_RESTRICTION_RL_VAL);
     }
     else
