@@ -181,4 +181,4 @@ fputc_unlocked, fputs_unlocked, fgetwc_unlocked, fputwc_unlocked, fputws_unlocke
                 
 AC_CHECK_FUNCS([setlocale strdup getopt_long])
 
-AC_OUTPUT([Makefile lttoolbox-3.2.pc lttoolbox/Makefile])
+AC_OUTPUT([Makefile lttoolbox.pc lttoolbox/Makefile])
