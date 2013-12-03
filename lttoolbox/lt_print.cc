@@ -52,6 +52,11 @@ int main(int argc, char *argv[])
 
 
   FILE *input = fopen(argv[1], "r");
+  if(!input)
+  {
+    cerr << "Error: Cannot open file '" << argv[1] << "'." << endl;
+    exit(EXIT_FAILURE);
+  }
 
   Alphabet new_alphabet;
   set<wchar_t> alphabetic_chars;
