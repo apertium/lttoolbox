@@ -177,7 +177,9 @@ int main(int argc, char *argv[])
     }
     if(ttype == 'a') 
     {
-#ifdef __APPLE__
+#if defined __clang__
+      locale::global(locale(""));;
+#elif defined __APPLE__
       LtLocale::tryToSetLocale();
 #else
       locale::global(locale(""));;
@@ -203,7 +205,9 @@ int main(int argc, char *argv[])
     }
     if(ttype == 'a')
     {
-#ifdef __APPLE__
+#if defined __clang__
+      locale::global(locale(""));;
+#elif defined __APPLE__
       LtLocale::tryToSetLocale();
 #else
       locale::global(locale(""));;
