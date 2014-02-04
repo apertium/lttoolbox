@@ -5,12 +5,11 @@ import itertools
 import unittest
 
 from apertium_process import ApertiumProcess
-#from null_flush_test import NullFlushTest
 
 ############################################################################################################
 # Tests which only test null flushing and which only close stdin after all tests have been executed.
 
-class NullFlushTest(object):
+class NullFlushTestKeepOpen(object):
     def assertEqualPipeOutput(self, proc, inputs, expectedOutputs, expectedErrors = itertools.repeat("")):
         for inString, expectedOutString, expectedErrorString in zip(inputs, expectedOutputs, expectedErrors):
             proc.send(inString.encode('utf-8'))
@@ -39,7 +38,7 @@ class NullFlushTest(object):
         self.assertEqual(self.proc.wait(), 0)
 
 
-class OnlyValidInput(unittest.TestCase, NullFlushTest):
+class OnlyValidInput(unittest.TestCase, NullFlushTestKeepOpen):
     def runNullTest(self):
         inputs = ["I",
                   "like apples",
@@ -55,52 +54,10 @@ class OnlyValidInput(unittest.TestCase, NullFlushTest):
         self.assertEqualPipeOutput(self.proc, inputs, outputs)
 
 
-class OnlyInvalidInput(unittest.TestCase, NullFlushTest):
-    def runNullTest(self):
-        inputs = ["I.[\x00",
-                  "like \\apples.[][\n]\x00",
-                  "very <much.[][\n]\x00"]
-
-        outputs = ["^I/prpers<prn><subj><p1><mf><sg>/PRPERS<prn><subj><p1><mf><sg>$\x00",
-                   "\x00",
-                   "\x00"]
-
-        errorOutputs = itertools.repeat("Error: Malformed input stream.\x00")
-
-        self.proc = ApertiumProcess(["../lttoolbox/.libs/lt-proc", "-z", "data/en-af.automorf.bin"])
-        self.assertEqualPipeOutput(self.proc, inputs, outputs, errorOutputs)
-
-
-class ValidAndInvalidInputs(unittest.TestCase, NullFlushTest):
-    def runNullTest(self):
-        inputs = ["Simple Simon simon says that.[][\n]\x00",
-                  "you should always[ eat\x00",
-                  "a lot of chocolate before.[][\n]\x00",
-                  "before you g\\o to bed.[][\n]\x00",
-                  "Simon prefers dark chocolate>.[][\n]\x00",
-                  "but sometimes he east milk chocolate.[][\n]\x00"]
-
-        outputs = ["^Simple/Simple<adj><sint>$ ^Simon/Simon<np><ant><m><sg>$ ^simon/*simon$ ^says/say<vblex><pri><p3><sg>$ ^that/that<cnjsub>/that<det><dem><sg>/that<prn><tn><mf><sg>/that<rel><an><mf><sp>$^./.<sent>$[][\n]\x00",
-                   "^you/prpers<prn><subj><p2><mf><sp>/prpers<prn><obj><p2><mf><sp>$ ^should/should<vaux><inf>$ \x00",
-                   "^a lot of/a lot of<det><qnt><sp>$ ^chocolate/chocolate<n><sg>$ ^before/before<adv>/before<cnjadv>/before<pr>$^./.<sent>$[][\n]\x00",
-                   "^before/before<adv>/before<cnjadv>/before<pr>$ ^you/prpers<prn><subj><p2><mf><sp>/prpers<prn><obj><p2><mf><sp>$ \x00",
-                   "^Simon/Simon<np><ant><m><sg>$ ^prefers/prefer<vblex><pri><p3><sg>$ ^dark/dark<adj><sint>/dark<n><sg>$ \x00",
-                   "^but/but<cnjcoo>/but<pr>$ ^sometimes/sometimes<adv>$ ^he/prpers<prn><subj><p3><m><sg>$ ^east/east<adj>/east<n><unc><sg>$ ^milk/milk<n><sg>/milk<vblex><inf>/milk<vblex><pres>$ ^chocolate/chocolate<n><sg>$^./.<sent>$[][\n]\x00"]
-
-        errorOutputs = ["",
-                        "Error: Malformed input stream.",
-                        "",
-                        "Error: Malformed input stream.",
-                        "Error: Malformed input stream.",
-                        ""]
-
-        self.proc = ApertiumProcess(["../lttoolbox/.libs/lt-proc", "-z", "data/en-af.automorf.bin"])
-        self.assertEqualPipeOutput(self.proc, inputs, outputs, errorOutputs)
-
 ############################################################################################################
-# Tests which only test null flushing and which only close stdin after all tests have been executed.
+# Tests which only test null flushing and which restart proc for each test
 
-class NullFlushTest2(object):
+class NullFlushTestRestartProc(object):
     def assertEqualPipeOutput(self, cmdLine, inputs, expectedOutputs,
                               expectedErrors = itertools.repeat(""),
                               expectedErrorCodes = itertools.repeat(0)):
@@ -122,7 +79,7 @@ class NullFlushTest2(object):
         self.runNullTest()
 
 
-class OnlyValidInputWithStdinClose(unittest.TestCase, NullFlushTest2):
+class OnlyValidInputWithStdinClose(unittest.TestCase, NullFlushTestRestartProc):
     def runNullTest(self):
         inputs = [u"The dog gladly eats homework.",
                   u"If wé swim fast enough,\x00we should reach shallow waters.",
@@ -138,24 +95,41 @@ class OnlyValidInputWithStdinClose(unittest.TestCase, NullFlushTest2):
 
         self.assertEqualPipeOutput(["../lttoolbox/.libs/lt-proc", "-z", "data/en-af.automorf.bin"], inputs, outputs, errorOutputs)
 
-
-class OnlyInvalidInputWithStdinClose(unittest.TestCase, NullFlushTest2):
+class WronglyEscapedLetter(unittest.TestCase, NullFlushTestRestartProc):
     def runNullTest(self):
-        inputs = [u"The dog gladly eats[ homework.",
-                  u"If wé swim ^ fast enough,\x00we should >reach shallow waters.",
-                  u"before];\x00the <sharks;\x00come."]
+        inputs = ["before you g\\o to bed.[][\n]\x00"]
 
-        outputs = [u"^The/The<det><def><sp>$ ^dog/dog<n><sg>$ ^gladly/gladly<adv>$ ",
-                   u"^If/If<cnjadv>$ ^wé/*wé$ ^swim/swim<vblex><inf>/swim<vblex><pres>$ \x00^we/prpers<prn><subj><p1><mf><pl>$ ^should/should<vaux><inf>$ ",
-                   u"\x00\x00^come/come<vblex><inf>/come<vblex><pres>/come<vblex><pp>$"]
+        outputs = ["^before/before<adv>/before<cnjadv>/before<pr>$ ^you/prpers<prn><subj><p2><mf><sp>/prpers<prn><obj><p2><mf><sp>$ "]
 
-        errorOutputs = [u"Error: Malformed input stream.",
-                        u"Error: Malformed input stream.\x00Error: Malformed input stream.",
-                        u"Error: Malformed input stream.\x00Error: Malformed input stream.\x00"]
+        errorOutputs = ["std::exception"]
 
-        errorCodes = [1,
-                      1,
-                      0]
+        errorCodes = [1]
 
-        self.assertEqualPipeOutput(["../lttoolbox/.libs/lt-proc", "-z", "data/en-af.automorf.bin"], 
+        self.assertEqualPipeOutput(["../lttoolbox/.libs/lt-proc", "-z", "data/en-af.automorf.bin"],
+                                   inputs, outputs, errorOutputs, errorCodes)
+
+
+class UnescapedAngleBracket(unittest.TestCase, NullFlushTestRestartProc):
+    def runNullTest(self):
+        inputs = ["Simon prefers dark chocolate>.[][\n]\x00"]
+
+        outputs = ["^Simon/Simon<np><ant><m><sg>$ ^prefers/prefer<vblex><pri><p3><sg>$ ^dark/dark<adj><sint>/dark<n><sg>$ "]
+
+        errorOutputs = ["std::exception"]
+
+        errorCodes = [1]
+        self.assertEqualPipeOutput(["../lttoolbox/.libs/lt-proc", "-z", "data/en-af.automorf.bin"],
+                                   inputs, outputs, errorOutputs, errorCodes)
+
+
+class UnclosedSuperblank(unittest.TestCase, NullFlushTestRestartProc):
+    def runNullTest(self):
+        inputs = ["you should always[ eat\x00"]
+
+        outputs = ["^you/prpers<prn><subj><p2><mf><sp>/prpers<prn><obj><p2><mf><sp>$ ^should/should<vaux><inf>$ "]
+
+        errorOutputs = ["std::exception"]
+
+        errorCodes = [1]
+        self.assertEqualPipeOutput(["../lttoolbox/.libs/lt-proc", "-z", "data/en-af.automorf.bin"],
                                    inputs, outputs, errorOutputs, errorCodes)

@@ -2,7 +2,7 @@ import unittest
 import sys
 import time
 
-from async.subproc import Popen, PIPE
+from subproc import Popen, PIPE
 
 def recv(proc):
     last_read = proc.recv(1)

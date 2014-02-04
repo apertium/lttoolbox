@@ -1,3 +1,5 @@
+# TODO: do we need this file?
+
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/440554
 
 import os
