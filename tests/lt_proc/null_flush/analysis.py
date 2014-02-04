@@ -11,7 +11,7 @@ from apertium_process import ApertiumProcess
 # Tests which only test null flushing and which only close stdin after all tests have been executed.
 
 class NullFlushTest(object):
-    def assertEqualPipeOutput(self, proc, inputs, expectedOutputs, expectedErrors = itertools.repeat("\x00")):
+    def assertEqualPipeOutput(self, proc, inputs, expectedOutputs, expectedErrors = itertools.repeat("")):
         for inString, expectedOutString, expectedErrorString in zip(inputs, expectedOutputs, expectedErrors):
             proc.send(inString.encode('utf-8'))
 
@@ -22,20 +22,20 @@ class NullFlushTest(object):
             self.assertEqual(expectedErrorString, errorString)
 
 
-    def ensureOutput(self, proc, output):
+    def ensureOutput(self, proc, expectedOutput, expectedError):
             outString = proc.readUntilNull(proc.recv)
-            self.assertEqual(output, outString)
+            self.assertEqual(expectedOutput, outString)
 
             errorString = proc.readUntilNull(proc.recv_err)
-            self.assertEqual(output, errorString)
+            self.assertEqual(expectedError, errorString)
 
 
     def runTest(self):
         self.runNullTest()
 
-        self.ensureOutput(self.proc, "")
+        self.ensureOutput(self.proc, "", "")
         self.proc.stdin.close()
-        self.ensureOutput(self.proc, "")
+        self.ensureOutput(self.proc, '\x00', "") # TODO: _should_ this be null here??
         self.assertEqual(self.proc.wait(), 0)
 
 
@@ -87,12 +87,12 @@ class ValidAndInvalidInputs(unittest.TestCase, NullFlushTest):
                    "^Simon/Simon<np><ant><m><sg>$ ^prefers/prefer<vblex><pri><p3><sg>$ ^dark/dark<adj><sint>/dark<n><sg>$ \x00",
                    "^but/but<cnjcoo>/but<pr>$ ^sometimes/sometimes<adv>$ ^he/prpers<prn><subj><p3><m><sg>$ ^east/east<adj>/east<n><unc><sg>$ ^milk/milk<n><sg>/milk<vblex><inf>/milk<vblex><pres>$ ^chocolate/chocolate<n><sg>$^./.<sent>$[][\n]\x00"]
 
-        errorOutputs = ["\x00",
-                        "Error: Malformed input stream.\x00",
-                        "\x00",
-                        "Error: Malformed input stream.\x00",
-                        "Error: Malformed input stream.\x00",
-                        "\x00"]
+        errorOutputs = ["",
+                        "Error: Malformed input stream.",
+                        "",
+                        "Error: Malformed input stream.",
+                        "Error: Malformed input stream.",
+                        ""]
 
         self.proc = ApertiumProcess(["../lttoolbox/.libs/lt-proc", "-z", "data/en-af.automorf.bin"])
         self.assertEqualPipeOutput(self.proc, inputs, outputs, errorOutputs)
@@ -100,7 +100,7 @@ class ValidAndInvalidInputs(unittest.TestCase, NullFlushTest):
 ############################################################################################################
 # Tests which only test null flushing and which only close stdin after all tests have been executed.
 
-class NullFlushTest(object):
+class NullFlushTest2(object):
     def assertEqualPipeOutput(self, cmdLine, inputs, expectedOutputs,
                               expectedErrors = itertools.repeat(""),
                               expectedErrorCodes = itertools.repeat(0)):
@@ -122,24 +122,24 @@ class NullFlushTest(object):
         self.runNullTest()
 
 
-class OnlyValidInputWithStdinClose(unittest.TestCase, NullFlushTest):
+class OnlyValidInputWithStdinClose(unittest.TestCase, NullFlushTest2):
     def runNullTest(self):
         inputs = [u"The dog gladly eats homework.",
                   u"If wé swim fast enough,\x00we should reach shallow waters.",
                   u"before;\x00the sharks;\x00come."]
 
-        outputs = [u"^The/The<det><def><sp>$ ^dog/dog<n><sg>$ ^gladly/gladly<adv>$ ^eats/eat<vblex><pri><p3><sg>$ ^homework/homework<n><unc><sg>$",
-                   u"^If/If<cnjadv>$ ^wé/*wé$ ^swim/swim<vblex><inf>/swim<vblex><pres>$ ^fast/fast<adj><sint>/fast<n><sg>$ ^enough/enough<adv>/enough<det><qnt><sp>$\x00^we/prpers<prn><subj><p1><mf><pl>$ ^should/should<vaux><inf>$ ^reach/reach<vblex><inf>/reach<vblex><pres>$ ^shallow/shallow<adj><sint>$ ^waters/water<n><pl>$",
-                   u"^before/before<adv>/before<cnjadv>/before<pr>$\x00^the/the<det><def><sp>$ ^sharks/shark<n><pl>$\x00^come/come<vblex><inf>/come<vblex><pres>/come<vblex><pp>$"]
+        outputs = [u"^The/The<det><def><sp>$ ^dog/dog<n><sg>$ ^gladly/gladly<adv>$ ^eats/eat<vblex><pri><p3><sg>$ ^homework/homework<n><unc><sg>$\x00",
+                   u"^If/If<cnjadv>$ ^wé/*wé$ ^swim/swim<vblex><inf>/swim<vblex><pres>$ ^fast/fast<adj><sint>/fast<n><sg>$ ^enough/enough<adv>/enough<det><qnt><sp>$\x00^we/prpers<prn><subj><p1><mf><pl>$ ^should/should<vaux><inf>$ ^reach/reach<vblex><inf>/reach<vblex><pres>$ ^shallow/shallow<adj><sint>$ ^waters/water<n><pl>$\x00",
+                   u"^before/before<adv>/before<cnjadv>/before<pr>$\x00^the/the<det><def><sp>$ ^sharks/shark<n><pl>$\x00^come/come<vblex><inf>/come<vblex><pres>/come<vblex><pp>$\x00"]
 
         errorOutputs = [u"",
-                        u"\x00",
-                        u"\x00\x00"]
+                        u"",
+                        u"",]
 
         self.assertEqualPipeOutput(["../lttoolbox/.libs/lt-proc", "-z", "data/en-af.automorf.bin"], inputs, outputs, errorOutputs)
 
 
-class OnlyInvalidInputWithStdinClose(unittest.TestCase, NullFlushTest):
+class OnlyInvalidInputWithStdinClose(unittest.TestCase, NullFlushTest2):
     def runNullTest(self):
         inputs = [u"The dog gladly eats[ homework.",
                   u"If wé swim ^ fast enough,\x00we should >reach shallow waters.",
