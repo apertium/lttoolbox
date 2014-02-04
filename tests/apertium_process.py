@@ -35,9 +35,7 @@ class ApertiumProcess(Popen):
     def kill(self):
         import os
         try:
-	    print self.pid;
-	    os.system('kill -9 ' + self.pid);
-            os.kill(self.pid, 9)
+            os.kill(self.pid, 15)
         except OSError:
             pass # if we get here, the process either never started, or has already died
 
