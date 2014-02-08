@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  Alphabet new_alphabet;
+  Alphabet alphabet;
   set<wchar_t> alphabetic_chars;
 
   map<wstring, Transducer> transducers;
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
   }  
 
   // symbols  
-  new_alphabet.read(input);
+  alphabet.read(input);
 
   len = Compression::multibyte_read(input);
 
@@ -97,8 +97,8 @@ int main(int argc, char *argv[])
   penum--;
   for(map<wstring, Transducer>::iterator it = transducers.begin(); it != transducers.end(); it++)
   {
-    //it->second.minimize();
-    it->second.show(new_alphabet, output);
+    it->second.joinFinals();
+    it->second.show(alphabet, output);
     if(it != penum) 
     {
       fwprintf(output, L"--\n", it->first.c_str());
