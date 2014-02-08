@@ -619,17 +619,15 @@ Transducer::reverse(int const epsilon_tag)
 }
 
 void
-Transducer::show(Alphabet &alphabet, FILE *output, int const epsilon_tag)
+Transducer::show(Alphabet const &alphabet, FILE *output, int const epsilon_tag) const
 {
-  joinFinals(epsilon_tag);
-
   map<int, multimap<int, int> > temporal;
 
-  for(map<int, multimap<int, int> >::iterator it = transitions.begin(); it != transitions.end(); it++)
+  for(map<int, multimap<int, int> >::const_iterator it = transitions.begin(); it != transitions.end(); it++)
   {
     multimap<int, int> aux = it->second;
   
-    for(multimap<int, int>::iterator it2 = aux.begin(); it2 != aux.end(); it2++) 
+    for(multimap<int, int>::const_iterator it2 = aux.begin(); it2 != aux.end(); it2++) 
     {
       pair<int, int> t = alphabet.decode(it2->first);
       fwprintf(output, L"%d\t", it->first);
@@ -658,7 +656,7 @@ Transducer::show(Alphabet &alphabet, FILE *output, int const epsilon_tag)
     } 
   } 
 
-  for(set<int>::iterator it3 = finals.begin(); it3 != finals.end(); it3++)
+  for(set<int>::const_iterator it3 = finals.begin(); it3 != finals.end(); it3++)
   {
     fwprintf(output, L"%d\n", *it3);
   }
