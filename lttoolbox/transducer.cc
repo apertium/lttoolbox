@@ -26,6 +26,7 @@
 #include <iostream>
 #include <vector>
 
+#define DEBUG
 
 int
 Transducer::newState()
@@ -771,7 +772,7 @@ Transducer::appendDotStar(set<int> const &loopback_symbols, int const epsilon_ta
 }
 
 Transducer
-Transducer::intersect(Transducer const &t,
+Transducer::intersect(Transducer &t,
   Alphabet const &my_a,
   Alphabet const &t_a,
   int const epsilon_tag)
@@ -786,7 +787,7 @@ Transducer::intersect(Transducer const &t,
   SearchState current;
   current.first = initial;
   current.second.insert(t.initial);
-  todo.push_back(current);
+  todo.push_front(current);
 
   while(todo.size() > 0)
   {
@@ -794,6 +795,73 @@ Transducer::intersect(Transducer const &t,
     todo.pop_front();
     // loop through arcs from current.first; when our arc matches an
     // arc from current.second, add that to (the front of) todo
+    for(multimap<int, int>::iterator it = transitions[current.first].begin(),
+                                     limit = transitions[current.first].end();
+      it != limit;
+      it++)
+    {
+      SearchState next;
+      for(set<int>::iterator t_state_it = current.second.begin(),
+                             t_state_limit = current.second.end();
+        t_state_it != t_state_limit;
+        t_state_it++)
+      {
+        for(multimap<int, int>::iterator t_transition_it
+            = t.transitions.at(*t_state_it).begin(),
+                                         t_transition_limit
+            = t.transitions.at(*t_state_it).end();
+          t_transition_it != t_transition_limit;
+          t_transition_it++)
+        {
+          wstring right = L"",
+                  t_left = L"";
+          my_a.getSymbol(right, my_a.decode(it->first).second);
+          t_a.getSymbol(t_left,
+            t_a.decode(t_transition_it->first).first);
+#ifdef DEBUG
+          wstring left = L"",
+                  t_right = L"";
+          my_a.getSymbol(left, my_a.decode(it->first).first);
+          t_a.getSymbol(t_right,
+            t_a.decode(t_transition_it->first).second);
+          wcerr << current.first
+                << L"\t"
+                << it->second
+                << L"\t"
+                << left
+                << L"\t"
+                << right
+                << L"\tis ";
+#endif /* DEBUG */
+
+          if(right == t_left)
+          {
+            next.second.insert(t_transition_it->second);
+            wcerr << L"equal to    ";
+          }
+#ifdef DEBUG
+          else
+          {
+            wcerr << L"not equal to";
+          }
+
+          wcerr << L"\t"
+                << *t_state_it
+                << L"\t "
+                << t_transition_it->second
+                << L"\t "
+                << t_left
+                << L"\t "
+                << t_right<<endl;
+#endif /* DEBUG */
+        }
+      }
+      if(next.second.size() > 0)
+      {
+        next.first = it->second;
+        todo.push_front(next);
+      }
+    }
   }
 
 #ifdef DEBUG
