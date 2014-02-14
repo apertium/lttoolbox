@@ -773,7 +773,6 @@ Transducer::intersect(Transducer &trimmer,
   Alphabet const &trimmer_a,
   int const epsilon_tag)
 {
-
   joinFinals(epsilon_tag);
   /**
    * this ∩ trimmer = trimmed
@@ -784,9 +783,7 @@ Transducer::intersect(Transducer &trimmer,
   // TODO: Give an error message if trimming produces an empty
   // dictionary (otherwise just gives segfault on lt-proc)
 
-  // TODO: If this_right == '+' (<j/>), add a transition from initial
-
-  // TODO: If this_right is a compound_tag, unconditionally add to next
+  // TODO: What to do about <g/>? Currently, "a<n># b" is added if "a<n>" is in trimmer.
 
   // State numbers may differ in this transducer and the trimmed:
   Transducer trimmed;
