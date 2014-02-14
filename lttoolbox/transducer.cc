@@ -771,181 +771,40 @@ Transducer::appendDotStar(set<int> const &loopback_symbols, int const epsilon_ta
 }
 
 Transducer
-Transducer::intersect(Transducer &t,
+Transducer::intersect(Transducer const &t,
   Alphabet const &my_a,
   Alphabet const &t_a,
   int const epsilon_tag)
 {
-  // map of the states of the multiplied and trimmed transducers
-  map<pair<int, int>, int> states_multiplied_trimmed;
-  // trimmed transducer
   Transducer trimmed_t;
-  // destroy the initial state of the trimmed transducer
-  trimmed_t.transitions.clear();
+
+  // first: currently searched state in this; second: current live states in t
+  typedef std::pair<int, set<int> > SearchState;
+
+  std::list<SearchState> todo;
   
-  for(map<int, multimap<int, int> >::iterator it = transitions.begin(),
-                                              limit = transitions.end();
-    it != limit;
-    it++)
-  {
-    linkStates(it->first, it->first, epsilon_tag);
+  SearchState current;
+  current.first = initial;
+  current.second.insert(t.initial);
+  todo.push_back(current);
 
-    for(map<int, multimap<int, int> >::const_iterator t_it
-        = t.transitions.begin(),
-                                                      t_limit
-        = t.transitions.end();
-      t_it != t_limit;
-      t_it++)
-    {
-      t.linkStates(t_it->first, t_it->first, epsilon_tag);
-      // state of the multiplied automaton
-      pair<int, int> tmp(it->first, t_it->first);
-      /* map the state of the multiplied automaton with a new state of the
-       * trimmed transducer
-       */
-      states_multiplied_trimmed.insert(make_pair(tmp, trimmed_t.newState()));
-    }
+  while(todo.size() > 0)
+  {
+    current = todo.front();
+    todo.pop_front();
+    // loop through arcs from current.first; when our arc matches an
+    // arc from current.second, add that to (the front of) todo
   }
 
-  for(map<int, multimap<int, int> >::iterator state_it = transitions.begin(),
-                                              state_limit = transitions.end();
-    state_it != state_limit;
-    state_it++)
-  {
-    for(map<int, multimap<int, int> >::const_iterator t_state_it
-        = t.transitions.begin(),
-                                                      t_state_limit
-        = t.transitions.end();
-      t_state_it != t_state_limit;
-      t_state_it++)
-    {
-      for(multimap<int, int>::iterator transition_it = state_it->second.begin(),
-                                       transition_limit
-          = state_it->second.end();
-        transition_it != transition_limit;
-        transition_it++)
-      {
-        for(multimap<int, int>::const_iterator t_transition_it
-            = t_state_it->second.begin(),
-                                               t_transition_limit
-            = t_state_it->second.end();
-          t_transition_it != t_transition_limit;
-          t_transition_it++)
-        {
-          wstring left_monolingual = L"",
-                  right_monolingual = L"",
-                  left_bilingual = L"";
-          my_a.getSymbol(left_monolingual,
-            my_a.decode(transition_it->first).first);
-          my_a.getSymbol(right_monolingual,
-            my_a.decode(transition_it->first).second);
-          t_a.getSymbol(left_bilingual,
-            t_a.decode(t_transition_it->first).first);
-          /* check if the input tag of this class is equal to the output tag of
-           * the transducer t
-           */
-          if(right_monolingual == left_bilingual)
-          {
-            // source state of the multiplied automaton
-            pair<int, int> multiplied_source(state_it->first,
-              t_state_it->first);
-            // target state of the multiplied automaton
-            pair<int, int> multiplied_target(transition_it->second,
-              t_transition_it->second);
-            wcerr << L"linking (("
-                  << multiplied_source.first
-                  << L", "
-                  << multiplied_source.second
-                  << L") -> "
-                  << states_multiplied_trimmed[multiplied_source]
-                  << L") to (("
-                  << multiplied_target.first
-                  << L", "
-                  << multiplied_target.second
-                  << L") -> "
-                  << states_multiplied_trimmed[multiplied_target]
-                  << L") with ("
-                  << left_monolingual
-                  << L", "
-                  << right_monolingual
-                  << L")"<<endl;
-            /* link the source and target states of the trimmed transducer with
-             * the symbol of this class
-             */
-            trimmed_t.linkStates(states_multiplied_trimmed[multiplied_source],
-              states_multiplied_trimmed[multiplied_target],
-              transition_it->first);
-          }
-          else
-          {
-            // source state of the multiplied automaton
-            pair<int, int> multiplied_source(state_it->first,
-              t_state_it->first);
-            // target state of the multiplied automaton
-            pair<int, int> multiplied_target(transition_it->second,
-              t_transition_it->second);
-            wstring right_bilingual = L"";
-            t_a.getSymbol(right_bilingual,
-              t_a.decode(t_transition_it->first).second);
-            /* wcerr << L"not linking (("
-              << multiplied_source.first
-              << L", "
-              << multiplied_source.second
-              << L") -> "
-              << states_multiplied_trimmed[multiplied_source]
-              << L") to (("
-              << multiplied_target.first
-              << L", "
-              << multiplied_target.second
-              << L") -> "
-              << states_multiplied_trimmed[multiplied_target]
-              << L") with ("
-              << left_monolingual
-              << L", "
-              << right_monolingual
-              << L") because the symbol ("
-              << left_monolingual
-              << L", "
-              << right_monolingual
-              << L") cannot be multiplied with ("
-              << left_bilingual
-              << L", "
-              << right_bilingual
-              << L")"<<endl; */
-            continue;
-          }
-        }
-      }
-    }
-  }
-
-  for(set<int>::iterator it = finals.begin(),
-                         limit = finals.end();
-    it != limit;
-    it++)
-  {
-    for(set<int>::iterator t_it = t.finals.begin(),
-                           t_limit = t.finals.end();
-      t_it != t_limit;
-      t_it++)
-    {
-      // final state of the multiplied automaton
-      pair<int, int> tmp(*it, *t_it);
-      // insert the final state of the trimmed transducer
-      trimmed_t.finals.insert(states_multiplied_trimmed[tmp]);
-    }
-  }
-
-  // initial state of the multiplied automaton
-  pair<int, int> tmp(initial, t.initial);
-  // set the initial state of the trimmed transducer
-  trimmed_t.initial = states_multiplied_trimmed[tmp];
+#ifdef DEBUG
   wcerr << L"initial state: " << trimmed_t.getInitial()<<endl;
   Alphabet show_should_probably_accept_const_a = my_a;
   trimmed_t.show(show_should_probably_accept_const_a);
   trimmed_t.wideConsoleErrorFinals();
   wcerr << L"trimmed_t.minimize();";
   cin.ignore();
+#endif /* DEBUG */
+
   // minimize the trimmed transducer
   trimmed_t.minimize();
 
