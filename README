@@ -14,6 +14,11 @@ README FILE OF LTTOOLBOX
 	             dictionary.  Execute without parameters to show the
                      instructions of use.
 
+	lt-trim   -> (experimental) trims a compiled analyser to only
+	             contain entries which would pass through a compiled
+		     bidix, creating a new compiled and trimmed analyser.
+
+
 2. Install
 
 	a. Requirements:
