@@ -90,9 +90,29 @@ trim(FILE *file_a, FILE *file_b)
   std::map<wstring, Transducer> trans_b = alph_trans_b.second;
 
   std::map<wstring, Transducer> prefix_transducers;
+  // Do we need the second type of this map? See line 115.
   for(std::map<wstring, Transducer>::iterator it = trans_b.begin(); it != trans_b.end(); it++)
   {
-    prefix_transducers[it->first]=it->second.appendDotStar(alph_b, alph_b, it->second);
+  /* a set of symbols of the alphabet of the monolingual transducer, all of the
+   * input and output tags of which are set equal
+   */
+  set<int> loopback_symbols;
+  /* TODO: define this!
+   * the alphabet of the prefix transducer
+   */
+  Alphabet prefix_alphabet;
+  /* I have no idea which transducers alph_a and alph_b are for. Therefore, I
+   * have written this conditional code to cover both foreseeable possiblilies.
+   */
+//#define _ALPH_A_IS_MONOLINGUAL_TRASDUCER_
+#ifdef _ALPH_A_IS_MONOLINGUAL_TRANSDUCER_
+  alph_a.insertSymbolsIntoSet(loopback_symbols, prefix_alphabet);
+#endif
+//#define _ALPH_B_IS_MONOLINGUAL_TRANSDUCER_
+#ifdef _ALPH_B_IS_MONOLINGUAL_TRANSDUCER_
+  alph_b.insertSymbolsIntoSet(loopback_symbols, prefix_alphabet);
+#endif
+  prefix_transducers[it->first]=it->second.appendDotStar(loopback_symbols, prefix_alphabet);
   }
   for(std::map<wstring, Transducer>::iterator it = trans_a.begin(); it != trans_a.end(); it++)
   {

@@ -275,18 +275,29 @@ public:
   void read(FILE *input, int const decalage = 0);
 
   /**
-   * Converts the transducer to a prefix transducer
-   * @param t the transducer with which this class is intersected
+   * Converts this class into a prefix transducer
+   * @param loopback_symbols a set of symbols of the alphabet for this class,
+   *   all of the input and output tags of which are set equal
+   * @param prefix_a the alphabet of the prefix transducer
+   * @param epsilon_tag the tag to take as epsilon
    * @return the prefix transducer
    */
-  Transducer appendDotStar(Alphabet &my_a, Alphabet &t_a, Transducer t, int const epsilon_tag = 0);
+  Transducer appendDotStar(set<int> loopback_symbols,
+    Alphabet prefix_a,
+    const int epsilon_tag = 0);
 
   /**
    * Intersects two finite-state transducers
-   * @param t the transducer with which this class is intersected
+   * @param t the Transducer with which this class is intersected
+   * @param a the alphabet of this class
+   * @param t_a the alphabet of the transducer t
+   * @param trimmed_a the alphabet of the trimmed transducer
    * @return the trimmed transducer
    */
-  Transducer intersect(Transducer);
+  Transducer intersect(Transducer t,
+    Alphabet a,
+    Alphabet t_a,
+    Alphabet trimmed_a);
 };
 
 #endif
