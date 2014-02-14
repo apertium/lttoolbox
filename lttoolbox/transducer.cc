@@ -773,6 +773,7 @@ Transducer::intersect(Transducer &trimmer,
   Alphabet const &trimmer_a,
   int const epsilon_tag)
 {
+
   joinFinals(epsilon_tag);
   /**
    * this ∩ trimmer = trimmed
@@ -864,8 +865,8 @@ Transducer::intersect(Transducer &trimmer,
              || this_right == L"+" // TODO: use COMPILER_JOIN_ELEM from compiler.cc
              || this_right == L"<compound-only-L>" // TODO: use compoundOnlyLSymbol
              || this_right == L"<compound-R>" // TODO: use compoundRSymbol
-             || this_label == epsilon_tag
-             || trimmer_label == epsilon_tag)
+             || this_right == L""             // epsilon
+             || trimmer_left == L"")
           {
             if(this_right == L"+")
             {
@@ -907,12 +908,6 @@ Transducer::intersect(Transducer &trimmer,
                 << L"\t"
                 << (trimmer_right == L"" ? L"ε" : trimmer_right)
                 <<endl;
-          if(this_right == trimmer_left || this_label == epsilon_tag || trimmer_label == epsilon_tag) 
-          {
-            wcerr<<L"vvv Trimmed after inserting: vvv"<<endl;
-            trimmed.show(show_should_probably_accept_const_a);
-            wcerr<<L"^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"<<endl;
-          }
 #endif /* DEBUG */
         }
 
