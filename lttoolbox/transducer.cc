@@ -732,9 +732,14 @@ Transducer::recognise(wstring patro, Alphabet &a, FILE *err)
 }
 
 void
-Transducer::unionWith(Transducer &t, int const epsilon_tag)
+Transducer::unionWith(Alphabet &my_a,
+  Transducer &t,
+  int const epsilon_tag)
 {
-  insertTransducer(initial, t, epsilon_tag);
+  /*int tmp = newState();
+  linkStates(tmp, initial, my_a(epsilon_tag, epsilon_tag));
+  initial = tmp;*/
+  finals.insert(insertTransducer(initial, t, epsilon_tag));
 }
 
 Transducer

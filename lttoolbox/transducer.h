@@ -280,7 +280,9 @@ public:
    * @param t the transducer being inserted
    * @param epsilon_tag the epsilon tag
    */
-  void unionWith(Transducer &t, int const epsilon_tag = 0); 
+  void unionWith(Alphabet &my_a,
+    Transducer &t,
+    int const epsilon_tag = 0); 
 
   /**
    * Converts this class into a prefix transducer

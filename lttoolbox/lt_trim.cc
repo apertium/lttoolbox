@@ -105,10 +105,16 @@ trim(FILE *file_mono, FILE *file_bi)
     if(union_transducer.isEmpty()) 
     {
       union_transducer = prefix_tmp;
+      wcerr << L"union_transducer:"<<endl;
+      union_transducer.show(alph_bi);
     }
     else 
     {
-      union_transducer.unionWith(prefix_tmp);
+      wcerr << L"unioning union_transducer:"<<endl;
+      union_transducer.show(alph_bi);
+      wcerr << L"with prefix_tmp"<<endl;
+      prefix_tmp.show(alph_bi);
+      union_transducer.unionWith(alph_bi, prefix_tmp);
     }
     wcerr << it->first<<endl;
     wcerr << L"current union:"<<endl;
