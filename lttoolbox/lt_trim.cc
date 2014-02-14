@@ -187,23 +187,35 @@ int main(int argc, char *argv[])
   alph_t.write(output);
 
   // transducers
-  Compression::multibyte_write(trans_t.size(), output);
-
-  int n_transitions=0;
+  int n_transducers = 0;
   for(std::map<wstring, Transducer>::iterator it = trans_t.begin(); it != trans_t.end(); it++)
   {
     wcout << it->first << " " << it->second.size();
     wcout << " " << it->second.numberOfTransitions() << endl;
-    Compression::wstring_write(it->first, output);
-    it->second.write(output);
-    n_transitions += it->second.numberOfTransitions();
+    if(it->second.numberOfTransitions() == 0)
+    {
+      wcerr << L"Warning: empty section! Skipping it ..."<<endl;
+    }
+    else
+    {
+      n_transducers++;
+    }
+  }
+  Compression::multibyte_write(n_transducers, output);
+  for(std::map<wstring, Transducer>::iterator it = trans_t.begin(); it != trans_t.end(); it++)
+  {
+    if(it->second.numberOfTransitions() != 0) 
+    {
+      Compression::wstring_write(it->first, output);
+      it->second.write(output);
+    }
   }
 
   fclose(analyser);
   fclose(bidix);
   fclose(output);
 
-  if(n_transitions==0) 
+  if(n_transducers == 0) 
   {
     wcerr << L"Error: Trimming gave empty transducer!" << endl;
     return 1;
