@@ -228,20 +228,48 @@ void Alphabet::setSymbol(int symbol, wstring newSymbolString) {
 }
 
 void
-Alphabet::insertSymbolsIntoSet(set<int> &symbols, Alphabet a, Tag t)
+Alphabet::createLoopbackSymbols(set<int> &symbols, Alphabet &basis, Side s)
 {
-  for(map<wstring, int, Ltstr>::iterator it = slexic.begin(),
-                                         limit = slexic.end();
-    it != limit;
-    it++)
+  // Non-tag letters get the same int in spairinv across alphabets,
+  // but tags may differ, so do those separately afterwards.
+  set<int> tags;
+  for(vector<pair<int, int> >::iterator it = basis.spairinv.begin(),
+                                        limit = basis.spairinv.end();
+      it != limit;
+      it++)
   {
-    if(t == kOutput)
-    {
-      symbols.insert(a(this->decode(it->second).second, this->decode(it->second).second));
+    if(s == left) {
+      if(basis.isTag(it->first)) 
+      {
+        tags.insert(it->first);
+      }
+      else 
+      {
+        symbols.insert(operator()(it->first, it->first));
+      }
     }
-    else
+    else {
+      if(basis.isTag(it->second)) 
+      {
+        tags.insert(it->second);
+      }
+      else 
+      {
+        symbols.insert(operator()(it->second, it->second));
+      }
+    }
+  }
+  for(map<wstring, int, Ltstr>::iterator it = basis.slexic.begin(),
+                                         limit = basis.slexic.end();
+      it != limit;
+      it++)
+  {
+    // Only include tags that were actually seen on the correct side
+    if(tags.find(it->second) != tags.end()) 
     {
-      symbols.insert(a(this->decode(it->second).first, this->decode(it->second).first));
+      includeSymbol(it->first);
+      symbols.insert(operator()(operator()(it->first),
+                                operator()(it->first)));
     }
   }
 }

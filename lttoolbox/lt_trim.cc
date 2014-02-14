@@ -80,46 +80,56 @@ read_fst(FILE *bin_file)
 }
 
 std::pair<std::pair<Alphabet, wstring>, std::map<wstring, Transducer> >
-trim(FILE *file_a, FILE *file_b)
+trim(FILE *file_mono, FILE *file_bi)
 {
-  std::pair<std::pair<Alphabet, wstring>, std::map<wstring, Transducer> > alph_trans_a = read_fst(file_a);
-  Alphabet alph_a = alph_trans_a.first.first;
-  std::map<wstring, Transducer> trans_a = alph_trans_a.second;
-  std::pair<std::pair<Alphabet, wstring>, std::map<wstring, Transducer> > alph_trans_b = read_fst(file_b);
-  Alphabet alph_b = alph_trans_b.first.first;
-  std::map<wstring, Transducer> trans_b = alph_trans_b.second;
+  std::pair<std::pair<Alphabet, wstring>, std::map<wstring, Transducer> > alph_trans_mono = read_fst(file_mono);
+  Alphabet alph_mono = alph_trans_mono.first.first;
+  std::map<wstring, Transducer> trans_mono = alph_trans_mono.second;
+  std::pair<std::pair<Alphabet, wstring>, std::map<wstring, Transducer> > alph_trans_bi = read_fst(file_bi);
+  Alphabet alph_bi = alph_trans_bi.first.first;
+  std::map<wstring, Transducer> trans_bi = alph_trans_bi.second;
 
-  std::map<wstring, Transducer> prefix_transducers;
-  // Do we need the second type of this map? See line 115.
-  for(std::map<wstring, Transducer>::iterator it = trans_b.begin(); it != trans_b.end(); it++)
+  // The prefix transducer is the union of all transducers from bidix,
+  // with a ".*" appended
+  Transducer prefix_transducer;
+  // The "." in ".*" is a set of equal pairs of the output symbols
+  // from the monodix alphabet (<n>:<n> etc.)
+  Alphabet alph_prefix = alph_bi;
+  set<int> loopback_symbols;    // ints refer to alph_prefix
+  alph_prefix.createLoopbackSymbols(loopback_symbols, alph_mono, Alphabet::right);
+
+  for(std::map<wstring, Transducer>::iterator it = trans_bi.begin(); it != trans_bi.end(); it++)
   {
-  /* a set of symbols of the alphabet of the monolingual transducer, all of the
-   * input and output tags of which are set equal
-   */
-  set<int> loopback_symbols;
-  /* TODO: define this!
-   * the alphabet of the prefix transducer
-   */
-  Alphabet prefix_alphabet;
-  /* I have no idea which transducers alph_a and alph_b are for. Therefore, I
-   * have written this conditional code to cover both foreseeable possiblilies.
-   */
-//#define _ALPH_A_IS_MONOLINGUAL_TRASDUCER_
-#ifdef _ALPH_A_IS_MONOLINGUAL_TRANSDUCER_
-  alph_a.insertSymbolsIntoSet(loopback_symbols, prefix_alphabet);
-#endif
-//#define _ALPH_B_IS_MONOLINGUAL_TRANSDUCER_
-#ifdef _ALPH_B_IS_MONOLINGUAL_TRANSDUCER_
-  alph_b.insertSymbolsIntoSet(loopback_symbols, prefix_alphabet);
-#endif
-  prefix_transducers[it->first]=it->second.appendDotStar(loopback_symbols, prefix_alphabet);
+    Transducer prefix_tmp = it->second.appendDotStar(loopback_symbols);
+    if(prefix_transducer.isEmpty()) 
+    {
+      prefix_transducer = prefix_tmp;
+    }
+    else 
+    {
+      prefix_transducer.unionWith(prefix_tmp);
+    }
+    // wcerr << it->first<<endl;
+    // prefix_tmp.show(alph_prefix);
+    // wcerr << L"current union:"<<endl;
+    // prefix_transducer.show(alph_prefix);
   }
-  for(std::map<wstring, Transducer>::iterator it = trans_a.begin(); it != trans_a.end(); it++)
+  // prefix_transducer.minimize();
+  // wcerr << L"minimized:"<<endl;
+  // prefix_transducer.show(alph_prefix);
+
+  for(std::map<wstring, Transducer>::iterator it = trans_mono.begin(); it != trans_mono.end(); it++)
   {
-    // it->second.intersect(alph_a, alph_b, trans_b);
+    // Transducer trimmed_tmp = it->second.intersect(prefix_transducer,
+    //                                               alph_mono,
+    //                                               alph_prefix);
+
+    // wcerr << it->first<<endl;
+    // trimmed_tmp.show(alph_mono);
+    // trans_mono[it->first] = trimmed_tmp;
   }
-  alph_trans_b.second = prefix_transducers;
-  return alph_trans_b;
+  alph_trans_mono.second = trans_mono;
+  return alph_trans_mono;
 }
 
 
