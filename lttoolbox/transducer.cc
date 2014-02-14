@@ -932,6 +932,70 @@ Transducer::intersect(Transducer &t, Alphabet &my_a, Alphabet &t_a)
   pair<int, int> tmp(initial, t.initial);
   // set the initial state of the trimmed transducer
   trimmed_t.initial = states_multiplied_trimmed[tmp];
+
+  for(map<int, multimap<int, int> >::iterator current_it
+      = trimmed_t.transitions.begin(),
+                                              current_limit
+      = trimmed_t.transitions.end();
+    current_it != current_limit;
+    current_it++)
+  {
+    // check if the current state of the trimmed transducer is the initial state
+    if(current_it->first == trimmed_t.getInitial())
+    {
+      continue;
+    }
+    else
+    {
+      bool unreachable = true;
+      for(map<int, multimap<int, int> >::iterator check_it
+          = trimmed_t.transitions.begin(),
+                                                  check_limit
+          = trimmed_t.transitions.end();
+        check_it != check_limit;
+        check_it++)
+      {
+        // check if the check state is the current state
+        if(check_it->first == current_it->first)
+        {
+          continue;
+        }
+        else
+        {
+          for(multimap<int, int>::iterator transition_it
+              = check_it->second.begin(),
+                                           transition_limit
+              = check_it->second.end();
+            transition_it != transition_limit;
+            transition_it++)
+          {
+            // check if the target state of the transition is the current state
+            if(transition_it->second == current_it->first)
+            {
+              // the current state is not unreachable
+              unreachable = false;
+              break;
+            }
+          }
+
+          if(unreachable == false)
+          {
+            break;
+          }
+        }
+      }
+      if(unreachable == true)
+      {
+        /* link the initial state of the trimmed transducer to the current
+         * state with an epsilon transition
+         */
+        trimmed_t.linkStates(trimmed_t.getInitial(),
+          current_it->first,
+          my_a(my_a(L""), my_a(L"")));
+      }
+    }
+  }
+
   wcerr << L"initial state: " << trimmed_t.getInitial()<<endl;
   trimmed_t.show(my_a);
   trimmed_t.wideConsoleErrorFinals();
