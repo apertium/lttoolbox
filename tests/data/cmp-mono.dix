@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+	<alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÄÅÆÇÈÉÊËÍÑÒÓÔÕÖØÙÚÜČĐŊŠŦŽabcdefghijklmnopqrstuvwxyzàáâäåæçèéêëíñòóôõöøùúüčđŋšŧž­-</alphabet>
+	<sdefs>
+	  <sdef n="n"/>
+	  <sdef n="pr"/>
+	  <sdef n="compound-only-L"/>
+	  <sdef n="compound-R"/>
+        </sdefs>
+<pardefs>
+
+</pardefs>
+
+<section id="cmp" type="standard">
+  <e><p><l>a</l><r>a<s n="n"/><s n="compound-only-L"/></r></p></e>
+  <e><p><l>b</l><r>b<s n="n"/><s n="compound-R"/></r></p></e>
+
+  <e><p><l>c</l><r>d<s n="compound-only-L"/><s n="n"/></r></p></e>
+  <e><p><l>d</l><r>d<s n="compound-R"/><s n="n"/></r></p></e>
+
+  <e><p><l>a</l><r>a<s n="pr"/><s n="compound-only-L"/></r></p></e>
+  <e><p><l>b</l><r>b<s n="pr"/><s n="compound-R"/></r></p></e>
+
+  <e><p><l>c</l><r>d<s n="compound-only-L"/><s n="pr"/></r></p></e>
+  <e><p><l>d</l><r>d<s n="compound-R"/><s n="pr"/></r></p></e>
+</section>
+
+</dictionary>
