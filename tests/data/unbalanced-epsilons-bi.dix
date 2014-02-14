@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet/>
+  <sdefs>
+    <sdef n="vblex"   c="Verb"/>
+  </sdefs>
+
+  <pardefs>
+  </pardefs>
+
+  <section id="main" type="standard">
+    <e>
+      <p><l>abcdefghijklmnopqrstuvwxyz</l><r>re</r></p>
+      <p><l><s n="vblex"/></l><r><s n="vblex"/></r></p>
+    </e>
+  </section>
+</dictionary>

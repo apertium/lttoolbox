@@ -187,3 +187,47 @@ class BidixPardef(unittest.TestCase, ProcTest):
 
         finally:
             rmtree(tmpd)
+
+
+
+class UnbalancedEpsilons(unittest.TestCase, ProcTest):
+    inputs = ["re", "rer", "res", "ret"]
+    expectedOutputs = ["^re/re<vblex><inf>$", "^rer/re<vblex><pres>$", "^res/re<vblex><pres>$", "^ret/re<vblex><pret>$"]
+    expectedRetCode = 0
+
+    def runTest(self):
+        tmpd = mkdtemp()
+        try:
+            self.assertEqual(0, call(["../lttoolbox/lt-comp",
+                                      "lr",
+                                      "data/unbalanced-epsilons-mono.dix",
+                                      tmpd+"/unbalanced-epsilons-mono.bin"],
+                                     stdout=PIPE))
+            self.assertEqual(0, call(["../lttoolbox/lt-comp",
+                                      "rl", # rl!
+                                      "data/unbalanced-epsilons-bi.dix",
+                                      tmpd+"/unbalanced-epsilons-bi.bin"],
+                                     stdout=PIPE))
+            self.assertEqual(0, call(["../lttoolbox/lt-trim",
+                                      tmpd+"/unbalanced-epsilons-mono.bin",
+                                      tmpd+"/unbalanced-epsilons-bi.bin",
+                                      tmpd+"/unbalanced-epsilons-trimmed.bin"],
+                                     stdout=PIPE))
+
+            self.cmdLine = ["../lttoolbox/.libs/lt-proc", "-z", tmpd+"/unbalanced-epsilons-trimmed.bin"]
+            self.proc = Popen(self.cmdLine, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+
+            for inp,exp in zip(self.inputs, self.expectedOutputs):
+                self.assertEqual( self.communicateFlush(inp+"[][\n]"),
+                                  exp+"[][\n]" )
+
+            self.proc.communicate() # let it terminate
+            self.proc.stdin.close()
+            self.proc.stdout.close()
+            self.proc.stderr.close()
+            self.assertEqual( self.proc.poll(),
+                              self.expectedRetCode )
+
+
+        finally:
+            rmtree(tmpd)
