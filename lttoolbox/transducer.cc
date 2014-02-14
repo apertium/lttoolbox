@@ -824,11 +824,19 @@ Transducer::intersect(Transducer &t, Alphabet &my_a, Alphabet &t_a)
           t_transition_it != t_transition_limit;
           t_transition_it++)
         {
+          wstring left_monolingual = L"",
+                  right_monolingual = L"",
+                  left_bilingual = L"";
+          my_a.getSymbol(left_monolingual,
+            my_a.decode(transition_it->first).first);
+          my_a.getSymbol(right_monolingual,
+            my_a.decode(transition_it->first).second);
+          t_a.getSymbol(left_bilingual,
+            t_a.decode(t_transition_it->first).first);
           /* check if the input tag of this class is equal to the output tag of
            * the transducer t
            */
-          if(my_a.decode(transition_it->first).first
-            == t_a.decode(t_transition_it->first).second)
+          if(right_monolingual == left_bilingual)
           {
             // source state of the multiplied automaton
             pair<int, int> multiplied_source(state_it->first,
@@ -836,6 +844,23 @@ Transducer::intersect(Transducer &t, Alphabet &my_a, Alphabet &t_a)
             // target state of the multiplied automaton
             pair<int, int> multiplied_target(transition_it->second,
               t_transition_it->second);
+            wcerr << L"linking (("
+                  << multiplied_source.first
+                  << L", "
+                  << multiplied_source.second
+                  << L") -> "
+                  << states_multiplied_trimmed[multiplied_source]
+                  << L") to (("
+                  << multiplied_target.first
+                  << L", "
+                  << multiplied_target.second
+                  << L") -> "
+                  << states_multiplied_trimmed[multiplied_target]
+                  << L") with ("
+                  << left_monolingual
+                  << L", "
+                  << right_monolingual
+                  << L")"<<endl;
             /* link the source and target states of the trimmed transducer with
              * the symbol of this class
              */
@@ -845,6 +870,40 @@ Transducer::intersect(Transducer &t, Alphabet &my_a, Alphabet &t_a)
           }
           else
           {
+            // source state of the multiplied automaton
+            pair<int, int> multiplied_source(state_it->first,
+              t_state_it->first);
+            // target state of the multiplied automaton
+            pair<int, int> multiplied_target(transition_it->second,
+              t_transition_it->second);
+            wstring right_bilingual = L"";
+            t_a.getSymbol(right_bilingual,
+              t_a.decode(t_transition_it->first).second);
+            wcerr << L"not linking (("
+              << multiplied_source.first
+              << L", "
+              << multiplied_source.second
+              << L") -> "
+              << states_multiplied_trimmed[multiplied_source]
+              << L") to (("
+              << multiplied_target.first
+              << L", "
+              << multiplied_target.second
+              << L") -> "
+              << states_multiplied_trimmed[multiplied_target]
+              << L") with ("
+              << left_monolingual
+              << L", "
+              << right_monolingual
+              << L") because the symbol ("
+              << left_monolingual
+              << L", "
+              << right_monolingual
+              << L") cannot be multiplied with ("
+              << left_bilingual
+              << L", "
+              << right_bilingual
+              << L")"<<endl;
             continue;
           }
         }
@@ -873,43 +932,12 @@ Transducer::intersect(Transducer &t, Alphabet &my_a, Alphabet &t_a)
   pair<int, int> tmp(initial, t.initial);
   // set the initial state of the trimmed transducer
   trimmed_t.initial = states_multiplied_trimmed[tmp];
-  wcerr << L"initial state:"<<endl;
-  wcerr << trimmed_t.initial<<endl;
-  wcerr << L"transitions from the initial state:"<<endl;
-  for(multimap<int, int>::iterator it
-      = trimmed_t.transitions[trimmed_t.initial].begin(),
-                                   limit
-      = trimmed_t.transitions[trimmed_t.initial].end();
-    it != limit;
-    it++)
-  {
-    wcerr << it->first << L" -> " << it->second<<endl;
-  }
-  wcerr << L"final states and the transitions to them:"<<endl;
-  for(set<int>::iterator state_it = trimmed_t.finals.begin(),
-                         state_limit = trimmed_t.finals.end();
-    state_it != state_limit;
-    state_it++)
-  {
-    wcerr << L"final state " << *state_it << L":"<<endl;
-    for(multimap<int, int>::iterator transition_it
-        = trimmed_t.transitions[*state_it].begin(),
-                                     transition_limit
-        = trimmed_t.transitions[*state_it].end();
-      transition_it != transition_limit;
-      transition_it++)
-    {
-      wcerr
-        << L"symbol "
-        << transition_it->first
-        << L" -> state "
-        << transition_it->second
-        <<endl;
-    }
-  }
-  /* minimize the trimmed transducer
-   * This is causing the error "Error: empty set of final states"
-   */
+  wcerr << L"initial state: " << trimmed_t.getInitial()<<endl;
+  trimmed_t.show(my_a);
+  trimmed_t.wideConsoleErrorFinals();
+  wcerr << L"trimmed_t.minimize();";
+  cin.ignore();
+  // minimize the trimmed transducer
   trimmed_t.minimize();
 
   return trimmed_t;
