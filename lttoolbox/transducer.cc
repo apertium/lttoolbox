@@ -860,32 +860,38 @@ Transducer::intersect(Transducer &trimmer,
                 << L"\tis ";
 #endif /* DEBUG */
 
-          if(this_right == trimmer_left || this_label == epsilon_tag || trimmer_label == epsilon_tag)
+          if(   this_right == trimmer_left
+             || this_right == L"+"
+             || this_label == epsilon_tag
+             || trimmer_label == epsilon_tag)
           {
+            if(this_right == L"+") // TODO: use COMPILER_JOIN_ELEM from compiler.cc
+            {
+              trimmer_trg = trimmer.initial;
+            }
             if(seen.find(make_pair(this_trg, trimmer_trg)) == seen.end()) 
             {
               next.second.insert(trimmer_trg);
             }
-#ifdef DEBUG
-            wcerr << L"equal to    ";
-#endif /* DEBUG */
             int trimmed_src = states_this_trimmed[this_src];
             if(states_this_trimmed.find(this_trg) == states_this_trimmed.end())
             {
               states_this_trimmed.insert(make_pair(this_trg, trimmed.newState()));
             }
-            int trimmed_trg =  states_this_trimmed[this_trg];
+            int trimmed_trg = states_this_trimmed[this_trg];
             trimmed.linkStates(trimmed_src, // fromState
                                trimmed_trg, // toState
                                this_label); // symbol-pair, using this alphabet
+#ifdef DEBUG
+            wcerr << L"    ";
+#endif /* DEBUG */
           }
 #ifdef DEBUG
           else
           {
-            wcerr << L"not equal to";
+            wcerr << L"not ";
           }
-
-          wcerr << L"\t"
+          wcerr << L"equal to\t"
                 << trimmer_src
                 << L"\t "
                 << trimmer_trg
@@ -903,9 +909,6 @@ Transducer::intersect(Transducer &trimmer,
 #endif /* DEBUG */
         }
 
-#ifdef DEBUG
-        wcerr << L""<<this_src<<L"\t\t\t\t\t\t"<< trimmer_src <<L" is seen"<<endl;
-#endif /* DEBUG */
         seen.insert(make_pair(this_src, trimmer_src));
       } // end loop live trimmer states
 
@@ -923,9 +926,6 @@ Transducer::intersect(Transducer &trimmer,
       it != limit;
       it++)
   {
-#ifdef DEBUG
-    wcerr << (*it)<<L" is final in this, insert into trimmed.finals: "<<states_this_trimmed[*it]<<endl;
-#endif /* DEBUG */
     trimmed.finals.insert(states_this_trimmed[*it]);
   }
 
