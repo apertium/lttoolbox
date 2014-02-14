@@ -781,10 +781,8 @@ Transducer::intersect(Transducer &trimmer,
    * The trimmer is typically a bidix passed through appendDotStar.
    */
 
-  // TODO: Give an error message if trimming produces an empty
-  // dictionary (otherwise just gives segfault on lt-proc)
-
-  // TODO: What to do about <g/>? Currently, "a<n># b" is added if "a<n>" is in trimmer.
+  // TODO: What to do about <g/>? Currently, "a<n># b" is added if
+  // "a<n>" is in trimmer.
 
   // State numbers may differ in this transducer and the trimmed:
   Transducer trimmed;
@@ -951,27 +949,11 @@ Transducer::intersect(Transducer &trimmer,
 #ifdef DEBUG
   wcerr << L"Done trimming!\nInitial state: " << trimmed.getInitial()<<endl;
   trimmed.show(show_should_probably_accept_const_a);
-  trimmed.wideConsoleErrorFinals();
-  wcerr << L"trimmed.minimize();";
+  wcerr << L"running trimmed.minimize() ...";
 #endif /* DEBUG */
 
   // minimize the trimmed transducer
   trimmed.minimize();
 
   return trimmed;
-}
-
-void
-Transducer::wideConsoleErrorFinals()
-{
-  wcerr << L"set of " << finals.size() << L" final states"<<endl;
-  wcerr << L"{"<<endl;
-  for(set<int>::iterator it = finals.begin(),
-                         limit = finals.end();
-    it != limit;
-    it++)
-  {
-    wcerr << *it<<endl;
-  }
-  wcerr << L"}"<<endl;
 }
