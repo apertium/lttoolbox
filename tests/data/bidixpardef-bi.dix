@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+	<alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÄÅÆÇÈÉÊËÍÑÒÓÔÕÖØÙÚÜČĐŊŠŦŽabcdefghijklmnopqrstuvwxyzàáâäåæçèéêëíñòóôõöøùúüčđŋšŧž­-</alphabet>
+  <sdefs>
+    <sdef n="vblex"   c="Verb"/>
+  </sdefs>
+<pardefs>
+<pardef n="vblex">
+<e>       <p><l><s n="vblex"/></l><r><s n="vblex"/></r></p></e>
+    </pardef>
+</pardefs>
+<section id="main" type="standard">
+  <e>       <p><l>ab</l><r>c</r></p><par n="vblex"/></e>
+</section>
+</dictionary>

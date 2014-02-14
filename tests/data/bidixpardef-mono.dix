@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+	<alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÄÅÆÇÈÉÊËÍÑÒÓÔÕÖØÙÚÜČĐŊŠŦŽabcdefghijklmnopqrstuvwxyzàáâäåæçèéêëíñòóôõöøùúüčđŋšŧž­-</alphabet>
+	<sdefs>
+		<sdef n="vblex" c="Verb"/>
+		<sdef n="inf" 	c="Infinitive"/>
+	</sdefs>
+<pardefs>
+</pardefs>
+<section id="main" type="standard">
+  <e>       <p><l>c</l>       <r>c<s n="vblex"/><s n="inf"/></r></p></e>
+</section>
+</dictionary>

@@ -145,3 +145,45 @@ class TrimLongleft(unittest.TestCase, ProcTest):
 
         finally:
             rmtree(tmpd)
+
+class BidixPardef(unittest.TestCase, ProcTest):
+    inputs = ["c"]
+    expectedOutputs = ["^c/c<vblex><inf>$"]
+    expectedRetCode = 0
+
+    def runTest(self):
+        tmpd = mkdtemp()
+        try:
+            self.assertEqual(0, call(["../lttoolbox/lt-comp",
+                                      "lr",
+                                      "data/bidixpardef-mono.dix",
+                                      tmpd+"/bidixpardef-mono.bin"],
+                                     stdout=PIPE))
+            self.assertEqual(0, call(["../lttoolbox/lt-comp",
+                                      "rl", # rl!
+                                      "data/bidixpardef-bi.dix",
+                                      tmpd+"/bidixpardef-bi.bin"],
+                                     stdout=PIPE))
+            self.assertEqual(0, call(["../lttoolbox/lt-trim",
+                                      tmpd+"/bidixpardef-mono.bin",
+                                      tmpd+"/bidixpardef-bi.bin",
+                                      tmpd+"/bidixpardef-trimmed.bin"],
+                                     stdout=PIPE))
+
+            self.cmdLine = ["../lttoolbox/.libs/lt-proc", "-z", tmpd+"/bidixpardef-trimmed.bin"]
+            self.proc = Popen(self.cmdLine, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+
+            for inp,exp in zip(self.inputs, self.expectedOutputs):
+                self.assertEqual( self.communicateFlush(inp+"[][\n]"),
+                                  exp+"[][\n]" )
+
+            self.proc.communicate() # let it terminate
+            self.proc.stdin.close()
+            self.proc.stdout.close()
+            self.proc.stderr.close()
+            self.assertEqual( self.proc.poll(),
+                              self.expectedRetCode )
+
+
+        finally:
+            rmtree(tmpd)
