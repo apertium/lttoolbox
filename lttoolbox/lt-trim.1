@@ -21,11 +21,13 @@ pass through `lt-proc -b bidix_binary' are kept.
 
 Both compund tags (`<compound-only-L>', `<compound-R>') and join
 elements (`<j/>' in XML, `+' in the stream) and the group element
-(`<g/>' in XML, `#' in the stream) should be handled correctly.
+(`<g/>' in XML, `#' in the stream) should be handled correctly in
+analyses that have only one of each, but combinations of + and # are
+not yet handled.
 
-There is one minor caveat: If you have the capitalised lemma "Foo" in
-the monodix, but "foo" in the bidix, an analysis "^Foo<tag>$" would
-pass through bidix when doing lt-proc -b, but will not make it through
+Another minor caveat: If you have the capitalised lemma "Foo" in the
+monodix, but "foo" in the bidix, an analysis "^Foo<tag>$" would pass
+through bidix when doing lt-proc -b, but will not make it through
 trimming. Make sure your lemmas have the same capitalisation in the
 different dictionaries.
 

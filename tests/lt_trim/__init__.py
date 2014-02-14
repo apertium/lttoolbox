@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 # If you have HFST installed, you can diff lttoolbox binaries like this:
 # $ lt-print full.bin | sed 's/ /@_SPACE_@/g' | hfst-txt2fst -e ε | hfst-fst2strings -c1 > full.strings 
@@ -102,6 +103,20 @@ class UnbalancedEpsilons(unittest.TestCase, TrimProcTest):
 class Group(unittest.TestCase, TrimProcTest):
     inputs = ["abc", "pq", "pqr", "pqs", "xyz"]
     expectedOutputs = ["^abc/ab<n><ind>#c$", "^pq/pq<n><ind>$", "^pqr/pq<n><ind>#r$", "^pqs/*pqs$", "^xyz/*xyz$"]
+    expectedRetCode = 0
+    monodix = "data/group-mono.dix"
+    bidix = "data/group-bi.dix"
+
+class GroupUnbalancedEpsilons(unittest.TestCase, TrimProcTest):
+    inputs = ["def"]
+    expectedOutputs = ["^def/de<n><f><sg>#f$"]
+    expectedRetCode = 0
+    monodix = "data/group-mono.dix"
+    bidix = "data/group-bi.dix"
+
+class BothJoinAndGroup(unittest.TestCase, TrimProcTest):
+    inputs = ["jkl", "jkm", "jnl"]
+    expectedOutputs = ["^jkl/j<n><ind>+k<n><ind>#l$", "^jkm/*jkm$", "^jnl/*jnl$"]
     expectedRetCode = 0
     monodix = "data/group-mono.dix"
     bidix = "data/group-bi.dix"
