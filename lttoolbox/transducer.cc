@@ -781,6 +781,11 @@ Transducer::intersect(Transducer &trimmer,
    * The trimmer is typically a bidix passed through appendDotStar.
    */
 
+  // TODO: These should be in file which is included by both
+  // fst_processor.cc and compiler.cc:
+  wstring compoundOnlyLSymbol = L"<compound-only-L>";
+  wstring compoundRSymbol = L"<compound-R>";
+  wstring COMPILER_JOIN_ELEM = L"+";
   // TODO: What to do about <g/>? Currently, "a<n># b" is added if
   // "a<n>" is in trimmer.
 
@@ -868,9 +873,9 @@ Transducer::intersect(Transducer &trimmer,
             }
           }
           else if(   this_right == trimmer_left
-                  || this_right == L"+" // TODO: use COMPILER_JOIN_ELEM from compiler.cc
-                  || this_right == L"<compound-only-L>" // TODO: use compoundOnlyLSymbol
-                  || this_right == L"<compound-R>" // TODO: use compoundRSymbol
+                  || this_right == COMPILER_JOIN_ELEM
+                  || this_right == compoundOnlyLSymbol
+                  || this_right == compoundRSymbol
                   || this_right == L""             // epsilon
             )
           {
@@ -878,8 +883,8 @@ Transducer::intersect(Transducer &trimmer,
             {
               trimmer_trg = trimmer.initial;
             }
-            else if(    this_right == L"<compound-only-L>"
-                    ||  this_right == L"<compound-R>"
+            else if(    this_right == compoundOnlyLSymbol
+                    ||  this_right == compoundRSymbol
                     || (this_right == L"" && trimmer_left != L"") )
             {
               // Stay put in the trimmer FST
