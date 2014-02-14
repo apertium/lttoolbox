@@ -21,9 +21,9 @@
 </section>
 
 <section id="j" type="standard">
-  <e><p><l>jg<s n="n"/></l><r>j<s n="pr"/><j/>g<s n="n"/></r></p></e>
-  <e><p><l>jh<s n="n"/></l><r>j<s n="pr"/><j/>h<s n="n"/></r></p></e>
-  <e><p><l>kg<s n="n"/></l><r>k<s n="pr"/><j/>g<s n="n"/></r></p></e>
+  <e><p><l>jg</l><r>j<s n="pr"/><j/>g<s n="n"/></r></p></e>
+  <e><p><l>jh</l><r>j<s n="pr"/><j/>h<s n="n"/></r></p></e>
+  <e><p><l>kg</l><r>k<s n="pr"/><j/>g<s n="n"/></r></p></e>
 </section>
 
 </dictionary>

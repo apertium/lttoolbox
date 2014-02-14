@@ -11,10 +11,10 @@ from subprocess import Popen, PIPE
 
 class Trim(unittest.TestCase, ProcTest):
     inputs = ["abc", "ab", "y", "n",
-              # "jg", "jh", "kg"
+              "jg", "jh", "kg"
     ]
     expectedOutputs = ["^abc/ab<n><def>$", "^ab/ab<n><ind>$", "^y/y<n><ind>$", "^n/*n$",
-                       # "^jg/j<pr>+g<n>$", "^jh/*jh$", "^kg/*kg$"
+                       "^jg/j<pr>+g<n>$", "^jh/*jh$", "^kg/*kg$"
     ]
     expectedRetCode = 0
 
@@ -24,15 +24,18 @@ class Trim(unittest.TestCase, ProcTest):
             self.assertEqual(0, call(["../lttoolbox/lt-comp",
                                       "lr",
                                       "data/minimal-mono.dix",
-                                      tmpd+"/minimal-mono.bin"]))
+                                      tmpd+"/minimal-mono.bin"],
+                                     stdout=PIPE))
             self.assertEqual(0, call(["../lttoolbox/lt-comp",
                                       "lr",
                                       "data/minimal-bi.dix",
-                                      tmpd+"/minimal-bi.bin"]))
+                                      tmpd+"/minimal-bi.bin"],
+                                     stdout=PIPE))
             self.assertEqual(0, call(["../lttoolbox/lt-trim",
                                       tmpd+"/minimal-mono.bin",
                                       tmpd+"/minimal-bi.bin",
-                                      tmpd+"/minimal-trimmed.bin"]))
+                                      tmpd+"/minimal-trimmed.bin"],
+                                     stdout=PIPE))
 
             self.cmdLine = ["../lttoolbox/.libs/lt-proc", "-z", tmpd+"/minimal-trimmed.bin"]
             self.proc = Popen(self.cmdLine, stdin=PIPE, stdout=PIPE, stderr=PIPE)
@@ -47,7 +50,7 @@ class Trim(unittest.TestCase, ProcTest):
             self.proc.stderr.close()
             self.assertEqual( self.proc.poll(),
                               self.expectedRetCode )
-            
-            
+
+
         finally:
             rmtree(tmpd)
