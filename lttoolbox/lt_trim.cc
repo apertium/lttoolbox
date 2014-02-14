@@ -33,7 +33,7 @@ void endProgram(char *name)
   if(name != NULL)
   {
     cout << basename(name) << " v" << PACKAGE_VERSION <<": trim a transducer to another transducer" << endl;
-    cout << "USAGE: " << basename(name) << " analyser_bin_file bidix_bin_file output_bin_file " << endl;
+    cout << "USAGE: " << basename(name) << " analyser_bin_file bidix_bin_file trimmed_bin_file " << endl;
   }
   exit(EXIT_FAILURE);
 }
@@ -182,19 +182,27 @@ int main(int argc, char *argv[])
   // transducers
   Compression::multibyte_write(trans_t.size(), output);
 
-  int conta=0;
+  int n_transitions=0;
   for(std::map<wstring, Transducer>::iterator it = trans_t.begin(); it != trans_t.end(); it++)
   {
-    conta++;
     wcout << it->first << " " << it->second.size();
     wcout << " " << it->second.numberOfTransitions() << endl;
     Compression::wstring_write(it->first, output);
     it->second.write(output);
+    n_transitions += it->second.numberOfTransitions();
   }
 
   fclose(analyser);
   fclose(bidix);
   fclose(output);
 
-  return 0;
+  if(n_transitions==0) 
+  {
+    wcerr << L"ERROR: Trimming gave empty transducer!" << endl;
+    return 1;
+  }
+  else 
+  {
+    return 0;
+  }
 }
