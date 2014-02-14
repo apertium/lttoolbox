@@ -228,7 +228,7 @@ void Alphabet::setSymbol(int symbol, wstring newSymbolString) {
 }
 
 void
-Alphabet::createLoopbackSymbols(set<int> &symbols, Alphabet &basis, Side s)
+Alphabet::createLoopbackSymbols(set<int> &symbols, Alphabet &basis, Side s, bool nonTagsToo)
 {
   // Non-tag letters get the same int in spairinv across alphabets,
   // but tags may differ, so do those separately afterwards.
@@ -243,7 +243,7 @@ Alphabet::createLoopbackSymbols(set<int> &symbols, Alphabet &basis, Side s)
       {
         tags.insert(it->first);
       }
-      else 
+      else if(nonTagsToo)
       {
         symbols.insert(operator()(it->first, it->first));
       }
@@ -253,7 +253,7 @@ Alphabet::createLoopbackSymbols(set<int> &symbols, Alphabet &basis, Side s)
       {
         tags.insert(it->second);
       }
-      else 
+      else if(nonTagsToo)
       {
         symbols.insert(operator()(it->second, it->second));
       }

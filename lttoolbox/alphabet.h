@@ -186,8 +186,9 @@ public:
    * @param basis use the symbols from this alphabet
    * @param symbols all the loopback symbols, referenced with this alphabet
    * @param s whether to loopback on the left or right side of the symbol-pair
+   * @param nonTagsToo by default only tags are included, but if this is true we include all symbols
    */
-  void createLoopbackSymbols(set<int> &symbols, Alphabet &basis, Side s = right);
+  void createLoopbackSymbols(set<int> &symbols, Alphabet &basis, Side s = right, bool nonTagsToo = false);
 };
 
 #endif
