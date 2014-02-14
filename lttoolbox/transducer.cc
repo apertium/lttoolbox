@@ -622,9 +622,6 @@ Transducer::reverse(int const epsilon_tag)
 void
 Transducer::show(Alphabet const &alphabet, FILE *output, int const epsilon_tag) const
 {
-#ifndef DEBUG
-  joinFinals(epsilon_tag);
-#endif
   map<int, multimap<int, int> > temporal;
 
   for(map<int, multimap<int, int> >::const_iterator it = transitions.begin(); it != transitions.end(); it++)
