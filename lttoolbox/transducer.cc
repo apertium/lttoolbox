@@ -771,7 +771,9 @@ Transducer::appendDotStar(const set<int> &loopback_symbols,
  * an attempt to save memory?
  */
 Transducer
-Transducer::intersect(Transducer &t, Alphabet &my_a, Alphabet &t_a)
+Transducer::intersect(Transducer const &t,
+  Alphabet const &my_a,
+  Alphabet const &t_a)
 {
   // map of the states of the multiplied and trimmed transducers
   map<pair<int, int>, int> states_multiplied_trimmed;

@@ -299,9 +299,9 @@ public:
    * @param t_a the alphabet of the transducer t
    * @return the trimmed transducer
    */
-  Transducer intersect(Transducer &t,
-                       Alphabet &my_a,
-                       Alphabet &t_a);
+  Transducer intersect(Transducer const &t,
+                       Alphabet const &my_a,
+                       Alphabet const &t_a);
 
   void wideConsoleErrorFinals();
 };
