@@ -3,19 +3,25 @@
   <alphabet/>
   <sdefs>
     <sdef n="n"/>
+    <sdef n="f"/>
   </sdefs>
   <pardefs>
   </pardefs>
 
   <section id="main" type="standard">
     <!-- These are in monodix: -->
-    <e><p><l>ab<g>c</g><s n="n"/></l><r>feh<s n="n"/></r></p></e>
-    <e><p><l>pq<s n="n"/></l><r>feh<s n="n"/></r></p></e>
-    <e><p><l>pq<g>r</g><s n="n"/></l><r>feh<s n="n"/></r></p></e>
+    <e><p><l>ab<g>c</g><s n="n"/></l> <r>feh<s n="n"/></r></p></e>
+    <e><p><l>pq<s n="n"/></l>         <r>feh<s n="n"/></r></p></e>
+    <e><p><l>pq<g>r</g><s n="n"/></l> <r>feh<s n="n"/></r></p></e>
+
+    <e><p><l>j<g>l</g><s n="n"/></l>  <r>feh</r></p></e>
+    <e><p><l>k<s n="n"/></l>        <r>feh</r></p></e>
+
+    <e><p><l>de<g>f</g><s n="n"/><s n="f"/></l><r>verylongword<s n="n"/></r></p></e>
 
     <!-- These are not in monodix: -->
-    <e><p><l>pq<g>n</g><s n="n"/></l><r>feh<s n="n"/></r></p></e>
-    <e><p><l>xy<s n="n"/></l><r>feh<s n="n"/></r></p></e>
+    <e><p><l>pq<g>n</g><s n="n"/></l> <r>feh<s n="n"/></r></p></e>
+    <e><p><l>xy<s n="n"/></l>         <r>feh<s n="n"/></r></p></e>
   </section>
 
 </dictionary>
