@@ -114,10 +114,14 @@ trim(FILE *file_mono, FILE *file_bi)
     wcerr << L"current union:"<<endl;
     union_transducer.show(alph_prefix);
   }
+  union_transducer.minimize();
+  wcerr << L"minimized union:"<<endl;
+  union_transducer.show(alph_prefix);
+
   Transducer prefix_transducer
     = union_transducer.appendDotStar(loopback_symbols);
   prefix_transducer.minimize();
-  wcerr << L"minimized:"<<endl;
+  wcerr << L"prefixed and minimized:"<<endl;
   prefix_transducer.show(alph_prefix);
 
   for(std::map<wstring, Transducer>::iterator it = trans_mono.begin(); it != trans_mono.end(); it++)
