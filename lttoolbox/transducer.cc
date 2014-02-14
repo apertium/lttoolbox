@@ -731,9 +731,15 @@ Transducer::recognise(wstring patro, Alphabet &a, FILE *err)
   return accepted;
 }
 
+void
+Transducer::unionWith(Transducer &t, 
+                      int const epsilon_tag)
+{
+  insertTransducer(initial, t, epsilon_tag);
+}
+
 Transducer
-Transducer::appendDotStar(set<int> loopback_symbols,
-  Alphabet prefix_a,
+Transducer::appendDotStar(const set<int> &loopback_symbols,
   const int epsilon_tag)
 {
   // prefix transducer converted from the bilingual dictionary
@@ -749,18 +755,7 @@ Transducer::appendDotStar(set<int> loopback_symbols,
     loopback_it != loopback_limit;
     loopback_it++)
     {
-      /* check if the input tag of the symbol is equal to the tag to take as
-       * epsilon
-       */
-      if(prefix_a.decode(*loopback_it).first == epsilon_tag)
-      {
-        /* erase the symbol without erasing it from the set itself (do not call
-         * the set by reference)
-         */
-        loopback_symbols.erase(loopback_it);
-        continue;
-      }
-      else
+      if((*loopback_it) != epsilon_tag)
       {
         /* link the final state of the prefix transducer to itself with the
          * symbol of this class
@@ -774,7 +769,7 @@ Transducer::appendDotStar(set<int> loopback_symbols,
 }
 
 Transducer
-Transducer::intersect(Transducer t, Alphabet a, Alphabet t_a, Alphabet trimmed_a)
+Transducer::intersect(Transducer &t, Alphabet &my_a, Alphabet &t_a)
 {
   // map of the states of the multiplied and trimmed transducers
   map<pair<int, int>, int> states_multiplied_trimmed;
@@ -830,7 +825,7 @@ Transducer::intersect(Transducer t, Alphabet a, Alphabet t_a, Alphabet trimmed_a
           /* check if the input tag of this class is equal to the output tag of
            * the transducer t
            */
-          if(a.decode(transition_it->first).first
+          if(my_a.decode(transition_it->first).first
             == t_a.decode(t_transition_it->first).second)
           {
             // source state of the multiplied automaton
