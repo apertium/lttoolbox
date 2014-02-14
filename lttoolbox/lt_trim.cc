@@ -100,23 +100,45 @@ trim(FILE *file_mono, FILE *file_bi)
 
   for(std::map<wstring, Transducer>::iterator it = trans_bi.begin(); it != trans_bi.end(); it++)
   {
+    wcerr << L"it->second"<<endl;
+    it->second.wideConsoleErrorFinals();
     Transducer prefix_tmp = it->second.appendDotStar(loopback_symbols);
+    wcerr << L"prefix_tmp"<<endl;
+    prefix_tmp.wideConsoleErrorFinals();
+    wcerr << L"prefix_transducer"<<endl;
+    prefix_transducer.wideConsoleErrorFinals();
+
     if(prefix_transducer.isEmpty()) 
     {
+      wcerr << L"if(prefix_transducer.isEmpty))"<<endl;
+      wcerr << L"{"<<endl;
+      wcerr << L"  prefix_transducer = prefix_tmp;"<<endl;
       prefix_transducer = prefix_tmp;
+      wcerr << L"prefix_transducer"<<endl;
+      prefix_transducer.wideConsoleErrorFinals();
     }
     else 
     {
+      wcerr << L"else"<<endl;
+      wcerr << L"{"<<endl;
+      wcerr << L"  prefix_transducer.unionWith(prefix_tmp);"<<endl;
       prefix_transducer.unionWith(prefix_tmp);
+      wcerr << L"prefix_transducer"<<endl;
+      prefix_transducer.wideConsoleErrorFinals();
     }
-    // wcerr << it->first<<endl;
-    // prefix_tmp.show(alph_prefix);
-    // wcerr << L"current union:"<<endl;
-    // prefix_transducer.show(alph_prefix);
+    wcerr << it->first<<endl;
+    wcerr << L"prefix_tmp.show(alph_prefix);"<<endl;
+
+    // This is causing the error "Error: empty set of final states"
+    // because the set of final states *is* empty
+    prefix_tmp.show(alph_prefix);
+
+    wcerr << L"current union:"<<endl;
+    prefix_transducer.show(alph_prefix);
   }
-  // prefix_transducer.minimize();
-  // wcerr << L"minimized:"<<endl;
-  // prefix_transducer.show(alph_prefix);
+  prefix_transducer.minimize();
+  wcerr << L"minimized:"<<endl;
+  prefix_transducer.show(alph_prefix);
 
   for(std::map<wstring, Transducer>::iterator it = trans_mono.begin(); it != trans_mono.end(); it++)
   {

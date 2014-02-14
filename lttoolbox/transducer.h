@@ -302,6 +302,8 @@ public:
   Transducer intersect(Transducer &t,
                        Alphabet &my_a,
                        Alphabet &t_a);
+
+  void wideConsoleErrorFinals();
 };
 
 #endif

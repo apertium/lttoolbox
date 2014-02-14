@@ -742,7 +742,6 @@ Transducer
 Transducer::appendDotStar(const set<int> &loopback_symbols,
   const int epsilon_tag)
 {
-  // prefix transducer converted from the bilingual dictionary
   Transducer prefix_transducer(*this);
 
   for(set<int>::iterator prefix_it = prefix_transducer.finals.begin(),
@@ -768,6 +767,9 @@ Transducer::appendDotStar(const set<int> &loopback_symbols,
   return prefix_transducer;
 }
 
+/* Why are the arguments called by reference? None of them are modified. Is this
+ * an attempt to save memory?
+ */
 Transducer
 Transducer::intersect(Transducer &t, Alphabet &my_a, Alphabet &t_a)
 {
@@ -871,8 +873,59 @@ Transducer::intersect(Transducer &t, Alphabet &my_a, Alphabet &t_a)
   pair<int, int> tmp(initial, t.initial);
   // set the initial state of the trimmed transducer
   trimmed_t.initial = states_multiplied_trimmed[tmp];
-  // minimize the trimmed transducer
+  wcerr << L"initial state:"<<endl;
+  wcerr << trimmed_t.initial<<endl;
+  wcerr << L"transitions from the initial state:"<<endl;
+  for(multimap<int, int>::iterator it
+      = trimmed_t.transitions[trimmed_t.initial].begin(),
+                                   limit
+      = trimmed_t.transitions[trimmed_t.initial].end();
+    it != limit;
+    it++)
+  {
+    wcerr << it->first << L" -> " << it->second<<endl;
+  }
+  wcerr << L"final states and the transitions to them:"<<endl;
+  for(set<int>::iterator state_it = trimmed_t.finals.begin(),
+                         state_limit = trimmed_t.finals.end();
+    state_it != state_limit;
+    state_it++)
+  {
+    wcerr << L"final state " << *state_it << L":"<<endl;
+    for(multimap<int, int>::iterator transition_it
+        = trimmed_t.transitions[*state_it].begin(),
+                                     transition_limit
+        = trimmed_t.transitions[*state_it].end();
+      transition_it != transition_limit;
+      transition_it++)
+    {
+      wcerr
+        << L"symbol "
+        << transition_it->first
+        << L" -> state "
+        << transition_it->second
+        <<endl;
+    }
+  }
+  /* minimize the trimmed transducer
+   * This is causing the error "Error: empty set of final states"
+   */
   trimmed_t.minimize();
 
   return trimmed_t;
+}
+
+void
+Transducer::wideConsoleErrorFinals()
+{
+  wcerr << L"set of " << finals.size() << L" final states"<<endl;
+  wcerr << L"{"<<endl;
+  for(set<int>::iterator it = finals.begin(),
+                         limit = finals.end();
+    it != limit;
+    it++)
+  {
+    wcerr << *it<<endl;
+  }
+  wcerr << L"}"<<endl;
 }
