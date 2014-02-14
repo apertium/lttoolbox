@@ -732,15 +732,13 @@ Transducer::recognise(wstring patro, Alphabet &a, FILE *err)
 }
 
 void
-Transducer::unionWith(Transducer &t, 
-                      int const epsilon_tag)
+Transducer::unionWith(Transducer &t, int const epsilon_tag)
 {
   insertTransducer(initial, t, epsilon_tag);
 }
 
 Transducer
-Transducer::appendDotStar(const set<int> &loopback_symbols,
-  const int epsilon_tag)
+Transducer::appendDotStar(set<int> const &loopback_symbols, int const epsilon_tag)
 {
   Transducer prefix_transducer(*this);
 
@@ -767,13 +765,8 @@ Transducer::appendDotStar(const set<int> &loopback_symbols,
   return prefix_transducer;
 }
 
-/* Why are the arguments called by reference? None of them are modified. Is this
- * an attempt to save memory?
- */
 Transducer
-Transducer::intersect(Transducer const &t,
-  Alphabet const &my_a,
-  Alphabet const &t_a)
+Transducer::intersect(Transducer const &t, Alphabet const &my_a, Alphabet const &t_a)
 {
   // map of the states of the multiplied and trimmed transducers
   map<pair<int, int>, int> states_multiplied_trimmed;
@@ -787,8 +780,8 @@ Transducer::intersect(Transducer const &t,
     it != limit;
     it++)
   {
-    for(map<int, multimap<int, int> >::iterator t_it = t.transitions.begin(),
-                                                t_limit = t.transitions.end();
+    for(map<int, multimap<int, int> >::const_iterator t_it = t.transitions.begin(),
+                                                      t_limit = t.transitions.end();
       t_it != t_limit;
       t_it++)
     {
@@ -806,9 +799,9 @@ Transducer::intersect(Transducer const &t,
     state_it != state_limit;
     state_it++)
   {
-    for(map<int, multimap<int, int> >::iterator t_state_it
+    for(map<int, multimap<int, int> >::const_iterator t_state_it
         = t.transitions.begin(),
-                                                t_state_limit
+                                                      t_state_limit
         = t.transitions.end();
       t_state_it != t_state_limit;
       t_state_it++)
@@ -819,9 +812,9 @@ Transducer::intersect(Transducer const &t,
         transition_it != transition_limit;
         transition_it++)
       {
-        for(multimap<int, int>::iterator t_transition_it
+        for(multimap<int, int>::const_iterator t_transition_it
             = t_state_it->second.begin(),
-                                         t_transition_limit
+                                               t_transition_limit
             = t_state_it->second.end();
           t_transition_it != t_transition_limit;
           t_transition_it++)
@@ -935,7 +928,8 @@ Transducer::intersect(Transducer const &t,
   // set the initial state of the trimmed transducer
   trimmed_t.initial = states_multiplied_trimmed[tmp];
   wcerr << L"initial state: " << trimmed_t.getInitial()<<endl;
-  trimmed_t.show(my_a);
+  Alphabet show_should_probably_accept_const_a = my_a;
+  trimmed_t.show(show_should_probably_accept_const_a);
   trimmed_t.wideConsoleErrorFinals();
   wcerr << L"trimmed_t.minimize();";
   cin.ignore();
