@@ -100,35 +100,43 @@ trim(FILE *file_mono, FILE *file_bi)
 
   for(std::map<wstring, Transducer>::iterator it = trans_bi.begin(); it != trans_bi.end(); it++)
   {
-    Transducer prefix_tmp = it->second;
-
+    Transducer union_tmp = it->second;
     if(union_transducer.isEmpty()) 
     {
-      union_transducer = prefix_tmp;
-      wcerr << L"union_transducer:"<<endl;
+      union_transducer = union_tmp;
+#ifdef DEBUG
+      wcerr << L"initially, union_transducer (" << it->first << L"):"<< endl;
       union_transducer.show(alph_bi);
+#endif /* DEBUG */
     }
     else 
     {
-      wcerr << L"unioning union_transducer:"<<endl;
+#ifdef DEBUG
+      wcerr << L"unioning current union_transducer:"<<endl;
       union_transducer.show(alph_bi);
-      wcerr << L"with prefix_tmp"<<endl;
-      prefix_tmp.show(alph_bi);
-      union_transducer.unionWith(alph_bi, prefix_tmp);
+      wcerr << L"with union_tmp (" << it->first << L")"<< endl;
+      union_tmp.show(alph_bi);
+#endif /* DEBUG */
+      union_transducer.unionWith(alph_bi, union_tmp);
+#ifdef DEBUG
+      wcerr << L"current union now:"<<endl;
+      union_transducer.show(alph_prefix);
+#endif /* DEBUG */
     }
-    wcerr << it->first<<endl;
-    wcerr << L"current union:"<<endl;
-    union_transducer.show(alph_prefix);
   }
   union_transducer.minimize();
+#ifdef DEBUG
   wcerr << L"minimized union:"<<endl;
   union_transducer.show(alph_prefix);
+#endif /* DEBUG */
 
   Transducer prefix_transducer
     = union_transducer.appendDotStar(loopback_symbols);
   prefix_transducer.minimize();
+#ifdef DEBUG
   wcerr << L"prefixed and minimized:"<<endl;
   prefix_transducer.show(alph_prefix);
+#endif /* DEBUG */
 
   for(std::map<wstring, Transducer>::iterator it = trans_mono.begin(); it != trans_mono.end(); it++)
   {
@@ -136,8 +144,10 @@ trim(FILE *file_mono, FILE *file_bi)
                                                   alph_mono,
                                                   alph_prefix);
 
+#ifdef DEBUG
     wcerr << it->first<<endl;
     trimmed_tmp.show(alph_mono);
+#endif /* DEBUG */
     trans_mono[it->first] = trimmed_tmp;
   }
   alph_trans_mono.second = trans_mono;
