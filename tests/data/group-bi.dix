@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet/>
+  <sdefs>
+    <sdef n="n"/>
+  </sdefs>
+  <pardefs>
+  </pardefs>
+
+  <section id="main" type="standard">
+    <!-- These are in monodix: -->
+    <e><p><l>ab<g>c</g><s n="n"/></l><r>feh<s n="n"/></r></p></e>
+    <e><p><l>pq<s n="n"/></l><r>feh<s n="n"/></r></p></e>
+    <e><p><l>pq<g>r</g><s n="n"/></l><r>feh<s n="n"/></r></p></e>
+
+    <!-- These are not in monodix: -->
+    <e><p><l>pq<g>n</g><s n="n"/></l><r>feh<s n="n"/></r></p></e>
+    <e><p><l>xy<s n="n"/></l><r>feh<s n="n"/></r></p></e>
+  </section>
+
+</dictionary>
