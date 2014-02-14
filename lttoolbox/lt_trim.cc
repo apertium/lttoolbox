@@ -132,9 +132,9 @@ trim(FILE *file_mono, FILE *file_bi)
 
   Transducer prefix_transducer
     = union_transducer.appendDotStar(loopback_symbols);
-  prefix_transducer.minimize();
+  // prefix_transducer should _not_ be minimized (both useless and takes forever)
 #ifdef DEBUG
-  wcerr << L"prefixed and minimized:"<<endl;
+  wcerr << L"prefixed union:"<<endl;
   prefix_transducer.show(alph_prefix);
 #endif /* DEBUG */
 
