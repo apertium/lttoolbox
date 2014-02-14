@@ -91,7 +91,7 @@ trim(FILE *file_mono, FILE *file_bi)
 
   // The prefix transducer is the union of all transducers from bidix,
   // with a ".*" appended
-  Transducer prefix_transducer;
+  Transducer union_transducer;
   // The "." in ".*" is a set of equal pairs of the output symbols
   // from the monodix alphabet (<n>:<n> etc.)
   Alphabet alph_prefix = alph_bi;
@@ -100,20 +100,22 @@ trim(FILE *file_mono, FILE *file_bi)
 
   for(std::map<wstring, Transducer>::iterator it = trans_bi.begin(); it != trans_bi.end(); it++)
   {
-    Transducer prefix_tmp = it->second.appendDotStar(loopback_symbols);
+    Transducer prefix_tmp = it->second;
 
-    if(prefix_transducer.isEmpty()) 
+    if(union_transducer.isEmpty()) 
     {
-      prefix_transducer = prefix_tmp;
+      union_transducer = prefix_tmp;
     }
     else 
     {
-      prefix_transducer.unionWith(prefix_tmp);
+      union_transducer.unionWith(prefix_tmp);
     }
     wcerr << it->first<<endl;
     wcerr << L"current union:"<<endl;
-    prefix_transducer.show(alph_prefix);
+    union_transducer.show(alph_prefix);
   }
+  Transducer prefix_transducer
+    = union_transducer.appendDotStar(loopback_symbols);
   prefix_transducer.minimize();
   wcerr << L"minimized:"<<endl;
   prefix_transducer.show(alph_prefix);
