@@ -1,4 +1,4 @@
-.TH lt-trim 1 2006-03-08 "" ""
+.TH lt-trim 1 2014-02-07 "" ""
 .SH NAME
 lt-trim \- This application is part of the lexical processing modules
 and tools (
@@ -9,32 +9,49 @@ This tool is part of the apertium machine translation
 architecture: \fBhttp://www.apertium.org\fR.
 .SH SYNOPSIS
 .B lt-trim
-analyser_file bidix_file output_file
+analyser_binary bidix_binary trimmed_analyser_binary
 .PP
 .SH DESCRIPTION
 .BR lt-trim
-Is the application responsible for trimming compiled dictionaries.
-The analyses (right-side) of analyser_file are trimmed to the
-left-side of bidix_file.
+is the application responsible for trimming compiled dictionaries. The
+analyses (right-side when compiling lr) of analyser_binary are trimmed
+to the input side of bidix_binary (left-side when compiling lr,
+right-side when compiling rl), such that only analyses which would
+pass through `lt-proc -b bidix_binary' are kept.
+
+Both compund tags (`<compound-only-L>', `<compound-R>') and join
+elements (`<j/>' in XML, `+' in the stream) should be handled
+correctly.
+
+The group element (`<g/>' in XML, `#' in the stream) is not handled
+yet, any such entries still need to be manually tested. If you need
+"foo<tag># bar" to be included, ensure "foo<tag>" is in bidix.
+Conversely, if "foo<tag>" is in your bidix, all "foo<tag># bar" type
+entries will be included from the analyser, whether or not they are in
+bidix.
+
+You should not trim a generator unless you have a \fBvery\fR simple
+translator pipeline, since the output of bidix seldom goes unchanged
+through transfer.
 .PP
 .SH FILES
-.B analyser_file
-The untrimmed dictionary (a finite state transducer).
+.B analyser_binary
+The untrimmed analyser dictionary (a finite state transducer).
 .PP
-.B bidix_file
-The dictionary to use to trim (a finite state transducer).
+.B bidix_binary
+The dictionary to use as trimmer (a finite state transducer).
 .PP
-.B output_file
-The trimmed dictionary (a finite state transducer).
+.B trimmed_analyser_binary
+The trimmed analyser dictionary (a finite state transducer).
 
 .SH SEE ALSO
 .I lt-comp\fR(1),
 .I lt-proc\fR(1),
-.I lt-trim\fR(1),
+.I lt-print\fR(1),
 .I lt-expand\fR(1),
 .I apertium-tagger\fR(1),
 .I apertium\fR(1).
 .SH BUGS
 Lots of...lurking in the dark and waiting for you!
 .SH AUTHOR
-(c) 2005--2012 Universitat d'Alacant / Universidad de Alicante.
+(c) 2013--2014 Universitat d'Alacant / Universidad de Alicante.

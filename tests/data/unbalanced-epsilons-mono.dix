@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅabcdefghijklmnopqrstuvwxyzæøåcqwxzCQWXZéèêóòâôÉÊÈÓÔÒÂáàÁÀäÄöÖšŠčČðđÐ</alphabet>
+  <sdefs>
+    <sdef n="vblex" 	c="Verb"/>
+    <sdef n="inf" 	c="Infinitive"/>
+    <sdef n="pres" 	c="Present"/>
+    <sdef n="pret" 	c="Preterite"/>
+  </sdefs>
+  <pardefs>
+  </pardefs>
+
+  <section id="main" type="standard">
+    <e>       <i>r</i><p><l>e</l>         <r>e<s n="vblex"/><s n="inf"/></r></p></e>
+    <e>       <i>r</i><p><l>er</l>        <r>e<s n="vblex"/><s n="pres"/></r></p></e>
+    <e>       <i>r</i><p><l>es</l>        <r>e<s n="vblex"/><s n="pres"/></r></p></e>
+    <e>       <i>r</i><p><l>et</l>        <r>e<s n="vblex"/><s n="pret"/></r></p></e>
+  </section>
+</dictionary>
