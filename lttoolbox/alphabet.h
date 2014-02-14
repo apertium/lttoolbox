@@ -54,6 +54,12 @@ private:
 
   void copy(Alphabet const &a);
   void destroy();
+
+  enum Tag
+  {
+    kInput;
+    kOutput;
+  };
 public:
 
   /**
@@ -153,7 +159,8 @@ public:
   void setSymbol(int symbol, wstring newSymbolString);
 
   pair<int, int> const & decode(int const code) const;
-  
+
+  void insertSymbolsIntoSet(set<int> &symbols);
 };
 
 #endif

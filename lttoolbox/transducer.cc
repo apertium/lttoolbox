@@ -732,54 +732,55 @@ Transducer::recognise(wstring patro, Alphabet &a, FILE *err)
 }
 
 Transducer
-Transducer::appendDotStar(Alphabet &my_a, Alphabet &t_a, Transducer t, int const epsilon_tag)
+Transducer::appendDotStar(Alphabet a,
+  Alphabet t_a,
+  Alphabet &prefix_alphabet,
+  Transducer t,
+  int const epsilon_tag = 0)
 {
-  // set of all of the symbols of the transducers
-  set<int> symbols;
-  // struct to insert the symbols of the transducers
-  struct InsertSymbols
+  // set of all of the input tags of the transducers
+  set<int> input_tags;
+  // struct to insert the input tags of the transducers
+  struct InsertInputTags
   {
-    static void insertSymbols(Alphabet &a, Transducer t, int const epsilon_tag, set<int> &symbols)
+    static void insertInputTags(Alphabet a, Transducer t, int const epsilon_tag, set<int> &input_tags)
     {
       for(map<int, multimap<int, int> >::iterator state_it = t.transitions.begin(),
                                                   state_limit = t.transitions.end();
         state_it != state_limit;
         state_it++)
       {
-        wcerr<<L"source:" << state_it->first <<L": "<<endl;
         for(multimap<int, int>::iterator transition_it = state_it->second.begin(),
                                          transition_limit = state_it->second.end();
           transition_it != transition_limit;
           transition_it++)
         {
-          wcerr<<L"sym:" << transition_it->first <<L" trg "<<transition_it->second<<endl;
-          // check if the symbol is the epsilon tag
-          std::pair<int,int> sym = a.decode(transition_it->first);
-          wcerr <<sym.first<<L":"<<sym.second <<endl;
-          if(transition_it->first == epsilon_tag)
+          // check if the input tag is equal to the tag to take as epsilon
+          if(a.decode(transition_it->first).first == epsilon_tag)
           {
             continue;
           }
           else
           {
-            // insert the symbol of the transition
-            symbols.insert(transition_it->first);
+            // insert the input tag of the transition
+            input_tags.insert(a.decode(transition_it->first).first);
           }
         }
       }
     }
   };
 
-  // insert the symbols of the transducers
-  InsertSymbols::insertSymbols(my_a, *this, epsilon_tag, symbols);
-  InsertSymbols::insertSymbols(t_a, t, epsilon_tag, symbols);
+  // insert the input tags of the transducers
+  InsertInputTags::insertInputTags(a, *this, epsilon_tag, input_tags);
+  InsertInputTags::insertInputTags(t_a, t, epsilon_tag, input_tags);
   // prefix transducer converted from the bilingual dictionary
   Transducer prefix_transducer(*this);
+  // TODO: include symbols in Alphabet prefix_alphabet
 
-  for(set<int>::iterator symbol_it = symbols.begin(),
-                         symbol_limit = symbols.end();
-    symbol_it != symbol_limit;
-    symbol_it++)
+  for(set<int>::iterator input_it = input_tags.begin(),
+                         input_limit = input_tags.end();
+    input_it != input_limit;
+    input_it++)
   {
     for(set<int>::iterator prefix_it = prefix_transducer.finals.begin(),
                            prefix_limit = prefix_transducer.finals.end();
@@ -787,15 +788,14 @@ Transducer::appendDotStar(Alphabet &my_a, Alphabet &t_a, Transducer t, int const
       prefix_it++)
     {
       // link the final state to itself with the symbol
-      prefix_transducer.linkStates(*prefix_it, *prefix_it, *symbol_it);
+      prefix_transducer.linkStates(*prefix_it, *prefix_it, prefix_alphabet(prefix_alphabet(*input_it), prefix_alphabet(*input_it)));
     }
   }
 
   return prefix_transducer;
 }
 
-
-
+// TODO
 Transducer
 Transducer::intersect(Transducer t)
 {
@@ -846,7 +846,6 @@ Transducer::intersect(Transducer t)
           t_transition_it != t_transition_limit;
           t_transition_it++)
         {
-          // check if the tags are equal
           if(transition_it->first == t_transition_it->first)
           {
             // source state of the multiplied automaton
