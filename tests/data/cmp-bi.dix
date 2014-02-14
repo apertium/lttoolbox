@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+	<alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÄÅÆÇÈÉÊËÍÑÒÓÔÕÖØÙÚÜČĐŊŠŦŽabcdefghijklmnopqrstuvwxyzàáâäåæçèéêëíñòóôõöøùúüčđŋšŧž­-</alphabet>
+	<sdefs>
+	  <sdef n="n"/>
+	  <sdef n="pr"/>
+	  <sdef n="compound-only-L"/>
+	  <sdef n="compound-R"/>
+        </sdefs>
+<pardefs>
+
+</pardefs>
+
+<section id="cmp" type="standard">
+  <e><p><l>a<s n="n"/></l><r>a<s n="n"/></r></p></e>
+  <e><p><l>b<s n="n"/></l><r>b<s n="n"/></r></p></e>
+  <e><p><l>c<s n="n"/></l><r>d<s n="n"/></r></p></e>
+  <e><p><l>d<s n="n"/></l><r>d<s n="n"/></r></p></e>
+</section>
+
+</dictionary>

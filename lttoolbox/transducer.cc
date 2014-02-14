@@ -861,14 +861,21 @@ Transducer::intersect(Transducer &trimmer,
 #endif /* DEBUG */
 
           if(   this_right == trimmer_left
-             || this_right == L"+"
+             || this_right == L"+" // TODO: use COMPILER_JOIN_ELEM from compiler.cc
+             || this_right == L"<compound-only-L>" // TODO: use compoundOnlyLSymbol
+             || this_right == L"<compound-R>" // TODO: use compoundRSymbol
              || this_label == epsilon_tag
              || trimmer_label == epsilon_tag)
           {
-            if(this_right == L"+") // TODO: use COMPILER_JOIN_ELEM from compiler.cc
+            if(this_right == L"+")
             {
               trimmer_trg = trimmer.initial;
             }
+            else if(this_right == L"<compound-only-L>" || this_right == L"<compound-R>")
+            {
+              trimmer_trg = trimmer_src; // stay put in the trimmer FST
+            }
+
             if(seen.find(make_pair(this_trg, trimmer_trg)) == seen.end()) 
             {
               next.second.insert(trimmer_trg);
