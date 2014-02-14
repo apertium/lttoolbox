@@ -26,8 +26,6 @@
 #include <iostream>
 #include <vector>
 
-//#define DEBUG
-
 int
 Transducer::newState()
 {
@@ -1037,9 +1035,6 @@ Transducer::intersect(Transducer &trimmer,
               trimmer_trg   = trimmer_trans_it->second;
           wstring trimmer_left = L"";
           trimmer_a.getSymbol(trimmer_left, trimmer_a.decode(trimmer_label).first);
-#ifdef DEBUG
-          wcerr << this_src << L"\t" << this_trg << L"\t" << L"\t" << (this_right == L"" ? L"ε" : this_right) << L"\tis ";
-#endif /* DEBUG */
 
           if(trimmer_preplus == trimmer_src) {
             // Keep the old preplus state if it was set; equal to current trimmer state means unset:
@@ -1083,14 +1078,7 @@ Transducer::intersect(Transducer &trimmer,
             trimmed.linkStates(trimmed_src, // fromState
                                trimmed_trg, // toState
                                this_label); // symbol-pair, using this alphabet
-#ifdef DEBUG
-            wcerr << L"    ";
-#endif /* DEBUG */
           }
-#ifdef DEBUG
-          else { wcerr << L"not "; }
-          wcerr << L"equal to\t" << trimmer_src << L"\t " << trimmer_trg << L"\t " << (trimmer_left == L"" ? L"ε" : trimmer_left) <<endl;
-#endif /* DEBUG */
         }
       } // end loop arcs from trimmer_src
     } // end loop arcs from this_src
@@ -1105,11 +1093,6 @@ Transducer::intersect(Transducer &trimmer,
     trimmed.finals.insert(states_this_trimmed[*it]);
   }
 
-#ifdef DEBUG
-  wcerr << L"Done trimming!\nInitial state: " << trimmed.getInitial()<<endl;
-  trimmed.show(this_a);
-  wcerr << L"running trimmed.minimize() ...";
-#endif /* DEBUG */
 
   // minimize the trimmed transducer
   trimmed.minimize();
