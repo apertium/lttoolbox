@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+	<alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÄÅÆÇÈÉÊËÍÑÒÓÔÕÖØÙÚÜČĐŊŠŦŽabcdefghijklmnopqrstuvwxyzàáâäåæçèéêëíñòóôõöøùúüčđŋšŧž­-</alphabet>
+	<sdefs>
+	  <sdef n="adj"/>
+	  <sdef n="pprs"/>
+        </sdefs>
+<pardefs>
+</pardefs>
+
+<section id="main" type="standard">
+<e>       <p><l>herde<s n="adj"/><s n="pprs"/></l><r>herde<s n="adj"/><s n="pprs"/></r></p></e>
+</section>
+
+</dictionary>

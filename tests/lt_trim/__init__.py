@@ -99,3 +99,49 @@ class TrimCmp(unittest.TestCase, ProcTest):
 
         finally:
             rmtree(tmpd)
+
+
+
+
+
+class TrimLongleft(unittest.TestCase, ProcTest):
+    inputs = ["herdende"]
+    expectedOutputs = ["^herdende/herde<adj><pprs>$"]
+    expectedRetCode = 0
+
+    def runTest(self):
+        tmpd = mkdtemp()
+        try:
+            self.assertEqual(0, call(["../lttoolbox/lt-comp",
+                                      "lr",
+                                      "data/longleft-mono.dix",
+                                      tmpd+"/longleft-mono.bin"],
+                                     stdout=PIPE))
+            self.assertEqual(0, call(["../lttoolbox/lt-comp",
+                                      "lr",
+                                      "data/longleft-bi.dix",
+                                      tmpd+"/longleft-bi.bin"],
+                                     stdout=PIPE))
+            self.assertEqual(0, call(["../lttoolbox/lt-trim",
+                                      tmpd+"/longleft-mono.bin",
+                                      tmpd+"/longleft-bi.bin",
+                                      tmpd+"/longleft-trimmed.bin"],
+                                     stdout=PIPE))
+
+            self.cmdLine = ["../lttoolbox/.libs/lt-proc", "-e", "-z", tmpd+"/longleft-trimmed.bin"]
+            self.proc = Popen(self.cmdLine, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+
+            for inp,exp in zip(self.inputs, self.expectedOutputs):
+                self.assertEqual( self.communicateFlush(inp+"[][\n]"),
+                                  exp+"[][\n]" )
+
+            self.proc.communicate() # let it terminate
+            self.proc.stdin.close()
+            self.proc.stdout.close()
+            self.proc.stderr.close()
+            self.assertEqual( self.proc.poll(),
+                              self.expectedRetCode )
+
+
+        finally:
+            rmtree(tmpd)
