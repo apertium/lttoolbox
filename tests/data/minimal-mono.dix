@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+	<alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÄÅÆÇÈÉÊËÍÑÒÓÔÕÖØÙÚÜČĐŊŠŦŽabcdefghijklmnopqrstuvwxyzàáâäåæçèéêëíñòóôõöøùúüčđŋšŧž­-</alphabet>
+	<sdefs>
+	  <sdef n="n"/>
+	  <sdef n="vblex"/>
+	  <sdef n="m"/>
+	  <sdef n="pr"/>
+	  <sdef n="def"/>
+	  <sdef n="ind"/>
+        </sdefs>
+<pardefs>
+
+</pardefs>
+
+<section id="main" type="standard">
+  <e><p><l>abc</l><r>ab<s n="n"/><s n="def"/></r></p></e>
+  <e><p><l>ab</l><r>ab<s n="n"/><s n="ind"/></r></p></e>
+  <e><p><l>y</l><r>y<s n="n"/><s n="ind"/></r></p></e>
+  <e><p><l>n</l><r>n<s n="n"/><s n="ind"/></r></p></e>
+</section>
+
+<section id="j" type="standard">
+  <e><p><l>jg<s n="n"/></l><r>j<s n="pr"/><j/>g<s n="n"/></r></p></e>
+  <e><p><l>jh<s n="n"/></l><r>j<s n="pr"/><j/>h<s n="n"/></r></p></e>
+  <e><p><l>kg<s n="n"/></l><r>k<s n="pr"/><j/>g<s n="n"/></r></p></e>
+</section>
+
+</dictionary>

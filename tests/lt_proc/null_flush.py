@@ -1,66 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import itertools
 import unittest
+from proctest import ProcTest
 
-from subprocess import Popen, PIPE
-
-import signal
-class Alarm(Exception):
-    pass
-
-class NullFlushTest():
-    cmdLine = ["../lttoolbox/.libs/lt-proc", "-z", "data/en-af.automorf.bin"]
-    inputs = itertools.repeat("")
-    expectedOutputs = itertools.repeat("")
-    expectedRetCode = 0
-
-    def alarmHandler(self, signum, frame):
-        raise Alarm
-
-    def withTimeout(self, seconds, cmd, *args, **kwds):
-        signal.signal(signal.SIGALRM, self.alarmHandler)
-        signal.alarm(seconds)
-        ret = cmd(*args, **kwds)
-        signal.alarm(0)         # reset the alarm
-        return ret
-
-    def communicateFlush(self, string):
-        self.proc.stdin.write(string.encode('utf-8'))
-        self.proc.stdin.write('\0')
-        self.proc.stdin.flush()
-
-        output = []
-        char = None
-        try:
-            char = self.withTimeout(2, self.proc.stdout.read, 1)
-        except Alarm:
-            pass
-        while char and char != '\0':
-            output.append(char)
-            try:
-                char = self.withTimeout(2, self.proc.stdout.read, 1)
-            except Alarm:
-                break           # send what we got up till now
-
-        return "".join(output).decode('utf-8')
-
-    def runTest(self):
-        self.proc = Popen(self.cmdLine, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-
-        for inp,exp in zip(self.inputs, self.expectedOutputs):
-            self.assertEqual( self.communicateFlush(inp),
-                              exp )
-
-        self.proc.communicate() # let it terminate
-        self.proc.stdin.close()
-        self.proc.stdout.close()
-        self.proc.stderr.close()
-        self.assertEqual( self.proc.poll(),
-                          self.expectedRetCode )
-
-class ValidInput(unittest.TestCase, NullFlushTest):
+class ValidInput(unittest.TestCase, ProcTest):
     inputs = [s + ".[][\n]" for s in
               ["I",
                "like apples",
@@ -71,7 +15,7 @@ class ValidInput(unittest.TestCase, NullFlushTest):
                         "^like/like<pr>/like<vblex><inf>/like<vblex><pres>$ ^apples/apple<n><pl>$",
                         "^very much/very much<adv>$"]]
 
-class NoSuperblankBeforeNUL(unittest.TestCase, NullFlushTest):
+class NoSuperblankBeforeNUL(unittest.TestCase, ProcTest):
     inputs = [u"The dog gladly eats homework.",
               u"If wé swim fast enough,",
               u"we should reach shallow waters.",
@@ -86,18 +30,18 @@ class NoSuperblankBeforeNUL(unittest.TestCase, NullFlushTest):
                        u"^the/the<det><def><sp>$ ^sharks/shark<n><pl>$",
                        u"^come/come<vblex><inf>/come<vblex><pres>/come<vblex><pp>$"]
 
-class WronglyEscapedLetter(unittest.TestCase, NullFlushTest):
+class WronglyEscapedLetter(unittest.TestCase, ProcTest):
     inputs = ["before you g\\o to bed.[][\n]"]
     expectedOutputs = ["^before/before<adv>/before<cnjadv>/before<pr>$ ^you/prpers<prn><subj><p2><mf><sp>/prpers<prn><obj><p2><mf><sp>$ "]
     expectedRetCode = 1
 
 
-class UnescapedAngleBracket(unittest.TestCase, NullFlushTest):
+class UnescapedAngleBracket(unittest.TestCase, ProcTest):
     inputs = ["Simon prefers dark chocolate>.[][\n]"]
     expectedOutputs = ["^Simon/Simon<np><ant><m><sg>$ ^prefers/prefer<vblex><pri><p3><sg>$ ^dark/dark<adj><sint>/dark<n><sg>$ "]
     expectedRetCode = 1
 
-class UnclosedSuperblank(unittest.TestCase, NullFlushTest):
+class UnclosedSuperblank(unittest.TestCase, ProcTest):
     inputs = ["you should always[ eat"]
     #expectedOutputs = ["^you/prpers<prn><subj><p2><mf><sp>/prpers<prn><obj><p2><mf><sp>$ ^should/should<vaux><inf>$ "]
     expectedOutputs = [""]
