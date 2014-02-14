@@ -22,6 +22,7 @@
 #include <cstdio>
 #include <list>
 #include <map>
+#include <set>
 #include <vector>
 
 #include <lttoolbox/ltstr.h>
@@ -55,11 +56,6 @@ private:
   void copy(Alphabet const &a);
   void destroy();
 
-  enum Tag
-  {
-    kInput;
-    kOutput;
-  };
 public:
 
   /**
@@ -160,7 +156,13 @@ public:
 
   pair<int, int> const & decode(int const code) const;
 
-  void insertSymbolsIntoSet(set<int> &symbols);
+  enum Tag
+  {
+    kInput,
+    kOutput
+  };
+
+  void insertSymbolsIntoSet(set<int> &symbols, Alphabet a, Tag t = kOutput);
 };
 
 #endif
