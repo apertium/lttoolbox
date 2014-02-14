@@ -731,3 +731,168 @@ Transducer::recognise(wstring patro, Alphabet &a, FILE *err)
   return accepted;
 }
 
+Transducer
+Transducer::appendDotStar(Alphabet &my_a, Alphabet &t_a, Transducer t, int const epsilon_tag)
+{
+  // set of all of the symbols of the transducers
+  set<int> symbols;
+  // struct to insert the symbols of the transducers
+  struct InsertSymbols
+  {
+    static void insertSymbols(Alphabet &a, Transducer t, int const epsilon_tag, set<int> &symbols)
+    {
+      for(map<int, multimap<int, int> >::iterator state_it = t.transitions.begin(),
+                                                  state_limit = t.transitions.end();
+        state_it != state_limit;
+        state_it++)
+      {
+        wcerr<<L"source:" << state_it->first <<L": "<<endl;
+        for(multimap<int, int>::iterator transition_it = state_it->second.begin(),
+                                         transition_limit = state_it->second.end();
+          transition_it != transition_limit;
+          transition_it++)
+        {
+          wcerr<<L"sym:" << transition_it->first <<L" trg "<<transition_it->second<<endl;
+          // check if the symbol is the epsilon tag
+          std::pair<int,int> sym = a.decode(transition_it->first);
+          wcerr <<sym.first<<L":"<<sym.second <<endl;
+          if(transition_it->first == epsilon_tag)
+          {
+            continue;
+          }
+          else
+          {
+            // insert the symbol of the transition
+            symbols.insert(transition_it->first);
+          }
+        }
+      }
+    }
+  };
+
+  // insert the symbols of the transducers
+  InsertSymbols::insertSymbols(my_a, *this, epsilon_tag, symbols);
+  InsertSymbols::insertSymbols(t_a, t, epsilon_tag, symbols);
+  // prefix transducer converted from the bilingual dictionary
+  Transducer prefix_transducer(*this);
+
+  for(set<int>::iterator symbol_it = symbols.begin(),
+                         symbol_limit = symbols.end();
+    symbol_it != symbol_limit;
+    symbol_it++)
+  {
+    for(set<int>::iterator prefix_it = prefix_transducer.finals.begin(),
+                           prefix_limit = prefix_transducer.finals.end();
+      prefix_it != prefix_limit;
+      prefix_it++)
+    {
+      // link the final state to itself with the symbol
+      prefix_transducer.linkStates(*prefix_it, *prefix_it, *symbol_it);
+    }
+  }
+
+  return prefix_transducer;
+}
+
+
+
+Transducer
+Transducer::intersect(Transducer t)
+{
+  // map of the states of the multiplied and trimmed transducers
+  map<pair<int, int>, int> states_multiplied_trimmed;
+
+  // trimmed transducer
+  Transducer trimmed_t;
+
+  // destroy the initial state of the trimmed transducer
+  trimmed_t.transitions.clear();
+  
+  for(map<int, multimap<int, int> >::iterator it = transitions.begin(),
+                                              limit = transitions.end();
+    it != limit;
+    it++)
+  {
+    for(map<int, multimap<int, int> >::iterator t_it = t.transitions.begin(),
+                                                t_limit = t.transitions.end();
+      t_it != t_limit;
+      t_it++)
+    {
+      // state of the multiplied automaton
+      pair<int, int> tmp(it->first, t_it->first);
+
+      // map the state of the multiplied automaton with a new state of the trimmed transducer
+      states_multiplied_trimmed.insert(make_pair(tmp, trimmed_t.newState()));
+    }
+  }
+
+  for(map<int, multimap<int, int> >::iterator state_it = transitions.begin(),
+                                              state_limit = transitions.end();
+    state_it != state_limit;
+    state_it++)
+  {
+    for(map<int, multimap<int, int> >::iterator t_state_it = t.transitions.begin(),
+                                                t_state_limit = t.transitions.end();
+      t_state_it != t_state_limit;
+      t_state_it++)
+    {
+      for(multimap<int, int>::iterator transition_it = state_it->second.begin(),
+                                       transition_limit = state_it->second.end();
+        transition_it != transition_limit;
+        transition_it++)
+      {
+        for(multimap<int, int>::iterator t_transition_it = t_state_it->second.begin(),
+                                         t_transition_limit = t_state_it->second.end();
+          t_transition_it != t_transition_limit;
+          t_transition_it++)
+        {
+          // check if the tags are equal
+          if(transition_it->first == t_transition_it->first)
+          {
+            // source state of the multiplied automaton
+            pair<int, int> multiplied_source(state_it->first, t_state_it->first);
+
+            // target state of the multiplied automaton
+            pair<int, int> multiplied_target(transition_it->second, t_transition_it->second);
+
+            // link the source and target states of the trimmed transducer with the tag
+            trimmed_t.linkStates(states_multiplied_trimmed[multiplied_source], states_multiplied_trimmed[multiplied_target], transition_it->first);
+          }
+          else
+          {
+            continue;
+          }
+        }
+      }
+    }
+  }
+
+  for(set<int>::iterator it = finals.begin(),
+                         limit = finals.end();
+    it != limit;
+    it++)
+  {
+    for(set<int>::iterator t_it = t.finals.begin(),
+                           t_limit = t.finals.end();
+      t_it != t_limit;
+      t_it++)
+    {
+      // final state of the multiplied automaton
+      pair<int, int> tmp(*it, *t_it);
+
+      // insert the final state of the trimmed transducer
+      trimmed_t.finals.insert(states_multiplied_trimmed[tmp]);
+    }
+  }
+
+  // initial state of the multiplied automaton
+  pair<int, int> tmp(initial, t.initial);
+
+  // set the initial state of the trimmed transducer
+  trimmed_t.initial = states_multiplied_trimmed[tmp];
+
+  // minimize the trimmed transducer
+  trimmed_t.minimize();
+
+  return trimmed_t;
+}
