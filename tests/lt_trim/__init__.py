@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 
+# If you have HFST installed, you can diff lttoolbox binaries like this:
+# $ lt-print full.bin | sed 's/ /@_SPACE_@/g' | hfst-txt2fst -e ε | hfst-fst2strings -c1 > full.strings 
+# $ lt-print trim.bin | sed 's/ /@_SPACE_@/g' | hfst-txt2fst -e ε | hfst-fst2strings -c1 > trim.strings 
+# $ diff -y full.strings trim.strings | less
+# This is similar to diffing the lt-expand of uncompiled XML dictionaries.
+# See also `man hfst-fst2strings'.
+
 import unittest
 
 from subprocess import call
@@ -91,6 +98,13 @@ class UnbalancedEpsilons(unittest.TestCase, TrimProcTest):
     monodix = "data/unbalanced-epsilons-mono.dix"
     bidir = "rl"
     bidix = "data/unbalanced-epsilons-bi.dix"
+
+class Group(unittest.TestCase, TrimProcTest):
+    inputs = ["abc", "pq", "pqr", "pqs", "xyz"]
+    expectedOutputs = ["^abc/ab<n><ind>#c$", "^pq/pq<n><ind>$", "^pqr/pq<n><ind>#r$", "^pqs/*pqs$", "^xyz/*xyz$"]
+    expectedRetCode = 0
+    monodix = "data/group-mono.dix"
+    bidix = "data/group-bi.dix"
 
 
 class Empty(unittest.TestCase, TrimProcTest):

@@ -20,15 +20,14 @@ right-side when compiling rl), such that only analyses which would
 pass through `lt-proc -b bidix_binary' are kept.
 
 Both compund tags (`<compound-only-L>', `<compound-R>') and join
-elements (`<j/>' in XML, `+' in the stream) should be handled
-correctly.
+elements (`<j/>' in XML, `+' in the stream) and the group element
+(`<g/>' in XML, `#' in the stream) should be handled correctly.
 
-The group element (`<g/>' in XML, `#' in the stream) is not handled
-yet, any such entries still need to be manually tested. If you need
-"foo<tag># bar" to be included, ensure "foo<tag>" is in bidix.
-Conversely, if "foo<tag>" is in your bidix, all "foo<tag># bar" type
-entries will be included from the analyser, whether or not they are in
-bidix.
+There is one minor caveat: If you have the capitalised lemma "Foo" in
+the monodix, but "foo" in the bidix, an analysis "^Foo<tag>$" would
+pass through bidix when doing lt-proc -b, but will not make it through
+trimming. Make sure your lemmas have the same capitalisation in the
+different dictionaries.
 
 You should not trim a generator unless you have a \fBvery\fR simple
 translator pipeline, since the output of bidix seldom goes unchanged

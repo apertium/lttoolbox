@@ -277,6 +277,7 @@ public:
   /**
    * Insert another transducer into this, unifying source and targets.
    * Does not minimize.
+   *
    * @param t the transducer being inserted
    * @param epsilon_tag the epsilon tag
    */
@@ -285,7 +286,13 @@ public:
     int const epsilon_tag = 0); 
 
   /**
-   * Converts this class into a prefix transducer
+   * Converts this class into a "prefix transducer", ie. for any final
+   * state, appends a transition to itself for all of the loopback
+   * symbols (typically all tags). So if the original transducer
+   * accepts "foo<tag1>" and loopback_symbols includes <tag2>, the
+   * prefix transducer will accept "foo<tag1><tag2>" as well as
+   * "foo<tag1>".
+   *
    * @param loopback_symbols a set of symbols of the alphabet for this class,
    *   all of the input and output tags of which are set equal
    * @param epsilon_tag the tag to take as epsilon
@@ -294,8 +301,38 @@ public:
   Transducer appendDotStar(set<int> const &loopback_symbols,
                            int const epsilon_tag = 0);
 
+
+  /**
+   * Turn "foo# bar<tag1><tag2>" into "foo<tag1><tag2># bar". Only
+   * regards the input (left) side, output side will be in wrong
+   * order. Used on bidixes when trimming.
+   *
+   * @param alphabet the alphabet of this transducer, also used for returned Transducer
+   * @param epsilon_tag the tag to take as epsilon
+   * @return the prefix transducer
+   */
+  Transducer moveLemqsLast(Alphabet const &alphabet,
+                           int const epsilon_tag = 0);
+  /**
+   * Helper for moveLemqsLast. Starting from a certain state, make all
+   * the tags go before the non-tags, so if " bar<tag1><tag2>" is a
+   * posible path, we get "<tag1><tag2> bar" in the returned
+   * transducer.
+   *
+   * @param start the state (in this Transducer) to start from
+   * @param group_label the label of the "#" symbol we saw
+   * @param alphabet the alphabet of this transducer
+   * @param epsilon_tag the tag to take as epsilon
+   * @return a transducer of all paths going from start, but with tags first.
+   */
+  Transducer copyWithTagsFirst(int start,
+                               int group_label,
+                               Alphabet const &alphabet,
+                               int const epsilon_tag = 0);
+
   /**
    * Intersects two finite-state transducers
+   *
    * @param t the Transducer with which this class is intersected
    * @param my_a the alphabet of this transducer
    * @param t_a the alphabet of the transducer t
@@ -306,7 +343,6 @@ public:
                        Alphabet const &t_a,
                        int const epsilon_tag = 0);
 
-  void wideConsoleErrorFinals();
 };
 
 #endif
