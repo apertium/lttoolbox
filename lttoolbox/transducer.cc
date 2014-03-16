@@ -962,10 +962,11 @@ Transducer::intersect(Transducer &trimmer,
   wstring COMPILER_JOIN_ELEM = L"+";
   wstring COMPILER_GROUP_ELEM = L"#";
 
-  // State numbers may differ in this transducer and the trimmed:
+  // State numbers may differ in thisXtrimmer transducers and the trimmed:
   Transducer trimmed;
-  map<int, int> states_this_trimmed;
-  states_this_trimmed.insert(make_pair(initial, trimmed.initial));
+  std::map<std::pair<int, int>, int> states_this_trimmed;
+  states_this_trimmed.insert(make_pair(make_pair(initial, trimmer.initial),
+                                       trimmed.initial));
 
   typedef std::pair<int, std::pair<int, int > > SearchState;
   // first: currently searched state in this; 
@@ -987,6 +988,12 @@ Transducer::intersect(Transducer &trimmer,
         trimmer_src     = current.second.first,
         trimmer_preplus = current.second.second,
         trimmer_preplus_next = trimmer_preplus;
+    
+    if(states_this_trimmed.find(make_pair(this_src, trimmer_src)) == states_this_trimmed.end()) {
+      wcerr <<L"Error: couldn't find "<<this_src<<L","<<trimmer_src<<L" in state map"<<endl;
+      exit(EXIT_FAILURE);
+    }
+    int trimmed_src = states_this_trimmed[make_pair(this_src, trimmer_src)];
 
     // Loop through arcs from this_src; when our arc matches an arc
     // from live_trimmer_states, add that to (the front of) todo:
@@ -999,6 +1006,7 @@ Transducer::intersect(Transducer &trimmer,
           this_trg   = trans_it->second;
       wstring this_right = L"";
       this_a.getSymbol(this_right, this_a.decode(this_label).second);
+      
 
       if(this_right == COMPILER_JOIN_ELEM)
       {
@@ -1009,12 +1017,12 @@ Transducer::intersect(Transducer &trimmer,
         {
           todo.push_front(next);
         }
-        int trimmed_src = states_this_trimmed[this_src];
-        if(states_this_trimmed.find(this_trg) == states_this_trimmed.end())
+        std::pair<int, int> states_trg = make_pair(this_trg, trimmer.initial);
+        if(states_this_trimmed.find(states_trg) == states_this_trimmed.end())
         {
-          states_this_trimmed.insert(make_pair(this_trg, trimmed.newState()));
+          states_this_trimmed.insert(make_pair(states_trg, trimmed.newState()));
         }
-        int trimmed_trg = states_this_trimmed[this_trg];
+        int trimmed_trg = states_this_trimmed[states_trg];
         trimmed.linkStates(trimmed_src, // fromState
                            trimmed_trg, // toState
                            this_label); // symbol-pair, using this alphabet
@@ -1023,6 +1031,8 @@ Transducer::intersect(Transducer &trimmer,
       {
         if(this_right == COMPILER_GROUP_ELEM && trimmer_preplus != trimmer_src)
         {
+          states_this_trimmed.insert(make_pair(make_pair(this_src, trimmer_preplus),
+                                               trimmed_src));
           trimmer_src = trimmer_preplus;
         }
         // Loop through arcs from the live state of trimmer:
@@ -1049,6 +1059,16 @@ Transducer::intersect(Transducer &trimmer,
             if(seen.find(next) == seen.end()) 
             {
               todo.push_front(next);
+              states_this_trimmed.insert(make_pair(make_pair(this_src, trimmer_trg),
+                                                   trimmed_src));
+            }
+            else
+            {
+              // this_src/trimmed_trg is already processed, just ensure the paths are merged:
+              int trimmed_trg = states_this_trimmed[make_pair(this_src, trimmer_trg)];
+              trimmed.linkStates(trimmed_src,
+                                 trimmed_trg,
+                                 epsilon_tag);
             }
           }
           else if( this_right == trimmer_left
@@ -1069,12 +1089,12 @@ Transducer::intersect(Transducer &trimmer,
             {
               todo.push_front(next);
             }
-            int trimmed_src = states_this_trimmed[this_src];
-            if(states_this_trimmed.find(this_trg) == states_this_trimmed.end())
+            std::pair<int, int> states_trg = make_pair(this_trg, trimmer_trg);
+            if(states_this_trimmed.find(states_trg) == states_this_trimmed.end())
             {
-              states_this_trimmed.insert(make_pair(this_trg, trimmed.newState()));
+              states_this_trimmed.insert(make_pair(states_trg, trimmed.newState()));
             }
-            int trimmed_trg = states_this_trimmed[this_trg];
+            int trimmed_trg = states_this_trimmed[states_trg];
             trimmed.linkStates(trimmed_src, // fromState
                                trimmed_trg, // toState
                                this_label); // symbol-pair, using this alphabet
@@ -1084,13 +1104,17 @@ Transducer::intersect(Transducer &trimmer,
     } // end loop arcs from this_src
   } // end while todo
 
-  // TODO: do we check that we've reached a trimmer.final state?
-  for(set<int>::iterator it = finals.begin(),
-        limit = finals.end();
+  for(map<std::pair<int, int>, int >::iterator it = states_this_trimmed.begin(),
+        limit = states_this_trimmed.end();
       it != limit;
       it++)
   {
-    trimmed.finals.insert(states_this_trimmed[*it]);
+    int s_this = it->first.first;
+    int s_trimmer = it->first.second; // TODO: do we check that we've reached a trimmer.final state?
+    int s_trimmed = it->second;
+    if(isFinal(s_this)) {
+      trimmed.finals.insert(s_trimmed);
+    }
   }
 
 

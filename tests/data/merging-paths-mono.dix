@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅabcdefghijklmnopqrstuvwxyzæøåcqwxzCQWXZéèêóòâôÉÊÈÓÔÒÂáàÁÀäÄöÖšŠčČðđÐ</alphabet>
+  <sdefs>
+    <sdef n="det" 	c="Determiner"/>
+    <sdef n="f" 	c="Feminine"/>
+    <sdef n="m" 	c="Masculine"/>
+    <sdef n="sg" 	c="Singular"/>
+    <sdef n="qnt" 	c="Quantifier"/>
+  </sdefs>
+  <pardefs>
+    <pardef n="e/n__num">
+      <e>       <p><l>n</l>          <r>n<s n="det"/><s n="qnt"/><s n="m"/><s n="sg"/></r></p></e>
+      <e>       <p><l>i</l>          <r>n<s n="det"/><s n="qnt"/><s n="f"/><s n="sg"/></r></p></e>
+    </pardef>
+  </pardefs>
+  <section id="main" type="standard">
+    <e lm="en">              <i>e</i><par n="e/n__num"/></e>
+  </section>
+</dictionary>
