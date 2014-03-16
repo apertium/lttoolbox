@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet/>
+  <sdefs>
+    <sdef n="det"     c="Determiner"/>
+    <sdef n="f"       c="Feminine"/>
+    <sdef n="m"       c="Masculine"/>
+    <sdef n="qnt"     c="Quantifier"/>
+    <sdef n="GD"      c="Gender to be determined"/>
+  </sdefs>
+  <section id="main" type="standard">
+    <e><p><l>ein<s n="det"/><s n="qnt"/><s n="GD"/></l><r>en<s n="det"/><s n="qnt"/><s n="m"/></r></p></e>
+    <e><p><l>ein<s n="det"/><s n="qnt"/><s n="f"/></l><r>en<s n="det"/><s n="qnt"/><s n="f"/></r></p></e>
+  </section>
+</dictionary>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅabcdefghijklmnopqrstuvwxyzæøåcqwxzCQWXZéèêóòâôÉÊÈÓÔÒÂáàÁÀäÄöÖšŠčČðđÐ</alphabet>
+  <sdefs>
+    <sdef n="vblex" 	c="Verb"/>
+    <sdef n="inf" 	c="Infinitive"/>
+  </sdefs>
+  <section id="main" type="standard">
+    <e>         <p><l>xa</l><r>xa<s n="vblex"/></r></p></e> <!-- should not be included! -->
+    <e>         <p><l>ya</l><r>ya<s n="vblex"/></r></p></e> <!-- should be included!-->
+  </section>
+</dictionary>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet/>
+  <sdefs>
+    <sdef n="vblex"   c="Verb"/>
+    <sdef n="adj"     c="Adjective"/>
+  </sdefs>
+
+  <section id="main" type="standard">
+    <e>       <p><l>x<s n="adj"/></l>    <r>x<s n="adj"/></r></p></e>
+    <e>       <p><l>ya<s n="vblex"/></l>  <r>ya<s n="vblex"/></r></p></e>
+  </section>
+
+</dictionary>

@@ -84,6 +84,21 @@ class TrimLongleft(unittest.TestCase, TrimProcTest):
     monodix = "data/longleft-mono.dix"
     bidix = "data/longleft-bi.dix"
 
+class DivergingPaths(unittest.TestCase, TrimProcTest):
+    inputs = ["xa ya"]
+    expectedOutputs = ["^xa/*xa$ ^ya/ya<vblex>$"]
+    expectedRetCode = 0
+    monodix = "data/diverging-paths-mono.dix"
+    bidix = "data/diverging-paths-bi.dix"
+
+class MergingPaths(unittest.TestCase, TrimProcTest):
+    inputs = ["en ei"]
+    expectedOutputs = ["^en/en<det><qnt><m><sg>$ ^ei/en<det><qnt><f><sg>$"]
+    expectedRetCode = 0
+    monodix = "data/merging-paths-mono.dix"
+    bidir = "rl"
+    bidix = "data/merging-paths-bi.dix"
+
 class BidixPardef(unittest.TestCase, TrimProcTest):
     inputs = ["c"]
     expectedOutputs = ["^c/c<vblex><inf>$"]
