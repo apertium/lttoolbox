@@ -115,6 +115,14 @@ class UnbalancedEpsilons(unittest.TestCase, TrimProcTest):
     bidir = "rl"
     bidix = "data/unbalanced-epsilons-bi.dix"
 
+class LeftUnbalancedEpsilons(unittest.TestCase, TrimProcTest):
+    inputs = ["a"]
+    expectedOutputs = ["^a/a<adv>$"]
+    expectedRetCode = 0
+    monodix = "data/left-unbalanced-epsilons-mono.dix"
+    bidir = "rl"
+    bidix = "data/left-unbalanced-epsilons-bi.dix"
+
 class Group(unittest.TestCase, TrimProcTest):
     inputs = ["abc", "pq", "pqr", "pqs", "xyz"]
     expectedOutputs = ["^abc/ab<n><ind>#c$", "^pq/pq<n><ind>$", "^pqr/pq<n><ind>#r$", "^pqs/*pqs$", "^xyz/*xyz$"]

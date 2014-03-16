@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅabcdefghijklmnopqrstuvwxyzæøåcqwxzCQWXZéèêóòâôÉÊÈÓÔÒÂáàÁÀäÄöÖšŠčČðđÐ</alphabet>
+  <sdefs>
+    <sdef n="adv" 	c="Adverb"/>
+  </sdefs>
+  <section id="main" type="standard">
+    <e>       <p><l>a</l><r>a<s n="adv"/></r></p></e>
+  </section>
+</dictionary>
