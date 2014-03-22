@@ -141,20 +141,12 @@ int main(int argc, char *argv[])
 
   FILE *analyser = fopen(argv[1], "rb");
   FILE *bidix = fopen(argv[2], "rb");
-  FILE *output = fopen(argv[3], "wb");
 
   std::pair<std::pair<Alphabet, wstring>, std::map<wstring, Transducer> > trimmed = trim(analyser, bidix);
   Alphabet alph_t = trimmed.first.first;
   wstring letters = trimmed.first.second;
   std::map<wstring, Transducer> trans_t = trimmed.second;
 
-  // letters
-  Compression::wstring_write(letters, output);
-
-  // symbols
-  alph_t.write(output);
-
-  // transducers
   int n_transducers = 0;
   for(std::map<wstring, Transducer>::iterator it = trans_t.begin(); it != trans_t.end(); it++)
   {
@@ -169,6 +161,23 @@ int main(int argc, char *argv[])
       n_transducers++;
     }
   }
+
+  if(n_transducers == 0)
+  {
+    wcerr << L"Error: Trimming gave empty transducer!" << endl;
+    exit(EXIT_FAILURE);
+  }
+
+  // Write the file:
+  FILE *output = fopen(argv[3], "wb");
+
+  // letters
+  Compression::wstring_write(letters, output);
+
+  // symbols
+  alph_t.write(output);
+
+  // transducers
   Compression::multibyte_write(n_transducers, output);
   for(std::map<wstring, Transducer>::iterator it = trans_t.begin(); it != trans_t.end(); it++)
   {
@@ -183,13 +192,5 @@ int main(int argc, char *argv[])
   fclose(bidix);
   fclose(output);
 
-  if(n_transducers == 0) 
-  {
-    wcerr << L"Error: Trimming gave empty transducer!" << endl;
-    return 1;
-  }
-  else 
-  {
-    return 0;
-  }
+  return 0;
 }
