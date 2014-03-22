@@ -435,6 +435,12 @@ Transducer::isEmpty() const
   return finals.size() == 0 && transitions.size() == 1;
 }
 
+bool
+Transducer::hasNoFinals() const
+{
+  return finals.size() == 0;
+}
+
 int
 Transducer::size() const
 {
@@ -1141,9 +1147,7 @@ Transducer::intersect(Transducer &trimmer,
     }
   }
 
-
-  // minimize the trimmed transducer
-  trimmed.minimize();
-
+  // We do not minimize here, in order to let lt_trim print a warning
+  // ()instead of exiting the whole program) if no finals.
   return trimmed;
 }
