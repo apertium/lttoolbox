@@ -236,6 +236,12 @@ public:
   bool isEmpty() const;
   
   /**
+   * Check if the transducer has no final state(s)
+   * @return true if the set of final states is empty
+   */
+  bool hasNoFinals() const;
+
+  /**
    * Returns the number of states of the transducer
    * @return the number of states
    */
@@ -332,6 +338,10 @@ public:
 
   /**
    * Intersects two finite-state transducers
+   *
+   * The returned transducer is not minimized! Minimization will exit
+   * with failure if there are no finals, but we might want to
+   * continue with intersecting the other sections.
    *
    * @param t the Transducer with which this class is intersected
    * @param my_a the alphabet of this transducer

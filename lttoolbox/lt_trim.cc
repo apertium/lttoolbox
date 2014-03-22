@@ -123,8 +123,23 @@ trim(FILE *file_mono, FILE *file_bi)
                                                   alph_mono,
                                                   alph_prefix);
 
-    trans_mono[it->first] = trimmed_tmp;
+    wcout << it->first << " " << it->second.size();
+    wcout << " " << it->second.numberOfTransitions() << endl;
+    if(it->second.numberOfTransitions() == 0)
+    {
+      wcerr << L"Warning: empty section! Skipping it ..."<<endl;
+      trans_mono[it->first].clear();
+    }
+    else if(trimmed_tmp.hasNoFinals()) {
+      wcerr << L"Warning: section had no final state after trimming! Skipping it ..."<<endl;
+      trans_mono[it->first].clear();
+    }
+    else {
+      trimmed_tmp.minimize();
+      trans_mono[it->first] = trimmed_tmp;
+    }
   }
+
   alph_trans_mono.second = trans_mono;
   return alph_trans_mono;
 }
@@ -150,13 +165,7 @@ int main(int argc, char *argv[])
   int n_transducers = 0;
   for(std::map<wstring, Transducer>::iterator it = trans_t.begin(); it != trans_t.end(); it++)
   {
-    wcout << it->first << " " << it->second.size();
-    wcout << " " << it->second.numberOfTransitions() << endl;
-    if(it->second.numberOfTransitions() == 0)
-    {
-      wcerr << L"Warning: empty section! Skipping it ..."<<endl;
-    }
-    else
+    if(!(it->second.isEmpty()))
     {
       n_transducers++;
     }
@@ -181,7 +190,7 @@ int main(int argc, char *argv[])
   Compression::multibyte_write(n_transducers, output);
   for(std::map<wstring, Transducer>::iterator it = trans_t.begin(); it != trans_t.end(); it++)
   {
-    if(it->second.numberOfTransitions() != 0) 
+    if(!(it->second.isEmpty()))
     {
       Compression::wstring_write(it->first, output);
       it->second.write(output);
