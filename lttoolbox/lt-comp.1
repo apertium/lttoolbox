@@ -19,7 +19,7 @@ architecture: \fBhttp://www.apertium.org\fR.
 [
 .B lr \fR| 
 .B rl
-] dictionary_file output_file
+] dictionary_file output_file [acx_file]
 .PP
 .B lt-comp
 [
@@ -32,7 +32,7 @@ architecture: \fBhttp://www.apertium.org\fR.
 [
 .B lr \fR| 
 .B rl
-] dictionary_file output_file
+] dictionary_file output_file [acx_file]
 .PP
 .SH DESCRIPTION
 .BR lt-comp 
@@ -82,6 +82,9 @@ The input dictionary.
 .PP
 .B output_file
 The compiled dictionary (a finite state transducer).
+.PP
+.B acx_file
+Optional XML file of equivalent characters in monodices.
 
 .SH SEE ALSO
 .I lt-proc\fR(1),
