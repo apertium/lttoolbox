@@ -5,7 +5,7 @@ AC_PREREQ(2.52)
 
 m4_define([required_libxml_version], [2.6.17])
 
-AC_INIT([lttoolbox/lttoolbox.h], [3.2.0], [sortiz@users.sourceforge.net])
+AC_INIT([lttoolbox/lttoolbox.h], [3.3.0], [sortiz@users.sourceforge.net])
 AC_CONFIG_HEADER([lttoolbox/lttoolbox_config.h])
 
 AC_CANONICAL_SYSTEM
@@ -14,7 +14,7 @@ GENERIC_LIBRARY_NAME=lttoolbox
 
 # Release versioning
 GENERIC_MAJOR_VERSION=3
-GENERIC_MINOR_VERSION=2
+GENERIC_MINOR_VERSION=3
 GENERIC_MICRO_VERSION=0
 
 # API version (often = GENERIC_MAJOR_VERSION.GENERIC_MINOR_VERSION)
