@@ -936,7 +936,7 @@ Transducer::moveLemqsLast(Alphabet const &alphabet,
         }
         int new_trg = states_this_new[this_trg];
         new_t.linkStates(new_src, new_trg, label);
-        if(seen.find(this_trg) == seen.end()) 
+        if(seen.find(this_trg) == seen.end())
         {
           todo.push_front(this_trg);
         }
@@ -1026,7 +1026,7 @@ Transducer::intersect(Transducer &trimmer,
       if(trimmer_left == L"") 
       {
         next = make_pair(this_src, make_pair(trimmer_trg, trimmer_preplus_next));
-        if(seen.find(next) == seen.end()) 
+        if(seen.find(next) == seen.end())
         {
           todo.push_front(next);
           states_this_trimmed.insert(make_pair(make_pair(this_src, trimmer_trg),
@@ -1060,7 +1060,7 @@ Transducer::intersect(Transducer &trimmer,
         // Go to the start in trimmer, but record where we restarted
         // from in case we later see a #:
         next = make_pair(this_trg, make_pair(trimmer.initial, trimmer_src));
-        if(seen.find(next) == seen.end()) 
+        if(seen.find(next) == seen.end())
         {
           todo.push_front(next);
         }
@@ -1074,15 +1074,45 @@ Transducer::intersect(Transducer &trimmer,
                            trimmed_trg, // toState
                            this_label); // symbol-pair, using this alphabet
       }
+      else if ( this_right == compoundOnlyLSymbol
+                || this_right == compoundRSymbol
+                || this_right == L"" )
+      {
+        // Stay put in the trimmer FST
+        int trimmer_trg = trimmer_src;
+
+        if(trimmer_preplus == trimmer_src) {
+          // Keep the old preplus state if it was set; equal to current trimmer state means unset:
+          trimmer_preplus_next = trimmer_trg;
+        }
+
+        next = make_pair(this_trg, make_pair(trimmer_trg, trimmer_preplus_next));
+        if(seen.find(next) == seen.end())
+        {
+          todo.push_front(next);
+        }
+        std::pair<int, int> states_trg = make_pair(this_trg, trimmer_trg);
+        if(states_this_trimmed.find(states_trg) == states_this_trimmed.end())
+        {
+          states_this_trimmed.insert(make_pair(states_trg, trimmed.newState()));
+        }
+        int trimmed_trg = states_this_trimmed[states_trg];
+        trimmed.linkStates(trimmed_src, // fromState
+                           trimmed_trg, // toState
+                           this_label); // symbol-pair, using this alphabet
+      }
       else
       {
+        // Loop through non-epsilon arcs from the live state of trimmer
+
+        // If we see a plus, we may have to rewind our trimmer state first:
         if(this_right == COMPILER_GROUP_ELEM && trimmer_preplus != trimmer_src)
         {
           states_this_trimmed.insert(make_pair(make_pair(this_src, trimmer_preplus),
                                                trimmed_src));
           trimmer_src = trimmer_preplus;
         }
-        // Loop through non-epsilon arcs from the live state of trimmer:
+
         for(multimap<int, int>::iterator trimmer_trans_it = trimmer.transitions.at(trimmer_src).begin(),
               trimmer_trans_limit = trimmer.transitions.at(trimmer_src).end();
             trimmer_trans_it != trimmer_trans_limit;
@@ -1098,21 +1128,8 @@ Transducer::intersect(Transducer &trimmer,
             trimmer_preplus_next = trimmer_trg;
           }
 
-          if( trimmer_left != L""
-              && ( this_right == trimmer_left
-                   || this_right == compoundOnlyLSymbol
-                   || this_right == compoundRSymbol
-                   || this_right == L"" )
-            )
+          if(trimmer_left != L"" && this_right == trimmer_left) // we've already dealt with trimmer epsilons
           {
-            if( this_right == compoundOnlyLSymbol
-                ||  this_right == compoundRSymbol
-                || (this_right == L"" && trimmer_left != L"") )
-            {
-              // Stay put in the trimmer FST
-              trimmer_trg = trimmer_src;
-            }
-
             next = make_pair(this_trg, make_pair(trimmer_trg, trimmer_preplus_next));
             if(seen.find(next) == seen.end()) 
             {
