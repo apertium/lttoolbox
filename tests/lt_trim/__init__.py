@@ -145,6 +145,14 @@ class BothJoinAndGroup(unittest.TestCase, TrimProcTest):
     bidix = "data/group-bi.dix"
 
 
+class FinalEpsilons(unittest.TestCase, TrimProcTest):
+    inputs = ["ea"]
+    expectedOutputs = ["^ea/e<n>#a$"]
+    expectedRetCode = 0
+    monodix = "data/final-epsilons-mono.dix"
+    bidix = "data/final-epsilons-bi.dix"
+
+
 class Empty(unittest.TestCase, TrimProcTest):
     def runTest(self):
         tmpd = mkdtemp()

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅabcdefghijklmnopqrstuvwxyzæøåcqwxzCQWXZéèêóòâôÉÊÈÓÔÒÂáàÁÀäÄöÖšŠ</alphabet>
+  <sdefs>
+    <sdef n="n"/>
+  </sdefs>
+
+  <section id="main" type="standard">
+    <e>   <p><l>e</l>    <r>e<s n="n"/></r></p></e>
+    <e>   <p><l>e</l>    <r>e<s n="n"/></r></p><p><l>a</l><r><g>a</g></r></p></e>
+  </section>
+</dictionary>
