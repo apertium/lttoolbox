@@ -83,6 +83,14 @@ AttCompiler::symbol_code(const wstring& symbol)
     return symbol[0];
   } else {
     letters.insert(symbol[0]);
+    if(iswlower(symbol[0]))
+    {
+      letters.insert(towupper(symbol[0]));
+    }
+    else if(iswupper(symbol[0]))
+    {
+      letters.insert(towlower(symbol[0]));
+    }
     return symbol[0];
   }
 }
