@@ -356,8 +356,6 @@ TMXCompiler::procTU()
         ref = &foo;
       }
       
-      bool hi = false;
-      
       while(name != TMX_COMPILER_TUV_ELEM || type != XML_READER_TYPE_END_ELEMENT)
       {
         xmlTextReaderRead(reader);
@@ -376,12 +374,7 @@ TMXCompiler::procTU()
         {
           if(type != XML_READER_TYPE_END_ELEMENT)
           {
-            hi = true;
             ref->push_back(alphabet(L"<b>"));
-          }
-          else
-          {
-            hi = false;
           }
         }
       }
