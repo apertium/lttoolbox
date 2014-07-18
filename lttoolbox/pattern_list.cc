@@ -350,7 +350,6 @@ PatternList::buildTransducer()
         transducer.setFinal(prevstate);
         final_type[prevstate] = it->first;
       }
-      prevstate = -1;
     }
     if(!transducer.isFinal(state))
     {
