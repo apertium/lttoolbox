@@ -46,7 +46,8 @@ private:
   {
     Node *where;
     vector<int> *sequence;
-    bool dirty; // What does "dirty" mean ? 
+    // a state is "dirty" if it was introduced at runtime (case variants, etc.)
+    bool dirty;
     
     TNodeState(Node * const &w, vector<int> * const &s, bool const &d): where(w), sequence(s), dirty(d){}
     TNodeState & operator=(TNodeState const &other)
