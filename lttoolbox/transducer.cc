@@ -187,8 +187,8 @@ Transducer::isFinal(int const state) const
 void
 Transducer::setFinal(int const state, bool valor)
 {
-  int initial_copy = getInitial();
 /*
+  int initial_copy = getInitial();
   if(state == initial_copy)
   {
     wcerr << L"Setting initial state to final" << endl;
