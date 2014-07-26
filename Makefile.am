@@ -5,3 +5,6 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = lttoolbox.pc
 
 EXTRA_DIST=autogen.sh CMakeLists.txt
+
+test: tests/run_tests.py
+	$<
