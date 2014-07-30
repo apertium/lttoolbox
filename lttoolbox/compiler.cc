@@ -373,8 +373,20 @@ Compiler::skipBlanks(wstring &name)
 void
 Compiler::skip(wstring &name, wstring const &elem)
 {
+  skip(name, elem, true);
+}
+
+void
+Compiler::skip(wstring &name, wstring const &elem, bool open)
+{
   xmlTextReaderRead(reader);
   name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+  wstring slash;
+
+  if(!open)
+  {
+    slash = L"/";
+  }
   
   while(name == L"#text" || name == L"#comment")
   {
@@ -394,7 +406,7 @@ Compiler::skip(wstring &name, wstring const &elem)
   if(name != elem)
   {
     wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << L"): Expected '<" << elem << L">'." << endl;
+    wcerr << L"): Expected '<" << slash << elem << L">'." << endl;
     exit(EXIT_FAILURE);
   }  
 }
@@ -478,7 +490,7 @@ Compiler::procTransduction()
     }    
   }
 
-  skip(name, COMPILER_PAIR_ELEM);  
+  skip(name, COMPILER_PAIR_ELEM, false);
   
   EntryToken e;
   e.setSingleTransduction(lhs, rhs);
