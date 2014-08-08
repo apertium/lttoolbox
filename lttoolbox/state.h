@@ -87,7 +87,18 @@ private:
    */
   void epsilonClosure();
 
+  /** 
+   * Check that the last part of the sequence (as separated by
+   * separationSymbol) has the requiredSymbol
+   */
   bool lastPartHasRequiredSymbol(const vector<int> &seq, int requiredSymbol, int separationSymbol);
+
+  /** 
+   * Check that the last part of the sequence (as separated by
+   * separationSymbol) has one of the two requiredSymbol's, where
+   * requiredSymbolOnlyLast can only be in the last part.
+   */
+  bool onlyLastPartHasRequiredSymbol(const vector<int> &seq, int requiredSymbolOnlyLast, int requiredSymbolLast, int separationSymbol);
 
 public:
 
@@ -156,17 +167,19 @@ public:
   /**
     * Remove states not containing a specific symbol in their last 'part', and states 
     * with more than a number of 'parts'
-    * @param requieredSymbol the symbol requiered in the last part
+    * @param requiredSymbolOnlyLast the symbol required in the last part, can't be in non-last parts
+    * @param requiredSymbolAnywhere alternate symbol required in last part (and is ignored in any other parts)
     * @param separationSymbol the symbol that represent the separation between two parts
     * @param compound_max_elements the maximum part number allowed
     */
-  void pruneCompounds(int requiredSymbol, int separationSymbol, int compound_max_elements);
+  void pruneCompounds(int requiredSymbolOnlyLast, int requiredSymbolAnywhere, int separationSymbol, int compound_max_elements);
 
   /**
     * Remove states containing a forbidden symbol
-    * @param forbiddenSymbol the symbol forbidden
+    * @param forbiddenSymbol1 a forbidden symbol
+    * @param forbiddenSymbol2 another forbidden symbol
     */
-  void pruneStatesWithForbiddenSymbol(int forbiddenSymbol);
+  void pruneStatesWithForbiddenSymbols(int forbiddenSymbol1, int forbiddenSymbol2);
 
   /**
    * Print all outputs of current parsing, preceded by a bar '/',
@@ -234,7 +247,7 @@ public:
    * @param restart_state
    * @param separationSymbol
    */
-    void restartFinals(const set<Node *> &finals, int requiredSymbol, State *restart_state, int separationSymbol);
+   void restartFinals(const set<Node *> &finals, int requiredSymbol, State *restart_state, int separationSymbol);
 
 
   /**

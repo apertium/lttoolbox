@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÄÅÆÇÈÉÊËÍÑÒÓÔÕÖØÙÚÜČĐŊŠŦŽabcdefghijklmnopqrstuvwxyzàáâäåæçèéêëíñòóôõöøùúüčđŋšŧž­-</alphabet>
+  <sdefs>
+    <sdef n="n"/>
+    <sdef n="sg"/>
+    <sdef n="pl"/>
+    <sdef n="nt"/>
+    <sdef n="mf"/>
+    <sdef n="f"/>
+    <sdef n="m"/>
+    <sdef n="pst"/>
+    <sdef n="adj"/>
+    <sdef n="ind"/>
+    <sdef n="def"/>
+    <sdef n="nom"/>
+    <sdef n="ind"/>
+    <sdef n="def"/>
+    <sdef n="sint"/>
+    <sdef n="compound-only-L"/>
+    <sdef n="compound-only-R"/>
+    <sdef n="compound-R"/>
+  </sdefs>
+
+  <pardefs>
+    <pardef n="cp-L">
+      <e>       <p><l></l>      <r></r></p></e>
+      <e r="LR"><p><l></l>      <r><s n="compound-only-L"/></r></p></e>
+    </pardef>
+    <pardef n="cp-only-R">
+      <e r="LR"><p><l></l>      <r><s n="compound-only-R"/></r></p></e>
+    </pardef>
+    <pardef n="cp-R">
+      <e r="LR"><p><l></l>      <r><s n="compound-R"/></r></p></e>
+    </pardef>
+
+    <pardef n="kull/a__n" c="weak, long">
+      <e>       <p><l></l>   <r>a<s n="n"/><s n="f"/><s n="sg"/><s n="nom"/><s n="ind"/></r></p><par n="cp-only-R"/></e>
+      <e>       <p><l>a</l>  <r>a<s n="n"/><s n="f"/><s n="sg"/><s n="nom"/><s n="ind"/></r></p></e>
+      <e>       <p><l>ą</l>  <r>a<s n="n"/><s n="f"/><s n="sg"/><s n="nom"/><s n="def"/></r></p></e>
+      <e>       <p><l>ur</l> <r>a<s n="n"/><s n="f"/><s n="pl"/><s n="nom"/><s n="ind"/></r></p></e>
+      <e>       <p><l>ur</l> <r>a<s n="n"/><s n="f"/><s n="pl"/><s n="nom"/><s n="def"/></r></p></e>
+      <!-- bunch of entries left out ... -->
+    </pardef>
+    <pardef n="stur__adj">
+      <e>       <p><l></l>   <r><s n="adj"/><s n="sint"/><s n="pst"/><s n="mf"/><s n="sg"/><s n="nom"/><s n="ind"/></r></p><par n="cp-L"/></e>
+      <e>       <p><l>t</l>  <r><s n="adj"/><s n="sint"/><s n="pst"/><s n="nt"/><s n="sg"/><s n="nom"/><s n="ind"/></r></p></e>
+      <e>       <p><l>n</l>  <r><s n="adj"/><s n="sint"/><s n="pst"/><s n="mf"/><s n="sg"/><s n="nom"/><s n="def"/></r></p></e>
+    </pardef>
+  </pardefs>
+
+  <section id="main" type="standard">
+    <e lm="kulla"> <i>kull</i> <par n="kull/a__n"/></e>
+    <e lm="stur"> <i>stur</i> <par n="stur__adj"/></e>
+    <!-- should analyse kulla and sturkull but not *sturkulla -->
+
+    <e lm="est"> <p><l>est</l><r>est<s n="n"/><s n="m"/><s n="sg"/><s n="nom"/><s n="ind"/></r></p><par n="cp-R"/> </e>
+    <!-- should analyse est and sturest -->
+  </section>
+
+</dictionary>

@@ -167,6 +167,11 @@ private:
   int compoundOnlyLSymbol;
 
   /**
+   * Symbol of CompoundOnlyR
+   */
+  int compoundOnlyRSymbol;
+
+  /**
    * Symbol of CompoundR
    */
   int compoundRSymbol;

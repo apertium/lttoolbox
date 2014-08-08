@@ -593,37 +593,37 @@ State::filterFinalsTM(set<Node *> const &finals,
 
 
 void
-State::pruneCompounds(int requiredSymbol, int separationSymbol, int compound_max_elements) 
+State::pruneCompounds(int requiredSymbolOnlyLast, int requiredSymbolLast, int separationSymbol, int compound_max_elements) 
 {
   int minNoOfCompoundElements = compound_max_elements;
   int *noOfCompoundElements = new int[state.size()];
 
-  //wcerr << L"pruneCompounds..." << endl;
-
   for (unsigned int i = 0;  i<state.size(); i++) {
     vector<int> seq = *state.at(i).sequence;
 
-    if (lastPartHasRequiredSymbol(seq, requiredSymbol, separationSymbol)) {
+    if (onlyLastPartHasRequiredSymbol(seq, requiredSymbolOnlyLast, requiredSymbolLast, separationSymbol)) {
       int this_noOfCompoundElements = 0;
-      for (int j = seq.size()-2; j>0; j--) if (seq.at(j)==separationSymbol) this_noOfCompoundElements++;
+      for (int j = seq.size()-2; j>0; j--) {
+        if (seq.at(j)==separationSymbol) {
+          this_noOfCompoundElements++;
+        }
+      }
       noOfCompoundElements[i] = this_noOfCompoundElements;
       minNoOfCompoundElements = (minNoOfCompoundElements < this_noOfCompoundElements) ? 
                         minNoOfCompoundElements : this_noOfCompoundElements;
     }
     else {
       noOfCompoundElements[i] = INT_MAX;
-		  //wcerr << L"Prune - No requiered symbol in state number " << i << endl;
     }
   }
 
-  // remove states with more than minimum number of compounds (or without the requiered symbol in the last part)
+  // Remove states with more than minimum number of compounds (or without the requiered symbol in the last part)
   vector<TNodeState>::iterator it = state.begin();
   int i=0;
   while(it != state.end()) {
     if (noOfCompoundElements[i] > minNoOfCompoundElements) {
       delete (*it).sequence;
       it = state.erase(it);
-      //wcerr << L"Prune - State number " << i << L" removed!" << endl;
     }
     else it++;
     i++;
@@ -635,14 +635,14 @@ State::pruneCompounds(int requiredSymbol, int separationSymbol, int compound_max
 
 
 void
-State::pruneStatesWithForbiddenSymbol(int forbiddenSymbol) 
+State::pruneStatesWithForbiddenSymbols(int forbiddenSymbol1, int forbiddenSymbol2) 
 {
   vector<TNodeState>::iterator it = state.begin();
   while(it != state.end()) {
     vector<int> *seq = (*it).sequence;
     bool found = false;
     for(int i = seq->size()-1; i>=0; i--) {
-      if(seq->at(i) == forbiddenSymbol) {
+      if(seq->at(i) == forbiddenSymbol1 || seq->at(i) == forbiddenSymbol2) {
         i=-1;
         delete (*it).sequence;
         it = state.erase(it);
@@ -672,6 +672,29 @@ State::lastPartHasRequiredSymbol(const vector<int> &seq, int requiredSymbol, int
   }
   return restart;
 }
+
+
+bool
+State::onlyLastPartHasRequiredSymbol(const vector<int> &seq, int requiredSymbolOnlyLast, int requiredSymbolLast, int separationSymbol) 
+{
+  bool seen_sep = false;
+  bool found = false;
+  for (int n = 0; n < seq.size(); n++) {
+    int symbol=seq.at(n);
+    if (symbol == separationSymbol) {
+      found = false;            // we're not in the last part yet
+      seen_sep = true;
+    }
+    else if (seen_sep && symbol == requiredSymbolOnlyLast) {
+      found = true; // have to see at least one separator for this symbol
+    }
+    else if (symbol == requiredSymbolLast) {
+      found = true;
+    }
+  }
+  return found;
+}
+
 
 
 void

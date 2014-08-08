@@ -2,14 +2,20 @@
 
 import itertools
 from subprocess import Popen, PIPE
+from subprocess import call
+from tempfile import mkdtemp
+from shutil import rmtree
 
 import signal
 class Alarm(Exception):
     pass
 
 class ProcTest():
-    """See lt_proc test for how to use this. Override runTest if you don't
-    want to use NUL flushing."""
+    """See lt_proc tests for how to use this and the subclass
+    CompilingProcTest. Override runTest if you don't want to use NUL
+    flushing.
+
+    """
     
     cmdLine = ["../lttoolbox/.libs/lt-proc", "-z", "data/en-af.automorf.bin"]
     inputs = itertools.repeat("")
@@ -59,3 +65,40 @@ class ProcTest():
         self.proc.stderr.close()
         self.assertEqual( self.proc.poll(),
                           self.expectedRetCode )
+
+
+
+
+class CompilingProcTest(ProcTest):
+    monodix = "data/cp-only-R.dix"
+    monodir = "lr"
+    procflags = ["-z"] # keep the -z since runTest uses communicateFlush
+
+    def runTest(self):
+        tmpd = mkdtemp()
+        try:
+            self.assertEqual(0, call(["../lttoolbox/lt-comp",
+                                      self.monodir,
+                                      self.monodix,
+                                      tmpd+"/mono.bin"],
+                                     stdout=PIPE))
+
+            self.proc = Popen(["../lttoolbox/lt-proc"] + self.procflags + [tmpd+"/mono.bin"],
+                              stdin=PIPE,
+                              stdout=PIPE,
+                              stderr=PIPE)
+
+            for inp,exp in zip(self.inputs, self.expectedOutputs):
+                self.assertEqual( self.communicateFlush(inp+"[][\n]"),
+                                  exp+"[][\n]" )
+
+            self.proc.communicate() # let it terminate
+            self.proc.stdin.close()
+            self.proc.stdout.close()
+            self.proc.stderr.close()
+            self.assertEqual( self.proc.poll(),
+                              self.expectedRetCode )
+
+
+        finally:
+            rmtree(tmpd)

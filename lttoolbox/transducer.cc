@@ -971,6 +971,7 @@ Transducer::intersect(Transducer &trimmer,
   // TODO: These should be in file which is included by both
   // fst_processor.cc and compiler.cc:
   wstring compoundOnlyLSymbol = L"<compound-only-L>";
+  wstring compoundOnlyRSymbol = L"<compound-only-R>";
   wstring compoundRSymbol = L"<compound-R>";
   wstring COMPILER_JOIN_ELEM = L"+";
   wstring COMPILER_GROUP_ELEM = L"#";
@@ -1075,6 +1076,7 @@ Transducer::intersect(Transducer &trimmer,
                            this_label); // symbol-pair, using this alphabet
       }
       else if ( this_right == compoundOnlyLSymbol
+                || this_right == compoundOnlyRSymbol
                 || this_right == compoundRSymbol
                 || this_right == L"" )
       {
