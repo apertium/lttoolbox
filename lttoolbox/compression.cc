@@ -252,6 +252,7 @@ Compression::multibyte_read(istream &input)
   return result;
 }
 
+
 void
 Compression::wstring_write(wstring const &str, FILE *output)
 {
@@ -271,6 +272,30 @@ Compression::wstring_read(FILE *input)
       i != limit; i++)
   {
     retval += static_cast<wchar_t>(Compression::multibyte_read(input));
+  }
+
+  return retval;
+}
+
+void
+Compression::string_write(string const &str, FILE *output)
+{
+  Compression::multibyte_write(str.size(), output);
+  for(unsigned int i = 0, limit = str.size(); i != limit; i++)
+  {
+    Compression::multibyte_write(static_cast<int>(str[i]), output);
+  }
+}
+
+string
+Compression::string_read(FILE *input)
+{
+  string retval = "";
+
+  for(unsigned int i = 0, limit = Compression::multibyte_read(input);
+      i != limit; i++)
+  {
+    retval += static_cast<char>(Compression::multibyte_read(input));
   }
   
   return retval;

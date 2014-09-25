@@ -92,9 +92,26 @@ public:
    * This method reads a wide string from the input stream.
    * @see wstring_write()
    * @param input the input stream.
-   * @return the wide string readed.
+   * @return the wide string read.
    */
   static wstring wstring_read(FILE *input);
+
+  /**
+   * This method allows to write a plain string to an output stream
+   * using its UCSencoding as integer.
+   * @see string_read()
+   * @param str the string to write.
+   * @param output the output stream.
+   */
+  static void string_write(string const &str, FILE *output);
+
+  /**
+   * This method reads a plain string from the input stream.
+   * @see string_write()
+   * @param input the input stream.
+   * @return the string read.
+   */
+  static string string_read(FILE *input);
 };
 
 #endif
