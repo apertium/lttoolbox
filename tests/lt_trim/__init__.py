@@ -152,6 +152,14 @@ class FinalEpsilons(unittest.TestCase, TrimProcTest):
     monodix = "data/final-epsilons-mono.dix"
     bidix = "data/final-epsilons-bi.dix"
 
+class BidixEpsilons(unittest.TestCase, TrimProcTest):
+    inputs = ["aa ba"]
+    expectedOutputs = ["^aa/aa<vblex><pp>$ ^ba/*ba$"]
+    expectedRetCode = 0
+    monodix = "data/bidix-epsilons-mono.dix"
+    bidix = "data/bidix-epsilons-bi.dix"
+    bidir = "rl"
+
 
 class Empty(unittest.TestCase, TrimProcTest):
     def runTest(self):

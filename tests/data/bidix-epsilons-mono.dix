@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+	<alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅabcdefghijklmnopqrstuvwxyzæøåcqwxzCQWXZéèêóòâôÉÊÈÓÔÒÂáàÁÀäÄöÖšŠčČðđÐ</alphabet>
+	<sdefs>
+		<sdef n="vblex" 	c="Verb"/>
+		<sdef n="pp" 	c="pp"/>
+	</sdefs>
+	<pardefs>
+<pardef n="DONT_REMOVE_bug_was_dependent_on_transition_order">
+  <e>                    <p><l>b</l> <r>b</r></p></e>
+</pardef>
+<pardef n="__vblex">
+  <e>       <p><l>a</l>         <r>a<s n="vblex"/><s n="pp"/></r></p></e>
+</pardef>
+	</pardefs>
+
+<section id="main" type="standard">
+  <e><i>a</i><par n="__vblex"/></e>
+  <e><i>b</i><par n="__vblex"/></e>
+</section>
+</dictionary>

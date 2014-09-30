@@ -1026,20 +1026,16 @@ Transducer::intersect(Transducer &trimmer,
       if(trimmer_left == L"") 
       {
         next = make_pair(this_src, make_pair(trimmer_trg, trimmer_preplus_next));
+        std::pair<int, int> states_trg = make_pair(this_src, trimmer_trg);
         if(seen.find(next) == seen.end())
         {
           todo.push_front(next);
-          states_this_trimmed.insert(make_pair(make_pair(this_src, trimmer_trg),
-                                               trimmed_src));
+          states_this_trimmed.insert(make_pair(states_trg, trimmed.newState()));
         }
-        else
-        {
-          // this_src/trimmed_trg is already processed, just ensure the paths are merged:
-          int trimmed_trg = states_this_trimmed[make_pair(this_src, trimmer_trg)];
-          trimmed.linkStates(trimmed_src,
-                             trimmed_trg,
-                             epsilon_tag);
-        }
+        int trimmed_trg = states_this_trimmed[states_trg];
+        trimmed.linkStates(trimmed_src,
+                           trimmed_trg,
+                           epsilon_tag);
       }
     }
 
