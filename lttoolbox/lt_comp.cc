@@ -163,7 +163,8 @@ int main(int argc, char *argv[])
   }
   else
   {
-    ttype = 'a';
+    cerr << "Error: Cannot not open file '" << infile << "'." << endl << endl;
+    exit(EXIT_FAILURE);
   }
   initGenericErrorDefaultFunc(NULL);
   

@@ -155,7 +155,17 @@ int main(int argc, char *argv[])
   LtLocale::tryToSetLocale();
 
   FILE *analyser = fopen(argv[1], "rb");
+  if(!analyser)
+  {
+    cerr << "Error: Cannot not open file '" << argv[1] << "'." << endl << endl;
+    exit(EXIT_FAILURE);
+  }
   FILE *bidix = fopen(argv[2], "rb");
+  if(!bidix)
+  {
+    cerr << "Error: Cannot not open file '" << argv[2] << "'." << endl << endl;
+    exit(EXIT_FAILURE);
+  }
 
   std::pair<std::pair<Alphabet, wstring>, std::map<wstring, Transducer> > trimmed = trim(analyser, bidix);
   Alphabet alph_t = trimmed.first.first;
@@ -179,6 +189,11 @@ int main(int argc, char *argv[])
 
   // Write the file:
   FILE *output = fopen(argv[3], "wb");
+  if(!output)
+  {
+    cerr << "Error: Cannot not open file '" << argv[3] << "'." << endl << endl;
+    exit(EXIT_FAILURE);
+  }
 
   // letters
   Compression::wstring_write(letters, output);
