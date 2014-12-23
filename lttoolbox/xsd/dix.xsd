@@ -10,6 +10,22 @@
         <xs:element maxOccurs="unbounded" ref="section"/>
       </xs:sequence>
     </xs:complexType>
+    <xs:keyref name="symbolNameRef" refer="symbol_name">
+      <xs:selector xpath=".//s" />
+      <xs:field xpath="@n" />
+    </xs:keyref>
+    <xs:key name="symbol_name">
+      <xs:selector xpath=".//sdef" />
+      <xs:field xpath="@n" />
+    </xs:key>
+    <xs:keyref name="parNameRef" refer="paradigm_name">
+      <xs:selector xpath=".//par" />
+      <xs:field xpath="@n" />
+    </xs:keyref>
+    <xs:key name="paradigm_name">
+      <xs:selector xpath=".//pardef" />
+      <xs:field xpath="@n" />
+    </xs:key>
   </xs:element>
   <!--  root element -->
   <xs:element name="alphabet" type="xs:string"/>
@@ -27,6 +43,10 @@
       <xs:attribute name="n" use="required"/>
       <xs:attribute name="c"/>
     </xs:complexType>
+    <xs:unique name="sdef-unique">
+      <xs:selector xpath="sdef"/>
+      <xs:field xpath="@n" />
+    </xs:unique>
   </xs:element>
   <!-- symbol definition -->
   <!-- n: symbol (tag) name -->
@@ -37,6 +57,10 @@
         <xs:element maxOccurs="unbounded" ref="pardef"/>
       </xs:sequence>
     </xs:complexType>
+    <xs:unique name="pardef-unique">
+      <xs:selector xpath="pardef"/>
+      <xs:field xpath="@n" />
+    </xs:unique>
   </xs:element>
   <!-- paradigm definition section -->
   <xs:element name="pardef">
@@ -103,8 +127,8 @@
   </xs:element>
   <!-- entry -->
   <!--
-    r: restriction LR: left-to-right,
-    RL: right-to-left
+      r: restriction LR: left-to-right,
+      RL: right-to-left
   -->
   <!-- lm: lemma -->
   <!-- a: author -->
