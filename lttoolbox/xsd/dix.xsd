@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DTD for the format of dictionaries -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="dictionary">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="alphabet"/>
+        <xs:element minOccurs="0" ref="sdefs"/>
+        <xs:element minOccurs="0" ref="pardefs"/>
+        <xs:element maxOccurs="unbounded" ref="section"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <!--  root element -->
+  <xs:element name="alphabet" type="xs:string"/>
+  <!-- alphabetic character list -->
+  <xs:element name="sdefs">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="sdef"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <!-- symbol definition section -->
+  <xs:element name="sdef">
+    <xs:complexType>
+      <xs:attribute name="n" use="required"/>
+      <xs:attribute name="c"/>
+    </xs:complexType>
+  </xs:element>
+  <!-- symbol definition -->
+  <!-- n: symbol (tag) name -->
+  <!-- c: symbol (tag) comment -->
+  <xs:element name="pardefs">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="pardef"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <!-- paradigm definition section -->
+  <xs:element name="pardef">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="e"/>
+      </xs:sequence>
+      <xs:attribute name="n" use="required"/>
+      <xs:attribute name="c"/>
+    </xs:complexType>
+  </xs:element>
+  <!-- paradigm definition -->
+  <!-- n: paradigm name -->
+  <!-- c: comment about paradigm -->
+  <xs:element name="section">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="e"/>
+      </xs:sequence>
+      <xs:attribute name="id" use="required" type="xs:ID"/>
+      <xs:attribute name="type" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="standard"/>
+            <xs:enumeration value="inconditional"/>
+            <xs:enumeration value="postblank"/>
+            <xs:enumeration value="preblank"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <!-- dictionary section -->
+  <!-- id: dictionary section identifier -->
+  <!-- type: dictionary section type -->
+  <xs:element name="e">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded">
+        <xs:element ref="f"/>
+        <xs:element ref="i"/>
+        <xs:element ref="p"/>
+        <xs:element ref="par"/>
+        <xs:element ref="re"/>
+      </xs:choice>
+      <xs:attribute name="r">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="LR"/>
+            <xs:enumeration value="RL"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="lm"/>
+      <xs:attribute name="a"/>
+      <xs:attribute name="c"/>
+      <xs:attribute name="i"/>
+      <xs:attribute name="slr"/>
+      <xs:attribute name="srl"/>
+    </xs:complexType>
+  </xs:element>
+  <!-- entry -->
+  <!--
+    r: restriction LR: left-to-right,
+    RL: right-to-left
+  -->
+  <!-- lm: lemma -->
+  <!-- a: author -->
+  <!-- c: comment -->
+  <!-- i: ignore ('yes') means ignore, otherwise it is not ignored) -->
+  <!-- slr: translation sense when translating from left to right -->
+  <!-- srl: translation sense when translating from right to left -->
+  <xs:element name="par">
+    <xs:complexType>
+      <xs:attribute name="n" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <!-- reference to paradigm -->
+  <!-- n: paradigm name -->
+  <xs:element name="i">
+    <xs:complexType mixed="true">
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="b"/>
+        <xs:element ref="s"/>
+        <xs:element ref="g"/>
+        <xs:element ref="j"/>
+        <xs:element ref="a"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="f">
+    <xs:complexType mixed="true">
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="b"/>
+        <xs:element ref="s"/>
+        <xs:element ref="g"/>
+        <xs:element ref="j"/>
+        <xs:element ref="a"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <!-- identity -->
+  <xs:element name="re" type="xs:string"/>
+  <!-- regular expression identification -->
+  <xs:element name="p">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="l"/>
+        <xs:element ref="r"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <!-- pair of strings -->
+  <xs:element name="l">
+    <xs:complexType mixed="true">
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="a"/>
+        <xs:element ref="b"/>
+        <xs:element ref="g"/>
+        <xs:element ref="j"/>
+        <xs:element ref="s"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <!-- left part of p -->
+  <xs:element name="r">
+    <xs:complexType mixed="true">
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="a"/>
+        <xs:element ref="b"/>
+        <xs:element ref="g"/>
+        <xs:element ref="j"/>
+        <xs:element ref="s"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <!-- right part of p -->
+  <xs:element name="a">
+    <xs:complexType/>
+  </xs:element>
+  <!-- post-generator wake-up mark -->
+  <xs:element name="b">
+    <xs:complexType/>
+  </xs:element>
+  <!-- blank chars block mark -->
+  <xs:element name="g">
+    <xs:complexType mixed="true">
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="a"/>
+        <xs:element ref="b"/>
+        <xs:element ref="j"/>
+        <xs:element ref="s"/>
+      </xs:choice>
+      <xs:attribute name="i"/>
+    </xs:complexType>
+  </xs:element>
+  <!-- mark special groups in lemmas -->
+  <!-- i is used to co-index groups in the left with those -->
+  <!-- on the right of a pair -->
+  <xs:element name="j">
+    <xs:complexType/>
+  </xs:element>
+  <!-- join lexical forms -->
+  <xs:element name="s">
+    <xs:complexType>
+      <xs:attribute name="n" use="required"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+<!-- reference to symbol (tag) -->
+<!-- n: symbol (tag) name -->
