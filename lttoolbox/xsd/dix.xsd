@@ -95,6 +95,10 @@
       <xs:attribute name="i"/>
       <xs:attribute name="slr"/>
       <xs:attribute name="srl"/>
+      <xs:attribute name="alt"/>
+      <xs:attribute name="v"/>
+      <xs:attribute name="vl"/>
+      <xs:attribute name="vr"/>
     </xs:complexType>
   </xs:element>
   <!-- entry -->
