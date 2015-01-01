@@ -18,14 +18,20 @@
       <xs:selector xpath=".//sdef" />
       <xs:field xpath="@n" />
     </xs:key>
-    <xs:keyref name="parNameRef" refer="paradigm_name">
-      <xs:selector xpath=".//par" />
-      <xs:field xpath="@n" />
-    </xs:keyref>
-    <xs:key name="paradigm_name">
-      <xs:selector xpath=".//pardef" />
-      <xs:field xpath="@n" />
-    </xs:key>
+    <!--
+	Commented out since it reports an error on entries having the
+	ignore attribute (@i) set to 'yes'.
+	Though, we should perhaps consider to differentiate ignoring a dictionary
+	in compilation vs. dictionary consistency.
+	<xs:keyref name="parNameRef" refer="paradigm_name">
+	  <xs:selector xpath=".//par" />
+	  <xs:field xpath="@n" />
+	</xs:keyref>
+	<xs:key name="paradigm_name">
+	  <xs:selector xpath=".//pardef" />
+	  <xs:field xpath="@n" />
+	</xs:key>
+    -->
   </xs:element>
   <!--  root element -->
   <xs:element name="alphabet" type="xs:string"/>
