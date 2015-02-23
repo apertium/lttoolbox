@@ -173,8 +173,6 @@ AC_TYPE_SIZE_T
 
 # Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
-AC_FUNC_MALLOC
-AC_FUNC_REALLOC
 
 AC_CHECK_DECLS([fread_unlocked, fwrite_unlocked, fgetc_unlocked, \
 fputc_unlocked, fputs_unlocked, fgetwc_unlocked, fputwc_unlocked, fputws_unlocked])

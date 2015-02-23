@@ -44,7 +44,7 @@ LtLocale::tryToSetLocale()
   setlocale(LC_ALL, "C.UTF-8");
 #endif
 #ifdef __MINGW32__
-  SetConsoleInputCP(65001);
+  //SetConsoleInputCP(65001);
   SetConsoleOutputCP(65001);
 #endif
 }
