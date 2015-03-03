@@ -35,7 +35,7 @@ INSTALL (TARGETS lt-proc lt-comp lt-expand lt-tmxcomp lt-tmxproc lttoolbox3
 FILE(GLOB HEADERS *.h)
 
 INSTALL (FILES ${HEADERS}
-         DESTINATION include/lttoolbox-3.1/lttoolbox)
+         DESTINATION include/lttoolbox-3.3/lttoolbox)
 
 INSTALL (FILES dix.dtd
-         DESTINATION share/lttoolbox-3.1)
+         DESTINATION share/lttoolbox-3.3)
