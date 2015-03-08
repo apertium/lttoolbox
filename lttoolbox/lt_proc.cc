@@ -31,6 +31,10 @@
 #include <fcntl.h>
 #endif
 
+#ifdef _WIN32
+#include <utf8_fwrap.hpp>
+#endif
+
 using namespace std;
 
 void endProgram(char *name)

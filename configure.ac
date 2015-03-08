@@ -179,4 +179,6 @@ fputc_unlocked, fputs_unlocked, fgetwc_unlocked, fputwc_unlocked, fputws_unlocke
                 
 AC_CHECK_FUNCS([setlocale strdup getopt_long])
 
+AM_CONDITIONAL([WINDOWS], [test x$version_type = xwindows])
+
 AC_OUTPUT([Makefile lttoolbox.pc lttoolbox/Makefile])

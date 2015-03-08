@@ -27,6 +27,10 @@
 #include <iostream>
 #include <libxml/encoding.h>
 
+#ifdef _WIN32
+#include <utf8_fwrap.hpp>
+#endif
+
 using namespace std;
 
 Expander::Expander()

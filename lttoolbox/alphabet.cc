@@ -26,6 +26,10 @@
 #include <cwchar>
 #include <cwctype>
 
+#ifdef _WIN32
+#include <utf8_fwrap.hpp>
+#endif
+
 using namespace std;
 
 Alphabet::Alphabet()
