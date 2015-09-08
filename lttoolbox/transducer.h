@@ -34,7 +34,7 @@ class Transducer
 {
 private:
   friend class MatchExe;
-  
+
   /**
    * Initial state
    */
@@ -101,7 +101,7 @@ public:
 
   /**
    * Insertion of a single transduction, creating a new target state
-   * if needed  
+   * if needed
    * @param tag the tag of the transduction being inserted
    * @param source the source state of the new transduction
    * @return the target state
@@ -126,8 +126,8 @@ public:
    * @return the new target state
    */
   int insertTransducer(int const source, Transducer &t,
-		       int const epsilon_tag = 0); 
-  
+		       int const epsilon_tag = 0);
+
   /**
    * Link two existing states by a transduction
    * @param source the source state
@@ -210,7 +210,7 @@ public:
   void optional(int const epsilon_tag = 0);
 
   /**
-   * Make a transducer cyclic (link final states with initial state with 
+   * Make a transducer cyclic (link final states with initial state with
    * empty transductions)
    * @param epsilon_tag the tag to take as epsilon
    */
@@ -232,7 +232,7 @@ public:
    * @return true if the transducer is empty
    */
   bool isEmpty() const;
-  
+
   /**
    * Check if the transducer has no final state(s)
    * @return true if the set of final states is empty
@@ -287,7 +287,7 @@ public:
    */
   void unionWith(Alphabet &my_a,
     Transducer &t,
-    int const epsilon_tag = 0); 
+    int const epsilon_tag = 0);
 
   /**
    * Converts this class into a "prefix transducer", ie. for any final

@@ -99,11 +99,11 @@ trim(FILE *file_mono, FILE *file_bi)
   for(std::map<wstring, Transducer>::iterator it = trans_bi.begin(); it != trans_bi.end(); it++)
   {
     Transducer union_tmp = it->second;
-    if(union_transducer.isEmpty()) 
+    if(union_transducer.isEmpty())
     {
       union_transducer = union_tmp;
     }
-    else 
+    else
     {
       union_transducer.unionWith(alph_bi, union_tmp);
     }
