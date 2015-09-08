@@ -1051,7 +1051,10 @@ Transducer::intersect(Transducer &trimmer,
 
       if(this_right == COMPILER_JOIN_ELEM)
       {
-        trimmer_preplus_next = trimmer_src; // not _trg when join!
+        if(trimmer_preplus == trimmer_src) {
+          // Keep the old preplus state if it was set; equal to current trimmer state means unset:
+          trimmer_preplus_next = trimmer_src; // not _trg when join!
+        }
         // Go to the start in trimmer, but record where we restarted from in case we later see a #:
         next = make_pair(this_trg, make_pair(trimmer.initial, trimmer_preplus_next));
         if(seen.find(next) == seen.end())
