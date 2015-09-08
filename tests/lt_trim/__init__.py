@@ -162,7 +162,7 @@ class BidixEpsilons(unittest.TestCase, TrimProcTest):
 
 class DoubleClitics(unittest.TestCase, TrimProcTest):
     inputs = ["a-b-c d"]
-    expectedOutputs = ["^a-b-c d/a<vblex><ger>+b<prn><enc>+c<prn><enc># a$"]
+    expectedOutputs = ["^a-b-c d/a<vblex><ger>+b<prn><enc>+c<prn><enc># d$"]
     expectedRetCode = 0
     monodix = "data/double-clitics-mono.dix"
     bidix = "data/double-clitics-bi.dix"
