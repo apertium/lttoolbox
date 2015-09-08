@@ -160,6 +160,14 @@ class BidixEpsilons(unittest.TestCase, TrimProcTest):
     bidix = "data/bidix-epsilons-bi.dix"
     bidir = "rl"
 
+class DoubleClitics(unittest.TestCase, TrimProcTest):
+    inputs = ["a-b-c d"]
+    expectedOutputs = ["^a-b-c d/a<vblex><ger>+b<prn><enc>+c<prn><enc># a$"]
+    expectedRetCode = 0
+    monodix = "data/double-clitics-mono.dix"
+    bidix = "data/double-clitics-bi.dix"
+    bidir = "lr"
+
 
 class Empty(unittest.TestCase, TrimProcTest):
     def runTest(self):

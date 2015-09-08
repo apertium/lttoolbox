@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet/>
+  <sdefs>
+    <sdef n="prn" />
+    <sdef n="vblex" />
+  </sdefs>
+
+
+  <section id="main" type="standard">
+<e>       <p><l>a<g><b/>d<s n="vblex"/></g></l><r>A<s n="vblex"/></r></p></e>
+<e>       <p><l>b<s n="prn"/></l><r>B<s n="prn"/></r></p></e>
+<e>       <p><l>c<s n="prn"/></l><r>C<s n="prn"/></r></p></e>
+<e>       <p><l>x<s n="vblex"/></l><r>X<s n="vblex"/></r></p></e>
+  </section>
+</dictionary>
