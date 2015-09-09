@@ -57,5 +57,9 @@ class ProcTest():
         self.proc.stdin.close()
         self.proc.stdout.close()
         self.proc.stderr.close()
-        self.assertEqual( self.proc.poll(),
-                          self.expectedRetCode )
+        retCode = self.proc.poll()
+        if self.expectedRetCode == "nonzero":
+            self.assertNotEqual(retCode, 0)
+        else:
+            self.assertEqual( self.proc.poll(),
+                              self.expectedRetCode )

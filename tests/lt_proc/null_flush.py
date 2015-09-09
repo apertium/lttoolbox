@@ -34,7 +34,7 @@ class NoSuperblankBeforeNUL(unittest.TestCase, ProcTest):
 class WronglyEscapedLetter(unittest.TestCase, ProcTest):
     inputs = ["before you g\\o to bed.[][\n]"]
     expectedOutputs = ["^before/before<adv>/before<cnjadv>/before<pr>$ ^you/prpers<prn><subj><p2><mf><sp>/prpers<prn><obj><p2><mf><sp>$ "]
-    expectedRetCode = -11
+    expectedRetCode = "nonzero"
 
 
 class UnescapedAngleBracket(unittest.TestCase, ProcTest):
