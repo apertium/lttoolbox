@@ -8,14 +8,12 @@ from __future__ import unicode_literals
 # This is similar to diffing the lt-expand of uncompiled XML dictionaries.
 # See also `man hfst-fst2strings'.
 
+from proctest import ProcTest
 import unittest
 
-from subprocess import call
+from subprocess import Popen, PIPE, call
 from tempfile import mkdtemp
 from shutil import rmtree
-
-from proctest import ProcTest
-from subprocess import Popen, PIPE
 
 class TrimProcTest(ProcTest):
     monodix = "data/minimal-mono.dix"
@@ -23,46 +21,23 @@ class TrimProcTest(ProcTest):
     bidix = "data/minimal-bi.dix"
     bidir = "lr"
     procflags = ["-z"]
-    expectedRetCode = 0
 
-    def runTest(self):
-        tmpd = mkdtemp()
-        try:
-            self.assertEqual(0, call(["../lttoolbox/lt-comp",
-                                      self.monodir,
-                                      self.monodix,
-                                      tmpd+"/mono.bin"],
-                                     stdout=PIPE))
-            self.assertEqual(0, call(["../lttoolbox/lt-comp",
-                                      self.bidir,
-                                      self.bidix,
-                                      tmpd+"/bi.bin"],
-                                     stdout=PIPE))
-            self.assertEqual(0, call(["../lttoolbox/lt-trim",
-                                      tmpd+"/mono.bin",
-                                      tmpd+"/bi.bin",
-                                      tmpd+"/trimmed.bin"],
-                                     stdout=PIPE))
-
-            self.proc = Popen(["../lttoolbox/lt-proc"] + self.procflags + [tmpd+"/trimmed.bin"],
-                              stdin=PIPE,
-                              stdout=PIPE,
-                              stderr=PIPE)
-
-            for inp,exp in zip(self.inputs, self.expectedOutputs):
-                self.assertEqual( self.communicateFlush(inp+"[][\n]"),
-                                  exp+"[][\n]" )
-
-            self.proc.communicate() # let it terminate
-            self.proc.stdin.close()
-            self.proc.stdout.close()
-            self.proc.stderr.close()
-            self.assertEqual( self.proc.poll(),
-                              self.expectedRetCode )
-
-
-        finally:
-            rmtree(tmpd)
+    def compileTest(self, tmpd):
+        self.assertEqual(0, call(["../lttoolbox/lt-comp",
+                                  self.monodir,
+                                  self.monodix,
+                                  tmpd+"/mono.bin"],
+                                 stdout=PIPE))
+        self.assertEqual(0, call(["../lttoolbox/lt-comp",
+                                  self.bidir,
+                                  self.bidix,
+                                  tmpd+"/bi.bin"],
+                                 stdout=PIPE))
+        self.assertEqual(0, call(["../lttoolbox/lt-trim",
+                                  tmpd+"/mono.bin",
+                                  tmpd+"/bi.bin",
+                                  tmpd+"/compiled.bin"],
+                                 stdout=PIPE))
 
 
 class TrimNormalAndJoin(unittest.TestCase, TrimProcTest):
