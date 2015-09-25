@@ -34,16 +34,16 @@ class NoSuperblankBeforeNUL(unittest.TestCase, ProcTest):
 class WronglyEscapedLetter(unittest.TestCase, ProcTest):
     inputs = ["before you g\\o to bed.[][\n]"]
     expectedOutputs = ["^before/before<adv>/before<cnjadv>/before<pr>$ ^you/prpers<prn><subj><p2><mf><sp>/prpers<prn><obj><p2><mf><sp>$ "]
-    expectedRetCode = "nonzero"
+    expectedRetCodeFail = True
 
 
 class UnescapedAngleBracket(unittest.TestCase, ProcTest):
     inputs = ["Simon prefers dark chocolate>.[][\n]"]
     expectedOutputs = ["^Simon/Simon<np><ant><m><sg>$ ^prefers/prefer<vblex><pri><p3><sg>$ ^dark/dark<adj><sint>/dark<n><sg>$ "]
-    expectedRetCode = 1
+    expectedRetCodeFail = True
 
 class UnclosedSuperblank(unittest.TestCase, ProcTest):
     inputs = ["you should always[ eat"]
     #expectedOutputs = ["^you/prpers<prn><subj><p2><mf><sp>/prpers<prn><obj><p2><mf><sp>$ ^should/should<vaux><inf>$ "]
     expectedOutputs = [""]
-    expectedRetCode = 1
+    expectedRetCodeFail = True

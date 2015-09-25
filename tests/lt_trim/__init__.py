@@ -23,6 +23,7 @@ class TrimProcTest(ProcTest):
     bidix = "data/minimal-bi.dix"
     bidir = "lr"
     procflags = ["-z"]
+    expectedRetCode = 0
 
     def runTest(self):
         tmpd = mkdtemp()
@@ -67,12 +68,10 @@ class TrimProcTest(ProcTest):
 class TrimNormalAndJoin(unittest.TestCase, TrimProcTest):
     inputs = ["abc", "ab", "y", "n", "jg", "jh", "kg"]
     expectedOutputs = ["^abc/ab<n><def>$", "^ab/ab<n><ind>$", "^y/y<n><ind>$", "^n/*n$", "^jg/j<pr>+g<n>$", "^jh/*jh$", "^kg/*kg$"]
-    expectedRetCode = 0
 
 class TrimCmp(unittest.TestCase, TrimProcTest):
     inputs = ["a", "b", "c", "d", "aa", "ab", "ac", "ad", "ba", "bb", "bc", "bd", "ca", "cb", "cc", "cd", "da", "db", "dc", "dd", ]
     expectedOutputs = ["^a/*a$", "^b/b<n>$", "^c/*c$", "^d/d<n>$", "^aa/*aa$", "^ab/a<n>+b<n>$", "^ac/*ac$", "^ad/a<n>+d<n>$", "^ba/*ba$", "^bb/*bb$", "^bc/*bc$", "^bd/*bd$", "^ca/*ca$", "^cb/d<n>+b<n>$", "^cc/*cc$", "^cd/d<n>+d<n>$", "^da/*da$", "^db/*db$", "^dc/*dc$", "^dd/*dd$"]
-    expectedRetCode = 0
     monodix = "data/cmp-mono.dix"
     bidix = "data/cmp-bi.dix"
     procflags = ["-e", "-z"]
@@ -80,21 +79,18 @@ class TrimCmp(unittest.TestCase, TrimProcTest):
 class TrimLongleft(unittest.TestCase, TrimProcTest):
     inputs = ["herdende"]
     expectedOutputs = ["^herdende/herde<adj><pprs>$"]
-    expectedRetCode = 0
     monodix = "data/longleft-mono.dix"
     bidix = "data/longleft-bi.dix"
 
 class DivergingPaths(unittest.TestCase, TrimProcTest):
     inputs = ["xa ya"]
     expectedOutputs = ["^xa/*xa$ ^ya/ya<vblex>$"]
-    expectedRetCode = 0
     monodix = "data/diverging-paths-mono.dix"
     bidix = "data/diverging-paths-bi.dix"
 
 class MergingPaths(unittest.TestCase, TrimProcTest):
     inputs = ["en ei"]
     expectedOutputs = ["^en/en<det><qnt><m><sg>$ ^ei/en<det><qnt><f><sg>$"]
-    expectedRetCode = 0
     monodix = "data/merging-paths-mono.dix"
     bidir = "rl"
     bidix = "data/merging-paths-bi.dix"
@@ -102,7 +98,6 @@ class MergingPaths(unittest.TestCase, TrimProcTest):
 class BidixPardef(unittest.TestCase, TrimProcTest):
     inputs = ["c"]
     expectedOutputs = ["^c/c<vblex><inf>$"]
-    expectedRetCode = 0
     monodix = "data/bidixpardef-mono.dix"
     bidir = "rl"
     bidix = "data/bidixpardef-bi.dix"
@@ -110,7 +105,6 @@ class BidixPardef(unittest.TestCase, TrimProcTest):
 class UnbalancedEpsilons(unittest.TestCase, TrimProcTest):
     inputs = ["re", "rer", "res", "ret"]
     expectedOutputs = ["^re/re<vblex><inf>$", "^rer/re<vblex><pres>$", "^res/re<vblex><pres>$", "^ret/re<vblex><pret>$"]
-    expectedRetCode = 0
     monodix = "data/unbalanced-epsilons-mono.dix"
     bidir = "rl"
     bidix = "data/unbalanced-epsilons-bi.dix"
@@ -118,7 +112,6 @@ class UnbalancedEpsilons(unittest.TestCase, TrimProcTest):
 class LeftUnbalancedEpsilons(unittest.TestCase, TrimProcTest):
     inputs = ["a"]
     expectedOutputs = ["^a/a<adv>$"]
-    expectedRetCode = 0
     monodix = "data/left-unbalanced-epsilons-mono.dix"
     bidir = "rl"
     bidix = "data/left-unbalanced-epsilons-bi.dix"
@@ -126,21 +119,18 @@ class LeftUnbalancedEpsilons(unittest.TestCase, TrimProcTest):
 class Group(unittest.TestCase, TrimProcTest):
     inputs = ["abc", "pq", "pqr", "pqs", "xyz"]
     expectedOutputs = ["^abc/ab<n><ind>#c$", "^pq/pq<n><ind>$", "^pqr/pq<n><ind>#r$", "^pqs/*pqs$", "^xyz/*xyz$"]
-    expectedRetCode = 0
     monodix = "data/group-mono.dix"
     bidix = "data/group-bi.dix"
 
 class GroupUnbalancedEpsilons(unittest.TestCase, TrimProcTest):
     inputs = ["def"]
     expectedOutputs = ["^def/de<n><f><sg>#f$"]
-    expectedRetCode = 0
     monodix = "data/group-mono.dix"
     bidix = "data/group-bi.dix"
 
 class BothJoinAndGroup(unittest.TestCase, TrimProcTest):
     inputs = ["jkl", "jkm", "jnl"]
     expectedOutputs = ["^jkl/j<n><ind>+k<n><ind>#l$", "^jkm/*jkm$", "^jnl/*jnl$"]
-    expectedRetCode = 0
     monodix = "data/group-mono.dix"
     bidix = "data/group-bi.dix"
 
@@ -148,14 +138,12 @@ class BothJoinAndGroup(unittest.TestCase, TrimProcTest):
 class FinalEpsilons(unittest.TestCase, TrimProcTest):
     inputs = ["ea"]
     expectedOutputs = ["^ea/e<n>#a$"]
-    expectedRetCode = 0
     monodix = "data/final-epsilons-mono.dix"
     bidix = "data/final-epsilons-bi.dix"
 
 class BidixEpsilons(unittest.TestCase, TrimProcTest):
     inputs = ["aa ba"]
     expectedOutputs = ["^aa/aa<vblex><pp>$ ^ba/*ba$"]
-    expectedRetCode = 0
     monodix = "data/bidix-epsilons-mono.dix"
     bidix = "data/bidix-epsilons-bi.dix"
     bidir = "rl"
@@ -163,7 +151,6 @@ class BidixEpsilons(unittest.TestCase, TrimProcTest):
 class DoubleClitics(unittest.TestCase, TrimProcTest):
     inputs = ["a-b-c d"]
     expectedOutputs = ["^a-b-c d/a<vblex><ger>+b<prn><enc>+c<prn><enc># d$"]
-    expectedRetCode = 0
     monodix = "data/double-clitics-mono.dix"
     bidix = "data/double-clitics-bi.dix"
     bidir = "lr"

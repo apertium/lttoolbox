@@ -14,7 +14,7 @@ class ProcTest():
     cmdLine = ["../lttoolbox/.libs/lt-proc", "-z", "data/en-af.automorf.bin"]
     inputs = itertools.repeat("")
     expectedOutputs = itertools.repeat("")
-    expectedRetCode = 0
+    expectedRetCodeFail = False
 
     def alarmHandler(self, signum, frame):
         raise Alarm
@@ -58,8 +58,7 @@ class ProcTest():
         self.proc.stdout.close()
         self.proc.stderr.close()
         retCode = self.proc.poll()
-        if self.expectedRetCode == "nonzero":
+        if self.expectedRetCodeFail:
             self.assertNotEqual(retCode, 0)
         else:
-            self.assertEqual( self.proc.poll(),
-                              self.expectedRetCode )
+            self.assertEqual(retCode, 0)
