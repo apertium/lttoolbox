@@ -1,0 +1,14 @@
+<dictionary>
+  <sdefs>
+    <sdef n="KEPT"/>
+    <sdef n="STILLMATCHING"/>
+    <sdef n="MATCHSOFAR"/>
+    <sdef n="NONMATCHL"/>
+    <sdef n="NONMATCHR"/>
+  </sdefs>
+
+  <section id="main" type="standard">
+<e><p><l>vihki<s n="KEPT"/><s n="MATCHSOFAR"/><s n="STILLMATCHING"/><s n="NONMATCHL"/></l><r>vihki<s n="KEPT"/><s n="MATCHSOFAR"/><s n="STILLMATCHING"/><s n="NONMATCHR"/></r></p></e>
+<e><p><l>vihki<s n="KEPT"/></l><r>vihki<s n="KEPT"/></r></p></e>
+  </section>
+</dictionary>

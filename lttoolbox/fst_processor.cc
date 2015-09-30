@@ -2391,7 +2391,7 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
       alphabet.getSymbol(sf, val); // add symbol to sf iff alphabetic
       if(val == 0)  // non-alphabetic, possibly unknown tag; add to sf
       {
-	sf += symbol;
+        sf += symbol;
       }
     }
     else
@@ -2403,7 +2403,7 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
       alphabet.getSymbol(sf, val); // add symbol to sf iff alphabetic
       if(val == 0)  // non-alphabetic, possibly unknown tag; add to sf
       {
-	sf += symbol;
+        sf += symbol;
       }
       if(alphabet.isTag(val) || val == 0)
       {
@@ -2411,14 +2411,14 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
       }
       if(current_state.size() != 0)
       {
-	if(!alphabet.isTag(val) && iswupper(val) && !caseSensitive)
-	{
-	  current_state.step(val, towlower(val));
-	}
-	else
-	{
-	  current_state.step(val);
-	}
+        if(!alphabet.isTag(val) && iswupper(val) && !caseSensitive)
+        {
+          current_state.step(val, towlower(val));
+        }
+        else
+        {
+          current_state.step(val);
+        }
       }
       if(current_state.isFinal(all_finals))
       {
