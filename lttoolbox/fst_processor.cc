@@ -2425,16 +2425,17 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
         bool uppercase = sf.size() > 1 && iswupper(sf[1]);
         bool firstupper= iswupper(sf[0]);
 
+        queue = L""; // the intervening tags were matched
         result = current_state.filterFinals(all_finals, alphabet,
                                             escaped_chars,
                                             uppercase, firstupper, 0);
       }
-      if(current_state.size() == 0 && result != L"")
+      else if(result != L"")
       {
         // We already have a result, but there is still more to read
         // of the analysis; following tags are not consumed, but
         // output as target language tags (added to result on
-        // end-of-word)
+        // end-of-word). This queue is reset if result is changed.
         if(alphabet.isTag(val)) // known tag
         {
           alphabet.getSymbol(queue, val);
@@ -2443,7 +2444,7 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
         {
           queue += symbol;
         }
-        else
+        else if(current_state.size() == 0)
         {
           // There are no more alive transductions and the current symbol is not a tag -- unknown word!
           result = L"";

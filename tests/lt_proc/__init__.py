@@ -13,7 +13,6 @@ class ValidInput(unittest.TestCase, ProcTest):
                        "^ABC/AB<n><def>$ ^jg/j<pr>+g<n>$",
                        "^y/y<n><ind>$ ^n/n<n><ind>$"]
 
-@unittest.expectedFailure
 class BiprocSkipTags(unittest.TestCase, ProcTest):
     procdix = "data/biproc-skips-tags-mono.dix"
     procflags = ["-b", "-z"]
