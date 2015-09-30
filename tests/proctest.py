@@ -32,7 +32,7 @@ class ProcTest():
 
     def communicateFlush(self, string):
         self.proc.stdin.write(string.encode('utf-8'))
-        self.proc.stdin.write('\0')
+        self.proc.stdin.write(b'\0')
         self.proc.stdin.flush()
 
         output = []
@@ -41,14 +41,14 @@ class ProcTest():
             char = self.withTimeout(2, self.proc.stdout.read, 1)
         except Alarm:
             pass
-        while char and char != '\0':
+        while char and char != b'\0':
             output.append(char)
             try:
                 char = self.withTimeout(2, self.proc.stdout.read, 1)
             except Alarm:
                 break           # send what we got up till now
 
-        return "".join(output).decode('utf-8')
+        return b"".join(output).decode('utf-8')
 
     def compileTest(self, tmpd):
         self.assertEqual(0, call(["../lttoolbox/lt-comp",
