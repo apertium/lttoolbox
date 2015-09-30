@@ -181,4 +181,6 @@ AC_CHECK_FUNCS([setlocale strdup getopt_long])
 
 AM_CONDITIONAL([WINDOWS], [test x$version_type = xwindows])
 
+AM_PATH_PYTHON([2], [], [AC_MSG_WARN([Can't run 'make test' without Python installed.])])
+
 AC_OUTPUT([Makefile lttoolbox.pc lttoolbox/Makefile])
