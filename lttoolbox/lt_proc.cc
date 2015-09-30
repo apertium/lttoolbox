@@ -48,7 +48,7 @@ void endProgram(char *name)
   cout << "  -e, --decompose-nouns:  Try to decompound unknown words" << endl;
   cout << "  -g, --generation:       morphological generation" << endl;
   cout << "  -l, --tagged-gen:       morphological generation keeping lexical forms" << endl;
-  cout << "  -m, --tagged-nm-gen:    same as -l but without unknown word marks" << endl;                              
+  cout << "  -m, --tagged-nm-gen:    same as -l but without unknown word marks" << endl;
   cout << "  -n, --non-marked-gen    morph. generation without unknown word marks" << endl;
   cout << "  -o, --surf-bilingual:   lexical transfer with surface forms" << endl;
   cout << "  -p, --post-generation:  post-generation" << endl;
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
       {"case-sensitive",  0, 0, 'c'},
       {"help",            0, 0, 'h'}
     };
-#endif    
+#endif
 
   while(true)
   {
@@ -121,20 +121,20 @@ int main(int argc, char *argv[])
     int c = getopt_long(argc, argv, "abceglmndopstzwvh", long_options, &option_index);
 #else
     int c = getopt(argc, argv, "abceglmndopstzwvh");
-#endif    
+#endif
 
     if(c == -1)
     {
       break;
     }
-      
+
     switch(c)
     {
     case 'c':
       fstp.setCaseSensitiveMode(true);
       break;
 
-    case 'e':      
+    case 'e':
     case 'a':
     case 'b':
     case 'o':
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 
   FILE *input = stdin, *output = stdout;
   LtLocale::tryToSetLocale();
-  
+
   if(optind == (argc - 3))
   {
     FILE *in = fopen(argv[optind], "rb");
@@ -186,21 +186,21 @@ int main(int argc, char *argv[])
       cerr << "Error: Cannot not open file '" << argv[optind] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
-    
+
     input = fopen(argv[optind+1], "rb");
     if(input == NULL || ferror(input))
     {
       cerr << "Error: Cannot not open file '" << argv[optind+1] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
-    
+
     output= fopen(argv[optind+2], "wb");
     if(output == NULL || ferror(output))
     {
       cerr << "Error: Cannot not open file '" << argv[optind+2] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
-    
+
     fstp.load(in);
     fclose(in);
   }
@@ -212,17 +212,17 @@ int main(int argc, char *argv[])
       cerr << "Error: Cannot not open file '" << argv[optind] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
-    
+
     input = fopen(argv[optind+1], "rb");
     if(input == NULL || ferror(input))
     {
       cerr << "Error: Cannot not open file '" << argv[optind+1] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
-    
+
     fstp.load(in);
     fclose(in);
-  }   
+  }
   else if(optind == (argc - 1))
   {
     FILE *in = fopen(argv[optind], "rb");
@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
       cerr << "Error: Cannot not open file '" << argv[optind] << "'." << endl << endl;
       exit(EXIT_FAILURE);
      }
-    fstp.load(in);    
+    fstp.load(in);
     fclose(in);
   }
   else
@@ -259,13 +259,13 @@ int main(int argc, char *argv[])
         checkValidity(fstp);
         fstp.generation(input, output);
         break;
-      
+
       case 'd':
         fstp.initGeneration();
         checkValidity(fstp);
         fstp.generation(input, output, gm_all);
         break;
-      
+
       case 'l':
         fstp.initGeneration();
         checkValidity(fstp);
@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
         checkValidity(fstp);
         fstp.generation(input, output, gm_tagged_nm);
         break;
-      
+
       case 'p':
         fstp.initPostgeneration();
         checkValidity(fstp);
@@ -291,18 +291,18 @@ int main(int argc, char *argv[])
         break;
 
       case 't':
-        fstp.initPostgeneration(); 
+        fstp.initPostgeneration();
         checkValidity(fstp);
         fstp.transliteration(input, output);
         break;
-        
+
       case 'o':
         fstp.initBiltrans();
         checkValidity(fstp);
         fstp.setBiltransSurfaceForms(true);
         fstp.bilingual(input, output);
         break;
-   
+
       case 'b':
         fstp.initBiltrans();
         checkValidity(fstp);
@@ -314,10 +314,10 @@ int main(int argc, char *argv[])
         checkValidity(fstp);
         fstp.analysis(input, output);
         break;
-      
+
       case 'a':
       default:
-        fstp.initAnalysis(); 
+        fstp.initAnalysis();
         checkValidity(fstp);
         fstp.analysis(input, output);
         break;
@@ -334,6 +334,6 @@ int main(int argc, char *argv[])
   }
 
   fclose(input);
-  fclose(output); 
+  fclose(output);
   return EXIT_SUCCESS;
 }

@@ -139,7 +139,7 @@ private:
   bool caseSensitive;
 
   /**
-   * if true, uses the dictionary case, discarding surface case 
+   * if true, uses the dictionary case, discarding surface case
    * information
    */
   bool dictionaryCase;
@@ -150,7 +150,7 @@ private:
   bool nullFlush;
 
   /**
-   * nullFlush property for the skipUntil function 
+   * nullFlush property for the skipUntil function
    */
   bool nullFlushGeneration;
 
@@ -346,7 +346,7 @@ private:
                                      GenerationMode mode);
   void postgeneration_wrapper_null_flush(FILE *input, FILE *output);
   void transliteration_wrapper_null_flush(FILE *input, FILE *output);
-  
+
   wstring compose(wstring const &lexforms, wstring const &queue) const;
 
   bool isLastBlankTM;
