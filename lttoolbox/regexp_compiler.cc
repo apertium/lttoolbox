@@ -19,7 +19,11 @@
 #include <cstdlib>
 #include <iostream>
 
-RegexpCompiler::RegexpCompiler()
+RegexpCompiler::RegexpCompiler() :
+token(0),
+alphabet(0),
+state(0),
+letter(0)
 {
 }
 

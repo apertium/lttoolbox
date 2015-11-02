@@ -42,7 +42,8 @@ wstring const TMXCompiler::TMX_COMPILER_LANG_ATTR    = L"lang";
 wstring const TMXCompiler::TMX_COMPILER_SEG_ELEM     = L"seg";
 wstring const TMXCompiler::TMX_COMPILER_PROP_ELEM    = L"prop";
 
-TMXCompiler::TMXCompiler()
+TMXCompiler::TMXCompiler() :
+reader(0)
 {
   LtLocale::tryToSetLocale();
   alphabet.includeSymbol(L"<n>"); // -1 -> numbers

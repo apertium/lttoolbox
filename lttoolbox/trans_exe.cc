@@ -20,7 +20,8 @@
 #include <lttoolbox/lttoolbox_config.h>
 #include <lttoolbox/my_stdio.h>
 
-TransExe::TransExe()
+TransExe::TransExe() :
+initial_id(0)
 {
 }
 

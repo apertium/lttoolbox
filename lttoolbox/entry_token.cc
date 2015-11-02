@@ -17,7 +17,8 @@
 #include <lttoolbox/entry_token.h>
 
 
-EntryToken::EntryToken()
+EntryToken::EntryToken() :
+type(paradigm)
 {
 }
 

@@ -41,7 +41,8 @@ PatternList::destroy()
 {
 }
 
-PatternList::PatternList()
+PatternList::PatternList() :
+sequence_id(0)
 {
   sequence = false;
   alphabet.includeSymbol(ANY_TAG);

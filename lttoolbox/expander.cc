@@ -31,7 +31,8 @@
 
 using namespace std;
 
-Expander::Expander()
+Expander::Expander() :
+reader(0)
 {
   LtLocale::tryToSetLocale();
 }
@@ -383,8 +384,8 @@ Expander::procEntry(FILE *output)
       // detección del uso de paradigmas no definidos
 
       if(paradigm.find(p) == paradigm.end() &&
-         paradigm_lr.find(p) == paradigm.end() &&
-         paradigm_rl.find(p) == paradigm.end())
+         paradigm_lr.find(p) == paradigm_lr.end() &&
+         paradigm_rl.find(p) == paradigm_rl.end())
       {
         wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
         wcerr << L"): Undefined paradigm '" << p << L"'." <<endl;

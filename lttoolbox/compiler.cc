@@ -59,7 +59,11 @@ wstring const Compiler::COMPILER_V_ATTR             = L"v";
 wstring const Compiler::COMPILER_VL_ATTR            = L"vl";
 wstring const Compiler::COMPILER_VR_ATTR            = L"vr";
 
-Compiler::Compiler()
+Compiler::Compiler() :
+reader(0),
+verbose(false),
+first_element(false),
+acx_current_char(0)
 {
 }
 

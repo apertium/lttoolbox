@@ -20,7 +20,8 @@
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/compression.h>
 
-MatchExe::MatchExe()
+MatchExe::MatchExe() :
+initial_id(0)
 {
 }
 

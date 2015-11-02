@@ -22,7 +22,8 @@
 
 using namespace std;
 
-AttCompiler::AttCompiler()
+AttCompiler::AttCompiler() :
+starting_state(0)
 {
 }
 

@@ -33,7 +33,7 @@ public:
   {
   }
 
-  const char* what()
+  const char* what() const throw ()
   {
     return msg.c_str();
   }

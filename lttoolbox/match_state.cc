@@ -54,11 +54,17 @@ void
 MatchState::destroy()
 {
   delete[] state;
+  state = 0;
 }
 
 void
 MatchState::copy(MatchState const &s)
 {
+  if (state == 0)
+  {
+    state = new MatchNode *[BUF_LIMIT];
+  }
+
   for(int i = 0; i < BUF_LIMIT; i++)
   {
     state[i] = s.state[i];

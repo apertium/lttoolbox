@@ -28,7 +28,9 @@
 using namespace std;
 
 
-FSTProcessor::FSTProcessor()
+FSTProcessor::FSTProcessor() :
+outOfWord(false),
+isLastBlankTM(false)
 {
   // escaped_chars chars
   escaped_chars.insert(L'[');
@@ -497,12 +499,8 @@ FSTProcessor::readBilingual(FILE *input, FILE *output)
     fputws_unlocked(readFullBlock(input, L'[', L']').c_str(), output);
     return readBilingual(input, output);
   }
-  else
-  {
-    return pair<wstring, int>(symbol, val);
-  }
 
-  return pair<wstring, int>(symbol, 0x7fffffff);
+  return pair<wstring, int>(symbol, val);
 }
 
 void
@@ -1707,15 +1705,15 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
         // case of the beggining of the next word
 
         wstring mybuf = L"";
-        for(unsigned int i = sf.size()-1; i >= 0; i--)
+        for(size_t i = sf.size(); i > 0; --i)
         {
-          if(!isalpha(sf[i]))
+          if(!isalpha(sf[i-1]))
           {
             break;
           }
           else
           {
-            mybuf = sf[i] + mybuf;
+            mybuf = sf[i-1] + mybuf;
           }
         }
 
@@ -1724,17 +1722,17 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
           bool myfirstupper = iswupper(mybuf[0]);
           bool myuppercase = mybuf.size() > 1 && iswupper(mybuf[1]);
 
-          for(unsigned int i = lf.size()-1; i >= 0; i--)
+          for(size_t i = lf.size(); i > 0; --i)
           {
-            if(!isalpha(lf[i]))
+            if(!isalpha(lf[i-1]))
             {
-              if(myfirstupper && i != lf.size()-1)
+              if(myfirstupper && i != lf.size())
               {
-                lf[i+1] = towupper(lf[i+1]);
+                lf[i] = towupper(lf[i]);
               }
               else
               {
-                lf[i+1] = towlower(lf[i+1]);
+                lf[i] = towlower(lf[i]);
               }
               break;
             }
@@ -1742,11 +1740,11 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
             {
               if(myuppercase)
               {
-                lf[i] = towupper(lf[i]);
+                lf[i-1] = towupper(lf[i-1]);
               }
               else
               {
-                lf[i] = towlower(lf[i]);
+                lf[i-1] = towlower(lf[i-1]);
               }
             }
           }
@@ -2043,7 +2041,6 @@ FSTProcessor::biltransfull(wstring const &input_word, bool with_delim)
   if(queue != L"")
   {
     wstring result_with_queue = L"";
-    bool multiple_translation = false;
     for(unsigned int i = 0, limit = result.size(); i != limit; i++)
     {
       switch(result[i])
@@ -2055,7 +2052,6 @@ FSTProcessor::biltransfull(wstring const &input_word, bool with_delim)
 
         case L'/':
           result_with_queue.append(queue);
-	  multiple_translation = true;
 	  break;
 
         default:
@@ -2208,7 +2204,6 @@ FSTProcessor::biltrans(wstring const &input_word, bool with_delim)
   if(queue != L"")
   {
     wstring result_with_queue = L"";
-    bool multiple_translation = false;
     for(unsigned int i = 0, limit = result.size(); i != limit; i++)
     {
       switch(result[i])
@@ -2220,7 +2215,6 @@ FSTProcessor::biltrans(wstring const &input_word, bool with_delim)
 
         case L'/':
           result_with_queue.append(queue);
-	  multiple_translation = true;
 	  break;
 
         default:
@@ -2600,7 +2594,6 @@ FSTProcessor::biltransWithQueue(wstring const &input_word, bool with_delim)
   if(queue != L"")
   {
     wstring result_with_queue = L"";
-    bool multiple_translation = false;
     for(unsigned int i = 0, limit = result.size(); i != limit; i++)
     {
       switch(result[i])
@@ -2612,7 +2605,6 @@ FSTProcessor::biltransWithQueue(wstring const &input_word, bool with_delim)
 
         case L'/':
           result_with_queue.append(queue);
-	  multiple_translation = true;
 	  break;
 
         default:
