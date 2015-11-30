@@ -49,72 +49,14 @@ VERSION=$GENERIC_VERSION
 
 AM_INIT_AUTOMAKE($PACKAGE, $VERSION, no-define)
 
-# Checks for programs.
-
-AC_MSG_CHECKING([Compilation architecture: PPC, i686, x86_64, Other])
-if test x$(which arch) = x
-then ARCH=$($(which uname) -m)
-else ARCH=$($(which arch))
-fi
-
-if test x$ARCH = xppc
-then
-  AC_MSG_RESULT([PowerPC])
-  CFLAGS="-Wall -fomit-frame-pointer $CFLAGS"
-  CXXFLAGS="-Wall -fomit-frame-pointer $CXXFLAGS"
-else
-  if test x$ARCH = xi686
-  then
-    AC_MSG_RESULT([i686])
-    CFLAGS="-Wall -march=i686 -O3 -fomit-frame-pointer -funroll-loops $CFLAGS"
-    CXXFLAGS="-Wall -march=i686 -O3 \
-              -fomit-frame-pointer -funroll-loops $CXXFLAGS"
-  
-  else
-    if test x$ARCH = xx86_64
-    then
-      AC_MSG_RESULT([x86_64])
-      CFLAGS="-Wall -O3 -mtune=nocona -fomit-frame-pointer -funroll-loops $CFLAGS"
-      CXXFLAGS="-Wall -O3 -mtune=nocona \
-              -fomit-frame-pointer -funroll-loops $CXXFLAGS"
-    else
-      AC_MSG_RESULT([Other])
-      CFLAGS="-Wall -O3 $CFLAGS"
-      CXXFLAGS="-Wall -O3 $CXXFLAGS"
-    fi
-  fi
-fi
-
 AC_CANONICAL_HOST
-
-USE_ANSI=yes
-
-case "${host_os}" in
-  mingw*)
-  echo "Found MinGW: Also considering MSYS paths"
-  CFLAGS="$CFLAGS -L/lib -I/include"
-  CXXFLAGS="$CXXFLAGS -L/lib -I/include"
-  CPPFLAGS="$CPPFLAGS -I/include"
-  
-  USE_ANSI=no
-  ;;
-  cygwin*)
-  echo "Found Cygwin: -ansi unset"
-  USE_ANSI=no
-  ;;
-esac
-
-if test x$USE_ANSI = xyes
-then
-	CFLAGS="$CFLAGS -ansi"
-	CXXFLAGS="$CXXFLAGS -ansi"
-	CPPFLAGS="$CPPFLAGS -ansi"
-fi
-
 AC_PROG_CXX
 AM_PROG_LIBTOOL
 AM_SANITY_CHECK
 AC_LANG_CPLUSPLUS
+
+CFLAGS="-Wall -Wextra $CFLAGS"
+CXXFLAGS="-Wall -Wextra $CXXFLAGS"
 
 AC_ARG_ENABLE(debug,
               [  --enable-debug  Enable "-g -Wall" compiler options],
