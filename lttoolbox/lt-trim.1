@@ -17,7 +17,7 @@ is the application responsible for trimming compiled dictionaries. The
 analyses (right-side when compiling lr) of analyser_binary are trimmed
 to the input side of bidix_binary (left-side when compiling lr,
 right-side when compiling rl), such that only analyses which would
-pass through `lt-proc -b bidix_binary' are kept.
+pass through `lt-proc \-b bidix_binary' are kept.
 
 \fBWarning: this program is experimental!\fR It has been tested, but
 not deployed extensively yet.
@@ -29,7 +29,7 @@ combinations of + followed by # in monodix are handled.
 
 Some minor caveats: If you have the capitalised lemma "Foo" in the
 monodix, but "foo" in the bidix, an analysis "^Foo<tag>$" would pass
-through bidix when doing lt-proc -b, but will not make it through
+through bidix when doing lt-proc \-b, but will not make it through
 trimming. Make sure your lemmas have the same capitalisation in the
 different dictionaries. Also, you should not have literal `+' or `#'
 in your lemmas. Since lt-comp doesn't escape these, lt-trim cannot
