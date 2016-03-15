@@ -104,6 +104,8 @@ public:
    */
   void init(MatchNode *initial);
 
+  int classifyFinals(map<MatchNode *, int> const &final_class, set<int> const &banned_rules) const;
+  
   int classifyFinals(map<MatchNode *, int> const &final_class) const;
 
   void debug();

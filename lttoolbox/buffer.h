@@ -100,6 +100,14 @@ public:
       destroy();
     }
 
+   /**
+    * Get size of buffer
+    */
+   unsigned int getSize() const
+    {
+      return size;
+    }
+
   /**
    * Assign operator.
    */

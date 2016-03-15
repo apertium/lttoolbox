@@ -124,13 +124,20 @@ MatchState::step(int const input, int const alt)
 int
 MatchState::classifyFinals(map<MatchNode *, int> const &final_class) const
 {
+  set<int> empty_set;
+  return classifyFinals(final_class, empty_set);
+}
+
+int
+MatchState::classifyFinals(map<MatchNode *, int> const &final_class, set<int> const &banned_rules) const
+{
   int result = INT_MAX;
   for (int i = first; i != last; i = (i+1)%BUF_LIMIT)
   {
     map<MatchNode*, int>::const_iterator it2 = final_class.find(state[i]);
     if(it2 != final_class.end())
     {
-      if(it2->second < result)
+      if(it2->second < result && banned_rules.find(it2->second) == banned_rules.end())
       {
         result = it2->second;
       }
