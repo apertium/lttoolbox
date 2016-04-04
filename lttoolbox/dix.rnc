@@ -1,0 +1,129 @@
+# Copyright (C) 2005 Universitat d'Alacant / Universidad de Alicante
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not <http://www.gnu.org/licenses/>.
+# 
+#    DTD for the format of dictionaries
+
+dictionary =
+  element dictionary {
+    attlist.dictionary, alphabet?, sdefs?, pardefs?, section+
+  }
+attlist.dictionary &= empty
+#  root element
+alphabet = element alphabet { attlist.alphabet, text }
+attlist.alphabet &= empty
+# alphabetic character list
+sdefs = element sdefs { attlist.sdefs, sdef+ }
+attlist.sdefs &= empty
+# symbol definition section
+sdef = element sdef { attlist.sdef, empty }
+# symbol definition
+attlist.sdef &= attribute n { xsd:ID }
+# n: symbol (tag) name
+attlist.sdef &= attribute c { text }?
+# c: symbol (tag) comment
+pardefs = element pardefs { attlist.pardefs, pardef+ }
+attlist.pardefs &= empty
+# paradigm definition section
+pardef = element pardef { attlist.pardef, e+ }
+# paradigm definition
+attlist.pardef &= attribute n { text }
+# n: paradigm name
+attlist.pardef &= attribute c { text }?
+# c: comment about paradigm
+section = element section { attlist.section, e+ }
+# dictionary section
+attlist.section &=
+  attribute id { xsd:ID },
+  attribute type {
+    "standard" | "inconditional" | "postblank" | "preblank"
+  }
+# id: dictionary section identifier
+
+# type: dictionary section type
+e = element e { attlist.e, (i | p | par | re)+ }
+# entry
+attlist.e &=
+  attribute r { "LR" | "RL" }?,
+  attribute lm { text }?,
+  attribute a { text }?,
+  attribute c { text }?,
+  attribute i { text }?,
+  attribute slr { text }?,
+  attribute srl { text }?,
+  attribute alt { text }?,
+  attribute v { text }?,
+  attribute vl { text }?,
+  attribute vr { text }?
+# r: restriction LR: left-to-right,
+# RL: right-to-left
+
+# lm: lemma
+
+# a: author
+
+# c: comment
+
+# i: ignore ('yes') means ignore, otherwise it is not ignored)
+
+# slr: translation sense when translating from left to right
+
+# srl: translation sense when translating from right to left
+
+# alt: alternative entries are omitted if not selected
+
+# v: variant sets (monodix) direction restrictions based on language variant
+
+# vl: variant left sets direction restrictions based on language variant for language on left of bidix
+
+# vr: variant right sets direction restrictions based on language variant for language on right of bidix
+par = element par { attlist.par, empty }
+# reference to paradigm
+attlist.par &= attribute n { text }
+# n: paradigm name
+i = element i { attlist.i, (text | b | s | g | j | a)* }
+attlist.i &= empty
+# identity
+re = element re { attlist.re, text }
+attlist.re &= empty
+# regular expression identification
+p = element p { attlist.p, l, r }
+attlist.p &= empty
+# pair of strings
+l = element l { attlist.l, (text | a | b | g | j | s)* }
+attlist.l &= empty
+# left part of p
+r = element r { attlist.r, (text | a | b | g | j | s)* }
+attlist.r &= empty
+# right part of p
+a = element a { attlist.a, empty }
+attlist.a &= empty
+# post-generator wake-up mark
+b = element b { attlist.b, empty }
+attlist.b &= empty
+# blank chars block mark
+g = element g { attlist.g, (text | a | b | j | s)* }
+# mark special groups in lemmas
+attlist.g &= attribute i { text }?
+# i is used to co-index groups in the left with those
+
+# on the right of a pair
+j = element j { attlist.j, empty }
+attlist.j &= empty
+# join lexical forms
+s = element s { attlist.s, empty }
+# reference to symbol (tag)
+attlist.s &= attribute n { xsd:IDREF }
+start = dictionary
+# n: symbol (tag) name
