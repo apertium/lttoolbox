@@ -327,7 +327,7 @@ int main(int argc, char *argv[])
   {
     cerr << e.what();
     if (fstp.getNullFlush()) {
-      fputws_unlocked('\0', output);
+      fputwc_unlocked(L'\0', output);
     }
 
     exit(1);
