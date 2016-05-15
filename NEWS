@@ -1,3 +1,55 @@
-Mon Mar 31 08:43:07 BST 2008
 
-  * Version 3.0.2 released
+===================
+ NEWS for lttoolbox
+===================
+
+SVN
+---
+
+
+Version 3.3.3, 2016-05-15 (-r68450)
+-----------------------------------
+
+* add .rnc files for validation (just converted from DTD's; DTD's are
+  still the source)
+
+* new match-state functions needed for apertium-transfer-tools
+
+* various distribution-related fixes
+
+Version 3.3.2, 2016-01-02 (-r64329)
+-----------------------------------
+
+* lt-proc -b no longer swallows tags on partial matches
+  https://sourceforge.net/p/apertium/tickets/82/
+
+* various distribution-related fixes, static analysis fixes; "make
+  test" should always pass now
+
+* lt-trim now supports multiple <j/> elements
+  https://sourceforge.net/p/apertium/tickets/83/
+
+
+Version 3.3.1, 2015-03-17 (-r61000)
+-----------------------------------
+
+* dix.xsd used for extra warnings on validation
+
+* minor bug fixes in lt-trim, lt-comp
+
+* new functions needed for pcre_version storing in apertium
+
+* tests run on "make test"
+
+* various distribution-related fixes, static analysis fixes,
+  documentation
+
+Version 3.3.0, 2014-08-20 (-r?)
+-----------------------------------
+
+# NEWS TODO
+
+Version 3.0.2, 2008-03-31 08:43:07 BST
+--------------------------------------
+
+# NEWS TODO
