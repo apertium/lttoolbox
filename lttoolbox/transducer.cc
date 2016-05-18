@@ -804,11 +804,12 @@ Transducer::copyWithTagsFirst(int start,
       int label = trans_it->first, this_trg = trans_it->second;
       int left_symbol = alphabet.decode(label).first;
 
-      // After the first tag, we can either have more tags, or
-      // epsilons (0), in which case the lemqlast state is already set
-      // to something other than this_src:
-      if(alphabet.isTag(left_symbol)
-         || (left_symbol == 0 && this_src != this_lemqlast))
+      // Anything after the first tag goes before the lemq, whether
+      // epsilon or alphabetic (might be a hack to force trimming). If
+      // the lemqlast state is already set to something other than
+      // this_src, then we've seen the first tag (and are done reading
+      // lemq).
+      if(alphabet.isTag(left_symbol) || (this_src != this_lemqlast))
       {
         int new_src;
         if(this_src == this_lemqlast)
@@ -919,7 +920,7 @@ Transducer::moveLemqsLast(Alphabet const &alphabet,
       alphabet.getSymbol(left, alphabet.decode(label).first);
       int new_src = states_this_new[this_src];
 
-      if(left == L"#")
+      if(left == COMPILER_GROUP_ELEM)
       {
         Transducer tagsFirst = copyWithTagsFirst(this_trg, label, alphabet, epsilon_tag);
         new_t.finals.insert(
@@ -960,6 +961,7 @@ Transducer::intersect(Transducer &trimmer,
   int const epsilon_tag)
 {
   joinFinals(epsilon_tag);
+  trimmer.show(trimmer_a, stdout, epsilon_tag);
   /**
    * this ∩ trimmer = trimmed
    *

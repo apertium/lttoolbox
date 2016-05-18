@@ -1,0 +1,22 @@
+<dictionary>
+  <alphabet/>
+  <sdefs>
+    <sdef n="Y" />
+    <sdef n="inf"  />
+    <sdef n="X" />
+    <sdef n="n" />
+  </sdefs>
+
+  <pardefs>
+    <pardef n="apar">
+<e>       <p><l><s n="inf"/><s n="Y"/></l>    <r><s n="inf"/></r></p></e>
+<e>       <p><l><s n="X"/></l>                <r><s n="X"/></r></p> <p><l>TAIL</l><r></r></p></e>
+    </pardef>
+</pardefs>
+
+  <section id="main" type="standard">
+<e>         <p><l>a<g><b/></g></l>	<r>te</r></p><par n="apar"/></e>
+<e>       <p><l>include<s n="n"/></l>   <r>meh<s n="n"/></r></p> </e>
+  </section>
+</dictionary>
+

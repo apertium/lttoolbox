@@ -117,9 +117,9 @@ trim(FILE *file_mono, FILE *file_bi)
 
   for(std::map<wstring, Transducer>::iterator it = trans_mono.begin(); it != trans_mono.end(); it++)
   {
-    Transducer trimmed_tmp = it->second.intersect(moved_transducer,
-                                                  alph_mono,
-                                                  alph_prefix);
+    Transducer trimmed = it->second.intersect(moved_transducer,
+                                              alph_mono,
+                                              alph_prefix);
 
     wcout << it->first << " " << it->second.size();
     wcout << " " << it->second.numberOfTransitions() << endl;
@@ -128,13 +128,13 @@ trim(FILE *file_mono, FILE *file_bi)
       wcerr << L"Warning: empty section! Skipping it ..."<<endl;
       trans_mono[it->first].clear();
     }
-    else if(trimmed_tmp.hasNoFinals()) {
+    else if(trimmed.hasNoFinals()) {
       wcerr << L"Warning: section had no final state after trimming! Skipping it ..."<<endl;
       trans_mono[it->first].clear();
     }
     else {
-      trimmed_tmp.minimize();
-      trans_mono[it->first] = trimmed_tmp;
+      trimmed.minimize();
+      trans_mono[it->first] = trimmed;
     }
   }
 

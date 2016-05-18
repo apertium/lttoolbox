@@ -123,6 +123,13 @@ class BidixEpsilons(unittest.TestCase, TrimProcTest):
     bidix = "data/bidix-epsilons-bi.dix"
     bidir = "rl"
 
+class AlphabeticAfterGroup(unittest.TestCase, TrimProcTest):
+    inputs = ["as"]
+    expectedOutputs = ["^as/*as$"]
+    monodix = "data/alphabetic-after-group-mono.dix"
+    bidix = "data/alphabetic-after-group-bi.dix"
+    bidir = "lr"
+
 class DoubleClitics(unittest.TestCase, TrimProcTest):
     inputs = ["a-b-c d"]
     expectedOutputs = ["^a-b-c d/a<vblex><ger>+b<prn><enc>+c<prn><enc># d$"]

@@ -77,6 +77,7 @@ class ProcTest():
             retCode = self.proc.poll()
             if self.expectedRetCodeFail:
                 self.assertNotEqual(retCode, 0)
+                print("hi")
             else:
                 self.assertEqual(retCode, 0)
 

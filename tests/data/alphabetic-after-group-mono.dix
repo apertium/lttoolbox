@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+ <alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÀÁÂÄÅÆÇÈÉÊËÌÍÎÏÑÒÓÔÖØÙÚÛÜàáâäåæçèéêëìíîïñòóôöøùúûüŠš</alphabet>
+ <sdefs>
+   <sdef n="inf"      />
+   <sdef n="unmatched"/>
+   <sdef n="n"/>
+
+   <sdef n="compound-only-L" c="compound-only-L"/>
+   <sdef n="compound-R"      c="compound-R"/>
+ </sdefs>
+
+ <section id="main" type="standard">
+<e>       <p><l>as</l>   <r>a<s n="inf"/><s n="unmatched"/></r></p> <p><l></l><r><g><b/></g></r></p></e>
+<e>       <p><l>include</l>   <r>include<s n="n"/></r></p> </e>
+ </section>
+
+</dictionary>
