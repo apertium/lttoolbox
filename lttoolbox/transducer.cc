@@ -961,7 +961,6 @@ Transducer::intersect(Transducer &trimmer,
   int const epsilon_tag)
 {
   joinFinals(epsilon_tag);
-  trimmer.show(trimmer_a, stdout, epsilon_tag);
   /**
    * this ∩ trimmer = trimmed
    *
