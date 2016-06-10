@@ -19,6 +19,7 @@
 #include <lttoolbox/entry_token.h>
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/xml_parse_util.h>
+#include <lttoolbox/string_to_wostream.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -79,7 +80,7 @@ Compiler::parseACX(string const &fichero, wstring const &dir)
     reader = xmlReaderForFile(fichero.c_str(), NULL, 0);
     if(reader == NULL)
     {
-      cerr << "Error: cannot open '" << fichero << "'." << endl;
+      wcerr << "Error: cannot open '" << fichero << "'." << endl;
       exit(EXIT_FAILURE);
     }
     int ret = xmlTextReaderRead(reader);
@@ -98,7 +99,7 @@ Compiler::parse(string const &fichero, wstring const &dir)
   reader = xmlReaderForFile(fichero.c_str(), NULL, 0);
   if(reader == NULL)
   {
-    cerr << "Error: Cannot open '" << fichero << "'." << endl;
+    wcerr << "Error: Cannot open '" << fichero << "'." << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -702,8 +703,8 @@ Compiler::procEntry()
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << L"): Parse error." << endl;
+      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+      wcerr << L"): Parse error." << endl;
       exit(EXIT_FAILURE);
     }
     wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));

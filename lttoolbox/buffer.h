@@ -75,7 +75,7 @@ public:
     {
       if(buf_size == 0)
       {
-	cerr << "Error: Cannot create empty buffer." << endl;
+	wcerr << "Error: Cannot create empty buffer." << endl;
 	exit(EXIT_FAILURE);
       }    
       buf = new T[buf_size];

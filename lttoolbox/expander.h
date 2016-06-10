@@ -18,6 +18,7 @@
 #define _EXPANDER_
 
 #include <lttoolbox/ltstr.h>
+#include <lttoolbox/string_to_wostream.h>
 
 #include <list>
 #include <map>

@@ -20,6 +20,7 @@
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/my_stdio.h>
+#include <lttoolbox/my_stdio.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -47,7 +48,7 @@ Expander::expand(string const &fichero, FILE *output)
   reader = xmlReaderForFile(fichero.c_str(), NULL, 0);
   if(reader == NULL)
   {
-    cerr << "Error: Cannot open '" << fichero << "'." << endl;
+    wcerr << "Error: Cannot open '" << fichero << "'." << endl;
     exit(EXIT_FAILURE);
   }
 

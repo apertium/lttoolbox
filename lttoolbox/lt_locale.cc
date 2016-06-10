@@ -34,7 +34,7 @@ LtLocale::tryToSetLocale()
     return;
   }
  
-  cerr << "Warning: unsupported locale, fallback to \"C\"" << endl;
+  wcerr << "Warning: unsupported locale, fallback to \"C\"" << endl;
 
   setlocale(LC_ALL, "C");
 #endif

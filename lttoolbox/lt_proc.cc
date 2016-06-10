@@ -183,21 +183,21 @@ int main(int argc, char *argv[])
     FILE *in = fopen(argv[optind], "rb");
     if(in == NULL || ferror(in))
     {
-      cerr << "Error: Cannot not open file '" << argv[optind] << "'." << endl << endl;
+      wcerr << "Error: Cannot not open file '" << argv[optind] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
     input = fopen(argv[optind+1], "rb");
     if(input == NULL || ferror(input))
     {
-      cerr << "Error: Cannot not open file '" << argv[optind+1] << "'." << endl << endl;
+      wcerr << "Error: Cannot not open file '" << argv[optind+1] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
     output= fopen(argv[optind+2], "wb");
     if(output == NULL || ferror(output))
     {
-      cerr << "Error: Cannot not open file '" << argv[optind+2] << "'." << endl << endl;
+      wcerr << "Error: Cannot not open file '" << argv[optind+2] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
@@ -209,14 +209,14 @@ int main(int argc, char *argv[])
     FILE *in = fopen(argv[optind], "rb");
     if(in == NULL || ferror(in))
     {
-      cerr << "Error: Cannot not open file '" << argv[optind] << "'." << endl << endl;
+      wcerr << "Error: Cannot not open file '" << argv[optind] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
     input = fopen(argv[optind+1], "rb");
     if(input == NULL || ferror(input))
     {
-      cerr << "Error: Cannot not open file '" << argv[optind+1] << "'." << endl << endl;
+      wcerr << "Error: Cannot not open file '" << argv[optind+1] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
     FILE *in = fopen(argv[optind], "rb");
     if(in == NULL || ferror(in))
     {
-      cerr << "Error: Cannot not open file '" << argv[optind] << "'." << endl << endl;
+      wcerr << "Error: Cannot not open file '" << argv[optind] << "'." << endl << endl;
       exit(EXIT_FAILURE);
      }
     fstp.load(in);
@@ -325,7 +325,7 @@ int main(int argc, char *argv[])
   }
   catch (exception& e)
   {
-    cerr << e.what();
+    wcerr << e.what();
     if (fstp.getNullFlush()) {
       fputwc_unlocked(L'\0', output);
     }

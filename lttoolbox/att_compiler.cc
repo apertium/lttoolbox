@@ -19,6 +19,7 @@
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
+#include <lttoolbox/string_to_wostream.h>
 
 using namespace std;
 
@@ -113,12 +114,12 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
 
     if (line.length() == 0 && first_line) 
     {
-      cerr << "Error: empty file '" << file_name << "'." << endl;
+      wcerr << "Error: empty file '" << file_name << "'." << endl;
       exit(EXIT_FAILURE);
     }
     if (first_line && line.find(L"\t") == wstring::npos)
     {
-      cerr << "Error: invalid format '" << file_name << "'." << endl;
+      wcerr << "Error: invalid format '" << file_name << "'." << endl;
       exit(EXIT_FAILURE);
     }
 

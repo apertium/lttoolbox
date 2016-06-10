@@ -19,6 +19,7 @@
 #include <lttoolbox/entry_token.h>
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/xml_parse_util.h>
+#include <lttoolbox/string_to_wostream.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -62,7 +63,7 @@ TMXCompiler::parse(string const &fichero, wstring const &lo, wstring const &lm)
   reader = xmlReaderForFile(fichero.c_str(), NULL, 0);
   if(reader == NULL)
   {
-    cerr << "Error: Cannot open '" << fichero << "'." << endl;
+    wcerr << "Error: Cannot open '" << fichero << "'." << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -119,8 +120,8 @@ TMXCompiler::skipBlanks(wstring &name)
     {
       if(!allBlanks())
       {
-        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader); 
-        cerr << "): Invalid construction." << endl;
+        wcerr << "Error (" << xmlTextReaderGetParserLineNumber(reader); 
+        wcerr << "): Invalid construction." << endl;
         exit(EXIT_FAILURE);
       }
     }
@@ -142,8 +143,8 @@ TMXCompiler::skip(wstring &name, wstring const &elem)
     {
       if(!allBlanks())
       {
-        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        cerr << "): Invalid construction." << endl;
+        wcerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+        wcerr << "): Invalid construction." << endl;
         exit(EXIT_FAILURE);
       }
     }

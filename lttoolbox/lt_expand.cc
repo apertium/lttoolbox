@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
       input = fopen(infile.c_str(), "rb");
       if(input == NULL)
       {
-        cerr << "Error: Cannot open file '" << infile << "'." << endl;
+        wcerr << "Error: Cannot open file '" << infile << "'." << endl;
         exit(EXIT_FAILURE);
       }      
       fclose(input);
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
       input = fopen(infile.c_str(), "rb");
       if(input == NULL)
       {
-        cerr << "Error: Cannot open file '" << infile << "'." << endl;
+        wcerr << "Error: Cannot open file '" << infile << "'." << endl;
         exit(EXIT_FAILURE);
       }
       fclose(input);
@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
       output = fopen(argv[argc-1], "wb");
       if(output == NULL)
       {
-        cerr << "Error: Cannot open file '" << outfile << "'." << endl;
+        wcerr << "Error: Cannot open file '" << outfile << "'." << endl;
         exit(EXIT_FAILURE);
       }
       break;

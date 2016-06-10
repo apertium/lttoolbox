@@ -131,7 +131,7 @@ Compression::multibyte_write(unsigned int value, ostream &output)
   }
   else
   {
-    cerr << "Out of range: " << value << endl;
+    wcerr << "Out of range: " << value << endl;
     exit(EXIT_FAILURE);
   }
 }
