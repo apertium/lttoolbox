@@ -20,7 +20,6 @@
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/my_stdio.h>
-#include <lttoolbox/my_stdio.h>
 
 #include <cstdlib>
 #include <iostream>
