@@ -42,4 +42,19 @@ private:
   std::string msg;
 };
 
+class IOException : public Exception {
+public:
+  IOException(const char* _msg) throw () : Exception(_msg) {};
+};
+
+class SerialisationException : public IOException {
+public:
+  SerialisationException(const char* _msg) throw () : IOException(_msg) {};
+};
+
+class DeserialisationException : public IOException {
+public:
+  DeserialisationException(const char* _msg) throw () : IOException(_msg) {};
+};
+
 #endif

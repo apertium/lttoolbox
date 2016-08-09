@@ -19,6 +19,8 @@
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/lttoolbox_config.h>
 #include <lttoolbox/my_stdio.h>
+#include <lttoolbox/deserialiser.h>
+#include <lttoolbox/serialiser.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -558,6 +560,22 @@ Transducer::read(FILE *input, int const decalage)
   }
 
   *this = new_t;
+}
+
+void
+Transducer::serialise(std::ostream &serialised) const
+{
+  Serialiser<int>::serialise(initial, serialised);
+  Serialiser<set<int> >::serialise(finals, serialised);
+  Serialiser<map<int, multimap<int, int> > >::serialise(transitions, serialised);
+}
+
+void
+Transducer::deserialise(std::istream &serialised)
+{
+  initial = Deserialiser<int>::deserialise(serialised);
+  finals = Deserialiser<set<int> >::deserialise(serialised);
+  transitions = Deserialiser<map<int, multimap<int, int> > >::deserialise(serialised);
 }
 
 void

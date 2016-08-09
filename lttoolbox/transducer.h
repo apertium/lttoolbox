@@ -278,6 +278,9 @@ public:
    */
   void read(FILE *input, int const decalage = 0);
 
+  void serialise(std::ostream &serialised) const;
+  void deserialise(std::istream &serialised);
+
   /**
    * Insert another transducer into this, unifying source and targets.
    * Does not minimize.

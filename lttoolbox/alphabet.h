@@ -133,6 +133,9 @@ public:
    */
   void read(FILE *input);
 
+  void serialise(std::ostream &serialised) const;
+  void deserialise(std::istream &serialised);
+
   /**
    * Write a symbol enclosed by angle brackets in the output stream.
    * @param symbol symbol code.

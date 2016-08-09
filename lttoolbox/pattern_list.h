@@ -136,6 +136,9 @@ public:
    * @param output the output stream
    */
   void write(FILE *output);
+
+  void serialise(std::ostream &serialised) const;
+  void deserialise(std::istream &serialised);
   
   /**
    * Create a new MatchExe from PatternList, must be freed with 'delete'
