@@ -31,6 +31,9 @@
 
 #include <typeinfo>
 
+
+template <typename T>
+struct remove_const;
 template <typename T>
 struct remove_const
 {
