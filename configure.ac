@@ -65,7 +65,7 @@ AC_ARG_ENABLE(debug,
 AC_ARG_ENABLE(profile,
               [  --enable-profile  Enable "-pg -g -Wall" compiler options],
               [CXXFLAGS="-pg -g -Wall"; CFLAGS="-pg -g -Wall"; LDFLAGS="-pg"])
-                            
+
 
 AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
 if test x$ac_cv_path_PKG_CONFIG = x
@@ -95,7 +95,7 @@ std::wstring test = L"test";
 
 AC_CXX_WSTRING
 
-if test "$ac_cv_cxx_wstring" = no 
+if test "$ac_cv_cxx_wstring" = no
 then
   AC_MSG_ERROR([Missing wide string support])
 fi
@@ -118,10 +118,24 @@ AC_FUNC_ERROR_AT_LINE
 
 AC_CHECK_DECLS([fread_unlocked, fwrite_unlocked, fgetc_unlocked, \
 fputc_unlocked, fputs_unlocked, fgetwc_unlocked, fputwc_unlocked, fputws_unlocked])
-                
+
 AC_CHECK_FUNCS([setlocale strdup getopt_long])
 
 AM_CONDITIONAL([WINDOWS], [test x$version_type = xwindows])
+
+# Checks for highest supported C++ standard
+AC_LANG(C++)
+AX_CHECK_COMPILE_FLAG([-std=c++17], [CXXFLAGS="$CXXFLAGS -std=c++17"], [
+ AX_CHECK_COMPILE_FLAG([-std=c++1z], [CXXFLAGS="$CXXFLAGS -std=c++1z"], [
+  AX_CHECK_COMPILE_FLAG([-std=c++14], [CXXFLAGS="$CXXFLAGS -std=c++14"], [
+   AX_CHECK_COMPILE_FLAG([-std=c++1y], [CXXFLAGS="$CXXFLAGS -std=c++1y"], [
+    AX_CHECK_COMPILE_FLAG([-std=c++11], [CXXFLAGS="$CXXFLAGS -std=c++11"], [
+     AX_CHECK_COMPILE_FLAG([-std=c++0x], [CXXFLAGS="$CXXFLAGS -std=c++0x"], [])
+    ])
+   ])
+  ])
+ ])
+])
 
 AM_PATH_PYTHON([2], [], [AC_MSG_WARN([Can't run 'make test' without Python installed.])])
 
