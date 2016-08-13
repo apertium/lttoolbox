@@ -124,7 +124,7 @@ template <typename value_type>
 void Serialiser<std::basic_string<value_type> >::serialise(
     const std::basic_string<value_type> &SerialisedType_,
     std::ostream &Output) {
-  ::serialise(SerialisedType_.size(), Output);
+  ::serialise(static_cast<uint64_t>(SerialisedType_.size()), Output);
 
   for (typename std::basic_string<value_type>::const_iterator
            SerialisedType_iterator = SerialisedType_.begin();
