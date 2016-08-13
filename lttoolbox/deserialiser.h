@@ -18,7 +18,7 @@
 
 #include "exception.h"
 
-#include <lttoolbox/stdint_shim.h>
+#include <stdint.h>
 #include <cstddef>
 #include <limits>
 #include <istream>
@@ -58,14 +58,24 @@ public:
   deserialise(std::istream &Stream_);
 };
 
-template <> class Deserialiser<signed int> {
+template <> class Deserialiser<int64_t> {
 public:
-  inline static signed int deserialise(std::istream &Stream_);
+  inline static int64_t deserialise(std::istream &Stream_);
 };
 
-template <> class Deserialiser<size_t> {
+template <> class Deserialiser<uint64_t> {
 public:
-  inline static size_t deserialise(std::istream &Stream_);
+  inline static uint64_t deserialise(std::istream &Stream_);
+};
+
+template <> class Deserialiser<int32_t> {
+public:
+  inline static int32_t deserialise(std::istream &Stream_);
+};
+
+template <> class Deserialiser<uint32_t> {
+public:
+  inline static uint32_t deserialise(std::istream &Stream_);
 };
 
 template <> class Deserialiser<wchar_t> {
@@ -93,8 +103,7 @@ template <typename value_type>
 std::basic_string<value_type>
 Deserialiser<std::basic_string<value_type> >::deserialise(
     std::istream &Stream_) {
-  std::size_t SerialisedValueCount =
-      Deserialiser<std::size_t>::deserialise(Stream_);
+  uint64_t SerialisedValueCount = Deserialiser<uint64_t>::deserialise(Stream_);
   std::basic_string<value_type> SerialisedType_;
 
   for (; SerialisedValueCount != 0; --SerialisedValueCount) {
@@ -139,22 +148,28 @@ integer_type int_deserialise(std::istream &Stream_) {
   }
 }
 
-signed int Deserialiser<signed int>::deserialise(std::istream &Stream_) {
-  // Assumes size_t >= int and signed int != size_t
-  return Deserialiser<size_t>::deserialise(Stream_);
+int64_t Deserialiser<int64_t>::deserialise(std::istream &Stream_) {
+  return int_deserialise<int64_t>(Stream_);
 }
 
-size_t Deserialiser<size_t>::deserialise(std::istream &Stream_) {
-  // Assumes size_t == uint64_t, ie it is fixed across platforms
-  return int_deserialise<size_t>(Stream_);
+uint64_t Deserialiser<uint64_t>::deserialise(std::istream &Stream_) {
+  return int_deserialise<uint64_t>(Stream_);
+}
+
+int32_t Deserialiser<int32_t>::deserialise(std::istream &Stream_) {
+  return int_deserialise<int32_t>(Stream_);
+}
+
+uint32_t Deserialiser<uint32_t>::deserialise(std::istream &Stream_) {
+  return int_deserialise<uint32_t>(Stream_);
 }
 
 wchar_t Deserialiser<wchar_t>::deserialise(std::istream &Stream_) {
-  return int_deserialise<wchar_t>(Stream_);
+  return int_deserialise<uint32_t>(Stream_);
 }
 
 char Deserialiser<char>::deserialise(std::istream &Stream_) {
-  return int_deserialise<char>(Stream_);
+  return int_deserialise<uint8_t>(Stream_);
 }
 
 double Deserialiser<double>::deserialise(std::istream &Stream_) {
@@ -169,8 +184,8 @@ double Deserialiser<double>::deserialise(std::istream &Stream_) {
 template <typename Container>
 Container
 Deserialiser<Container>::deserialise(std::istream &Stream_) {
-  std::size_t SerialisedValueCount =
-      Deserialiser<std::size_t>::deserialise(Stream_);
+  uint64_t SerialisedValueCount =
+      Deserialiser<uint64_t>::deserialise(Stream_);
   typename remove_const<Container>::type SerialisedType_;
   std::insert_iterator<typename remove_const<Container>::type> insert_it =
       std::inserter(SerialisedType_, SerialisedType_.begin());

@@ -18,7 +18,7 @@
 
 #include "exception.h"
 
-#include <lttoolbox/stdint_shim.h>
+#include <stdint.h>
 #include <cstddef>
 #include <limits>
 #include <ios>
@@ -64,15 +64,27 @@ public:
             std::ostream &Output);
 };
 
-template <> class Serialiser<signed int> {
+template <> class Serialiser<int64_t> {
 public:
-  inline static void serialise(const signed int &SerialisedType_,
+  inline static void serialise(const int64_t &SerialisedType_,
                                std::ostream &Output);
 };
 
-template <> class Serialiser<size_t> {
+template <> class Serialiser<uint64_t> {
 public:
-  inline static void serialise(const size_t &SerialisedType_,
+  inline static void serialise(const uint64_t &SerialisedType_,
+                               std::ostream &Output);
+};
+
+template <> class Serialiser<int32_t> {
+public:
+  inline static void serialise(const int32_t &SerialisedType_,
+                               std::ostream &Output);
+};
+
+template <> class Serialiser<uint32_t> {
+public:
+  inline static void serialise(const uint32_t &SerialisedType_,
                                std::ostream &Output);
 };
 
@@ -166,26 +178,34 @@ void int_serialise(const integer_type &SerialisedType_,
   }
 }
 
-void Serialiser<signed int>::serialise(const signed int &SerialisedType_,
-                                   std::ostream &Output) {
-  // Assumes size_t >= int and signed int != size_t
-  Serialiser<size_t>::serialise(SerialisedType_, Output);
+void Serialiser<int64_t>::serialise(const int64_t &SerialisedType_,
+                                    std::ostream &Output) {
+  Serialiser<int64_t>::serialise(SerialisedType_, Output);
 }
 
-void Serialiser<size_t>::serialise(const size_t &SerialisedType_,
-                                   std::ostream &Output) {
-  // Assumes size_t == uint64_t, ie it is fixed across platforms
+void Serialiser<uint64_t>::serialise(const uint64_t &SerialisedType_,
+                                     std::ostream &Output) {
+  int_serialise(SerialisedType_, Output);
+}
+
+void Serialiser<int32_t>::serialise(const int32_t &SerialisedType_,
+                                    std::ostream &Output) {
+  Serialiser<int32_t>::serialise(SerialisedType_, Output);
+}
+
+void Serialiser<uint32_t>::serialise(const uint32_t &SerialisedType_,
+                                     std::ostream &Output) {
   int_serialise(SerialisedType_, Output);
 }
 
 void Serialiser<wchar_t>::serialise(const wchar_t &SerialisedType_,
                                     std::ostream &Output) {
-  int_serialise(SerialisedType_, Output);
+  int_serialise((uint32_t)SerialisedType_, Output);
 }
 
 void Serialiser<char>::serialise(const char &SerialisedType_,
                                  std::ostream &Output) {
-  int_serialise(SerialisedType_, Output);
+  int_serialise((uint8_t)SerialisedType_, Output);
 }
 
 void Serialiser<double>::serialise(const double &SerialisedType_,
@@ -201,7 +221,8 @@ void Serialiser<double>::serialise(const double &SerialisedType_,
 template <typename Container>
 void Serialiser<Container>::serialise(
     const Container &SerialisedType_, std::ostream &Output) {
-  ::serialise(SerialisedType_.size(), Output);
+  uint64_t size = SerialisedType_.size();
+  ::serialise(size, Output);
 
   for (typename Container::const_iterator value_type_ =
            SerialisedType_.begin();
