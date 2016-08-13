@@ -104,6 +104,16 @@ Alphabet::operator()(wstring const &s)
   return slexic[s];
 }
 
+int
+Alphabet::operator()(wstring const &s) const
+{
+  map<wstring, int, Ltstr>::const_iterator it = slexic.find(s);
+  if (it == slexic.end()) {
+    return -1;
+  }
+  return it->second;
+}
+
 bool
 Alphabet::isSymbolDefined(wstring const &s)
 {

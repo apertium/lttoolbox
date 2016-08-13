@@ -418,13 +418,19 @@ PatternList::deserialise(std::istream &serialised)
 }
 
 MatchExe *
-PatternList::newMatchExe()
+PatternList::newMatchExe() const
 {
   return new MatchExe(transducer, final_type);
 }
 
 Alphabet &
 PatternList::getAlphabet()
+{
+  return alphabet;
+}
+
+const Alphabet &
+PatternList::getAlphabet() const
 {
   return alphabet;
 }

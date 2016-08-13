@@ -99,6 +99,7 @@ public:
    * @return code for (c1, c2).
    */
   int operator()(int const c1, int const c2);
+  int operator()(wstring const &s) const;
   
   /**
    * Gets the individual symbol identifier. Assumes it already exists!

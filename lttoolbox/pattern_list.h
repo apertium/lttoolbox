@@ -144,13 +144,14 @@ public:
    * Create a new MatchExe from PatternList, must be freed with 'delete'
    * @return the new MatchExe object
    */
-  MatchExe * newMatchExe();
+  MatchExe * newMatchExe() const;
   
   /**
    * Get the alphabet of this PatternList object
    * @return the alphabet
    */
   Alphabet & getAlphabet();
+  const Alphabet & getAlphabet() const;
 };
 
 #endif
