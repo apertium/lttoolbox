@@ -31,7 +31,10 @@
 
 #include <typeinfo>
 
-
+#if __cplusplus >= 201103L
+#include <type_traits>
+#else
+namespace std {
 template <typename T>
 struct remove_const;
 template <typename T>
@@ -44,6 +47,8 @@ struct remove_const<const T>
 {
     typedef T type;
 };
+}
+#endif
 
 template <typename DeserialisedType> class Deserialiser;
 
