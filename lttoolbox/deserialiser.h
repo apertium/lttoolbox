@@ -125,8 +125,8 @@ template <typename first_type, typename second_type>
 std::pair<first_type, second_type>
 Deserialiser<std::pair<first_type, second_type> >::deserialise(
     std::istream &Stream_) {
-  first_type a = Deserialiser<typename remove_const<first_type>::type>::deserialise(Stream_);
-  second_type b = Deserialiser<typename remove_const<second_type>::type>::deserialise(Stream_);
+  first_type a = Deserialiser<typename std::remove_const<first_type>::type>::deserialise(Stream_);
+  second_type b = Deserialiser<typename std::remove_const<second_type>::type>::deserialise(Stream_);
   return std::make_pair(a, b);
 }
 
@@ -194,8 +194,8 @@ Container
 Deserialiser<Container>::deserialise(std::istream &Stream_) {
   uint64_t SerialisedValueCount =
       Deserialiser<uint64_t>::deserialise(Stream_);
-  typename remove_const<Container>::type SerialisedType_;
-  std::insert_iterator<typename remove_const<Container>::type> insert_it =
+  typename std::remove_const<Container>::type SerialisedType_;
+  std::insert_iterator<typename std::remove_const<Container>::type> insert_it =
       std::inserter(SerialisedType_, SerialisedType_.begin());
 
   for (; SerialisedValueCount != 0; --SerialisedValueCount) {
