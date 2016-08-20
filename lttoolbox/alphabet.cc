@@ -198,7 +198,7 @@ Alphabet::deserialise(std::istream &serialised)
   spair.clear();
   slexicinv = Deserialiser<vector<wstring> >::deserialise(serialised);
   for (size_t i = 0; i < slexicinv.size(); i++) {
-    slexic[slexicinv[i]] = i;
+    slexic[slexicinv[i]] = -i - 1;
   }
   spairinv = Deserialiser<vector<pair<int, int> > >::deserialise(serialised);
   for (size_t i = 0; i < slexicinv.size(); i++) {
