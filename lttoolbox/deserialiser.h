@@ -157,7 +157,7 @@ integer_type int_deserialise(std::istream &Stream_) {
 }
 
 int64_t Deserialiser<int64_t>::deserialise(std::istream &Stream_) {
-  return int_deserialise<int64_t>(Stream_);
+  return int_deserialise<uint64_t>(Stream_);
 }
 
 uint64_t Deserialiser<uint64_t>::deserialise(std::istream &Stream_) {
@@ -165,11 +165,11 @@ uint64_t Deserialiser<uint64_t>::deserialise(std::istream &Stream_) {
 }
 
 int32_t Deserialiser<int32_t>::deserialise(std::istream &Stream_) {
-  return int_deserialise<int32_t>(Stream_);
+  return int_deserialise<uint64_t>(Stream_);
 }
 
 uint32_t Deserialiser<uint32_t>::deserialise(std::istream &Stream_) {
-  return int_deserialise<uint32_t>(Stream_);
+  return int_deserialise<uint64_t>(Stream_);
 }
 
 wchar_t Deserialiser<wchar_t>::deserialise(std::istream &Stream_) {
