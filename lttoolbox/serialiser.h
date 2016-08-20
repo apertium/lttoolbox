@@ -180,7 +180,7 @@ void int_serialise(const integer_type &SerialisedType_,
 
 void Serialiser<int64_t>::serialise(const int64_t &SerialisedType_,
                                     std::ostream &Output) {
-  Serialiser<int64_t>::serialise(SerialisedType_, Output);
+  int_serialise(SerialisedType_, Output);
 }
 
 void Serialiser<uint64_t>::serialise(const uint64_t &SerialisedType_,
@@ -190,12 +190,12 @@ void Serialiser<uint64_t>::serialise(const uint64_t &SerialisedType_,
 
 void Serialiser<int32_t>::serialise(const int32_t &SerialisedType_,
                                     std::ostream &Output) {
-  Serialiser<int32_t>::serialise(SerialisedType_, Output);
+  int_serialise((int64_t)SerialisedType_, Output);
 }
 
 void Serialiser<uint32_t>::serialise(const uint32_t &SerialisedType_,
                                      std::ostream &Output) {
-  int_serialise(SerialisedType_, Output);
+  int_serialise((uint64_t)SerialisedType_, Output);
 }
 
 void Serialiser<wchar_t>::serialise(const wchar_t &SerialisedType_,
