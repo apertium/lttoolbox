@@ -66,10 +66,12 @@ public:
   deserialise(std::istream &Stream_);
 };
 
+#ifdef __APPLE__
 template <> class Deserialiser<size_t> {
 public:
   inline static size_t deserialise(std::istream &Stream_);
 };
+#endif
 
 template <> class Deserialiser<int64_t> {
 public:
@@ -161,9 +163,11 @@ integer_type int_deserialise(std::istream &Stream_) {
   }
 }
 
+#ifdef __APPLE__
 size_t Deserialiser<size_t>::deserialise(std::istream &Stream_) {
   return int_deserialise<uint64_t>(Stream_);
 }
+#endif
 
 int64_t Deserialiser<int64_t>::deserialise(std::istream &Stream_) {
   return int_deserialise<uint64_t>(Stream_);

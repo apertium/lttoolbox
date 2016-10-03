@@ -64,11 +64,13 @@ public:
             std::ostream &Output);
 };
 
+#ifdef __APPLE__
 template <> class Serialiser<size_t> {
 public:
   inline static void serialise(const size_t &SerialisedType_,
                                std::ostream &Output);
 };
+#endif
 
 template <> class Serialiser<int64_t> {
 public:
@@ -184,10 +186,12 @@ void int_serialise(const integer_type &SerialisedType_,
   }
 }
 
+#ifdef __APPLE__
 void Serialiser<size_t>::serialise(const size_t &SerialisedType_,
                                     std::ostream &Output) {
   int_serialise((uint64_t)SerialisedType_, Output);
 }
+#endif
 
 void Serialiser<int64_t>::serialise(const int64_t &SerialisedType_,
                                     std::ostream &Output) {
