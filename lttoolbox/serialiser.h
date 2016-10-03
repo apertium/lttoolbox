@@ -64,6 +64,12 @@ public:
             std::ostream &Output);
 };
 
+template <> class Serialiser<size_t> {
+public:
+  inline static void serialise(const size_t &SerialisedType_,
+                               std::ostream &Output);
+};
+
 template <> class Serialiser<int64_t> {
 public:
   inline static void serialise(const int64_t &SerialisedType_,
@@ -176,6 +182,11 @@ void int_serialise(const integer_type &SerialisedType_,
           << exc.what();
     throw SerialisationException(what_.str().c_str());
   }
+}
+
+void Serialiser<size_t>::serialise(const size_t &SerialisedType_,
+                                    std::ostream &Output) {
+  int_serialise((uint64_t)SerialisedType_, Output);
 }
 
 void Serialiser<int64_t>::serialise(const int64_t &SerialisedType_,

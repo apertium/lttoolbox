@@ -66,6 +66,11 @@ public:
   deserialise(std::istream &Stream_);
 };
 
+template <> class Deserialiser<size_t> {
+public:
+  inline static size_t deserialise(std::istream &Stream_);
+};
+
 template <> class Deserialiser<int64_t> {
 public:
   inline static int64_t deserialise(std::istream &Stream_);
@@ -154,6 +159,10 @@ integer_type int_deserialise(std::istream &Stream_) {
     what_ << "can't deserialise " << sizeof(integer_type) << " byte integer type: " << exc.what();
     throw DeserialisationException(what_.str().c_str());
   }
+}
+
+size_t Deserialiser<size_t>::deserialise(std::istream &Stream_) {
+  return int_deserialise<uint64_t>(Stream_);
 }
 
 int64_t Deserialiser<int64_t>::deserialise(std::istream &Stream_) {
