@@ -9,6 +9,11 @@
 #include <cwchar>
 #include <stdint.h>
 
+#ifdef _WIN32
+	#define utf8to32 utf8to16
+	#define utf32to8 utf16to8
+#endif
+
 inline wint_t fgetwc_u8(FILE *in) {
 	int32_t rv = 0;
 	int c = 0, i = 0;
@@ -96,5 +101,10 @@ inline wint_t ungetwc_u8(wint_t wc, FILE *out) {
 	#undef ungetwc
 #endif
 #define ungetwc ungetwc_u8
+
+#ifdef _WIN32
+	#undef utf8to32
+	#undef utf32to8
+#endif
 
 #endif
