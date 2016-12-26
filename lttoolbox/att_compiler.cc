@@ -65,9 +65,12 @@ AttCompiler::convert_hfst(wstring& symbol)
 bool
 AttCompiler::is_word_punct(wchar_t symbol)
 {
-  // This should be filled out with
-  // combining marks from U+0300 ... U+036F
-  if(symbol == L'ʼ' || symbol == L'́' || symbol == L'̂' || symbol == L'̌' || symbol == L'̀')
+  // https://en.wikipedia.org/wiki/Combining_character#Unicode_ranges
+  if((symbol >= 0x0300 && symbol <= 0x036F) // Combining Diacritics
+  || (symbol >= 0x1AB0 && symbol <= 0x1AFF) // ... Extended
+  || (symbol >= 0x1DC0 && symbol <= 0x1DFF) // ... Supplement
+  || (symbol >= 0x20D0 && symbol <= 0x20FF) // ... for Symbols
+  || (symbol >= 0xFE20 && symbol <= 0xFE2F)) // Combining Half Marks
   {
     return true;
   }
