@@ -62,6 +62,19 @@ AttCompiler::convert_hfst(wstring& symbol)
   }
 }
 
+bool
+AttCompiler::is_word_punct(wchar_t symbol)
+{
+  // This should be filled out with
+  // combining marks from U+0300 ... U+036F
+  if(symbol == L'ʼ' || symbol == L'́' || symbol == L'̂' || symbol == L'̌' || symbol == L'̀')
+  {
+    return true;
+  }
+ 
+  return false; 
+}
+
 /**
  * Returns the code of the symbol in the alphabet. Run after convert_hfst has
  * run.
@@ -79,7 +92,7 @@ AttCompiler::symbol_code(const wstring& symbol)
     return alphabet(symbol);
   } else if (symbol == L"") {
     return 0;
-  } else if (iswpunct(symbol[0]) || iswspace(symbol[0])) {
+  } else if ((iswpunct(symbol[0]) || iswspace(symbol[0])) && !is_word_punct(symbol[0])) {
     return symbol[0];
   } else {
     letters.insert(symbol[0]);

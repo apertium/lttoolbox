@@ -188,6 +188,11 @@ private:
     return state;
   }
 
+  /** 
+   * Returns true for combining diacritics and modifier letters
+   *
+   */
+  bool is_word_punct(wchar_t symbol);
 
   /** 
    * Converts symbols like @0@ to epsilon, @_SPACE_@ to space, etc.
