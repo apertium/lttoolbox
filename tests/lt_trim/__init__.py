@@ -138,6 +138,15 @@ class DoubleClitics(unittest.TestCase, TrimProcTest):
     bidir = "lr"
 
 
+@unittest.skip("FIXME: https://sourceforge.net/p/apertium/tickets/117/")
+class GroupAfterJoin(unittest.TestCase, TrimProcTest):
+    inputs = ["notG a"]
+    expectedOutputs = ["^notG/notG<vblex><inf>$ ^a/*a$"]
+    monodix = "data/group-after-join-mono.dix"
+    bidix = "data/group-after-join-bi.dix"
+    bidir = "lr"
+
+
 class Empty(unittest.TestCase, TrimProcTest):
     def runTest(self):
         tmpd = mkdtemp()

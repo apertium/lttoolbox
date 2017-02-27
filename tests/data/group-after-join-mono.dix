@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet>·ÀÁÂÄÇÈÉÊËÌÍÎÏÑÒÓÔÖÙÚÛÜàáâäçèéêëìíîïñòóôöùúûüABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzœ</alphabet>
+  <sdefs>
+    <sdef n="prn"/>
+    <sdef n="vblex"/>
+    <sdef n="inf"/>
+  </sdefs>
+  <pardefs>
+    <pardef n="abaiss/er__vblex">
+      <e><p><l>-jy</l>  <r><s n="vblex"/><j/>jy<s n="prn"/></r></p></e>
+      <e><p><l></l>     <r><s n="vblex"/><s n="inf"/></r></p></e>
+    </pardef>
+  </pardefs>
+  <section id="main" type="standard">
+    <e> <i>hasG</i><par n="abaiss/er__vblex"/><p><l><b/>a</l><r><g><b/>a</g></r></p></e>
+    <e> <i>hasG</i><par n="abaiss/er__vblex"/></e>
+    <e> <i>notG</i><par n="abaiss/er__vblex"/><p><l><b/>a</l><r><g><b/>a</g></r></p></e>
+    <e> <i>notG</i><par n="abaiss/er__vblex"/></e>
+  </section>
+</dictionary>
