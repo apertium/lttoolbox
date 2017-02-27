@@ -138,8 +138,8 @@ class DoubleClitics(unittest.TestCase, TrimProcTest):
     bidir = "lr"
 
 
-@unittest.skip("FIXME: https://sourceforge.net/p/apertium/tickets/117/")
 class GroupAfterJoin(unittest.TestCase, TrimProcTest):
+    "https://sourceforge.net/p/apertium/tickets/117/"
     inputs = ["notG a"]
     expectedOutputs = ["^notG/notG<vblex><inf>$ ^a/*a$"]
     monodix = "data/group-after-join-mono.dix"
