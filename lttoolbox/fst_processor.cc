@@ -1570,8 +1570,12 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
       }
       else if(current_state.isFinal(all_finals))
       {
-        bool uppercase = sf.size() > 1 && iswupper(sf[1]);
-        bool firstupper= iswupper(sf[0]);
+        bool firstupper = false, uppercase = false;
+        if(!dictionaryCase)
+        {
+          uppercase = sf.size() > 1 && iswupper(sf[1]);
+          firstupper= iswupper(sf[0]);
+        }
 
         if(mode == gm_tagged || mode == gm_tagged_nm)
         {
