@@ -389,11 +389,6 @@ State::filterFinalsLRX(set<Node *> const &finals,
   vector<wstring> current_result;
   wstring rule_id = L""; 
 
-  // /<$><select>station<n><ANY_TAG><$><skip><6>/<$><select>station<n><ANY_TAG><$><skip><6>
-
-  // if <$> current_result.push_back(current_word)
-  // if /   results.insert(current_result)
-
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     if(finals.find(state[i].where) != finals.end())
@@ -596,38 +591,42 @@ State::pruneCompounds(int requiredSymbol, int separationSymbol, int compound_max
   int minNoOfCompoundElements = compound_max_elements;
   int *noOfCompoundElements = new int[state.size()];
 
-  //wcerr << L"pruneCompounds..." << endl;
-
-  for (unsigned int i = 0;  i<state.size(); i++) {
+  for(unsigned int i = 0; i<state.size(); i++)
+  {
     vector<int> seq = *state.at(i).sequence;
 
-    if (lastPartHasRequiredSymbol(seq, requiredSymbol, separationSymbol)) {
+    if(lastPartHasRequiredSymbol(seq, requiredSymbol, separationSymbol))
+    {
       int this_noOfCompoundElements = 0;
       for (int j = seq.size()-2; j>0; j--) if (seq.at(j)==separationSymbol) this_noOfCompoundElements++;
       noOfCompoundElements[i] = this_noOfCompoundElements;
       minNoOfCompoundElements = (minNoOfCompoundElements < this_noOfCompoundElements) ? 
                         minNoOfCompoundElements : this_noOfCompoundElements;
     }
-    else {
+    else
+    {
       noOfCompoundElements[i] = INT_MAX;
-		  //wcerr << L"Prune - No requiered symbol in state number " << i << endl;
     }
   }
 
   // remove states with more than minimum number of compounds (or without the requiered symbol in the last part)
   vector<TNodeState>::iterator it = state.begin();
   int i=0;
-  while(it != state.end()) {
-    if (noOfCompoundElements[i] > minNoOfCompoundElements) {
+  while(it != state.end())
+  {
+    if(noOfCompoundElements[i] > minNoOfCompoundElements)
+    {
       delete (*it).sequence;
       it = state.erase(it);
-      //wcerr << L"Prune - State number " << i << L" removed!" << endl;
     }
-    else it++;
+    else
+    {
+      it++;
+    }
     i++;
   }
 
- delete[] noOfCompoundElements;
+  delete[] noOfCompoundElements;
 }
 
 
@@ -636,18 +635,24 @@ void
 State::pruneStatesWithForbiddenSymbol(int forbiddenSymbol) 
 {
   vector<TNodeState>::iterator it = state.begin();
-  while(it != state.end()) {
+  while(it != state.end())
+  {
     vector<int> *seq = (*it).sequence;
     bool found = false;
-    for(int i = seq->size()-1; i>=0; i--) {
-      if(seq->at(i) == forbiddenSymbol) {
+    for(int i = seq->size()-1; i>=0; i--)
+    {
+      if(seq->at(i) == forbiddenSymbol)
+      {
         i=-1;
         delete (*it).sequence;
         it = state.erase(it);
         found = true;
       }
     }
-    if (!found) it++;
+    if(!found)
+    {
+      it++;
+    }
   }
 }
 
@@ -658,13 +663,16 @@ State::lastPartHasRequiredSymbol(const vector<int> &seq, int requiredSymbol, int
 {
   // state is final - it should be restarted it with all elements in stateset restart_state, with old symbols conserved
   bool restart=false;
-  for (int n=seq.size()-1; n>=0; n--) {
+  for(int n=seq.size()-1; n>=0; n--)
+  {
     int symbol=seq.at(n);
-    if (symbol==requiredSymbol) {
+    if(symbol==requiredSymbol)
+    {
       restart=true;
       break;
     }
-    if (symbol==separationSymbol) {
+    if(symbol==separationSymbol)
+    {
       break;
     }
   }
@@ -676,27 +684,35 @@ void
 State::restartFinals(const set<Node *> &finals, int requiredSymbol, State *restart_state, int separationSymbol) 
 {
 
-  for (unsigned int i=0;  i<state.size(); i++) {
+  for(unsigned int i=0;  i<state.size(); i++)
+  {
     TNodeState state_i = state.at(i);
     // A state can be a possible final state and still have transitions
 
-    if (finals.count(state_i.where) > 0) {
+    if(finals.count(state_i.where) > 0) 
+    {
       bool restart = lastPartHasRequiredSymbol(*(state_i.sequence), requiredSymbol, separationSymbol);
-      if (restart) {
-        if (restart_state != NULL) {
-          for (unsigned int j=0; j<restart_state->state.size(); j++) {
+      if(restart)
+      {
+        if(restart_state != NULL)
+        {
+          for(unsigned int j=0; j<restart_state->state.size(); j++)
+          {
             TNodeState initst = restart_state->state.at(j);
             vector<int> *tnvec = new vector<int>;
 
-            for(unsigned int k=0; k < state_i.sequence->size(); k++) tnvec->push_back(state_i.sequence->at(k));
+            for(unsigned int k=0; k < state_i.sequence->size(); k++)
+            {
+              tnvec->push_back(state_i.sequence->at(k));
+            }
             TNodeState tn(initst.where, tnvec, state_i.dirty);
             tn.sequence->push_back(separationSymbol);
             state.push_back(tn);
-            }
           }
         }
       }
     }
+  }
 }
 
 
@@ -706,28 +722,20 @@ State::getReadableString(const Alphabet &a)
 {
   wstring retval = L"[";
 
-  for(unsigned int i=0; i<state.size(); i++) {
+  for(unsigned int i=0; i<state.size(); i++)
+  {
     vector<int>* seq = state.at(i).sequence;
-    if(seq != NULL) for (unsigned int j=0; j<seq->size(); j++) {
+    if(seq != NULL) for (unsigned int j=0; j<seq->size(); j++)
+    {
       wstring ws = L"";
       a.getSymbol(ws, seq->at(j));
-      //if(ws == L"") ws = L"?";
       retval.append(ws);
     }
 
-    /*Node *where = state.at(i).where;
-    if(where == NULL) retval.append(L"→@null");
-    else {
-      retval.append(L"→");
-      map<int, Dest>::iterator it;
-      wstring ws;
-      for (it = where->transitions.begin(); it != where->transitions.end(); it++) {
-        int symbol = (*it).first;
-        a.getSymbol(ws, symbol);
-        retval.append(ws);
-      }
-    }*/
-    if (i+1 < state.size()) retval.append(L", ");
+    if(i+1 < state.size())
+    {
+      retval.append(L", ");
+    }
   }
   retval.append(L"]");
   return retval;
