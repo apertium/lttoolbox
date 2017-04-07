@@ -760,53 +760,51 @@ FSTProcessor::initBiltrans()
 
 
 wstring
-FSTProcessor::compoundAnalysis(wstring input_word, bool uppercase, bool firstupper) {
-    const int MAX_COMBINATIONS = 500;
-    //wcerr << L"compoundAnalysis(input_word = " << input_word << L")" << endl;
+FSTProcessor::compoundAnalysis(wstring input_word, bool uppercase, bool firstupper)
+{
+  const int MAX_COMBINATIONS = 500;
 
-    State current_state = *initial_state;
+  State current_state = *initial_state;
 
-    for(unsigned int i=0; i<input_word.size(); i++) {
-        wchar_t val=input_word.at(i);
+  for(unsigned int i=0; i<input_word.size(); i++)
+  {
+    wchar_t val=input_word.at(i);
 
-        //wcerr << val << L" før step " << i << L" current_state = " << current_state.getReadableString(alphabet) << endl;
-        current_state.step_case(val, caseSensitive);
+    current_state.step_case(val, caseSensitive);
 
-        if(current_state.size() > MAX_COMBINATIONS) {
-            wcerr << L"Warning: compoundAnalysis's MAX_COMBINATIONS exceeded for '" << input_word << L"'" << endl;
-            wcerr << L"         gave up at char " << i << L" '" << val << L"'." << endl;
+    if(current_state.size() > MAX_COMBINATIONS)
+    {
+      wcerr << L"Warning: compoundAnalysis's MAX_COMBINATIONS exceeded for '" << input_word << L"'" << endl;
+      wcerr << L"         gave up at char " << i << L" '" << val << L"'." << endl;
 
-            wstring nullString = L"";
-            return  nullString;
-        }
-
-        //wcerr << val << L" eft step " << i << L" current_state = " << current_state.getReadableString(alphabet) << endl;
-
-        if(i < input_word.size()-1)
-            current_state.restartFinals(all_finals, compoundOnlyLSymbol, initial_state, '+');
-
-        //wcerr << val << " eft rest " << i << " current_state = " << current_state.getReadableString(alphabet) << endl;
-        //wcerr << i << " result = "  << current_state.filterFinals(all_finals, alphabet, escaped_chars, uppercase, firstupper) << endl;
-        //wcerr << i << " -- size = " << current_state.size() << endl;
-
-        if(current_state.size()==0) {
-            wstring nullString = L"";
-            return nullString;
-        }
+      wstring nullString = L"";
+      return  nullString;
     }
 
-    current_state.pruneCompounds(compoundRSymbol, '+', compound_max_elements);
-    wstring result = current_state.filterFinals(all_finals, alphabet, escaped_chars, uppercase, firstupper);
-    //wcerr << L"rrresult = " << result << endl;
+    if(i < input_word.size()-1)
+    {
+      current_state.restartFinals(all_finals, compoundOnlyLSymbol, initial_state, '+');
+    }
 
-    return result;
+    if(current_state.size()==0)
+    {
+      wstring nullString = L"";
+      return nullString;
+    }
+  }
+
+  current_state.pruneCompounds(compoundRSymbol, '+', compound_max_elements);
+  wstring result = current_state.filterFinals(all_finals, alphabet, escaped_chars, uppercase, firstupper);
+
+  return result;
 }
 
 
 
 void
-FSTProcessor::initDecompositionSymbols() {
-  if ((compoundOnlyLSymbol=alphabet(L"<:co:only-L>")) == 0
+FSTProcessor::initDecompositionSymbols()
+{
+  if((compoundOnlyLSymbol=alphabet(L"<:co:only-L>")) == 0
      && (compoundOnlyLSymbol=alphabet(L"<:compound:only-L>")) == 0
      && (compoundOnlyLSymbol=alphabet(L"<@co:only-L>")) == 0
      && (compoundOnlyLSymbol=alphabet(L"<@compound:only-L>")) == 0
@@ -814,10 +812,12 @@ FSTProcessor::initDecompositionSymbols() {
   {
     wcerr << L"Warning: Decomposition symbol <:compound:only-L> not found" << endl;
   }
-  else if (!showControlSymbols)
-      alphabet.setSymbol(compoundOnlyLSymbol, L"");
+  else if(!showControlSymbols)
+  {
+    alphabet.setSymbol(compoundOnlyLSymbol, L"");
+  }
 
-  if ((compoundRSymbol=alphabet(L"<:co:R>")) == 0
+  if((compoundRSymbol=alphabet(L"<:co:R>")) == 0
      && (compoundRSymbol=alphabet(L"<:compound:R>")) == 0
      && (compoundRSymbol=alphabet(L"<@co:R>")) == 0
      && (compoundRSymbol=alphabet(L"<@compound:R>")) == 0
@@ -825,184 +825,20 @@ FSTProcessor::initDecompositionSymbols() {
   {
     wcerr << L"Warning: Decomposition symbol <:compound:R> not found" << endl;
   }
-  else if (!showControlSymbols)
-      alphabet.setSymbol(compoundRSymbol, L"");
+  else if(!showControlSymbols)
+  {
+    alphabet.setSymbol(compoundRSymbol, L"");
+  }
 }
 
 
 void
-FSTProcessor::initDecomposition() {
+FSTProcessor::initDecomposition()
+{
   do_decomposition = true;
   initAnalysis();
   initDecompositionSymbols();
 }
-
-/*wstring
-FSTProcessor::decompose(wstring w)
-{
-        State current_state = *initial_state;
-
-        vector<vector<wstring> > elements;
-        bool firstupper = false, uppercase = false, last = false;
-        unsigned int index = 0;
-
-        if(w.length() < 7) // Heuristic: Do not try and decompound short words
-        {
-          return L"";
-        }
-        //wcerr << L"+ decompose: " << w << endl;
-
-        for (unsigned int i = 0; i < w.length(); i++)
-        {
-          //if(i == (w.length() - 1))
-          if(i == (w.length()))
-          {
-            last = true;
-          }
-
-          State previous_state = current_state;
-
-          unsigned int val = w.at(i);
-
-          //wcerr << L"++ [" << last << L"][" << current_state.size() << L"] decompose: " << w.at(i) << endl;
-
-          if(last)
-          {
-            previous_state = current_state;
-          }
-          else
-          {
-            previous_state = current_state;
-
-            if (current_state.size() != 0)
-            {
-              if (!isAlphabetic(val) && iswupper(val) && !caseSensitive)
-              {
-                current_state.step(val, towlower(val));
-              }
-              else
-              {
-                //wcerr << L"+++ step: " << w.at(i) << endl;
-                current_state.step(val);
-              }
-            }
-          }
-          if(i == (w.length())-1)
-          {
-            last = true;
-          }
-
-          if (current_state.size() == 0 || last)
-          {
-            //wcerr << L"+++ [" << last << L"][" << current_state.size() << L"]" << endl;
-            if(current_state.isFinal(all_finals))
-            {
-              previous_state = current_state;
-            }
-
-            if(previous_state.isFinal(all_finals))
-            {
-              firstupper = iswupper(w.at(0));
-              wstring result = previous_state.filterFinals(all_finals, alphabet,
-                                        escaped_chars,
-                                        uppercase, firstupper);
-
-              result = result.substr(1, result.size());
-              //wcerr << L"++++ result[" << index << L"]: " <<  result << endl;
-              vector<wstring> lfs;
-              wstring::size_type pos;
-
-              pos = result.find(L'/');
-              if(pos == wstring::npos)
-              {
-                lfs.push_back(result);
-              }
-              else
-              {
-                while(pos != wstring::npos)
-                {
-                  lfs.push_back(result.substr(0, pos));
-                  result.erase(0, pos + 1);
-                  pos = result.find(L'/');
-                }
-                lfs.push_back(result.substr(0, pos));
-              }
-              elements.push_back(lfs); // Add final analysis
-              index++;
-            }
-            else
-            {
-              return L"";
-            }
-
-            if (!last)
-            {
-              current_state = *initial_state;
-              i--;
-            }
-          }
-        }
-
-        //wcerr << L"+++ index: " << index << endl;
-        if(index > 3 || index < 2)  // Heuristic: Only permit binary/trinary compounds
-        {
-          return L"";
-        }
-
-        wstring lf = L"";
-
-        if(index != elements.size())
-        {
-          //wcerr << L"++ index != elements.size(): " << index << L" != " << elements.size() << endl;
-          return L"";
-        }
-
-        vector<wstring> first_elements = elements.at(0);
-        vector<wstring> second_elements = elements.at(1);
-
-        if(first_elements.size() == 0 || second_elements.size() == 0)
-        {
-          //wcerr << L"++ first or second empty" << endl;
-          return L"";
-        }
-
-        if(index == 2)
-        {
-          for(unsigned int j = 0; j < first_elements.size(); j++)
-          {
-            for(unsigned int y = 0; y < second_elements.size(); y++)
-            {
-              wstring analysis = first_elements.at(j) + L"+" + second_elements.at(y);
-              lf = lf + L"/" + analysis;
-              //wcerr << L"++++++ [" << j << L"][" << y << L"] compound_analysis: " << analysis << endl;
-            }
-          }
-        }
-        else if(index == 3)
-        {
-          vector<wstring> third_elements = elements.at(2);
-
-          for(unsigned int j = 0; j < first_elements.size(); j++)
-          {
-            for(unsigned int k = 0; k < second_elements.size(); k++)
-            {
-              for(unsigned int y = 0; y < third_elements.size(); y++)
-              {
-                wstring analysis = first_elements.at(j) + L"+" + second_elements.at(k) + L"+" + third_elements.at(y);
-                lf = lf + L"/" + analysis;
-                //wcerr << L"++++++ [" << j << L"][" << y << L"] compound_analysis: " << analysis << endl;
-              }
-            }
-          }
-
-        }
-        else
-        {
-          return L"";
-        }
-        //wcerr << L"+ decompose: " << lf << endl;
-        return lf;
-}*/
 
 void
 FSTProcessor::analysis(FILE *input, FILE *output)
