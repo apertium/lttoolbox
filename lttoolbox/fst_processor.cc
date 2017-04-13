@@ -762,7 +762,7 @@ FSTProcessor::initBiltrans()
 wstring
 FSTProcessor::compoundAnalysis(wstring input_word, bool uppercase, bool firstupper)
 {
-  const int MAX_COMBINATIONS = 500;
+  const int MAX_COMBINATIONS = 32767;
 
   State current_state = *initial_state;
 
