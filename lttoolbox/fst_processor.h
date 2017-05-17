@@ -42,7 +42,8 @@ enum GenerationMode
   gm_unknown,    // display unknown words, clear transfer and generation tags
   gm_all,        // display all
   gm_tagged,     // tagged generation
-  gm_tagged_nm   // clean tagged generation
+  gm_tagged_nm,  // clean tagged generation
+  gm_carefulcase // try lowercase iff no uppercase
 };
 
 /**

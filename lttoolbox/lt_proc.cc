@@ -57,6 +57,7 @@ void endProgram(char *name)
   cout << "  -v, --version:          version" << endl;
   cout << "  -z, --null-flush:       flush output on the null character " << endl;
   cout << "  -w, --dictionary-case:  use dictionary case instead of surface case" << endl;
+  cout << "  -C, --careful-case:     use dictionary case if present, else surface" << endl;
   cout << "  -h, --help:             show this help" << endl;
 #else
   cout << "  -a:   morphological analysis (default behavior)" << endl;
@@ -73,6 +74,7 @@ void endProgram(char *name)
   cout << "  -t:   apply transliteration dictionary" << endl;
   cout << "  -v:   version" << endl;
   cout << "  -z:   flush output on the null character " << endl;
+  cout << "  -C:   use dictionary case if present, else surface" << endl;
   cout << "  -w:   use dictionary case instead of surface case" << endl;
   cout << "  -h:   show this help" << endl;
 #endif
@@ -110,6 +112,7 @@ int main(int argc, char *argv[])
       {"dictionary-case", 0, 0, 'w'},
       {"version",	  0, 0, 'v'},
       {"case-sensitive",  0, 0, 'c'},
+      {"careful-case",    0, 0, 'C'},
       {"help",            0, 0, 'h'}
     };
 #endif
@@ -118,9 +121,9 @@ int main(int argc, char *argv[])
   {
 #if HAVE_GETOPT_LONG
     int option_index;
-    int c = getopt_long(argc, argv, "abceglmndopstzwvh", long_options, &option_index);
+    int c = getopt_long(argc, argv, "abceglmndopstzwvCh", long_options, &option_index);
 #else
-    int c = getopt(argc, argv, "abceglmndopstzwvh");
+    int c = getopt(argc, argv, "abceglmndopstzwvCh");
 #endif
 
     if(c == -1)
@@ -146,6 +149,7 @@ int main(int argc, char *argv[])
     case 'p':
     case 't':
     case 's':
+    case 'C':
       if(cmd == 0)
       {
 	cmd = c;
@@ -276,6 +280,12 @@ int main(int argc, char *argv[])
         fstp.initGeneration();
         checkValidity(fstp);
         fstp.generation(input, output, gm_tagged_nm);
+        break;
+
+      case 'C':
+        fstp.initGeneration();
+        checkValidity(fstp);
+        fstp.generation(input, output, gm_carefulcase);
         break;
 
       case 'p':

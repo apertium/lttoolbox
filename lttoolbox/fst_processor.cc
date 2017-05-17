@@ -1483,7 +1483,14 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
       {
 	if(!alphabet.isTag(val) && iswupper(val) && !caseSensitive)
 	{
-	  current_state.step(val, towlower(val));
+          if(mode == gm_carefulcase)
+          {
+	    current_state.step_careful(val, towlower(val));
+          }
+          else
+          {
+	    current_state.step(val, towlower(val));
+          }
 	}
 	else
 	{

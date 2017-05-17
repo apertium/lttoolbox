@@ -177,6 +177,57 @@ State::apply(int const input, int const alt)
   state = new_state;
 }
 
+void 
+State::apply_careful(int const input, int const alt)
+{
+  vector<TNodeState> new_state;
+  if(input == 0 || alt == 0)
+  {
+    state = new_state;
+    return;
+  }
+
+  
+  for(size_t i = 0, limit = state.size(); i != limit; i++)
+  {
+    map<int, Dest>::const_iterator it;
+    it = state[i].where->transitions.find(input);
+    if(it != state[i].where->transitions.end())
+    {
+      for(int j = 0; j != it->second.size; j++)
+      {
+        vector<int> *new_v = new vector<int>();
+	*new_v = *(state[i].sequence);
+        if(it->first != 0)
+        {
+          new_v->push_back(it->second.out_tag[j]);
+        }
+        new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
+      }
+    }
+    else
+    {
+      it = state[i].where->transitions.find(alt);
+      if(it != state[i].where->transitions.end())
+      {
+        for(int j = 0; j != it->second.size; j++)
+        {
+          vector<int> *new_v = new vector<int>();
+          *new_v = *(state[i].sequence);
+          if(it->first != 0)
+          {
+            new_v->push_back(it->second.out_tag[j]);
+          }
+          new_state.push_back(TNodeState(it->second.dest[j], new_v, true));
+        }
+      }
+    }
+    delete state[i].sequence;
+  }
+
+  state = new_state;
+}
+
 void
 State::epsilonClosure()
 {
@@ -274,6 +325,13 @@ void
 State::step(int const input, int const alt)
 {
   apply(input, alt);
+  epsilonClosure();
+}
+
+void
+State::step_careful(int const input, int const alt)
+{
+  apply_careful(input, alt);
   epsilonClosure();
 }
 

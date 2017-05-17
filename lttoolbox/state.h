@@ -80,6 +80,14 @@ private:
   void apply(int const input, int const alt1, int const alt2);
 
   /**
+   * Make a transition, only applying lowercase version if
+   * uppercase version is absent
+   * @param input the input symbol
+   * @param alt the alternative input symbol
+   */
+  void apply_careful(int const input, int const alt);
+
+  /**
    * Calculate the epsilon closure over the current state, replacing
    * its content.
    */
@@ -144,6 +152,7 @@ public:
 
   void step_case(wchar_t val, wchar_t val2, bool caseSensitive);
 
+  void step_careful(int const input, int const alt);
 
   /**
    * Init the state with the initial node and empty output
