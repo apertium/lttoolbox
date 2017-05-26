@@ -441,6 +441,18 @@ Transducer::hasNoFinals() const
   return finals.size() == 0;
 }
 
+map<int, multimap<int, int> >&
+Transducer::getTransitions()
+{
+  return transitions;
+}
+
+set<int>
+Transducer::getFinals() const
+{
+  return set<int>(finals);
+}
+
 int
 Transducer::size() const
 {

@@ -177,6 +177,17 @@ public:
    */
   void joinFinals(int const epsilon_tag = 0);
 
+
+  /**
+   * Return a copy of the set of final states
+   */
+  set<int> getFinals() const;
+
+  /**
+   * Return reference to the transitions
+   */
+  map<int, multimap<int, int> >& getTransitions();
+
   /**
    * Reverse all the transductions of a transducer
    * @param epsilon_tag the tag to take as epsilon
