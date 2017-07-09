@@ -121,7 +121,6 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
   wstring line;
   bool first_line = true;       // First line -- see below
   bool seen_input_symbol = false;
-
   while (getline(infile, line)) 
   {
     tokens.clear();

@@ -87,6 +87,14 @@ private:
    */
   void apply_careful(int const input, int const alt);
 
+  /** 
+   * Make a transition, but overriding the output symbol
+   * @param input symbol
+   * @param output symbol we expect to appear 
+   * @param output symbol we want to appear 
+   */
+  void apply_override(int const input, int const old_sym, int const new_sym);
+
   /**
    * Calculate the epsilon closure over the current state, replacing
    * its content.
@@ -153,6 +161,8 @@ public:
   void step_case(wchar_t val, wchar_t val2, bool caseSensitive);
 
   void step_careful(int const input, int const alt);
+
+  void step_override(int const input, int const old_sym, int const new_sym);
 
   /**
    * Init the state with the initial node and empty output

@@ -130,6 +130,70 @@ State::apply(int const input)
 }
 
 void 
+State::apply_override(int const input, int const old_sym, int const new_sym)
+{
+  vector<TNodeState> new_state;
+  if(input == 0 || old_sym == 0)
+  {
+    state = new_state;
+    return;
+  }
+
+  
+  for(size_t i = 0, limit = state.size(); i != limit; i++)
+  {
+    map<int, Dest>::const_iterator it;
+    it = state[i].where->transitions.find(input);
+    if(it != state[i].where->transitions.end())
+    {
+      for(int j = 0; j != it->second.size; j++)
+      {
+        vector<int> *new_v = new vector<int>();
+	*new_v = *(state[i].sequence);
+        if(it->first != 0)
+        {
+          if(it->second.out_tag[j] == old_sym) 
+          {
+            new_v->push_back(new_sym);
+          } 
+          else 
+          {
+            new_v->push_back(it->second.out_tag[j]);
+          }
+        }
+        new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
+      }
+    }
+    it = state[i].where->transitions.find(old_sym);
+    if(it != state[i].where->transitions.end())
+    {
+      for(int j = 0; j != it->second.size; j++)
+      {
+        vector<int> *new_v = new vector<int>();
+        *new_v = *(state[i].sequence);
+        if(it->first != 0)
+        {
+          if(it->second.out_tag[j] == old_sym) 
+          {
+            new_v->push_back(new_sym);
+          } 
+          else 
+          {
+            new_v->push_back(it->second.out_tag[j]);
+          }
+        }
+        new_state.push_back(TNodeState(it->second.dest[j], new_v, true));
+      }
+    }
+    delete state[i].sequence;
+  }
+
+  state = new_state;
+}
+
+
+
+void 
 State::apply(int const input, int const alt)
 {
   vector<TNodeState> new_state;
@@ -325,6 +389,13 @@ void
 State::step(int const input, int const alt)
 {
   apply(input, alt);
+  epsilonClosure();
+}
+
+void
+State::step_override(int const input, int const old_sym, int const new_sym)
+{
+  apply_override(input, old_sym, new_sym);
   epsilonClosure();
 }
 
