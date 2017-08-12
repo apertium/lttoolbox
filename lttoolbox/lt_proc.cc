@@ -38,7 +38,7 @@ using namespace std;
 void endProgram(char *name)
 {
   cout << basename(name) << ": process a stream with a letter transducer" << endl;
-  cout << "USAGE: " << basename(name) << " [ -a | -b | -c | -d | -e | -g | -n | -p | -s | -t | -v | -h -z -w ] [ -i icx_file ] fst_file [input_file [output_file]]" << endl;
+  cout << "USAGE: " << basename(name) << " [ -a | -b | -c | -d | -e | -g | -n | -p | -s | -t | -v | -h -z -w ] [ -i icx_file ] [ -r rcx_file ] fst_file [input_file [output_file]]" << endl;
   cout << "Options:" << endl;
 #if HAVE_GETOPT_LONG
   cout << "  -a, --analysis:          morphological analysis (default behavior)" << endl;
@@ -48,6 +48,7 @@ void endProgram(char *name)
   cout << "  -e, --decompose-nouns:   Try to decompound unknown words" << endl;
   cout << "  -g, --generation:        morphological generation" << endl;
   cout << "  -i, --ignored-chars:     specify file with characters to ignore" << endl;
+  cout << "  -r, --restore-chars:     specify file with characters to diacritic restoration" << endl;
   cout << "  -l, --tagged-gen:        morphological generation keeping lexical forms" << endl;
   cout << "  -m, --tagged-nm-gen:     same as -l but without unknown word marks" << endl;
   cout << "  -n, --non-marked-gen     morph. generation without unknown word marks" << endl;
@@ -69,6 +70,7 @@ void endProgram(char *name)
   cout << "  -e:   try to decompose unknown words as compounds" << endl;
   cout << "  -g:   morphological generation" << endl;
   cout << "  -i:   specify file with characters to ignore" << endl;
+  cout << "  -r:   specify file with characters to diacritic restoration" << endl;
   cout << "  -l:   morphological generation keeping lexical forms" << endl;
   cout << "  -n:   morph. generation without unknown word marks" << endl;
   cout << "  -o:   lexical transfer with surface forms" << endl;
@@ -106,6 +108,7 @@ int main(int argc, char *argv[])
       {"surf-bilingual",    0, 0, 'o'},
       {"generation",        0, 0, 'g'},
       {"ignored-chars",     1, 0, 'i'},
+      {"restore-chars",     1, 0, 'i'},
       {"non-marked-gen",    0, 0, 'n'},
       {"debugged-gen",      0, 0, 'd'},
       {"tagged-gen",        0, 0, 'l'},
@@ -127,9 +130,9 @@ int main(int argc, char *argv[])
   {
 #if HAVE_GETOPT_LONG
     int option_index;
-    int c = getopt_long(argc, argv, "abcegi:lmndopstzwvCIh", long_options, &option_index);
+    int c = getopt_long(argc, argv, "abcegi:r:lmndopstzwvCIh", long_options, &option_index);
 #else
-    int c = getopt(argc, argv, "abcegi:lmndopstzwvCIh");
+    int c = getopt(argc, argv, "abcegi:r:lmndopstzwvCIh");
 #endif
 
     if(c == -1)
@@ -148,8 +151,13 @@ int main(int argc, char *argv[])
       fstp.parseICX(optarg);
       break;
 
+    case 'r':
+      fstp.setRestoreChars(true);
+      fstp.parseRCX(optarg);
+
     case 'I':
       fstp.setUseDefaultIgnoredChars(false);
+
       break;
 
     case 'e':      

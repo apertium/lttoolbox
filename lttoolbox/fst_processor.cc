@@ -53,6 +53,7 @@ isLastBlankTM(false)
   nullFlushGeneration = false;
   useIgnoredChars = false;
   useDefaultIgnoredChars = true;
+  useRestoreChars = false;
   showControlSymbols = false;
   biltransSurfaceForms = false;
   compoundOnlyLSymbol = 0;
@@ -106,6 +107,26 @@ FSTProcessor::parseICX(string const &fichero)
 }
 
 void
+FSTProcessor::parseRCX(string const &fichero)
+{
+  if(useRestoreChars)
+  {
+    reader = xmlReaderForFile(fichero.c_str(), NULL, 0);
+    if(reader == NULL)
+    {
+      cerr << "Error: cannot open '" << fichero << "'." << endl;
+      exit(EXIT_FAILURE);
+    }
+    int ret = xmlTextReaderRead(reader);
+    while(ret == 1)
+    {
+      procNodeRCX();
+      ret = xmlTextReaderRead(reader);
+    }
+  }
+}
+
+void
 FSTProcessor::procNodeICX()
 {
   xmlChar  const *xnombre = xmlTextReaderConstName(reader);
@@ -140,6 +161,38 @@ FSTProcessor::initDefaultIgnoredCharacters()
   ignored_chars.insert(173); // '\u00AD', soft hyphen
 }
 
+void
+FSTProcessor::procNodeRCX()
+{
+  xmlChar  const *xnombre = xmlTextReaderConstName(reader);
+  wstring nombre = XMLParseUtil::towstring(xnombre);
+  if(nombre == L"#text")
+  {
+    /* ignore */
+  }
+  else if(nombre == L"restore-chars")
+  {
+    /* ignore */
+  }
+  else if(nombre == L"char")
+  {
+    rcx_current_char = static_cast<int>(XMLParseUtil::attrib(reader, L"value")[0]);
+  }
+  else if(nombre == L"restore-char")
+  {
+    rcx_map[rcx_current_char].insert(static_cast<int>(XMLParseUtil::attrib(reader, L"value")[0]));
+  }
+  else if(nombre == L"#comment")
+  {
+    /* ignore */
+  }
+  else
+  {
+    wcerr << L"Error in RCX file (" << xmlTextReaderGetParserLineNumber(reader);
+    wcerr << L"): Invalid node '<" << nombre << L">'." << endl;
+    exit(EXIT_FAILURE);
+  }
+}
 
 wchar_t
 FSTProcessor::readEscaped(FILE *input)
@@ -932,6 +985,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
   wstring sf = L"";
   int last = 0;
   bool firstupper = false, uppercase = false;
+  map<int, set<int> >::iterator rcx_map_ptr;
 
   while(wchar_t val = readAnalysis(input))
   {
@@ -1023,13 +1077,37 @@ FSTProcessor::analysis(FILE *input, FILE *output)
       last = input_buffer.getPos();
     }
 
-    if(!iswupper(val) || caseSensitive)
+    if(useRestoreChars && rcx_map.find(val) != rcx_map.end())
     {
-      current_state.step(val);
+      rcx_map_ptr = rcx_map.find(val);
+      set<int> tmpset = rcx_map_ptr->second;
+      if(!iswupper(val) || caseSensitive)
+      {
+        current_state.step(val, tmpset);
+      }
+      else if(rcx_map.find(towlower(val)) != rcx_map.end())
+      {
+        rcx_map_ptr = rcx_map.find(tolower(val));
+        tmpset.insert(tolower(val));
+        tmpset.insert(rcx_map_ptr->second.begin(), rcx_map_ptr->second.end());
+        current_state.step(val, tmpset);
+      }
+      else
+      {
+        tmpset.insert(tolower(val));
+        current_state.step(val, tmpset);
+      }
     }
     else
     {
-      current_state.step(val, towlower(val));
+      if(!iswupper(val) || caseSensitive)
+      {
+        current_state.step(val);
+      }
+      else
+      {
+        current_state.step(val, towlower(val));
+      }
     }
 
     if(current_state.size() != 0)
@@ -2965,11 +3043,16 @@ FSTProcessor::setIgnoredChars(bool const value)
 }
 
 void
+FSTProcessor::setRestoreChars(bool const value)
+{
+  useRestoreChars = value;
+}
+
+void
 FSTProcessor::setUseDefaultIgnoredChars(bool const value)
 {
   useDefaultIgnoredChars = value;
 }
-
 
 bool
 FSTProcessor::getDecompoundingMode()
