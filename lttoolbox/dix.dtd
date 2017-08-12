@@ -118,6 +118,9 @@
 <!ELEMENT b EMPTY>
 	<!-- blank chars block mark -->
 	
+<!ELEMENT ig (#PCDATA | a | b | j | s)*>
+	<!-- 'group identity' -- equivalent to <p> where <r> contains <g>, whose contents are the same as those of <l> -->
+
 <!ELEMENT g (#PCDATA | a | b | j | s)*>
 	<!-- mark special groups in lemmas -->
 <!ATTLIST g

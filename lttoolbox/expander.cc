@@ -220,6 +220,35 @@ Expander::procIdentity()
 }
 
 pair<wstring, wstring>
+Expander::procIdentityGroup()
+{
+  wstring lhs = L"";
+  wstring rhs = L"#";
+  wstring both_sides = L"";
+
+  if(!xmlTextReaderIsEmptyElement(reader))
+  {
+    wstring name = L"";
+
+    while(true)
+    {
+      xmlTextReaderRead(reader);
+      name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+      if(name == Compiler::COMPILER_IDENTITYGROUP_ELEM)
+      {
+        break;
+      }
+      readString(both_sides, name);
+    }
+  }
+  lhs += both_sides;
+  rhs += both_sides;
+
+  pair<wstring, wstring> e(lhs, rhs);
+  return e;
+}
+
+pair<wstring, wstring>
 Expander::procTransduction()
 {
   wstring lhs = L"", rhs = L""; 
@@ -370,6 +399,13 @@ Expander::procEntry(FILE *output)
       append(items, val);
       append(items_lr, val);
       append(items_rl, val);
+    }
+    else if(name == Compiler::COMPILER_IDENTITYGROUP_ELEM)
+    {      
+      pair<wstring, wstring> p = procIdentityGroup();
+      append(items, p);
+      append(items_lr, p);
+      append(items_rl, p);
     }
     else if(name == Compiler::COMPILER_REGEXP_ELEM)
     {

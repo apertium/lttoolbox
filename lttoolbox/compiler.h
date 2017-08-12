@@ -207,7 +207,7 @@ private:
    * Parse the &lt;i&lt; element
    * @return a list of tokens from the dictionary's entry
    */
-  EntryToken procIdentity();
+  EntryToken procIdentity(bool ig = false);
 
   /**
    * Parse the &lt;par&gt; element
@@ -293,6 +293,7 @@ public:
   static wstring const COMPILER_ID_ATTR;
   static wstring const COMPILER_TYPE_ATTR;
   static wstring const COMPILER_IDENTITY_ELEM;
+  static wstring const COMPILER_IDENTITYGROUP_ELEM;
   static wstring const COMPILER_JOIN_ELEM;
   static wstring const COMPILER_BLANK_ELEM;
   static wstring const COMPILER_POSTGENERATOR_ELEM;
