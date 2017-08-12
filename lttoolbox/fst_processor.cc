@@ -17,6 +17,7 @@
 #include <lttoolbox/fst_processor.h>
 #include <lttoolbox/compression.h>
 #include <lttoolbox/exception.h>
+#include <lttoolbox/xml_parse_util.h>
 
 #include <iostream>
 #include <cerrno>
@@ -50,11 +51,18 @@ isLastBlankTM(false)
   do_decomposition = false;
   nullFlush = false;
   nullFlushGeneration = false;
+  useIgnoredChars = false;
+  useDefaultIgnoredChars = true;
   showControlSymbols = false;
   biltransSurfaceForms = false;
   compoundOnlyLSymbol = 0;
   compoundRSymbol = 0;
   compound_max_elements = 4;
+
+  if(useDefaultIgnoredChars)
+  {
+    initDefaultIgnoredCharacters();
+  }
 
   initial_state = new State();
   current_state = new State();
@@ -71,6 +79,67 @@ FSTProcessor::streamError()
 {
   throw Exception("Error: Malformed input stream.");
 }
+
+void
+FSTProcessor::parseICX(string const &fichero)
+{
+  if(useIgnoredChars)
+  {
+    reader = xmlReaderForFile(fichero.c_str(), NULL, 0);
+    if(reader == NULL)
+    {
+      cerr << "Error: cannot open '" << fichero << "'." << endl;
+      exit(EXIT_FAILURE);
+    }
+    int ret = xmlTextReaderRead(reader);
+    while(ret == 1)
+    {
+      procNodeICX();
+      ret = xmlTextReaderRead(reader);
+    }
+    // No point trying to process ignored chars if there are none
+    if(ignored_chars.size() == 0)
+    {
+      useIgnoredChars = false;
+    }
+  }
+}
+
+void
+FSTProcessor::procNodeICX()
+{
+  xmlChar  const *xnombre = xmlTextReaderConstName(reader);
+  wstring nombre = XMLParseUtil::towstring(xnombre);
+  if(nombre == L"#text")
+  {
+    /* ignore */
+  }
+  else if(nombre == L"ignored-chars")
+  {
+    /* ignore */
+  }
+  else if(nombre == L"char")
+  {
+    ignored_chars.insert(static_cast<int>(XMLParseUtil::attrib(reader, L"value")[0]));
+  }
+  else if(nombre == L"#comment")
+  {
+    /* ignore */
+  }
+  else
+  {
+    wcerr << L"Error in ICX file (" << xmlTextReaderGetParserLineNumber(reader);
+    wcerr << L"): Invalid node '<" << nombre << L">'." << endl;
+    exit(EXIT_FAILURE);
+  }
+}
+
+void
+FSTProcessor::initDefaultIgnoredCharacters()
+{
+  ignored_chars.insert(173); // '\u00AD', soft hyphen
+}
+
 
 wchar_t
 FSTProcessor::readEscaped(FILE *input)
@@ -132,6 +201,12 @@ FSTProcessor::readAnalysis(FILE *input)
   if(feof(input))
   {
     return 0;
+  }
+
+  if((useIgnoredChars || useDefaultIgnoredChars) && ignored_chars.find(val) != ignored_chars.end())
+  {
+    input_buffer.add(val);
+    val = static_cast<wchar_t>(fgetwc_unlocked(input));
   }
 
   if(escaped_chars.find(val) != escaped_chars.end())
@@ -736,6 +811,7 @@ FSTProcessor::initTMAnalysis()
 void
 FSTProcessor::initGeneration()
 {
+  setIgnoredChars(false);
   calcInitial();
   for(map<wstring, TransExe, Ltstr>::iterator it = transducers.begin(),
                                              limit = transducers.end();
@@ -2881,6 +2957,19 @@ FSTProcessor::setNullFlush(bool const value)
 {
   nullFlush = value;
 }
+
+void
+FSTProcessor::setIgnoredChars(bool const value)
+{
+  useIgnoredChars = value;
+}
+
+void
+FSTProcessor::setUseDefaultIgnoredChars(bool const value)
+{
+  useDefaultIgnoredChars = value;
+}
+
 
 bool
 FSTProcessor::getDecompoundingMode()

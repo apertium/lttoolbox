@@ -25,6 +25,8 @@ architecture: \fBhttp://www.apertium.org\fR.
 .B \-h
 .B \-z
 .B \-w
+] [
+.B \-i \fR icx_file
 ] fst_file [input_file [output_file]]
 .PP
 .B lt-proc
@@ -46,6 +48,8 @@ architecture: \fBhttp://www.apertium.org\fR.
 .B \-\-decompose\-compounds \fR|
 .B \-\-version \fR|
 .B \-\-help
+] [
+.B \-\-ignored\-chars \fR icx_file
 ] fst_file [input_file [output_file]]
 .SH DESCRIPTION
 .BR lt-proc 
@@ -148,6 +152,9 @@ annotation system format: \fBhttp://orthoepikon.sf.net\fR.
 .TP
 .B \-t, \-\-transliteration
 Apply a transliteration dictionary
+.TP
+.B \-i, \-\-ignored\-chars icx_file
+Ignores characters specified in the file icx_file
 .TP
 .B \-z, \-\-null\-flush
 Flush output on the null character

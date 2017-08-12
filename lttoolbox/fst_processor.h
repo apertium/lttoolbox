@@ -24,6 +24,7 @@
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/state.h>
 #include <lttoolbox/trans_exe.h>
+#include <libxml/xmlreader.h>
 
 #include <cwchar>
 #include <map>
@@ -108,6 +109,11 @@ private:
   set<wchar_t> escaped_chars;
 
   /**
+   * Set of characters to ignore
+   */
+  set<wchar_t> ignored_chars;
+
+  /**
    * Alphabet
    */
   Alphabet alphabet;
@@ -154,6 +160,16 @@ private:
    * nullFlush property for the skipUntil function
    */
   bool nullFlushGeneration;
+
+  /**
+   * if true, ignore the provided set of characters 
+   */
+  bool useIgnoredChars;
+
+  /**
+   * if true, skips loading the default set of ignored characters
+   */
+  bool useDefaultIgnoredChars;
 
   /**
    * try analysing unknown words as compounds
@@ -350,7 +366,12 @@ private:
 
   wstring compose(wstring const &lexforms, wstring const &queue) const;
 
+  void procNodeICX();
+  void initDefaultIgnoredCharacters();
+
   bool isLastBlankTM;
+
+  xmlTextReaderPtr reader;
 public:
   FSTProcessor();
   ~FSTProcessor();
@@ -375,6 +396,7 @@ public:
   pair<wstring, int> biltransWithQueue(wstring const &input_word, bool with_delim = true);
   wstring biltransWithoutQueue(wstring const &input_word, bool with_delim = true);
   void SAO(FILE *input = stdin, FILE *output = stdout);
+  void parseICX(string const &fichero);
 
   void load(FILE *input);
 
@@ -383,7 +405,9 @@ public:
   void setCaseSensitiveMode(bool const value);
   void setDictionaryCaseMode(bool const value);
   void setBiltransSurfaceForms(bool const value);
+  void setIgnoredChars(bool const value);
   void setNullFlush(bool const value);
+  void setUseDefaultIgnoredChars(bool);
   bool getNullFlush();
   bool getDecompoundingMode();
 };
