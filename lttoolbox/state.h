@@ -80,6 +80,13 @@ private:
   void apply(int const input, int const alt1, int const alt2);
 
   /**
+   * Make a transition, with multiple possibilities
+   * @param input the input symbol
+   * @param alts set of alternative input symbols
+   */
+  void apply(int const input, set<int> const alts);
+
+  /**
    * Make a transition, only applying lowercase version if
    * uppercase version is absent
    * @param input the input symbol
@@ -155,6 +162,13 @@ public:
   void step(int const input, int const alt);
 
   void step(int const input, int const alt1, int const alt2);
+
+  /**
+   * step = apply + epsilonClosure
+   * @param input the input symbol
+   * @param alt the alternative input symbols
+   */
+  void step(int const input, set<int> const alts);
 
   void step_case(wchar_t val, bool caseSensitive);
 
