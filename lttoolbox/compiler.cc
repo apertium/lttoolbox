@@ -428,7 +428,7 @@ Compiler::procIdentity(bool ig)
     {
       xmlTextReaderRead(reader);
       name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
-      if(name == COMPILER_IDENTITY_ELEM)
+      if(name == COMPILER_IDENTITY_ELEM || name == COMPILER_IDENTITYGROUP_ELEM)
       {
         break;
       }

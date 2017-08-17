@@ -62,7 +62,7 @@
 	<!-- id: dictionary section identifier -->
 	<!-- type: dictionary section type -->
 	
-<!ELEMENT e (i | p | par | re)+>
+<!ELEMENT e (i | p | par | re | ig)+>
 	<!-- entry -->
 <!ATTLIST e
 	r (LR|RL) #IMPLIED
