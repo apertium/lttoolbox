@@ -27,7 +27,7 @@
 #include <cwctype>
 
 #ifdef _WIN32
-#include <utf8_fwrap.hpp>
+#include <utf8_fwrap.h>
 #endif
 
 using namespace std;
