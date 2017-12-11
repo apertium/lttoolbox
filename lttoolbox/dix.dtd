@@ -1,16 +1,16 @@
 <!--
    Copyright (C) 2005 Universitat d'Alacant / Universidad de Alicante
-  
+
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License as
    published by the Free Software Foundation; either version 2 of the
    License, or (at your option) any later version.
-  
+
    This program is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    General Public License for more details.
-  
+
    You should have received a copy of the GNU General Public License
    along with this program; if not <http://www.gnu.org/licenses/>.
 
@@ -22,10 +22,10 @@
 
 <!ELEMENT alphabet (#PCDATA)>
 	<!-- alphabetic character list -->
-	
+
 <!ELEMENT sdefs (sdef+)>
 	<!-- symbol definition section -->
-	
+
 <!ELEMENT sdef EMPTY>
 	<!-- symbol definition -->
 <!ATTLIST sdef
@@ -36,10 +36,10 @@
         c CDATA  #IMPLIED
 >
         <!-- c: symbol (tag) comment -->
-	
+
 <!ELEMENT pardefs (pardef+)>
 	<!-- paradigm definition section -->
-	
+
 <!ELEMENT pardef (e+)>
 	<!-- paradigm definition -->
 <!ATTLIST pardef
@@ -51,17 +51,17 @@
 >
         <!-- c: comment about paradigm -->
 
-	
+
 <!ELEMENT section (e+)>
 	<!-- dictionary section -->
 <!ATTLIST section
 	id ID #REQUIRED
 	type (standard|inconditional|postblank|preblank) #REQUIRED
-	
+
 >
 	<!-- id: dictionary section identifier -->
 	<!-- type: dictionary section type -->
-	
+
 <!ELEMENT e (i | p | par | re | ig)+>
 	<!-- entry -->
 <!ATTLIST e
@@ -84,7 +84,7 @@
 	<!-- c: comment -->
 	<!-- i: ignore ('yes') means ignore, otherwise it is not ignored) -->
 	<!-- slr: translation sense when translating from left to right -->
-	<!-- srl: translation sense when translating from right to left --> 
+	<!-- srl: translation sense when translating from right to left -->
 	<!-- alt: alternative entries are omitted if not selected -->
 	<!-- v: variant sets (monodix) direction restrictions based on language variant -->
 	<!-- vl: variant left sets direction restrictions based on language variant for language on left of bidix -->
@@ -93,31 +93,38 @@
 	<!-- reference to paradigm -->
 <!ATTLIST par
 	n CDATA #REQUIRED
-	
+
 >
 	<!-- n: paradigm name -->
-	
+
 <!ELEMENT i (#PCDATA | b | s | g | j | a)*>
 	<!-- identity -->
-	
+
 <!ELEMENT re (#PCDATA)>
 	<!-- regular expression identification -->
-	
+
 <!ELEMENT p (l, r)>
 	<!-- pair of strings -->
-	
+
 <!ELEMENT l (#PCDATA | a | b | g | j | s)*>
 	<!-- left part of p -->
-	
+<!ATTLIST l
+    c CDATA #IMPLIED
+>
+	<!-- c: comment -->
 <!ELEMENT r (#PCDATA | a | b | g | j | s)*>
 	<!-- right part of p -->
-	
+<!ATTLIST r
+    c CDATA #IMPLIED
+>
+	<!-- c: comment -->
+
 <!ELEMENT a EMPTY>
 	<!-- post-generator wake-up mark -->
-	
+
 <!ELEMENT b EMPTY>
 	<!-- blank chars block mark -->
-	
+
 <!ELEMENT ig (#PCDATA | a | b | j | s)*>
 	<!-- 'group identity' - equivalent to <p> where <r> contains <g>, whose contents are the same as those of <l> -->
 
@@ -128,14 +135,14 @@
 >
 	<!-- i is used to co-index groups in the left with those -->
 	<!-- on the right of a pair -->
-	
+
 <!ELEMENT j EMPTY>
 	<!-- join lexical forms -->
-	
+
 <!ELEMENT s EMPTY>
 	<!-- reference to symbol (tag) -->
 <!ATTLIST s
 	n IDREF #REQUIRED
-	
+
 >
 	<!-- n: symbol (tag) name -->
