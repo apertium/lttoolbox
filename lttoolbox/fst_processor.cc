@@ -64,15 +64,6 @@ isLastBlankTM(false)
   {
     initDefaultIgnoredCharacters();
   }
-
-  initial_state = new State();
-  current_state = new State();
-}
-
-FSTProcessor::~FSTProcessor()
-{
-  delete current_state;
-  delete initial_state;
 }
 
 void
@@ -651,7 +642,7 @@ FSTProcessor::calcInitial()
     root.addTransition(0, 0, it->second.getInitial());
   }
 
-  initial_state->init(&root);
+  initial_state.init(&root);
 }
 
 bool
@@ -1128,7 +1119,7 @@ FSTProcessor::compoundAnalysis(wstring input_word, bool uppercase, bool firstupp
 {
   const int MAX_COMBINATIONS = 32767;
 
-  State current_state = *initial_state;
+  State current_state = initial_state;
 
   for(unsigned int i=0; i<input_word.size(); i++)
   {
@@ -1215,7 +1206,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
   bool last_incond = false;
   bool last_postblank = false;
   bool last_preblank = false;
-  State current_state = *initial_state;
+  State current_state = initial_state;
   wstring lf = L"";
   wstring sf = L"";
   int last = 0;
@@ -1484,7 +1475,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
         input_buffer.back(1);
       }
 
-      current_state = *initial_state;
+      current_state = initial_state;
       lf = L"";
       sf = L"";
       last_incond = false;
@@ -1567,7 +1558,7 @@ FSTProcessor::transliteration_wrapper_null_flush(FILE *input, FILE *output)
 void
 FSTProcessor::tm_analysis(FILE *input, FILE *output)
 {
-  State current_state = *initial_state;
+  State current_state = initial_state;
   wstring lf = L"";
   wstring sf = L"";
   int last = 0;
@@ -1710,7 +1701,7 @@ FSTProcessor::tm_analysis(FILE *input, FILE *output)
         input_buffer.back(1);
       }
 
-      current_state = *initial_state;
+      current_state = initial_state;
       lf = L"";
       sf = L"";
     }
@@ -1729,7 +1720,7 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
     generation_wrapper_null_flush(input, output, mode);
   }
 
-  State current_state = *initial_state;
+  State current_state = initial_state;
   wstring sf = L"";
 
   outOfWord = false;
@@ -1854,7 +1845,7 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
         }
       }
 
-      current_state = *initial_state;
+      current_state = initial_state;
       sf = L"";
     }
     else if(iswspace(val) && sf.size() == 0)
@@ -1899,7 +1890,7 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
   }
 
   bool skip_mode = true;
-  State current_state = *initial_state;
+  State current_state = initial_state;
   wstring lf = L"";
   wstring sf = L"";
   int last = 0;
@@ -2045,7 +2036,7 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
 	  }
 	}
 
-	current_state = *initial_state;
+	current_state = initial_state;
 	lf = L"";
 	sf = L"";
 	skip_mode = true;
@@ -2065,7 +2056,7 @@ FSTProcessor::transliteration(FILE *input, FILE *output)
     transliteration_wrapper_null_flush(input, output);
   }
 
-  State current_state = *initial_state;
+  State current_state = initial_state;
   wstring lf = L"";
   wstring sf = L"";
   int last = 0;
@@ -2081,7 +2072,7 @@ FSTProcessor::transliteration(FILE *input, FILE *output)
       if(!lf.empty())
       {
         fputws_unlocked(lf.substr(1).c_str(), output);
-        current_state = *initial_state;
+        current_state = initial_state;
         lf = L"";
         sf = L"";
       }
@@ -2138,7 +2129,7 @@ FSTProcessor::transliteration(FILE *input, FILE *output)
             fputwc_unlocked(val, output);
           }
         }
-        current_state = *initial_state;
+        current_state = initial_state;
         lf = L"";
         sf = L"";
       }
@@ -2151,7 +2142,7 @@ FSTProcessor::transliteration(FILE *input, FILE *output)
 wstring
 FSTProcessor::biltransfull(wstring const &input_word, bool with_delim)
 {
-  State current_state = *initial_state;
+  State current_state = initial_state;
   wstring result = L"";
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
@@ -2318,7 +2309,7 @@ FSTProcessor::biltransfull(wstring const &input_word, bool with_delim)
 wstring
 FSTProcessor::biltrans(wstring const &input_word, bool with_delim)
 {
-  State current_state = *initial_state;
+  State current_state = initial_state;
   wstring result = L"";
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
@@ -2524,7 +2515,7 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
     bilingual_wrapper_null_flush(input, output);
   }
 
-  State current_state = *initial_state;
+  State current_state = initial_state;
   wstring sf = L"";		// source language analysis
   wstring queue = L"";		// symbols to be added to each target
   wstring result = L"";		// result of looking up analysis in bidix
@@ -2604,7 +2595,7 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
       surface = L"";
       queue = L"";
       result = L"";
-      current_state = *initial_state;
+      current_state = initial_state;
       sf = L"";
       seentags = false;
     }
@@ -2687,7 +2678,7 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
 pair<wstring, int>
 FSTProcessor::biltransWithQueue(wstring const &input_word, bool with_delim)
 {
-  State current_state = *initial_state;
+  State current_state = initial_state;
   wstring result = L"";
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
@@ -2869,7 +2860,7 @@ FSTProcessor::biltransWithQueue(wstring const &input_word, bool with_delim)
 wstring
 FSTProcessor::biltransWithoutQueue(wstring const &input_word, bool with_delim)
 {
-  State current_state = *initial_state;
+  State current_state = initial_state;
   wstring result = L"";
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
@@ -2992,14 +2983,14 @@ FSTProcessor::biltransWithoutQueue(wstring const &input_word, bool with_delim)
 bool
 FSTProcessor::valid() const
 {
-  if(initial_state->isFinal(all_finals))
+  if(initial_state.isFinal(all_finals))
   {
     wcerr << L"Error: Invalid dictionary (hint: the left side of an entry is empty)" << endl;
     return false;
   }
   else
   {
-    State s = *initial_state;
+    State s = initial_state;
     s.step(L' ');
     if(s.size() != 0)
     {
@@ -3083,7 +3074,7 @@ FSTProcessor::SAO(FILE *input, FILE *output)
 {
   bool last_incond = false;
   bool last_postblank = false;
-  State current_state = *initial_state;
+  State current_state = initial_state;
   wstring lf = L"";
   wstring sf = L"";
   int last = 0;
@@ -3220,7 +3211,7 @@ FSTProcessor::SAO(FILE *input, FILE *output)
         input_buffer.back(1);
       }
 
-      current_state = *initial_state;
+      current_state = initial_state;
       lf = L"";
       sf = L"";
       last_incond = false;

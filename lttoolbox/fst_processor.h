@@ -61,12 +61,12 @@ private:
   /**
    * Current state of lexical analysis
    */
-  State *current_state;
+  State current_state;
 
   /**
    * Initial state of every token
    */
-  State *initial_state;
+  State initial_state;
 
   /**
    * Set of final states of inconditional sections in the dictionaries
