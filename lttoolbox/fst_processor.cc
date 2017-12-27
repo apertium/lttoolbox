@@ -833,7 +833,242 @@ FSTProcessor::load(FILE *input)
     transducers[name].read(input, alphabet);
     len--;
   }
+}
 
+void
+FSTProcessor::lsx(FILE *input, FILE *output)
+{
+  vector<State> new_states, alive_states;
+  wstring blank, out, in, alt_out, alt_in;
+  bool outOfWord = true;
+  bool finalFound = false;
+  bool plus_thing = false;
+
+  alive_states.push_back(initial_state);
+
+  while(!feof(input))
+  {
+    int val = fgetwc(input);
+
+    if(val == L'+' && isEscaped(val) && !outOfWord)
+    {
+      val = L'$';
+      plus_thing = true;
+    }
+
+    if((val == L'^' && isEscaped(val) && outOfWord) || feof(input))
+    {
+      blankqueue.push(blank);
+
+      if(alive_states.size() == 0)
+      {
+        if(blankqueue.size() > 0)
+        {
+          fputws(blankqueue.front().c_str(), output);
+          fflush(output);
+          blankqueue.pop();
+        }
+
+        alive_states.push_back(initial_state);
+
+        alt_in = L"";
+        for(int i=0; i < (int) in.size(); i++) // FIXME indexing
+        {
+          alt_in += in[i];
+          if(in[i] == L'$' && in[i+1] == L'^' && blankqueue.size() > 0)
+          {
+            // in.insert(i+1, blankqueue.front().c_str());
+            alt_in += blankqueue.front().c_str();
+            blankqueue.pop();
+          }
+        }
+        in = alt_in;
+        fputws(in.c_str(), output);
+        fflush(output);
+        in = L"";
+        finalFound = false;
+      }
+      else if(finalFound && alive_states.size() == 1)
+      {
+        finalFound = false;
+      }
+
+      blank = L"";
+      in += val;
+      outOfWord = false;
+      continue;
+    }
+
+//    wcerr << L"\n[!] " << (wchar_t)val << L" ||| " << outOfWord << endl;
+
+    if(outOfWord)
+    {
+      blank += val;
+      continue;
+    }
+
+    if((feof(input) || val == L'$') && !outOfWord) // && isEscaped(val)
+    {
+      new_states.clear();
+      for(vector<State>::const_iterator it = alive_states.begin(); it != alive_states.end(); it++)
+      {
+        State s = *it;
+//        wcerr << endl << L"[0] FEOF | $ | " << s.size() << L" | " << s.isFinal(all_finals) << endl;
+        s.step(alphabet(L"<$>"));
+//        wcerr << endl << L"[1] FEOF | $ | " << s.size() << L" | " << s.isFinal(all_finals) << endl;
+        if(s.size() > 0)
+        {
+          new_states.push_back(s);
+        }
+
+/*        if(s.isFinal(all_finals))
+        {
+          out += s.filterFinals(all_finals, alphabet, escaped_chars);
+          new_states.push_back(*initial_state);
+        }*/
+
+        if(s.isFinal(all_finals))
+        {
+          new_states.clear();
+          out = s.filterFinals(all_finals, alphabet, escaped_chars);
+
+          new_states.push_back(initial_state);
+
+          alt_out = L"";
+          for (int i=0; i < (int) out.size(); i++)
+          {
+            wchar_t c = out.at(i);
+            if(c == L'/')
+            {
+              alt_out += L'^';
+            }
+            else if(out[i-1] == L'<' && c == L'$' && out[i+1] == L'>') // indexing
+            {
+              alt_out += c;
+              alt_out += L'^';
+            }
+            else if(!(c == L'<' && out[i+1] == L'$' && out[i+2] == L'>') && !(out[i-2] == L'<' && out[i-1] == L'$' && c == L'>'))
+            {
+              alt_out += c;
+            }
+          }
+          out = alt_out;
+
+
+          if(out[out.length()-1] == L'^')
+          {
+            out = out.substr(0, out.length()-1); // extra ^ at the end
+            if(plus_thing)
+            {
+              out[out.size()-1] = L'+';
+              plus_thing = false;
+            }
+          }
+          else // take# out ... of
+          {
+            for(int i=out.length()-1; i>=0; i--) // indexing
+            {
+              if(out.at(i) == L'$')
+              {
+                out.insert(i+1, L" ");
+                break;
+              }
+            }
+            out += L'$';
+          }
+
+          if(blankqueue.size() > 0)
+          {
+            fputws(blankqueue.front().c_str(), output);
+            blankqueue.pop();
+          }
+
+          alt_out = L"";
+          for(int i=0; i < (int) out.size(); i++) // indexing
+          {
+            if((out.at(i) == L'$') && blankqueue.size() > 0)
+            {
+              alt_out += out.at(i);
+              alt_out += blankqueue.front().c_str();
+              blankqueue.pop();
+            }
+            else if((out.at(i) == L'$') && blankqueue.size() == 0 && i != (int) out.size()-1)
+            {
+              alt_out += out.at(i);
+              alt_out += L' ';
+            }
+            else if(out.at(i) == L' ' && blankqueue.size() > 0)
+            {
+              alt_out += blankqueue.front().c_str();
+              blankqueue.pop();
+            }
+            else
+            {
+              alt_out += out.at(i);
+            }
+          }
+          out = alt_out;
+
+          fputws(out.c_str(), output);
+          flushBlanks(output);
+          finalFound = true;
+          out = L"";
+          in = L"";
+        }
+      }
+
+      alive_states.swap(new_states);
+      outOfWord = true;
+
+      if(!finalFound)
+      {
+        in += val; //do not remove
+      }
+      continue;
+    }
+
+    if(!outOfWord) // && (!(feof(input) || val == L'$')))
+    {
+      if(val == L'<') // tag
+      {
+        wstring tag = readFullBlock(input, L'<', L'>');
+        in += tag;
+        if(!alphabet.isSymbolDefined(tag))
+        {
+          alphabet.includeSymbol(tag);
+        }
+        val = static_cast<int>(alphabet(tag));
+      }
+      else
+      {
+        in += (wchar_t) val;
+      }
+
+      new_states.clear();
+      for(vector<State>::const_iterator it = alive_states.begin(); it != alive_states.end(); it++)
+      {
+        State s = *it;
+        if(val < 0)
+        {
+          s.step_override(val, alphabet(L"<ANY_TAG>"), val);
+        }
+        else if(val > 0)
+        {
+          int val_lowercase = towlower(val);
+          s.step_override(val_lowercase, alphabet(L"<ANY_CHAR>"), val); // FIXME deal with cases! in step_override
+        }
+
+        if(s.size() > 0)
+        {
+          new_states.push_back(s);
+        }
+
+      }
+      alive_states.swap(new_states);
+    }
+  }
+
+  flushBlanks(output);
 }
 
 void

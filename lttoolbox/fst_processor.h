@@ -121,7 +121,7 @@ private:
   /**
    * Original char being restored
    */
-  int rcx_current_char; 
+  int rcx_current_char;
 
   /**
    * Alphabet
@@ -172,12 +172,12 @@ private:
   bool nullFlushGeneration;
 
   /**
-   * if true, ignore the provided set of characters 
+   * if true, ignore the provided set of characters
    */
   bool useIgnoredChars;
 
   /**
-   * if true, attempt simplistic diacritic restoration 
+   * if true, attempt simplistic diacritic restoration
    */
   bool useRestoreChars;
 
@@ -416,6 +416,8 @@ public:
   void parseRCX(string const &fichero);
 
   void load(FILE *input);
+
+  void lsx(FILE *input, FILE *output);
 
   bool valid() const;
 
