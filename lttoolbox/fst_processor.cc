@@ -1138,7 +1138,7 @@ FSTProcessor::compoundAnalysis(wstring input_word, bool uppercase, bool firstupp
 
     if(i < input_word.size()-1)
     {
-      current_state.restartFinals(all_finals, compoundOnlyLSymbol, initial_state, '+');
+      current_state.restartFinals(all_finals, compoundOnlyLSymbol, &initial_state, '+');
     }
 
     if(current_state.size()==0)
