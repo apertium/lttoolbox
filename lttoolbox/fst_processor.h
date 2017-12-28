@@ -390,7 +390,6 @@ private:
   xmlTextReaderPtr reader;
 public:
   FSTProcessor();
-  ~FSTProcessor();
 
   void initAnalysis();
   void initTMAnalysis();
