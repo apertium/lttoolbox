@@ -68,16 +68,6 @@ AC_ARG_ENABLE(profile,
               [CXXFLAGS="-pg -g -Wall"; CFLAGS="-pg -g -Wall"; LDFLAGS="-pg"])
 
 
-AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
-if test x$ac_cv_path_PKG_CONFIG = x
-then
-  AC_MSG_ERROR([You don't have pkg-config installed])
-fi
-if test x$ac_cv_path_PKG_CONFIG = xno
-then
-  AC_MSG_ERROR([You don't have pkg-config installed])
-fi
-
 PKG_CHECK_MODULES(LTTOOLBOX, [libxml-2.0 >= required_libxml_version])
 
 # Check for wide strings
