@@ -827,8 +827,33 @@ FSTProcessor::load(FILE *input)
 }
 
 void
+FSTProcessor::lsx_wrapper_null_flush(FILE *input, FILE *output)
+{
+  setNullFlush(false);
+  //nullFlushGeneration = true;
+
+  while(!feof(input))
+  {
+    lsx(input, output);
+    fputwc_unlocked(L'\0', output);
+    int code = fflush(output);
+    if(code != 0)
+    {
+        wcerr << L"Could not flush output " << errno << endl;
+    }
+  }
+}
+
+
+
+void
 FSTProcessor::lsx(FILE *input, FILE *output)
 {
+  if(getNullFlush())
+  {
+    lsx_wrapper_null_flush(input, output);
+  }
+
   vector<State> new_states, alive_states;
   wstring blank, out, in, alt_out, alt_in;
   bool outOfWord = true;

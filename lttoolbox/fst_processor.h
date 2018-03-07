@@ -373,6 +373,7 @@ private:
   size_t firstNotAlpha(wstring const &sf);
 
   void analysis_wrapper_null_flush(FILE *input, FILE *output);
+  void lsx_wrapper_null_flush(FILE *input, FILE *output);
   void bilingual_wrapper_null_flush(FILE *input, FILE *output);
   void generation_wrapper_null_flush(FILE *input, FILE *output,
                                      GenerationMode mode);
