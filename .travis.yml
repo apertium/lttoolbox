@@ -1,0 +1,14 @@
+dist: trusty
+language: generic
+script:
+    - ./autogen.sh
+    - ./configure
+    - make
+    - make check
+notifications:
+    irc:
+        channels:
+            - "chat.freenode.net#apertium"
+        on_failure: change
+        on_success: never
+
