@@ -1,0 +1,19 @@
+dist: trusty
+language: cpp
+os:
+  - linux
+  - osx
+compiler:
+  - clang
+  - gcc
+script:
+  - ./autogen.sh
+  - ./configure
+  - make
+  - make test
+notifications:
+  irc:
+    channels:
+      - secure: 'otnkbD9vmmFMozxz2XerhGYHkPoqS7e03AcUyhw5NHvG1B7lZRUujQLmCk7mwSJdHeWxwXOtaO4ofle3ax63a1/ayByCKPsd3fzhdV/vRs6cPblBHDTlN9J+Edm/3kAyZgf59xFm9Mh7Wwms0e6/KAqwW44gKim0aYlsXc6yB5ttpxbQKb2tMxSP6G3De+4RwWBCVWnQkwFaN4zjhScv7s2/XSHA5PACuDTweG/7zHb86i5vata2jKycYsHp2sowglCX5RZOAcpTCAlEGRoFpHTFFQsfRohL+Lkcf0RgeJHn956w7VwYtRlhYqNg+rO2yML3NUoIaOGEjoN5TAAQjlbG5TmZ/0QSNlmGyfDBmYBrYrKfgUydwaqDNz2G8pNRJwJR+7cRuBnDRQlc/hFyXnOg305vklUMfgpXFYyjQvTPQCGWGYhAKBQ27OptC3/H1AxuDhxlOsWDgJb3rOwrkW3A5yqS0HP2R/9MAoCUhsWrIk4hWOOZcSAthwO0OOzUhKaS4g8jqSonODSZoH/kehts3laSlbPirlys8PdQ5SdJuPv+unyIOK4Gl0mWungYWwqpLmylegQemNSeV5cytw1C84+7I53VhEPNUaPv+JHKdbKFuKNpJkoa8QBk3INexRziDC7LXBwk6oe4AUxcnbxFIU4SOM8Auz63SCabCXU='
+  on_failure: change
+  on_success: never
