@@ -18,6 +18,8 @@
 #include <lttoolbox/my_stdio.h>
 
 #include <cstdlib>
+#include <cmath>
+#include <limits>
 #include <iostream>
 
 void 
@@ -299,3 +301,56 @@ Compression::string_read(FILE *input)
   return retval;
 }
 
+
+void
+Compression::long_multibyte_write(const double& value, FILE *output)
+{
+  int exp = 0;
+
+  long unsigned int mantissa = static_cast<long unsigned int>(std::numeric_limits<long int>::max() * frexp(value, &exp));
+  unsigned int exponent = static_cast<unsigned int>(exp);
+
+  multibyte_write(mantissa, output);
+  multibyte_write(exponent, output);
+}
+
+void
+Compression::long_multibyte_write(const double& value, ostream &output)
+{
+  int exp = 0;
+
+  long unsigned int mantissa = static_cast<long unsigned int>(std::numeric_limits<long int>::max() * frexp(value, &exp));
+  unsigned int exponent = static_cast<unsigned int>(exp);
+
+  multibyte_write(mantissa, output);
+  multibyte_write(exponent, output);
+}
+
+
+double
+Compression::long_multibyte_read(FILE *input)
+{
+  double result = 0.0;
+
+  long unsigned int mantissa = multibyte_read(input);
+  int exponent = multibyte_read(input);
+
+  double value = static_cast<double>(static_cast<long int>(mantissa)) / std::numeric_limits<long int>::max();
+  result = ldexp(value, exponent);
+
+  return result;
+}
+
+double
+Compression::long_multibyte_read(istream &input)
+{
+  double result = 0.0;
+
+  long unsigned int mantissa = multibyte_read(input);
+  int exponent = multibyte_read(input);
+
+  double value = static_cast<double>(static_cast<long int>(mantissa)) / std::numeric_limits<long int>::max();
+  result = ldexp(value, exponent);
+
+  return result;
+}

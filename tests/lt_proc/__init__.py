@@ -19,5 +19,42 @@ class BiprocSkipTags(unittest.TestCase, ProcTest):
     inputs = ["^vihki<KEPT><MATCHSOFAR><STILLMATCHING><SOMEHOWKEPT1><@SOMEHOWKEPT2>$"]
     expectedOutputs = ["^vihki<KEPT><MATCHSOFAR><STILLMATCHING><SOMEHOWKEPT1><@SOMEHOWKEPT2>/vihki<KEPT><MATCHSOFAR><STILLMATCHING><SOMEHOWKEPT1><@SOMEHOWKEPT2>$"]
 
+class WeightedTransducer(unittest.TestCase, ProcTest):
+    procdix = "data/walk-weight.att"
+    inputs = ["walk",
+              "walks"]
+    expectedOutputs = ["^walk/*walk$",
+                       "^walks/*walks$"]
+
+class WeightedCatTransducer(unittest.TestCase, ProcTest):
+    procdix = "data/cat-weight.att"
+    inputs = ["cat"]
+    expectedOutputs = ["^cat/cat+n/cat+v$"]
+
+class WeightedCatInitialTransducer(unittest.TestCase, ProcTest):
+    procdix = "data/cat-weight-initial.att"
+    inputs = ["cat"]
+    expectedOutputs = ["^cat/cat$"]
+
+class WeightedCatMiddleTransducer(unittest.TestCase, ProcTest):
+    procdix = "data/cat-weight-middle.att"
+    inputs = ["cat"]
+    expectedOutputs = ["^cat/cat$"]
+
+class WeightedCatFinalTransducer(unittest.TestCase, ProcTest):
+    procdix = "data/cat-weight-final.att"
+    inputs = ["cat"]
+    expectedOutputs = ["^cat/cat$"]
+
+class WeightedCatHeavyTransducer(unittest.TestCase, ProcTest):
+    procdix = "data/cat-weight-heavy.att"
+    inputs = ["cat"]
+    expectedOutputs = ["^cat/cat$"]
+
+class WeightedCatNegativeTransducer(unittest.TestCase, ProcTest):
+    procdix = "data/cat-weight-negative.att"
+    inputs = ["cat"]
+    expectedOutputs = ["^cat/cat+n/cat+v$"]
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *

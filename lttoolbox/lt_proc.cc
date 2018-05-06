@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
       {"transliteration",   0, 0, 't'},
       {"null-flush",        0, 0, 'z'},
       {"dictionary-case",   0, 0, 'w'},
-      {"version",	    0, 0, 'v'},
+      {"version",           0, 0, 'v'},
       {"case-sensitive",    0, 0, 'c'},
       {"careful-case",      0, 0, 'C'},
       {"no-default-ignore", 0, 0, 'I'},
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 
       break;
 
-    case 'e':      
+    case 'e':
     case 'a':
     case 'b':
     case 'o':
@@ -175,11 +175,11 @@ int main(int argc, char *argv[])
     case 'C':
       if(cmd == 0)
       {
-	cmd = c;
+        cmd = c;
       }
       else
       {
-	endProgram(argv[0]);
+        endProgram(argv[0]);
       }
       break;
 
@@ -267,8 +267,8 @@ int main(int argc, char *argv[])
   }
 
 #ifdef _MSC_VER
-  	_setmode(_fileno(input), _O_U8TEXT);
-	_setmode(_fileno(output), _O_U8TEXT);
+  _setmode(_fileno(input), _O_U8TEXT);
+  _setmode(_fileno(output), _O_U8TEXT);
 #endif
 
   try

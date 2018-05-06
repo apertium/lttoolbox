@@ -50,7 +50,7 @@ MatchState::operator =(MatchState const &s)
   return *this;
 }
 
-void 
+void
 MatchState::destroy()
 {
   delete[] state;
@@ -73,7 +73,7 @@ MatchState::copy(MatchState const &s)
   last = s.last;
 }
 
-int 
+int
 MatchState::size() const
 {
   return last >= first ? last - first: last + BUF_LIMIT -first;
@@ -85,7 +85,7 @@ MatchState::init(MatchNode *initial)
   first = 0;
   last = 1;
   state[0] = initial;
-} 
+}
 
 void
 MatchState::applySymbol(MatchNode *pnode, int const symbol)

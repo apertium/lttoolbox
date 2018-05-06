@@ -174,11 +174,11 @@ Alphabet::read(FILE *input)
     int first = Compression::multibyte_read(input);
     int second = Compression::multibyte_read(input);
     pair<int, int> tmp(first - bias, second - bias);
-	int spair_size = a_new.spair.size();
+    int spair_size = a_new.spair.size();
     a_new.spair[tmp] = spair_size;
     a_new.spairinv.push_back(tmp);
   }
-  
+
   *this = a_new;
 }
 
@@ -303,7 +303,7 @@ Alphabet::createLoopbackSymbols(set<int> &symbols, Alphabet &basis, Side s, bool
       it++)
   {
     // Only include tags that were actually seen on the correct side
-    if(tags.find(it->second) != tags.end()) 
+    if(tags.find(it->second) != tags.end())
     {
       includeSymbol(it->first);
       symbols.insert(operator()(operator()(it->first),

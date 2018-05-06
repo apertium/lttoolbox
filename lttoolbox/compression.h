@@ -110,6 +110,38 @@ public:
    * @return the string read.
    */
   static string string_read(FILE *input);
+
+  /**
+   * Encodes a double value and writes it into the output stream
+   * @see long_multibyte_read()
+   * @param value double to write.
+   * @param output output stream.
+   */
+  static void long_multibyte_write(const double& value, FILE *output);
+
+  /**
+   * Encodes a double value and writes it into the output stream
+   * @see long_multibyte_read()
+   * @param value double to write.
+   * @param output output stream.
+   */
+  static void long_multibyte_write(const double& value, ostream &os);
+
+  /**
+   * Read and decode a double from the input stream.
+   * @see long_multibyte_read()
+   * @param input input stream.
+   * @return the double value read.
+   */
+  static double long_multibyte_read(FILE *input);
+
+  /**
+   * Read and decode a double from the input stream.
+   * @see long_multibyte_read()
+   * @param input input stream.
+   * @return the double value read.
+   */
+  static double long_multibyte_read(istream &is);
 };
 
 #endif

@@ -24,16 +24,18 @@
 using namespace std;
 
 AttCompiler::AttCompiler() :
-starting_state(0)
+starting_state(0),
+default_weight(0.0000)
 {
 }
+
 
 AttCompiler::~AttCompiler()
 {
 }
 
 void 
-AttCompiler::clear() 
+AttCompiler::clear()
 {
   for (map<int, AttNode*>::const_iterator it = graph.begin(); it != graph.end();
       ++it) 
@@ -49,14 +51,14 @@ AttCompiler::clear()
  * @todo Are there other special symbols? If so, add them, and maybe use a map
  *       for conversion?
  */
-void 
-AttCompiler::convert_hfst(wstring& symbol) 
+void
+AttCompiler::convert_hfst(wstring& symbol)
 {
-  if (symbol == L"@0@" || symbol == L"ε") 
+  if (symbol == L"@0@" || symbol == L"ε")
   {
     symbol = L"";
   } 
-  else if (symbol == L"@_SPACE_@") 
+  else if (symbol == L"@_SPACE_@")
   {
     symbol = L" ";
   }
@@ -75,7 +77,7 @@ AttCompiler::is_word_punct(wchar_t symbol)
     return true;
   }
  
-  return false; 
+  return false;
 }
 
 /**
@@ -88,7 +90,7 @@ AttCompiler::is_word_punct(wchar_t symbol)
  *         only) character otherwise.
  */
 int 
-AttCompiler::symbol_code(const wstring& symbol) 
+AttCompiler::symbol_code(const wstring& symbol)
 {
   if (symbol.length() > 1) {
     alphabet.includeSymbol(symbol);
@@ -111,8 +113,8 @@ AttCompiler::symbol_code(const wstring& symbol)
   }
 }
 
-void 
-AttCompiler::parse(string const &file_name, wstring const &dir) 
+void
+AttCompiler::parse(string const &file_name, wstring const &dir)
 {
   clear();
 
@@ -121,7 +123,9 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
   wstring line;
   bool first_line = true;       // First line -- see below
   bool seen_input_symbol = false;
-  while (getline(infile, line)) 
+  double weight;
+
+  while (getline(infile, line))
   {
     tokens.clear();
     int from, to;
@@ -139,7 +143,7 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
     }
 
     /* Empty line. */
-    if (line.length() == 0) 
+    if (line.length() == 0)
     {
       continue;
     }
@@ -149,18 +153,26 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
 
     AttNode* source = get_node(from);
     /* First line: the initial state is of both types. */
-    if (first_line) 
+    if (first_line)
     {
       starting_state = from;
       first_line = false;
     }
 
     /* Final state. */
-    if (tokens.size() <= 2) 
+    if (tokens.size() <= 2)
     {
-      finals.insert(from);
+      if (tokens.size() > 1)
+      {
+        weight = static_cast<double>(convert(tokens[1]));
+      }
+      else
+      {
+        weight = default_weight;
+      }
+      finals.insert(pair <int, double>(from, weight));
     } 
-    else 
+    else
     {
       to = convert(tokens[1]);
       if(dir == L"RL")
@@ -177,17 +189,24 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
       convert_hfst(lower);
       if(upper != L"")
       {
-        seen_input_symbol = true; 
+        seen_input_symbol = true;
       }
-      /* skip lines that have an empty left side and output 
+      /* skip lines that have an empty left side and output
          if we haven't seen an input symbol */
-      if(upper == L"" && lower != L"" && !seen_input_symbol) 
+      if(upper == L"" && lower != L"" && !seen_input_symbol)
       {
         continue;
       }
       int tag = alphabet(symbol_code(upper), symbol_code(lower));
-      /* We don't read the weights, even if they are defined. */
-      source->transductions.push_back(Transduction(to, upper, lower, tag));
+      if(tokens.size() > 4)
+      {
+        weight = static_cast<double>(convert(tokens[4]));
+      }
+      else
+      {
+        weight = default_weight;
+      }
+      source->transductions.push_back(Transduction(to, upper, lower, tag, weight));
 
       get_node(to);
     }
@@ -202,23 +221,25 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
 
 /** Extracts the sub-transducer made of states of type @p type. */
 Transducer 
-AttCompiler::extract_transducer(TransducerType type) 
+AttCompiler::extract_transducer(TransducerType type)
 {
   Transducer transducer;
   /* Correlation between the graph's state ids and those in the transducer. */
   map<int, int> corr;
   set<int> visited;
+  double cost = default_weight;
 
   corr[starting_state] = transducer.getInitial();
-  _extract_transducer(type, starting_state, transducer, corr, visited);
+  _extract_transducer(type, starting_state, transducer, corr, visited, cost);
 
   /* The final states. */
   bool noFinals = true;
-  for (set<int>::const_iterator f = finals.begin(); f != finals.end(); ++f) 
+  for (map<int, double>::const_iterator f = finals.begin(); f != finals.end(); ++f)
   {
-    if (corr.find(*f) != corr.end()) 
+    if (corr.find(f->first) != corr.end())
     {
-      transducer.setFinal(corr[*f]);
+      transducer.setFinal(corr[f->first], f->second);
+      cost = cost + f->second;
       noFinals = false;
     }
   }
@@ -229,7 +250,7 @@ AttCompiler::extract_transducer(TransducerType type)
     wcerr << L"No final states (" << type << ")" << endl;
     wcerr << L"  were:" << endl;
     wcerr << L"\t" ;
-    for (set<int>::const_iterator f = finals.begin(); f != finals.end(); ++f) 
+    for (set<int>::const_iterator f = finals.begin(); f != finals.end(); ++f)
     {
       wcerr << *f << L" ";
     }
@@ -246,13 +267,13 @@ AttCompiler::extract_transducer(TransducerType type)
 void 
 AttCompiler::_extract_transducer(TransducerType type, int from,
                          Transducer& transducer, map<int, int>& corr,
-                         set<int>& visited) 
+                         set<int>& visited, double& cost)
 {
-  if (visited.find(from) != visited.end()) 
+  if (visited.find(from) != visited.end())
   {
     return;
   } 
-  else 
+  else
   {
     visited.insert(from);
   }
@@ -273,26 +294,29 @@ AttCompiler::_extract_transducer(TransducerType type, int from,
     /* Is the target state new? */
     bool new_to = corr.find(it->to) == corr.end();
 
-    if (new_from) 
+    if (new_from)
     {
       corr[from] = transducer.size() + (new_to ? 1 : 0);
     }
     from_t = corr[from];
 
+    /*Update cost with each new transduction*/
+    cost = cost + it->weight;
+
     /* Now with the target state: */
-    if (!new_to) 
+    if (!new_to)
     {
       /* We already know it, possibly by a different name: link them! */
       to_t = corr[it->to];
-      transducer.linkStates(from_t, to_t, it->tag);
-    } 
+      transducer.linkStates(from_t, to_t, it->tag, it->weight);
+    }
     else 
     {
       /* We haven't seen it yet: add a new state! */
-      to_t = transducer.insertNewSingleTransduction(it->tag, from_t);
+      to_t = transducer.insertNewSingleTransduction(it->tag, from_t, it->weight);
       corr[it->to] = to_t;
     }
-    _extract_transducer(type, it->to, transducer, corr, visited);
+    _extract_transducer(type, it->to, transducer, corr, visited, cost);
   }  // for
 }
 
@@ -310,31 +334,31 @@ AttCompiler::_extract_transducer(TransducerType type, int from,
  * @param visited the ids of states visited by this path.
  * @param path are we in a path?
  */
-void 
+void
 AttCompiler::classify(int from, map<int, TransducerType>& visited, bool path,
-              TransducerType type) 
+              TransducerType type)
 {
   AttNode* source = get_node(from);
-  if (visited.find(from) != visited.end()) 
+  if (visited.find(from) != visited.end())
   {
-    if (path && ( (visited[from] & type) == type) ) 
+    if (path && ( (visited[from] & type) == type) )
     {
       return;
     }
   }
 
-  if (path) 
+  if (path)
   {
     visited[from] |= type;
   }
 
   for (vector<Transduction>::iterator it = source->transductions.begin();
-       it != source->transductions.end(); ++it) 
+       it != source->transductions.end(); ++it)
   {
     bool next_path = path;
     int  next_type = type;
     bool first_transition = !path && it->upper != L"";
-    if (first_transition) 
+    if (first_transition)
     {
       /* First transition: we now know the type of the path! */
       bool upper_word  = (it->upper.length() == 1 &&
@@ -345,7 +369,7 @@ AttCompiler::classify(int from, map<int, TransducerType>& visited, bool path,
       if (upper_punct) next_type |= PUNCT;
       next_path = true;
     } 
-    else 
+    else
     {
       /* Otherwise (not yet, already): target's type is the same as ours. */
       next_type = type;
@@ -357,7 +381,7 @@ AttCompiler::classify(int from, map<int, TransducerType>& visited, bool path,
 
 /** Writes the transducer to @p file_name in lt binary format. */
 void 
-AttCompiler::write(FILE *output) 
+AttCompiler::write(FILE *output)
 {
 //  FILE* output = fopen(file_name, "w");
   Transducer punct_fst = extract_transducer(PUNCT);
@@ -381,7 +405,7 @@ AttCompiler::write(FILE *output)
   wcout << L"main@standard" << " " << word_fst.size();
   wcout << " " << word_fst.numberOfTransitions() << endl;
   Compression::wstring_write(L"final@inconditional", output);
-  if(punct_fst.numberOfTransitions() != 0) 
+  if(punct_fst.numberOfTransitions() != 0)
   {
     punct_fst.write(output);
     wcout << L"final@inconditional" << " " << punct_fst.size();
