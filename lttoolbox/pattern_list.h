@@ -34,20 +34,21 @@ typedef pair<PatternStore::iterator, PatternStore::iterator> PatternRange;
 class PatternList
 {
 private:
-  Alphabet alphabet;  
+  Alphabet alphabet;
   PatternStore patterns;
   bool sequence;
   list<vector<int> > sequence_data;
   Transducer transducer;
   map<int, int> final_type;
   int sequence_id;
+  double default_weight;
 
   void copy(PatternList const &o);
   void destroy();
   void insertOutOfSequence(wstring const &lemma, wstring const &tags,
-			   vector<int> &result);
+                           vector<int> &result);
   void insertIntoSequence(int const id, wstring const &lemma, 
-			  wstring const &tags);
+                          wstring const &tags);
 
   static int tagCount(wstring const &tags);
   static wstring tagAt(wstring const &tags, int const index);

@@ -72,7 +72,7 @@ namespace
  *       encoding of the file, just set it by adding
  *       <tt>std::locale::global(locale(""));</tt> to your code.
  */
-class AttCompiler 
+class AttCompiler
 {
 public:
   /**
@@ -94,7 +94,7 @@ public:
    */
   void _extract_transducer(TransducerType type, int from,
                            Transducer& transducer, map<int, int>& corr,
-                           set<int>& visited) ;
+                           set<int>& visited, double& cost) ;
 
   /**
    * Classifies the edges of the transducer graphs recursively. It works like
@@ -127,12 +127,18 @@ public:
 private:
 
   /** The final state(s). */
-  set<int> finals;
+  map<int, double> finals;
   /**
    * Id of the starting state. We assume it is the source state of the first
    * transduction in the file.
    */
   int starting_state;
+  /**
+   * Value of the final weight after a complete valid transduction. We assume it
+   * is the default value of weight for an entry if not specified otherwise or
+   * for the case of unweighted automata/transducers.
+   */
+  double default_weight;
 
   Alphabet alphabet;
   /** All non-multicharacter symbols. */
@@ -145,11 +151,12 @@ private:
     wstring        upper;
     wstring        lower;
     int            tag;
+    double         weight;
     TransducerType type;
 
-    Transduction(int to, wstring upper, wstring lower, int tag,
+    Transduction(int to, wstring upper, wstring lower, int tag, double weight,
                  TransducerType type=UNDECIDED) :
-      to(to), upper(upper), lower(lower), tag(tag), type(type) {}
+      to(to), upper(upper), lower(lower), tag(tag), weight(weight), type(type) {}
   };
 
   /** A node in the transducer graph. */
@@ -175,7 +182,7 @@ private:
   AttNode* get_node(int id)
   {
     AttNode* state;
-  
+
     if (graph.find(id) != graph.end())
     {
       state = graph[id];
@@ -188,13 +195,13 @@ private:
     return state;
   }
 
-  /** 
+  /**
    * Returns true for combining diacritics and modifier letters
    *
    */
   bool is_word_punct(wchar_t symbol);
 
-  /** 
+  /**
    * Converts symbols like @0@ to epsilon, @_SPACE_@ to space, etc.
    * @todo Are there other special symbols? If so, add them, and maybe use a map
    *       for conversion?

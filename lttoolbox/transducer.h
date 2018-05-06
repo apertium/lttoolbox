@@ -41,14 +41,21 @@ private:
   int initial;
 
   /**
-   * Final state set
+   * Default value of weight
    */
-  set<int> finals;
+  double default_weight;
+
+  /**
+   * Final state set mapped to its weight walues
+   * Schema: (state, weight)
+   */
+  map<int, double> finals;
 
   /**
    * Transitions of the transducer
+   * Schema: (souurce state, tag, target state, weight)
    */
-  map<int, multimap<int, int> > transitions;
+  map<int, multimap<int, pair<int, double> > > transitions;
 
   /**
    * New state creator
@@ -104,18 +111,20 @@ public:
    * if needed
    * @param tag the tag of the transduction being inserted
    * @param source the source state of the new transduction
+   * @param weight the weight value for the new transduction
    * @return the target state
    */
-  int insertSingleTransduction(int const tag, int const source);
+  int insertSingleTransduction(int const tag, int const source, double const weight);
 
   /**
    * Insertion of a single transduction, forcing create a new target
    * state
    * @param tag the tag of the transduction being inserted
    * @param source the source state of the new transduction
+   * @param weight the weight value for the new transduction
    * @return the target state
    */
-  int insertNewSingleTransduction(int const tag, int const source);
+  int insertNewSingleTransduction(int const tag, int const source, double const weight);
 
   /**
    * Insertion of a transducer in a given source state, unifying their
@@ -126,15 +135,16 @@ public:
    * @return the new target state
    */
   int insertTransducer(int const source, Transducer &t,
-		       int const epsilon_tag = 0);
+                      int const epsilon_tag = 0);
 
   /**
    * Link two existing states by a transduction
    * @param source the source state
    * @param target the target state
    * @param tag the tag of the transduction
+   * @param weight the weight value for the new transduction
    */
-  void linkStates(int const source, int const target, int const tag);
+  void linkStates(int const source, int const target, int const tag, double const weight);
 
   /**
    * Test if the state is a final state
@@ -148,14 +158,15 @@ public:
    * @param a widestring of the pattern to be recognised
    * @return true if the pattern is recognised by the transducer
    */
-  bool recognise(wstring patro, Alphabet &a, FILE *err = stderr);
+  bool recognise(wstring pattern, Alphabet &a, FILE *err = stderr);
 
   /**
    * Set the state as a final or not, yes by default
    * @param state the state
+   * @param weight the weight value for the final state
    * @param value if true, the state is set as final state
    */
-  void setFinal(int const state, bool value = true);
+  void setFinal(int const state, double const weight, bool value = true);
 
   /**
    * Returns the initial state of a transducer
@@ -179,14 +190,14 @@ public:
 
 
   /**
-   * Return a copy of the set of final states
+   * Return a copy of the final states
    */
-  set<int> getFinals() const;
+  map<int, double> getFinals() const;
 
   /**
    * Return reference to the transitions
    */
-  map<int, multimap<int, int> >& getTransitions();
+  map<int, multimap<int, pair<int, double> > >& getTransitions();
 
   /**
    * Reverse all the transductions of a transducer

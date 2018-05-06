@@ -69,29 +69,34 @@ private:
   State initial_state;
 
   /**
-   * Set of final states of inconditional sections in the dictionaries
+   * Default value of weight of a transition
    */
-  set<Node *> inconditional;
+  double default_weight;
 
   /**
-   * Set of final states of standard sections in the dictionaries
+   * The final states of inconditional sections in the dictionaries
    */
-  set<Node *> standard;
+  map<Node *, double> inconditional;
 
   /**
-   * Set of final states of postblank sections in the dictionaries
+   * The final states of standard sections in the dictionaries
    */
-  set<Node *> postblank;
+  map<Node *, double> standard;
 
   /**
-   * Set of final states of preblank sections in the dictionaries
+   * The final states of postblank sections in the dictionaries
    */
-  set<Node *> preblank;
+  map<Node *, double> postblank;
+
+  /**
+   * The final states of preblank sections in the dictionaries
+   */
+  map<Node *, double> preblank;
 
   /**
    * Merge of 'inconditional', 'standard', 'postblank' and 'preblank' sets
    */
-  set<Node *> all_finals;
+  map<Node *, double> all_finals;
 
   /**
    * Queue of blanks, used in reading methods
@@ -412,8 +417,8 @@ public:
   pair<wstring, int> biltransWithQueue(wstring const &input_word, bool with_delim = true);
   wstring biltransWithoutQueue(wstring const &input_word, bool with_delim = true);
   void SAO(FILE *input = stdin, FILE *output = stdout);
-  void parseICX(string const &fichero);
-  void parseRCX(string const &fichero);
+  void parseICX(string const &file);
+  void parseRCX(string const &file);
 
   void load(FILE *input);
 

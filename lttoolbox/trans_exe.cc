@@ -20,9 +20,10 @@
 #include <lttoolbox/lttoolbox_config.h>
 #include <lttoolbox/my_stdio.h>
 
-TransExe::TransExe() :
-initial_id(0)
+TransExe::TransExe()
 {
+  initial_id = 0;
+  default_weight = 0.0000;
 }
 
 TransExe::~TransExe()
@@ -50,6 +51,7 @@ void
 TransExe::copy(TransExe const &te)
 {
   initial_id = te.initial_id;
+  default_weight = te.default_weight;
   node_list = te.node_list;
   finals = te.finals;
 }
@@ -70,8 +72,9 @@ TransExe::read(FILE *input, Alphabet const &alphabet)
   int finals_size = Compression::multibyte_read(input);
 
   int base = 0;
+  double base_weight = default_weight;
 
-  set<int> myfinals;
+  map<int, double> myfinals;
 
 
   while(finals_size > 0)
@@ -79,20 +82,21 @@ TransExe::read(FILE *input, Alphabet const &alphabet)
     finals_size--;
 
     base += Compression::multibyte_read(input);
-    myfinals.insert(base);
+    base_weight = Compression::long_multibyte_read(input);
+    myfinals.insert(pair<int, double>(base, base_weight));
   }
-  
+
 
   base = Compression::multibyte_read(input);
 
   int number_of_states = base;
-  int current_state = 0;   
+  int current_state = 0;
   new_t.node_list.resize(number_of_states);
 
-  for(set<int>::iterator it = myfinals.begin(), limit = myfinals.end(); 
+  for(map<int, double>::iterator it = myfinals.begin(), limit = myfinals.end(); 
       it != limit; it++)
   {
-    new_t.finals.insert(&new_t.node_list[*it]);
+    new_t.finals.insert(pair<Node*, double>(&new_t.node_list[it->first], it->second));
   }
 
   while(number_of_states > 0)
@@ -106,11 +110,12 @@ TransExe::read(FILE *input, Alphabet const &alphabet)
       number_of_local_transitions--;
       tagbase += Compression::multibyte_read(input);
       int state = (current_state + Compression::multibyte_read(input)) % base;
+      base_weight = Compression::long_multibyte_read(input);
       int i_symbol = alphabet.decode(tagbase).first;
       int o_symbol = alphabet.decode(tagbase).second;
-      
-      mynode.addTransition(i_symbol, o_symbol, &new_t.node_list[state]);
-    }   
+
+      mynode.addTransition(i_symbol, o_symbol, &new_t.node_list[state], base_weight);
+    }
     number_of_states--;
     current_state++;
   }
@@ -123,14 +128,14 @@ TransExe::unifyFinals()
 
   Node *newfinal = &node_list[node_list.size()-1];
 
-  for(set<Node *>::iterator it = finals.begin(), limit = finals.end(); 
+  for(map<Node *, double>::iterator it = finals.begin(), limit = finals.end();
       it != limit; it++)
   {
-    (*it)->addTransition(0, 0, newfinal);
+    it->first->addTransition(0, 0, newfinal, it->second);
   }
-  
+
   finals.clear();
-  finals.insert(newfinal);
+  finals.insert(pair<Node*, double>(newfinal, default_weight));
 }
 
 Node *
@@ -139,7 +144,7 @@ TransExe::getInitial()
   return &node_list[initial_id];
 }
 
-set<Node *> &
+map<Node *, double> &
 TransExe::getFinals()
 {
   return finals;

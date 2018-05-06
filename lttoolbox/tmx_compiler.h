@@ -41,6 +41,11 @@ private:
    * The libxml2's XML reader
    */
   xmlTextReaderPtr reader;
+
+  /**
+   * The default value of weight
+   */
+  double default_weight;
   
   /**
    * Identifier of all the symbols during the compilation
