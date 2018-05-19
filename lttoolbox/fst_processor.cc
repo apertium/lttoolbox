@@ -844,8 +844,6 @@ FSTProcessor::lsx_wrapper_null_flush(FILE *input, FILE *output)
   }
 }
 
-
-
 void
 FSTProcessor::lsx(FILE *input, FILE *output)
 {
@@ -864,7 +862,12 @@ FSTProcessor::lsx(FILE *input, FILE *output)
 
   while(!feof(input))
   {
-    int val = fgetwc(input);
+    int val = fgetwc_unlocked(input);
+
+    if (val == 0) {
+      blankqueue.push(blank);
+      break;
+    }
 
     if(val == L'+' && isEscaped(val) && !outOfWord)
     {
