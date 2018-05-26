@@ -296,30 +296,30 @@ void
 Transducer::determinize(int const epsilon_tag)
 {
   vector<set<int> > R(2);
-  map<int, set<int> > Q_prima;
-  map<set<int>, int> Q_prima_inv;
+  map<int, set<int> > Q_prime;
+  map<set<int>, int> Q_prime_inv;
 
-  map<int, multimap<int, pair<int, double> > > transitions_prima;
+  map<int, multimap<int, pair<int, double> > > transitions_prime;
 
-  unsigned int talla_Q_prima = 0;
-  Q_prima[0] = closure(initial, epsilon_tag);
+  unsigned int size_Q_prime = 0;
+  Q_prime[0] = closure(initial, epsilon_tag);
 
-  Q_prima_inv[Q_prima[0]] = 0;
+  Q_prime_inv[Q_prime[0]] = 0;
   R[0].insert(0);
 
-  int initial_prima = 0;
-  map<int, double> finals_prima;
+  int initial_prime = 0;
+  map<int, double> finals_prime;
 
   if(isFinal(initial))
   {
-    finals_prima.insert(pair<int, double>(0, default_weight));
+    finals_prime.insert(pair<int, double>(0, default_weight));
   }
 
   int t = 0;
 
-  while(talla_Q_prima != Q_prima.size())
+  while(size_Q_prime != Q_prime.size())
   {
-    talla_Q_prima = Q_prima.size();
+    size_Q_prime = Q_prime.size();
     R[(t+1)%2].clear();
 
     for(set<int>::iterator it = R[t].begin(), limit = R[t].end();
@@ -330,15 +330,15 @@ Transducer::determinize(int const epsilon_tag)
       {
         finals_state.insert(it2->first);
       }
-      if(!isEmptyIntersection(Q_prima[*it], finals_state))
+      if(!isEmptyIntersection(Q_prime[*it], finals_state))
       {
-        finals_prima.insert(pair<int, double>(*it, default_weight));
+        finals_prime.insert(pair<int, double>(*it, finals.find(*it)->second));
       }
 
       map<int, set<int> > mymap;
 
-      for(set<int>::iterator it2 = Q_prima[*it].begin(),
-                             limit2 = Q_prima[*it].end();
+      for(set<int>::iterator it2 = Q_prime[*it].begin(),
+                             limit2 = Q_prime[*it].end();
           it2 != limit2; it2++)
       {
         for(multimap<int, pair<int, double> >::iterator it3 = transitions[*it2].begin(),
@@ -362,16 +362,16 @@ Transducer::determinize(int const epsilon_tag)
       for(map<int, set<int> >::iterator it2 = mymap.begin(), limit2 = mymap.end();
           it2 != limit2; it2++)
       {
-        if(Q_prima_inv.find(it2->second) == Q_prima_inv.end())
+        if(Q_prime_inv.find(it2->second) == Q_prime_inv.end())
         {
-          int etiq = Q_prima.size();
-          Q_prima[etiq] = it2->second;
-          Q_prima_inv[it2->second] = etiq;
-          R[(t+1)%2].insert(Q_prima_inv[it2->second]);
-          transitions_prima[etiq].clear();
+          int tag = Q_prime.size();
+          Q_prime[tag] = it2->second;
+          Q_prime_inv[it2->second] = tag;
+          R[(t+1)%2].insert(Q_prime_inv[it2->second]);
+          transitions_prime[tag].clear();
         }
-        transitions_prima[*it].insert(pair<int, pair<int, double> >(it2->first,
-                                                                    make_pair(Q_prima_inv[it2->second],
+        transitions_prime[*it].insert(pair<int, pair<int, double> >(it2->first,
+                                                                    make_pair(Q_prime_inv[it2->second],
                                                                               default_weight)));
       }
     }
@@ -379,9 +379,9 @@ Transducer::determinize(int const epsilon_tag)
     t = (t+1)%2;
   }
 
-  transitions = transitions_prima;
-  finals = finals_prima;
-  initial = initial_prima;
+  transitions = transitions_prime;
+  finals = finals_prime;
+  initial = initial_prime;
 }
 
 
@@ -595,12 +595,7 @@ void
 Transducer::serialise(std::ostream &serialised) const
 {
   Serialiser<int>::serialise(initial, serialised);
-  set<int> finals_state;
-  for(map<int, double>::const_iterator it = finals.begin(); it != finals.end(); it++)
-  {
-    finals_state.insert(it->first);
-  }
-  Serialiser<set<int> >::serialise(finals_state, serialised);
+  Serialiser<map<int, double> >::serialise(finals, serialised);
   Serialiser<map<int, multimap<int, pair<int, double> > > >::serialise(transitions, serialised);
 }
 
@@ -608,11 +603,7 @@ void
 Transducer::deserialise(std::istream &serialised)
 {
   initial = Deserialiser<int>::deserialise(serialised);
-  for(set<int>::const_iterator D_it = Deserialiser<set<int> >::deserialise(serialised).begin();
-      D_it != Deserialiser<set<int> >::deserialise(serialised).end(); D_it++)
-  {
-    finals.insert(pair <int, double>(*D_it, default_weight));
-  }
+  finals = Deserialiser<map<int, double> >::deserialise(serialised);
   transitions = Deserialiser<map<int, multimap<int, pair<int, double> > > >::deserialise(serialised);
 }
 
@@ -892,7 +883,7 @@ Transducer::copyWithTagsFirst(int start,
           states_this_new.insert(make_pair(this_trg, new_t.newState()));
         }
         int new_trg = states_this_new[this_trg];
-        new_t.linkStates(new_src, new_trg, label, default_weight);
+        new_t.linkStates(new_src, new_trg, label, this_wt);
 
         if(isFinal(this_src))
         {
@@ -913,7 +904,7 @@ Transducer::copyWithTagsFirst(int start,
           states_this_lemq.insert(make_pair(this_trg, lemq.newState()));
         }
         int lemq_trg = states_this_lemq[this_trg];
-        lemq.linkStates(lemq_src, lemq_trg, label, default_weight);
+        lemq.linkStates(lemq_src, lemq_trg, label, this_wt);
         if(seen.find(make_pair(this_trg, this_trg)) == seen.end())
         {
           todo.push_front(make_pair(this_trg, this_trg));
@@ -1099,7 +1090,7 @@ Transducer::intersect(Transducer &trimmer,
         trimmed.linkStates(trimmed_src,
                            trimmed_trg,
                            epsilon_tag,
-                           default_weight);
+                           trimmer_wt);
       }
     }
 
@@ -1136,7 +1127,7 @@ Transducer::intersect(Transducer &trimmer,
         trimmed.linkStates(trimmed_src, // fromState
                            trimmed_trg, // toState
                            this_label, // symbol-pair, using this alphabet
-                           default_weight); //weight of transduction
+                           this_wt); //weight of transduction
       }
       else if ( this_right == compoundOnlyLSymbol
                 || this_right == compoundRSymbol
@@ -1163,7 +1154,7 @@ Transducer::intersect(Transducer &trimmer,
         trimmed.linkStates(trimmed_src, // fromState
                            trimmed_trg, // toState
                            this_label, // symbol-pair, using this alphabet
-                           default_weight); //weight of transduction
+                           this_wt); //weight of transduction
       }
       else
       {
@@ -1209,7 +1200,7 @@ Transducer::intersect(Transducer &trimmer,
             trimmed.linkStates(trimmed_src, // fromState
                                trimmed_trg, // toState
                                this_label, // symbol-pair, using this alphabet
-                               default_weight); //weight of transduction
+                               this_wt); //weight of transduction
           }
         } // end loop arcs from trimmer_src
       } // end if JOIN else

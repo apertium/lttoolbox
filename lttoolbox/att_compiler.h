@@ -55,9 +55,9 @@ namespace
   }
   
   /** Converts a string to a number. Slow, but at this point I don't care. */
-  int convert(const wstring& s) 
+  double convert(const wstring& s)
   {
-    int ret;
+    double ret;
     wistringstream ss(s);
     ss >> ret;
     return ret;
@@ -94,7 +94,7 @@ public:
    */
   void _extract_transducer(TransducerType type, int from,
                            Transducer& transducer, map<int, int>& corr,
-                           set<int>& visited, double& cost) ;
+                           set<int>& visited) ;
 
   /**
    * Classifies the edges of the transducer graphs recursively. It works like
@@ -134,9 +134,7 @@ private:
    */
   int starting_state;
   /**
-   * Value of the final weight after a complete valid transduction. We assume it
-   * is the default value of weight for an entry if not specified otherwise or
-   * for the case of unweighted automata/transducers.
+   * Default value of weight of a transduction unless specified.
    */
   double default_weight;
 

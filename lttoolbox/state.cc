@@ -19,6 +19,7 @@
 #include <cstring>
 #include <cwctype>
 #include <climits>
+#include <algorithm>
 
 //debug//
 //#include <iostream>
@@ -516,13 +517,16 @@ State::isFinal(map<Node *, double> const &finals) const
   return false;
 }
 
-wstring
+map< wstring, double >
 State::filterFinals(map<Node *, double> const &finals,
                     Alphabet const &alphabet,
                     set<wchar_t> const &escaped_chars,
                     bool uppercase, bool firstupper, int firstchar) const
 {
+  map< wstring, double > response;
+
   wstring result = L"";
+  double cost = 0.0000;
 
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
@@ -530,7 +534,8 @@ State::filterFinals(map<Node *, double> const &finals,
     {
       if(state[i].dirty)
       {
-        result += L'/';
+        result = L"";
+        cost = 0.0000;
         unsigned int const first_char = result.size() + firstchar;
         for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
         {
@@ -539,6 +544,7 @@ State::filterFinals(map<Node *, double> const &finals,
             result += L'\\';
           }
           alphabet.getSymbol(result, (*(state[i].sequence))[j].first, uppercase);
+          cost += (*(state[i].sequence))[j].second;
         }
         if(firstupper)
         {
@@ -552,10 +558,12 @@ State::filterFinals(map<Node *, double> const &finals,
             result[first_char] = towupper(result[first_char]);
           }
         }
+        response.insert(pair<wstring, double>(result, cost));
       }
       else
       {
-        result += L'/';
+        result = L"";
+        cost = 0.0000;
         for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
         {
           if(escaped_chars.find((*(state[i].sequence))[j].first) != escaped_chars.end())
@@ -563,25 +571,28 @@ State::filterFinals(map<Node *, double> const &finals,
             result += L'\\';
           }
           alphabet.getSymbol(result, (*(state[i].sequence))[j].first);
+          cost += (*(state[i].sequence))[j].second;
         }
+        response.insert(pair<wstring, double>(result, cost));
       }
     }
   }
 
-  return result;
+  return response;
 }
 
 
-set<pair<wstring, vector<wstring> > >
+map<pair<wstring, vector<wstring> >, double >
 State::filterFinalsLRX(map<Node *, double> const &finals,
-                    Alphabet const &alphabet,
-                    set<wchar_t> const &escaped_chars,
-                    bool uppercase, bool firstupper, int firstchar) const
+                       Alphabet const &alphabet,
+                       set<wchar_t> const &escaped_chars,
+                       bool uppercase, bool firstupper, int firstchar) const
 {
-  set<pair<wstring, vector<wstring> > > results;
+  map<pair<wstring, vector<wstring> >, double > results;
 
   vector<wstring> current_result;
   wstring rule_id = L"";
+  double cost = 0.0000;
 
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
@@ -589,6 +600,7 @@ State::filterFinalsLRX(map<Node *, double> const &finals,
     {
       current_result.clear();
       rule_id = L"";
+      cost = 0.0000;
       wstring current_word = L"";
       for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
       {
@@ -608,11 +620,12 @@ State::filterFinalsLRX(map<Node *, double> const &finals,
         }
         else
         {
-          current_word += sym; 
+          current_word += sym;
         }
+        cost += (*(state[i].sequence))[j].second;
       }
       rule_id = current_word;
-      results.insert(make_pair(rule_id, current_result)); 
+      results.insert(make_pair(make_pair(rule_id, current_result), cost));
     }
   }
 
@@ -620,20 +633,24 @@ State::filterFinalsLRX(map<Node *, double> const &finals,
 }
 
 
-wstring
+map<wstring, double>
 State::filterFinalsSAO(map<Node *, double> const &finals,
                        Alphabet const &alphabet,
                        set<wchar_t> const &escaped_chars,
                        bool uppercase, bool firstupper, int firstchar) const
 {
+  map<wstring, double> response;
+
   wstring result = L"";
   wstring annot = L"";
+  double cost = 0.0000;
 
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     if(finals.find(state[i].where) != finals.end())
     {
-      result += L'/';
+      result = L"";
+      cost = 0.0000;
       unsigned int const first_char = result.size() + firstchar;
       for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
       {
@@ -651,6 +668,7 @@ State::filterFinalsSAO(map<Node *, double> const &finals,
         {
           alphabet.getSymbol(result, (*(state[i].sequence))[j].first, uppercase);
         }
+        cost += (*(state[i].sequence))[j].second;
       }
       if(firstupper)
       {
@@ -664,25 +682,31 @@ State::filterFinalsSAO(map<Node *, double> const &finals,
           result[first_char] = towupper(result[first_char]);
         }
       }
+      response.insert(pair<wstring, double>(result, cost));
     }
   }
 
-  return result;
+  return response;
 }
 
-wstring
+map<wstring, double>
 State::filterFinalsTM(map<Node *, double> const &finals,
                       Alphabet const &alphabet,
                       set<wchar_t> const &escaped_chars,
                       queue<wstring> &blankqueue, vector<wstring> &numbers) const
 {
+  map<wstring, double> response;
+
   wstring result = L"";
+  wstring res = L"";
+  double cost = 0.0000;
 
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     if(finals.find(state[i].where) != finals.end())
     {
-      result += L'/';
+      result = L"";
+      cost = 0.0000;
       for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
       {
         if(escaped_chars.find((*(state[i].sequence))[j].first) != escaped_chars.end())
@@ -690,91 +714,100 @@ State::filterFinalsTM(map<Node *, double> const &finals,
           result += L'\\';
         }
         alphabet.getSymbol(result, (*(state[i].sequence))[j].first);
+        cost += (*(state[i].sequence))[j].second;
       }
+      response.insert(pair<wstring, double>(result, cost));
     }
   }
 
 
   wstring result2 = L"";
-  vector<wstring> fragmentos;
-  fragmentos.push_back(L"");
+  vector<wstring> fragment;
 
-  for(unsigned int i = 0, limit = result.size(); i != limit ; i++)
-  {
-    if(result[i] == L')')
-    {
-      fragmentos.push_back(L"");
-    }
-    else
-    {
-      fragmentos[fragmentos.size()-1] += result[i];
-    }
-  }
 
-  for(unsigned int i = 0, limit = fragmentos.size(); i != limit; i++)
+  for(map<wstring, double>::iterator it = response.begin(), limit = response.end(); it != limit ; it++)
   {
-    if(i != limit -1)
+    res = it->first;
+    fragment.clear();
+    fragment.push_back(L"");
+    for(unsigned int i = 0, limit = res.size(); i != limit ; i++)
     {
-      if(fragmentos[i].size() >=2 && fragmentos[i].substr(fragmentos[i].size()-2) == L"(#")
+      if(res[i] == L')')
       {
-        wstring whitespace = L" ";
-        if(blankqueue.size() != 0)
-        {
-          whitespace = blankqueue.front().substr(1);
-          blankqueue.pop();
-          whitespace = whitespace.substr(0, whitespace.size() - 1);
-        }  
-        fragmentos[i] = fragmentos[i].substr(0, fragmentos[i].size()-2) +
-                        whitespace;
+        fragment.push_back(L"");
       }
       else
       {
-        bool sustituido = false;
-        for(int j = fragmentos[i].size() - 1; j >= 0; j--)
+        fragment[fragment.size()-1] += res[i];
+      }
+    }
+
+    for(unsigned int i = 0, limit = fragment.size(); i != limit; i++)
+    {
+      if(i != limit -1)
+      {
+        if(fragment[i].size() >=2 && fragment[i].substr(fragment[i].size()-2) == L"(#")
         {
-          if(fragmentos[i].size()-j > 3 && fragmentos[i][j] == L'\\' &&
-             fragmentos[i][j+1] == L'@' && fragmentos[i][j+2] == L'(')
+          wstring whitespace = L" ";
+          if(blankqueue.size() != 0)
           {
-            int num = 0;
-            bool correcto = true;
-            for(unsigned int k = (unsigned int) j+3, limit2 = fragmentos[i].size();
-                k != limit2; k++)
+            whitespace = blankqueue.front().substr(1);
+            blankqueue.pop();
+            whitespace = whitespace.substr(0, whitespace.size() - 1);
+          }
+          fragment[i] = fragment[i].substr(0, fragment[i].size()-2) +
+                          whitespace;
+        }
+        else
+        {
+          bool substitute = false;
+          for(int j = fragment[i].size() - 1; j >= 0; j--)
+          {
+            if(fragment[i].size()-j > 3 && fragment[i][j] == L'\\' &&
+               fragment[i][j+1] == L'@' && fragment[i][j+2] == L'(')
             {
-              if(iswdigit(fragmentos[i][k]))
+              int num = 0;
+              bool correct = true;
+              for(unsigned int k = (unsigned int) j+3, limit2 = fragment[i].size();
+                  k != limit2; k++)
               {
-                num = num * 10;
-                num += (int) fragmentos[i][k] - 48;
+                if(iswdigit(fragment[i][k]))
+                {
+                  num = num * 10;
+                  num += (int) fragment[i][k] - 48;
+                }
+                else
+                {
+                  correct = false;
+                  break;
+                }
               }
-              else
+              if(correct)
               {
-                correcto = false;
+                fragment[i] = fragment[i].substr(0, j) + numbers[num - 1];
+                substitute = true;
                 break;
               }
             }
-            if(correcto)
-            {
-              fragmentos[i] = fragmentos[i].substr(0, j) + numbers[num - 1];
-              sustituido = true;
-              break;
-            }
           }
-        }
-        if(sustituido == false)
-        {
-          fragmentos[i] += L')';
+          if(substitute == false)
+          {
+            fragment[i] += L')';
+          }
         }
       }
     }
+
+    res = L"";
+
+    for(unsigned int i = 0, limit = fragment.size(); i != limit; i++)
+    {
+      res += fragment[i];
+    }
+    response.insert(pair<wstring, double>(res, cost));
   }
 
-  result = L"";
-
-  for(unsigned int i = 0, limit = fragmentos.size(); i != limit; i++)
-  {
-    result += fragmentos[i];
-  }
-
-  return result;
+  return response;
 }
 
 
@@ -933,4 +966,32 @@ State::getReadableString(const Alphabet &a)
   }
   retval.append(L"]");
   return retval;
+}
+
+
+map< wstring, double >
+State::NFinals(map<wstring, double> lf, int maxAnalyses, int maxWeightClasses) const
+{
+  map<wstring, double> result;
+
+  vector<pair<wstring, double> > lfvector(lf.begin(), lf.end());
+
+
+  sort(lfvector.begin(), lfvector.end(), sort_weights<wstring, double>());
+
+  for(vector<pair<wstring, double> >::iterator it = lfvector.begin(); it != lfvector.end(); it++)
+  {
+    double last_weight = 0.0000;
+    if(maxAnalyses > 0 && maxWeightClasses > 0)
+    {
+      result.insert(*it);
+      maxAnalyses--;
+      if(last_weight!=(*it).second)
+      {
+        maxWeightClasses--;
+      }
+    }
+    else break;
+  }
+  return result;
 }

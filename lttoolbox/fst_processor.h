@@ -69,7 +69,7 @@ private:
   State initial_state;
 
   /**
-   * Default value of weight of a transition
+   * Default value of weight unless specified
    */
   double default_weight;
 
@@ -192,6 +192,11 @@ private:
   bool useDefaultIgnoredChars;
 
   /**
+   * if true, displays the final weights (if any)
+   */
+  bool displayWeightsMode;
+
+  /**
    * try analysing unknown words as compounds
    */
   bool do_decomposition;
@@ -216,6 +221,16 @@ private:
    * Hard coded for now, but there might come a switch one day
    */
   int compound_max_elements;
+
+  /**
+   * Output no more than 'N' number of weighted analyses
+   */
+  int maxAnalyses;
+
+  /**
+   * Output no more than 'N' best weight classes
+   */
+  int maxWeightClasses;
 
   /**
    * Prints an error of input stream and exits
@@ -432,7 +447,10 @@ public:
   void setIgnoredChars(bool const value);
   void setRestoreChars(bool const value);
   void setNullFlush(bool const value);
-  void setUseDefaultIgnoredChars(bool);
+  void setUseDefaultIgnoredChars(bool const value);
+  void setDisplayWeightsMode(bool const value);
+  void setMaxAnalysesValue(int const value);
+  void setMaxWeightClassesValue(int const value);
   bool getNullFlush();
   bool getDecompoundingMode();
 };
