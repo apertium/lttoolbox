@@ -211,11 +211,12 @@ public:
    * @param firstchar first character of the word
    * @return the result of the transduction
    */
-  wstring filterFinals(map<Node *, double> const &finals, Alphabet const &a,
-                      set<wchar_t> const &escaped_chars,
-                      bool uppercase = false,
-                      bool firstupper = false,
-                      int firstchar = 0) const;
+  map< wstring, double > filterFinals(map<Node *, double> const &finals,
+                                      Alphabet const &a,
+                                      set<wchar_t> const &escaped_chars,
+                                      bool uppercase = false,
+                                      bool firstupper = false,
+                                      int firstchar = 0) const;
 
   /**
    * Same as previous one, but  the output is adapted to the SAO system
@@ -228,11 +229,12 @@ public:
    * @param firstchar first character of the word
    * @return the result of the transduction
    */
-  wstring filterFinalsSAO(map<Node *, double> const &finals, Alphabet const &a,
-                      set<wchar_t> const &escaped_chars,
-                      bool uppercase = false,
-                      bool firstupper = false,
-                      int firstchar = 0) const;
+  map< wstring, double > filterFinalsSAO(map<Node *, double> const &finals,
+                                         Alphabet const &a,
+                                         set<wchar_t> const &escaped_chars,
+                                         bool uppercase = false,
+                                         bool firstupper = false,
+                                         int firstchar = 0) const;
 
 
   /**
@@ -247,11 +249,12 @@ public:
    * @return the result of the transduction
    */
 
-  set<pair<wstring, vector<wstring> > > filterFinalsLRX(map<Node *, double> const &finals, Alphabet const &a,
-                      set<wchar_t> const &escaped_chars,
-                      bool uppercase = false,
-                      bool firstupper = false,
-                      int firstchar = 0) const;
+  map<pair<wstring, vector<wstring> >, double > filterFinalsLRX(map<Node *, double> const &finals,
+                                                                Alphabet const &a,
+                                                                set<wchar_t> const &escaped_chars,
+                                                                bool uppercase = false,
+                                                                bool firstupper = false,
+                                                                int firstchar = 0) const;
 
 
 
@@ -281,11 +284,32 @@ public:
    */
   wstring getReadableString(const Alphabet &a);
 
-  wstring filterFinalsTM(map<Node *, double> const &finals,
-                         Alphabet const &alphabet,
-                         set<wchar_t> const &escaped_chars,
-                         queue<wstring> &blanks,
-                         vector<wstring> &numbers) const;
+  map< wstring, double > filterFinalsTM(map<Node *, double> const &finals,
+                                        Alphabet const &alphabet,
+                                        set<wchar_t> const &escaped_chars,
+                                        queue<wstring> &blanks,
+                                        vector<wstring> &numbers) const;
+
+  /**
+   * Returns the lexical form in a sorted by weights manner
+   * and restricts to N analyses or N weight classes if those options are provided.
+   * @param the original lexical form map
+   * @param the max number of printable analyses
+   * @param the max number of printable weight classes
+   * @return the sorted lexical form
+   */
+
+  template <typename T1, typename T2>
+  struct sort_weights {
+      typedef pair<T1, T2> type;
+      bool operator ()(type const& a, type const& b) const {
+          return a.second < b.second;
+      }
+  };
+
+  map< wstring, double > NFinals(map<wstring, double> lf,
+                                 int maxAnalyses,
+                                 int maxWeightClasses) const;
 };
 
 #endif

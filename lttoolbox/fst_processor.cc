@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <cerrno>
+#include <limits>
 
 #ifdef _WIN32
 #include <utf8_fwrap.h>
@@ -55,8 +56,11 @@ isLastBlankTM(false)
   useIgnoredChars = false;
   useDefaultIgnoredChars = true;
   useRestoreChars = false;
+  displayWeightsMode = false;
   showControlSymbols = false;
   biltransSurfaceForms = false;
+  maxAnalyses = std::numeric_limits<int>::max();
+  maxWeightClasses = std::numeric_limits<int>::max();
   compoundOnlyLSymbol = 0;
   compoundRSymbol = 0;
   compound_max_elements = 4;
@@ -863,6 +867,7 @@ FSTProcessor::lsx(FILE *input, FILE *output)
   }
 
   vector<State> new_states, alive_states;
+  map< wstring, double > out_resp;
   wstring blank, out, in, alt_out, alt_in;
   bool outOfWord = true;
   bool finalFound = false;
@@ -928,7 +933,7 @@ FSTProcessor::lsx(FILE *input, FILE *output)
       continue;
     }
 
-//    wcerr << L"\n[!] " << (wchar_t)val << L" ||| " << outOfWord << endl;
+    //wcerr << L"\n[!] " << (wchar_t)val << L" ||| " << outOfWord << endl;
 
     if(outOfWord)
     {
@@ -942,26 +947,47 @@ FSTProcessor::lsx(FILE *input, FILE *output)
       for(vector<State>::const_iterator it = alive_states.begin(); it != alive_states.end(); it++)
       {
         State s = *it;
-//        wcerr << endl << L"[0] FEOF | $ | " << s.size() << L" | " << s.isFinal(all_finals) << endl;
+        //wcerr << endl << L"[0] FEOF | $ | " << s.size() << L" | " << s.isFinal(all_finals) << endl;
         s.step(alphabet(L"<$>"));
-//        wcerr << endl << L"[1] FEOF | $ | " << s.size() << L" | " << s.isFinal(all_finals) << endl;
+        //wcerr << endl << L"[1] FEOF | $ | " << s.size() << L" | " << s.isFinal(all_finals) << endl;
         if(s.size() > 0)
         {
           new_states.push_back(s);
         }
 
-/*        if(s.isFinal(all_finals))
+        /*if(s.isFinal(all_finals))
         {
-          out += s.filterFinals(all_finals, alphabet, escaped_chars);
+          out_resp = s.filterFinals(all_finals, alphabet, escaped_chars);
+          wstring out_lm = L"";
+          for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
+          {
+            out_lm += L"/";
+            out_lm += it->first;
+          }
+          out += out_lm;
           new_states.push_back(*initial_state);
         }*/
 
         if(s.isFinal(all_finals))
         {
           new_states.clear();
-          out = s.filterFinals(all_finals, alphabet, escaped_chars);
-
           new_states.push_back(initial_state);
+          out_resp = s.filterFinals(all_finals, alphabet, escaped_chars);
+          out_resp = s.NFinals(out_resp, maxAnalyses, maxWeightClasses);
+          wstring out_lm = L"";
+          for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
+          {
+            out_lm += L"/";
+            out_lm += it->first;
+            if(displayWeightsMode != 0)
+            {
+              out_lm += L"<W:";
+              out_lm += to_wstring(it->second);
+              out_lm += L">";
+            }
+          }
+          out = out_lm;
+
 
           alt_out = L"";
           for (int i=0; i < (int) out.size(); i++)
@@ -1191,7 +1217,20 @@ FSTProcessor::compoundAnalysis(wstring input_word, bool uppercase, bool firstupp
   }
 
   current_state.pruneCompounds(compoundRSymbol, '+', compound_max_elements);
-  wstring result = current_state.filterFinals(all_finals, alphabet, escaped_chars, uppercase, firstupper);
+  map< wstring, double > response = current_state.filterFinals(all_finals, alphabet, escaped_chars, uppercase, firstupper);
+  response = current_state.NFinals(response, maxAnalyses, maxWeightClasses);
+  wstring result = L"";
+  for(map<wstring, double>::const_iterator it = response.begin(); it != response.end(); it++)
+  {
+    result += L"/";
+    result += it->first;
+    if(displayWeightsMode != 0)
+    {
+      result += L"<W:";
+      result += to_wstring(it->second);
+      result += L">";
+    }
+  }
 
   return result;
 }
@@ -1249,8 +1288,9 @@ FSTProcessor::analysis(FILE *input, FILE *output)
   bool last_postblank = false;
   bool last_preblank = false;
   State current_state = initial_state;
-  wstring lf = L"";
-  wstring sf = L"";
+  map< wstring, double > out_resp;
+  wstring lf = L"";   //lexical form
+  wstring sf = L"";   //surface form
   int last = 0;
   bool firstupper = false, uppercase = false;
   map<int, set<int> >::iterator rcx_map_ptr;
@@ -1272,9 +1312,22 @@ FSTProcessor::analysis(FILE *input, FILE *output)
         {
           current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
         }
-        lf = current_state.filterFinals(all_finals, alphabet,
-                                        escaped_chars,
-                                        uppercase, firstupper);
+        out_resp = current_state.filterFinals(all_finals, alphabet,
+                                              escaped_chars,
+                                              uppercase, firstupper);
+        out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
+        lf = L"";
+        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
+        {
+          lf += L"/";
+          lf += it->first;
+          if(displayWeightsMode != 0)
+          {
+            lf += L"<W:";
+            lf += to_wstring(it->second);
+            lf += L">";
+          }
+        }
         last_incond = true;
         last = input_buffer.getPos();
       }
@@ -1290,9 +1343,22 @@ FSTProcessor::analysis(FILE *input, FILE *output)
         {
           current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
         }
-        lf = current_state.filterFinals(all_finals, alphabet,
-                                        escaped_chars,
-                                        uppercase, firstupper);
+        out_resp = current_state.filterFinals(all_finals, alphabet,
+                                              escaped_chars,
+                                              uppercase, firstupper);
+        out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
+        lf = L"";
+        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
+        {
+          lf += L"/";
+          lf += it->first;
+          if(displayWeightsMode != 0)
+          {
+            lf += L"<W:";
+            lf += to_wstring(it->second);
+            lf += L">";
+          }
+        }
         last_postblank = true;
         last = input_buffer.getPos();
       }
@@ -1308,9 +1374,22 @@ FSTProcessor::analysis(FILE *input, FILE *output)
         {
           current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
         }
-        lf = current_state.filterFinals(all_finals, alphabet,
-                                        escaped_chars,
-                                        uppercase, firstupper);
+        out_resp = current_state.filterFinals(all_finals, alphabet,
+                                              escaped_chars,
+                                              uppercase, firstupper);
+        out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
+        lf = L"";
+        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
+        {
+          lf += L"/";
+          lf += it->first;
+          if(displayWeightsMode != 0)
+          {
+            lf += L"<W:";
+            lf += to_wstring(it->second);
+            lf += L">";
+          }
+        }
         last_preblank = true;
         last = input_buffer.getPos();
       }
@@ -1326,9 +1405,22 @@ FSTProcessor::analysis(FILE *input, FILE *output)
         {
           current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
         }
-        lf = current_state.filterFinals(all_finals, alphabet,
-                                        escaped_chars,
-                                        uppercase, firstupper);
+        out_resp = current_state.filterFinals(all_finals, alphabet,
+                                              escaped_chars,
+                                              uppercase, firstupper);
+        out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
+        lf = L"";
+        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
+        {
+          lf += L"/";
+          lf += it->first;
+          if(displayWeightsMode != 0)
+          {
+            lf += L"<W:";
+            lf += to_wstring(it->second);
+            lf += L">";
+          }
+        }
         last_postblank = false;
         last_preblank = false;
         last_incond = false;
@@ -1601,8 +1693,9 @@ void
 FSTProcessor::tm_analysis(FILE *input, FILE *output)
 {
   State current_state = initial_state;
-  wstring lf = L"";
-  wstring sf = L"";
+  map< wstring, double > out_resp;
+  wstring lf = L"";     //lexical form
+  wstring sf = L"";     //surface form
   int last = 0;
 
   while(wchar_t val = readTMAnalysis(input))
@@ -1612,9 +1705,23 @@ FSTProcessor::tm_analysis(FILE *input, FILE *output)
     {
       if(iswpunct(val))
       {
-        lf = current_state.filterFinalsTM(all_finals, alphabet,
+        out_resp = current_state.filterFinalsTM(all_finals, alphabet,
                                           escaped_chars,
-                                          blankqueue, numbers).substr(1);
+                                          blankqueue, numbers);
+        out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
+        lf = L"";
+        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
+        {
+          lf += L"/";
+          lf += it->first;
+          if(displayWeightsMode != 0)
+          {
+            lf += L"<W:";
+            lf += to_wstring(it->second);
+            lf += L">";
+          }
+        }
+        lf = lf.substr(1);
         last = input_buffer.getPos();
         numbers.clear();
       }
@@ -1840,10 +1947,24 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
           fputwc_unlocked(L'^', output);
         }
 
-        fputws_unlocked(current_state.filterFinals(all_finals, alphabet,
+        wstring out_tagged = L"";
+        map <wstring, double> out_resp_tagged = current_state.filterFinals(all_finals, alphabet,
                                                   escaped_chars,
-                                                  uppercase, firstupper).substr(1).c_str(),
-                                                  output);
+                                                  uppercase, firstupper);
+        out_resp_tagged = current_state.NFinals(out_resp_tagged, maxAnalyses, maxWeightClasses);
+        for(map<wstring, double>::const_iterator it = out_resp_tagged.begin(); it != out_resp_tagged.end(); it++)
+        {
+          out_tagged += L"/";
+          out_tagged += it->first;
+          if(displayWeightsMode != 0)
+          {
+            out_tagged += L"<W:";
+            out_tagged += to_wstring(it->second);
+            out_tagged += L">";
+          }
+        }
+
+        fputws_unlocked(out_tagged.substr(1).c_str(), output);
         if(mode == gm_tagged || mode == gm_tagged_nm)
         {
           fputwc_unlocked(L'/', output);
@@ -1933,6 +2054,7 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
 
   bool skip_mode = true;
   State current_state = initial_state;
+  map<wstring, double> out_resp;
   wstring lf = L"";
   wstring sf = L"";
   int last = 0;
@@ -1967,9 +2089,22 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
       {
         bool firstupper = iswupper(sf[1]);
         bool uppercase = sf.size() > 1 && firstupper && iswupper(sf[2]);
-        lf = current_state.filterFinals(all_finals, alphabet,
+        out_resp = current_state.filterFinals(all_finals, alphabet,
                                         empty_escaped_chars,
                                         uppercase, firstupper, 0);
+        out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
+        lf = L"";
+        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
+        {
+          lf += L"/";
+          lf += it->first;
+          if(displayWeightsMode != 0)
+          {
+            lf += L"<W:";
+            lf += to_wstring(it->second);
+            lf += L">";
+          }
+        }
 
         // case of the beggining of the next word
 
@@ -2099,6 +2234,7 @@ FSTProcessor::transliteration(FILE *input, FILE *output)
   }
 
   State current_state = initial_state;
+  map<wstring, double> out_resp;
   wstring lf = L"";
   wstring sf = L"";
   int last = 0;
@@ -2109,8 +2245,21 @@ FSTProcessor::transliteration(FILE *input, FILE *output)
     {
       bool firstupper = iswupper(sf[1]);
       bool uppercase = sf.size() > 1 && firstupper && iswupper(sf[2]);
-      lf = current_state.filterFinals(all_finals, alphabet, escaped_chars,
+      out_resp = current_state.filterFinals(all_finals, alphabet, escaped_chars,
                                       uppercase, firstupper, 0);
+      out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
+      lf = L"";
+      for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
+      {
+        lf += L"/";
+        lf += it->first;
+        if(displayWeightsMode != 0)
+        {
+          lf += L"<W:";
+          lf += to_wstring(it->second);
+          lf += L">";
+        }
+      }
       if(!lf.empty())
       {
         fputws_unlocked(lf.substr(1).c_str(), output);
@@ -2137,8 +2286,21 @@ FSTProcessor::transliteration(FILE *input, FILE *output)
       {
         bool firstupper = iswupper(sf[1]);
         bool uppercase = sf.size() > 1 && firstupper && iswupper(sf[2]);
-        lf = current_state.filterFinals(all_finals, alphabet, escaped_chars,
+        out_resp = current_state.filterFinals(all_finals, alphabet, escaped_chars,
                                         uppercase, firstupper, 0);
+        out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
+        lf = L"";
+        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
+        {
+          lf += L"/";
+          lf += it->first;
+          if(displayWeightsMode != 0)
+          {
+            lf += L"<W:";
+            lf += to_wstring(it->second);
+            lf += L">";
+          }
+        }
         last = input_buffer.getPos();
       }
 
@@ -2185,6 +2347,7 @@ wstring
 FSTProcessor::biltransfull(wstring const &input_word, bool with_delim)
 {
   State current_state = initial_state;
+  map<wstring, double> out_resp;
   wstring result = L"";
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
@@ -2252,9 +2415,22 @@ FSTProcessor::biltransfull(wstring const &input_word, bool with_delim)
     }
     if(current_state.isFinal(all_finals))
     {
-      result = current_state.filterFinals(all_finals, alphabet,
+      out_resp = current_state.filterFinals(all_finals, alphabet,
                                          escaped_chars,
                                          uppercase, firstupper, 0);
+      out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
+      result = L"";
+      for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
+      {
+        result += L"/";
+        result += it->first;
+        if(displayWeightsMode != 0)
+        {
+          result += L"<W:";
+          result += to_wstring(it->second);
+          result += L">";
+        }
+      }
       if(with_delim)
       {
         if(mark)
@@ -2352,6 +2528,7 @@ wstring
 FSTProcessor::biltrans(wstring const &input_word, bool with_delim)
 {
   State current_state = initial_state;
+  map<wstring, double> out_resp;
   wstring result = L"";
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
@@ -2419,9 +2596,22 @@ FSTProcessor::biltrans(wstring const &input_word, bool with_delim)
     }
     if(current_state.isFinal(all_finals))
     {
-      result = current_state.filterFinals(all_finals, alphabet,
+      out_resp = current_state.filterFinals(all_finals, alphabet,
                                          escaped_chars,
                                          uppercase, firstupper, 0);
+      out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
+      result = L"";
+      for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
+      {
+        result += L"/";
+        result += it->first;
+        if(displayWeightsMode != 0)
+        {
+          result += L"<W:";
+          result += to_wstring(it->second);
+          result += L">";
+        }
+      }
       if(with_delim)
       {
         if(mark)
@@ -2558,6 +2748,7 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
   }
 
   State current_state = initial_state;
+  map<wstring, double> out_resp;
   wstring sf = L"";                   // source language analysis
   wstring queue = L"";                // symbols to be added to each target
   wstring result = L"";               // result of looking up analysis in bidix
@@ -2609,9 +2800,22 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
         bool uppercase = sf.size() > 1 && iswupper(sf[1]);
         bool firstupper= iswupper(sf[0]);
 
-        result = current_state.filterFinals(all_finals, alphabet,
+        out_resp = current_state.filterFinals(all_finals, alphabet,
                                             escaped_chars,
                                             uppercase, firstupper, 0);
+        out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
+        result = L"";
+        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
+        {
+          result += L"/";
+          result += it->first;
+          if(displayWeightsMode != 0)
+          {
+            result += L"<W:";
+            result += to_wstring(it->second);
+            result += L">";
+          }
+        }
       }
 
       if(sf[0] == L'*')
@@ -2689,9 +2893,22 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
         bool firstupper= iswupper(sf[0]);
 
         queue = L""; // the intervening tags were matched
-        result = current_state.filterFinals(all_finals, alphabet,
+        out_resp = current_state.filterFinals(all_finals, alphabet,
                                             escaped_chars,
                                             uppercase, firstupper, 0);
+        out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
+        result = L"";
+        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
+        {
+          result += L"/";
+          result += it->first;
+          if(displayWeightsMode != 0)
+          {
+            result += L"<W:";
+            result += to_wstring(it->second);
+            result += L">";
+          }
+        }
       }
       else if(result != L"")
       {
@@ -2722,6 +2939,7 @@ FSTProcessor::biltransWithQueue(wstring const &input_word, bool with_delim)
 {
   State current_state = initial_state;
   wstring result = L"";
+  map< wstring, double > out_resp;
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
   wstring queue = L"";
@@ -2790,9 +3008,22 @@ FSTProcessor::biltransWithQueue(wstring const &input_word, bool with_delim)
     }
     if(current_state.isFinal(all_finals))
     {
-      result = current_state.filterFinals(all_finals, alphabet,
+      out_resp = current_state.filterFinals(all_finals, alphabet,
                                          escaped_chars,
                                          uppercase, firstupper, 0);
+      out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
+      result = L"";
+      for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
+      {
+        result += L"/";
+        result += it->first;
+        if(displayWeightsMode != 0)
+        {
+          result += L"<W:";
+          result += to_wstring(it->second);
+          result += L">";
+        }
+      }
       if(with_delim)
       {
         if(mark)
@@ -2839,10 +3070,18 @@ FSTProcessor::biltransWithQueue(wstring const &input_word, bool with_delim)
     }
   }
 
-  if (!seentags
-      && L"" == current_state.filterFinals(all_finals, alphabet,
+  map<wstring, double> null_out_resp = current_state.filterFinals(all_finals, alphabet,
                                            escaped_chars,
-                                           uppercase, firstupper, 0))
+                                           uppercase, firstupper, 0);
+  wstring null_result = L"";
+  for(map<wstring, double>::const_iterator it = null_out_resp.begin(); it != null_out_resp.end(); it++)
+  {
+    null_result += L"/";
+    null_result += it->first;
+  }
+
+  if (!seentags
+      && L"" == null_result)
   {
     // word is not present
     if(with_delim)
@@ -2904,6 +3143,7 @@ FSTProcessor::biltransWithoutQueue(wstring const &input_word, bool with_delim)
 {
   State current_state = initial_state;
   wstring result = L"";
+  map< wstring, double > out_resp;
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
   bool mark = false;
@@ -2969,9 +3209,22 @@ FSTProcessor::biltransWithoutQueue(wstring const &input_word, bool with_delim)
     }
     if(current_state.isFinal(all_finals))
     {
-      result = current_state.filterFinals(all_finals, alphabet,
+      out_resp = current_state.filterFinals(all_finals, alphabet,
                                          escaped_chars,
                                          uppercase, firstupper, 0);
+      out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
+      result = L"";
+      for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
+      {
+        result += L"/";
+        result += it->first;
+        if(displayWeightsMode != 0)
+        {
+          result += L"<W:";
+          result += to_wstring(it->second);
+          result += L">";
+        }
+      }
       if(with_delim)
       {
         if(mark)
@@ -3117,6 +3370,7 @@ FSTProcessor::SAO(FILE *input, FILE *output)
   bool last_incond = false;
   bool last_postblank = false;
   State current_state = initial_state;
+  map< wstring, double > out_resp;
   wstring lf = L"";
   wstring sf = L"";
   int last = 0;
@@ -3136,9 +3390,22 @@ FSTProcessor::SAO(FILE *input, FILE *output)
         bool firstupper = iswupper(sf[0]);
         bool uppercase = firstupper && iswupper(sf[sf.size()-1]);
 
-        lf = current_state.filterFinalsSAO(all_finals, alphabet,
+        out_resp = current_state.filterFinalsSAO(all_finals, alphabet,
                                         escaped_chars,
                                         uppercase, firstupper);
+        out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
+        lf = L"";
+        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
+        {
+          lf += L"/";
+          lf += it->first;
+          if(displayWeightsMode != 0)
+          {
+            lf += L"<W:";
+            lf += to_wstring(it->second);
+            lf += L">";
+          }
+        }
         last_incond = true;
         last = input_buffer.getPos();
       }
@@ -3147,9 +3414,22 @@ FSTProcessor::SAO(FILE *input, FILE *output)
         bool firstupper = iswupper(sf[0]);
         bool uppercase = firstupper && iswupper(sf[sf.size()-1]);
 
-        lf = current_state.filterFinalsSAO(all_finals, alphabet,
+        out_resp = current_state.filterFinalsSAO(all_finals, alphabet,
                                         escaped_chars,
                                         uppercase, firstupper);
+        out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
+        lf = L"";
+        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
+        {
+          lf += L"/";
+          lf += it->first;
+          if(displayWeightsMode != 0)
+          {
+            lf += L"<W:";
+            lf += to_wstring(it->second);
+            lf += L">";
+          }
+        }
         last_postblank = true;
         last = input_buffer.getPos();
       }
@@ -3158,9 +3438,22 @@ FSTProcessor::SAO(FILE *input, FILE *output)
         bool firstupper = iswupper(sf[0]);
         bool uppercase = firstupper && iswupper(sf[sf.size()-1]);
 
-        lf = current_state.filterFinalsSAO(all_finals, alphabet,
+        out_resp = current_state.filterFinalsSAO(all_finals, alphabet,
                                         escaped_chars,
                                         uppercase, firstupper);
+        out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
+        lf = L"";
+        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
+        {
+          lf += L"/";
+          lf += it->first;
+          if(displayWeightsMode != 0)
+          {
+            lf += L"<W:";
+            lf += to_wstring(it->second);
+            lf += L">";
+          }
+        }
         last_postblank = false;
         last_incond = false;
         last = input_buffer.getPos();
@@ -3320,6 +3613,24 @@ void
 FSTProcessor::setUseDefaultIgnoredChars(bool const value)
 {
   useDefaultIgnoredChars = value;
+}
+
+void
+FSTProcessor::setDisplayWeightsMode(bool const value)
+{
+  displayWeightsMode = value;
+}
+
+void
+FSTProcessor::setMaxAnalysesValue(int const value)
+{
+  maxAnalyses = value;
+}
+
+void
+FSTProcessor::setMaxWeightClassesValue(int const value)
+{
+  maxWeightClasses = value;
 }
 
 bool

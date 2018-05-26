@@ -123,13 +123,13 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
   wstring line;
   bool first_line = true;       // First line -- see below
   bool seen_input_symbol = false;
-  double weight;
 
   while (getline(infile, line))
   {
     tokens.clear();
     int from, to;
     wstring upper, lower;
+    double weight;
 
     if (line.length() == 0 && first_line) 
     {
@@ -149,7 +149,7 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
     }
     split(line, L'\t', tokens);
 
-    from = convert(tokens[0]);
+    from = static_cast<int>(convert(tokens[0]));
 
     AttNode* source = get_node(from);
     /* First line: the initial state is of both types. */
@@ -174,7 +174,7 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
     } 
     else
     {
-      to = convert(tokens[1]);
+      to = static_cast<int>(convert(tokens[1]));
       if(dir == L"RL")
       {
         upper = tokens[3];
@@ -227,10 +227,9 @@ AttCompiler::extract_transducer(TransducerType type)
   /* Correlation between the graph's state ids and those in the transducer. */
   map<int, int> corr;
   set<int> visited;
-  double cost = default_weight;
 
   corr[starting_state] = transducer.getInitial();
-  _extract_transducer(type, starting_state, transducer, corr, visited, cost);
+  _extract_transducer(type, starting_state, transducer, corr, visited);
 
   /* The final states. */
   bool noFinals = true;
@@ -239,7 +238,6 @@ AttCompiler::extract_transducer(TransducerType type)
     if (corr.find(f->first) != corr.end())
     {
       transducer.setFinal(corr[f->first], f->second);
-      cost = cost + f->second;
       noFinals = false;
     }
   }
@@ -266,8 +264,8 @@ AttCompiler::extract_transducer(TransducerType type)
  */
 void 
 AttCompiler::_extract_transducer(TransducerType type, int from,
-                         Transducer& transducer, map<int, int>& corr,
-                         set<int>& visited, double& cost)
+                                 Transducer& transducer, map<int, int>& corr,
+                                 set<int>& visited)
 {
   if (visited.find(from) != visited.end())
   {
@@ -287,7 +285,7 @@ AttCompiler::_extract_transducer(TransducerType type, int from,
   for (vector<Transduction>::const_iterator it = source->transductions.begin();
        it != source->transductions.end(); ++it) 
   {
-    if ((it->type & type) != type) 
+    if ((it->type & type) != type)
     {
       continue;  // Not the right type
     }
@@ -300,9 +298,6 @@ AttCompiler::_extract_transducer(TransducerType type, int from,
     }
     from_t = corr[from];
 
-    /*Update cost with each new transduction*/
-    cost = cost + it->weight;
-
     /* Now with the target state: */
     if (!new_to)
     {
@@ -310,13 +305,13 @@ AttCompiler::_extract_transducer(TransducerType type, int from,
       to_t = corr[it->to];
       transducer.linkStates(from_t, to_t, it->tag, it->weight);
     }
-    else 
+    else
     {
       /* We haven't seen it yet: add a new state! */
       to_t = transducer.insertNewSingleTransduction(it->tag, from_t, it->weight);
       corr[it->to] = to_t;
     }
-    _extract_transducer(type, it->to, transducer, corr, visited, cost);
+    _extract_transducer(type, it->to, transducer, corr, visited);
   }  // for
 }
 
@@ -336,7 +331,7 @@ AttCompiler::_extract_transducer(TransducerType type, int from,
  */
 void
 AttCompiler::classify(int from, map<int, TransducerType>& visited, bool path,
-              TransducerType type)
+                      TransducerType type)
 {
   AttNode* source = get_node(from);
   if (visited.find(from) != visited.end())
@@ -368,7 +363,7 @@ AttCompiler::classify(int from, map<int, TransducerType>& visited, bool path,
       if (upper_word)  next_type |= WORD;
       if (upper_punct) next_type |= PUNCT;
       next_path = true;
-    } 
+    }
     else
     {
       /* Otherwise (not yet, already): target's type is the same as ours. */

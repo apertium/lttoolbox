@@ -56,5 +56,22 @@ class WeightedCatNegativeTransducer(unittest.TestCase, ProcTest):
     inputs = ["cat"]
     expectedOutputs = ["^cat/cat+n/cat+v$"]
 
+class PrintWeights(unittest.TestCase, ProcTest):
+    procdix = "data/cat-weight.att"
+    procflags = ["-W"]
+    inputs = ["cat"]
+    expectedOutputs = ["^cat/cat+n<W:11.002748>/cat+v<W:12.034480>$"]
+
+class PrintWeightsNegative(unittest.TestCase, ProcTest):
+    procdix = "data/cat-weight-negative.att"
+    procflags = ["-W"]
+    inputs = ["cat"]
+    expectedOutputs = ["^cat/cat+n<W:9.353620>/cat+v<W:10.385352>$"]
+
+class PrintNAnalyses(unittest.TestCase, ProcTest):
+    procdix = "data/cat-weight.att"
+    procflags = ["W", "-N 1"]
+    inputs = ["cat"]
+    expectedOutputs = ["^cat/cat+n$"]
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *
