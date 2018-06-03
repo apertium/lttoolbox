@@ -66,7 +66,7 @@ public:
   deserialise(std::istream &Stream_);
 };
 
-#ifdef __APPLE__
+#ifdef SIZET_NOT_CSTDINT
 template <> class Deserialiser<size_t> {
 public:
   inline static size_t deserialise(std::istream &Stream_);
@@ -163,7 +163,7 @@ integer_type int_deserialise(std::istream &Stream_) {
   }
 }
 
-#ifdef __APPLE__
+#ifdef SIZET_NOT_CSTDINT
 size_t Deserialiser<size_t>::deserialise(std::istream &Stream_) {
   return int_deserialise<uint64_t>(Stream_);
 }

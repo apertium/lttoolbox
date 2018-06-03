@@ -64,7 +64,7 @@ public:
             std::ostream &Output);
 };
 
-#ifdef __APPLE__
+#ifdef SIZET_NOT_CSTDINT
 template <> class Serialiser<size_t> {
 public:
   inline static void serialise(const size_t &SerialisedType_,
@@ -186,7 +186,7 @@ void int_serialise(const integer_type &SerialisedType_,
   }
 }
 
-#ifdef __APPLE__
+#ifdef SIZET_NOT_CSTDINT
 void Serialiser<size_t>::serialise(const size_t &SerialisedType_,
                                     std::ostream &Output) {
   int_serialise((uint64_t)SerialisedType_, Output);
