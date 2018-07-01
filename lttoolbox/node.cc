@@ -27,7 +27,7 @@ Node::~Node()
 
 Node::Node(Node const &n)
 {
-  copy(n);  
+  copy(n);
 }
 
 Node &
@@ -38,13 +38,13 @@ Node::operator =(Node const &n)
     destroy();
     copy(n);
   }
-  return *this; 
+  return *this;
 }
 
 void
 Node::copy(Node const &n)
 {
-  transitions = n.transitions;  
+  transitions = n.transitions;
 }
 
 void
@@ -53,27 +53,32 @@ Node::destroy()
 }
 
 void
-Node::addTransition(int const i, int const o, Node * const d)
+Node::addTransition(int const i, int const o, Node * const d, double const w)
 {
   Dest &aux = transitions[i];
   aux.size++;
   int *out_tag = new int[aux.size];
   Node **dest = new Node*[aux.size];
- 
+  double *weight = new double[aux.size];
+
   for(int i = 0; i<aux.size-1; i++)
   {
     out_tag[i] = aux.out_tag[i];
     dest[i] = aux.dest[i];
+    weight[i] = aux.weight[i];
   }
-  
+
   if(aux.size > 1)
   {
     delete[] aux.out_tag;
     delete[] aux.dest;
+    delete[] aux.weight;
   }
 
   out_tag[aux.size-1] = o;
   dest[aux.size-1] = d;
+  weight[aux.size-1] = w;
   aux.out_tag = out_tag;
   aux.dest = dest;
+  aux.weight = weight;
 }

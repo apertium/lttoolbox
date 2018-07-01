@@ -44,7 +44,8 @@ wstring const TMXCompiler::TMX_COMPILER_SEG_ELEM     = L"seg";
 wstring const TMXCompiler::TMX_COMPILER_PROP_ELEM    = L"prop";
 
 TMXCompiler::TMXCompiler() :
-reader(0)
+reader(0),
+default_weight(0.0000)
 {
   LtLocale::tryToSetLocale();
   alphabet.includeSymbol(L"<n>"); // -1 -> numbers
@@ -219,9 +220,9 @@ TMXCompiler::insertTU(vector<int> const &origin, vector<int> const &meta)
       {
         break;
       }
-      source = transducer.insertSingleTransduction(alphabet(s1, s2), source);
+      source = transducer.insertSingleTransduction(alphabet(s1, s2), source, default_weight);
     }
-    transducer.setFinal(source);
+    transducer.setFinal(source, default_weight);
   }
 }
 
