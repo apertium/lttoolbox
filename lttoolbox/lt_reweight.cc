@@ -30,8 +30,8 @@ void endProgram(char *name)
 {
   if(name != NULL)
   {
-    cout << basename(name) << " v" << PACKAGE_VERSION <<": trim a transducer to another transducer" << endl;
-    cout << "USAGE: " << basename(name) << " analyser_bin_file bidix_bin_file trimmed_bin_file " << endl;
+    cout << basename(name) << " v" << PACKAGE_VERSION <<": assign weights to a compiled transducer based on a corpus." << endl;
+    cout << "USAGE: " << basename(name) << " analyser_bin_file tagged_corpus" << endl;
   }
   exit(EXIT_FAILURE);
 }
@@ -145,7 +145,7 @@ trim(FILE *file_mono, FILE *file_bi)
 
 int main(int argc, char *argv[])
 {
-  if(argc != 4)
+  if(argc != 3)
   {
     endProgram(argv[0]);
   }
@@ -155,13 +155,13 @@ int main(int argc, char *argv[])
   FILE *analyser = fopen(argv[1], "rb");
   if(!analyser)
   {
-    wcerr << "Error: Cannot open file '" << argv[1] << "'." << endl << endl;
+    wcerr << "Error: Cannot not open file '" << argv[1] << "'." << endl << endl;
     exit(EXIT_FAILURE);
   }
   FILE *bidix = fopen(argv[2], "rb");
   if(!bidix)
   {
-    wcerr << "Error: Cannot open file '" << argv[2] << "'." << endl << endl;
+    wcerr << "Error: Cannot not open file '" << argv[2] << "'." << endl << endl;
     exit(EXIT_FAILURE);
   }
 
