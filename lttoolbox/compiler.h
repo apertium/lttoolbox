@@ -22,6 +22,7 @@
 #include <lttoolbox/entry_token.h>
 #include <lttoolbox/ltstr.h>
 #include <lttoolbox/transducer.h>
+#include <lttoolbox/att_compiler.h>
 
 #include <map>
 #include <string>
@@ -40,7 +41,7 @@ private:
    * The libxml2's XML reader
    */
   xmlTextReaderPtr reader;
-  
+
   /**
    * The alt value
    */
@@ -50,38 +51,38 @@ private:
    * The variant value (monodix)
    */
   wstring variant;
-  
+
   /**
    * The variant value (left side of bidix)
    */
   wstring variant_left;
-  
+
   /**
    * The variant value (right side of bidix)
    */
   wstring variant_right;
-    
+
   /**
    * The paradigm being compiled
    */
   wstring current_paradigm;
-  
+
   /**
    * The dictionary section being compiled
    */
   wstring current_section;
-  
+
   /**
    * The direction of the compilation, 'lr' (left-to-right) or 'rl'
    * (right-to-left)
    */
   wstring direction;
-  
+
   /**
    * List of characters to be considered alphabetic
    */
   wstring letters;
-  
+
   /**
    * Set verbose mode: warnings which may or may not be correct
    */
@@ -101,22 +102,22 @@ private:
    * Identifier of all the symbols during the compilation
    */
   Alphabet alphabet;  
-  
+
   /**
    * List of named transducers-paradigms
    */
   map<wstring, Transducer, Ltstr> paradigms;
-  
+
   /**
    * List of named dictionary sections
    */
   map<wstring, Transducer, Ltstr> sections;
-  
+
   /**
    * List of named prefix copy of a paradigm
    */
   map<wstring, map<wstring, int, Ltstr>, Ltstr> prefix_paradigms;
-  
+
   /**
    * List of named suffix copy of a paradigm
    */
@@ -131,13 +132,13 @@ private:
    * Mapping of aliases of characters specified in ACX files
    */
   map<int, set<int> > acx_map;
-  
+
   /**
    * Original char being mapped
    */
   int acx_current_char; 
 
-  /*    
+  /*
   static string range(char const a, char const b);
   string readAlphabet();
   */
@@ -201,18 +202,18 @@ private:
    * @return the last state of the inserted transduction
    */
   int matchTransduction(list<int> const &lp, list<int> const &rp,
-			    int state, Transducer &t);
+                        int state, Transducer &t, double const &entry_weight);
   /**
    * Parse the &lt;p&lt; element
    * @return a list of tokens from the dictionary's entry
    */
-  EntryToken procTransduction();
+  EntryToken procTransduction(wstring const &wsweight);
 
   /**
    * Parse the &lt;i&lt; element
    * @return a list of tokens from the dictionary's entry
    */
-  EntryToken procIdentity(bool ig = false);
+  EntryToken procIdentity(wstring const &wsweight, bool ig = false);
 
   /**
    * Parse the &lt;par&gt; element
