@@ -1,0 +1,66 @@
+.TH lt-reweight 1 2014-02-07 "" ""
+.SH NAME
+lt-reweight \- This application is part of the lexical processing modules
+and tools (
+.B lttoolbox
+)
+.PP
+This tool is part of the apertium machine translation
+architecture: \fBhttp://www.apertium.org\fR.
+.SH SYNOPSIS
+.B lt-trim
+analyser_binary bidix_binary trimmed_analyser_binary
+.PP
+.SH DESCRIPTION
+.BR lt-trim
+is the application responsible for trimming compiled dictionaries. The
+analyses (right-side when compiling lr) of analyser_binary are trimmed
+to the input side of bidix_binary (left-side when compiling lr,
+right-side when compiling rl), such that only analyses which would
+pass through `lt-proc \-b bidix_binary' are kept.
+
+\fBWarning: this program is experimental!\fR It has been tested, but
+not deployed extensively yet.
+
+Both compund tags (`<compound-only-L>', `<compound-R>') and join
+elements (`<j/>' in XML, `+' in the stream) and the group element
+(`<g/>' in XML, `#' in the stream) should be handled correctly, even
+combinations of + followed by # in monodix are handled.
+
+Some minor caveats: If you have the capitalised lemma "Foo" in the
+monodix, but "foo" in the bidix, an analysis "^Foo<tag>$" would pass
+through bidix when doing lt-proc \-b, but will not make it through
+trimming. Make sure your lemmas have the same capitalisation in the
+different dictionaries. Also, you should not have literal `+' or `#'
+in your lemmas. Since lt-comp doesn't escape these, lt-trim cannot
+know that they are different from `<j/>' or `<g/>', and you may get
+@-marked output this way. You can analyse `+' or `#' by having the
+literal symbol in the `<l>' part and some other string (e.g. "plus")
+in the `<r>'.
+
+You should not trim a generator unless you have a \fBvery\fR simple
+translator pipeline, since the output of bidix seldom goes unchanged
+through transfer.
+.PP
+.SH FILES
+.B analyser_binary
+The untrimmed analyser dictionary (a finite state transducer).
+.PP
+.B bidix_binary
+The dictionary to use as trimmer (a finite state transducer).
+.PP
+.B trimmed_analyser_binary
+The trimmed analyser dictionary (a finite state transducer).
+
+.SH SEE ALSO
+.I lt-comp\fR(1),
+.I lt-proc\fR(1),
+.I lt-print\fR(1),
+.I lt-expand\fR(1),
+.I lt-trim\fR(1),
+.I apertium-tagger\fR(1),
+.I apertium\fR(1).
+.SH BUGS
+Lots of...lurking in the dark and waiting for you!
+.SH AUTHOR
+(c) 2013--2014 Universitat d'Alacant / Universidad de Alicante.
