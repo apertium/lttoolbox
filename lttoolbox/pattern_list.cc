@@ -36,6 +36,7 @@ PatternList::copy(PatternList const &o)
   transducer = o.transducer;
   final_type = o.final_type;
   sequence_id = o.sequence_id;
+  default_weight = o.default_weight;
 }
 
 void
@@ -44,7 +45,8 @@ PatternList::destroy()
 }
 
 PatternList::PatternList() :
-sequence_id(0)
+sequence_id(0),
+default_weight(0.0000)
 {
   sequence = false;
   alphabet.includeSymbol(ANY_TAG);
@@ -96,7 +98,7 @@ PatternList::endSequence()
   sequence = false;
   
   for(list<vector<int> >::iterator it = sequence_data.begin(),
-	limit = sequence_data.end();
+      limit = sequence_data.end();
       it != limit; it++)
   {
     it->push_back(alphabet(QUEUE));
@@ -106,7 +108,7 @@ PatternList::endSequence()
 
 void
 PatternList::insertOutOfSequence(wstring const &lemma, wstring const &tags,
-				 vector<int> &result)
+                                 vector<int> &result)
 {
   if(lemma == L"")
   {
@@ -121,7 +123,7 @@ PatternList::insertOutOfSequence(wstring const &lemma, wstring const &tags,
         result.push_back(alphabet(ANY_CHAR));
       }
       else
-      { 
+      {
         result.push_back(int((unsigned char) lemma[i]));
       }
     }
@@ -138,20 +140,20 @@ PatternList::insertOutOfSequence(wstring const &lemma, wstring const &tags,
       
       if(tag == L"<*>")
       {
-	result.push_back(alphabet(ANY_TAG));
+        result.push_back(alphabet(ANY_TAG));
       }
       else
       {
-	alphabet.includeSymbol(tag);
-	result.push_back(alphabet(tag));
+        alphabet.includeSymbol(tag);
+        result.push_back(alphabet(tag));
       }
-    } 
+    }
   }
 }
 
 void
 PatternList::insertIntoSequence(int const id, wstring const &lemma, 
-				wstring const &tags)
+        wstring const &tags)
 {
   sequence_id = id;
 
@@ -213,16 +215,16 @@ PatternList::insert(int const id, int const otherid)
     list<vector<int> > new_sequence_data;
 
     for(list<vector<int> >::iterator it = sequence_data.begin(),
-	  limit = sequence_data.end(); it != limit; it++)
+          limit = sequence_data.end(); it != limit; it++)
     {
       for(PatternRange p = patterns.equal_range(otherid);
-	  p.first != p.second; p.first++)
+          p.first != p.second; p.first++)
       {
-	vector<int> temp = *it;
-	temp.push_back(L'+');
+        vector<int> temp = *it;
+        temp.push_back(L'+');
         temp.insert(temp.end(), (p.first->second).begin(),
-		    (p.first->second).end());
-	new_sequence_data.push_back(temp);
+                    (p.first->second).end());
+        new_sequence_data.push_back(temp);
       }
     }
 
@@ -264,11 +266,11 @@ PatternList::tagAt(wstring const &tags, int const index)
       count++;
       if(end == 0)
       {
-	start = 0;
+        start = 0;
       }
       else
       {
-	start = end + 1;
+        start = end + 1;
       }
       end = i;
     }
@@ -326,8 +328,8 @@ PatternList::buildTransducer()
           // ignore second (and next) possible consecutive queues
           continue;
         }
-        
-	// optional queue
+
+        // optional queue
         prevstate = state;
         state = transducer.insertSingleTransduction(static_cast<int>(L'_'), state);
         transducer.linkStates(prevstate, state, static_cast<int>(L' '));
@@ -358,7 +360,7 @@ PatternList::buildTransducer()
       final_type[state] = it->first;
     }
   }
-}  
+}
 
 void
 PatternList::write(FILE *output)
@@ -385,13 +387,13 @@ PatternList::read(FILE *input)
 {
   sequence = false;
   final_type.clear();
-  
+
   alphabet.read(input);
   if(Compression::multibyte_read(input) == 1)
   {
     wstring mystr = Compression::wstring_read(input);
     transducer.read(input, alphabet.size());
-    
+
     int finalsize = Compression::multibyte_read(input);
     for(; finalsize != 0; finalsize--)
     {

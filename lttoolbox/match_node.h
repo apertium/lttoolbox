@@ -28,7 +28,7 @@ class MatchState;
 using namespace std;
 
 //class MatchNode;
-//typedef map<int, MatchNode *> MNode;
+//typedef map<int, pair<MatchNode *, double> > MNode;
 
 typedef SortedVector MNode;
 
@@ -40,10 +40,10 @@ class MatchNode
 {
 private:
   friend class MatchState;
-  
+
   /**
-   * The outgoing transitions from this node. 
-   * Schema: (input symbol, destination)
+   * The outgoing transitions from this node.
+   * Schema: (input symbol, destination, weight)
    */
   MNode transitions;
 
@@ -71,7 +71,7 @@ public:
   ~MatchNode();
 
   /**
-   * Copy constructor 
+   * Copy constructor
    * @param n the node to be copied
    */
   MatchNode(MatchNode const &n);
@@ -87,8 +87,9 @@ public:
    * Making a link between this node and another
    * @param i input symbol
    * @param d destination
+   * @param w weight value
    */
-  void addTransition(int const i, MatchNode * const d, int pos);
+  void addTransition(int const i, MatchNode * const d, double const w, int pos);
 };
 
 #endif

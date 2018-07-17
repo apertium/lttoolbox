@@ -52,7 +52,7 @@ Alphabet &
 Alphabet::operator =(Alphabet const &a)
 {
   if(this != &a)
-  { 
+  {
     destroy();
     copy(a);
   }
@@ -64,7 +64,7 @@ Alphabet::destroy()
 {
 }
 
-void 
+void
 Alphabet::copy(Alphabet const &a)
 {
   slexic = a.slexic;
@@ -94,7 +94,7 @@ Alphabet::operator()(int const c1, int const c2)
     spair[tmp] = spair_size;
     spairinv.push_back(tmp);
   }
-  
+
   return spair[tmp];
 }
 
@@ -153,7 +153,7 @@ Alphabet::read(FILE *input)
   Alphabet a_new;
   a_new.spairinv.clear();
   a_new.spair.clear();
-  
+
   // Reading of taglist
   int tam = Compression::multibyte_read(input);
   map<int, string> tmp;
@@ -174,11 +174,11 @@ Alphabet::read(FILE *input)
     int first = Compression::multibyte_read(input);
     int second = Compression::multibyte_read(input);
     pair<int, int> tmp(first - bias, second - bias);
-	int spair_size = a_new.spair.size();
+    int spair_size = a_new.spair.size();
     a_new.spair[tmp] = spair_size;
     a_new.spairinv.push_back(tmp);
   }
-  
+
   *this = a_new;
 }
 
@@ -226,7 +226,7 @@ Alphabet::getSymbol(wstring &result, int const symbol, bool uppercase) const
   {
     return;
   }
-  
+
   if(!uppercase)
   {
     if(symbol >= 0)
@@ -303,7 +303,7 @@ Alphabet::createLoopbackSymbols(set<int> &symbols, Alphabet &basis, Side s, bool
       it++)
   {
     // Only include tags that were actually seen on the correct side
-    if(tags.find(it->second) != tags.end()) 
+    if(tags.find(it->second) != tags.end())
     {
       includeSymbol(it->first);
       symbols.insert(operator()(operator()(it->first),
