@@ -44,7 +44,8 @@ wstring const TMXCompiler::TMX_COMPILER_SEG_ELEM     = L"seg";
 wstring const TMXCompiler::TMX_COMPILER_PROP_ELEM    = L"prop";
 
 TMXCompiler::TMXCompiler() :
-reader(0)
+reader(0),
+default_weight(0.0000)
 {
   LtLocale::tryToSetLocale();
   alphabet.includeSymbol(L"<n>"); // -1 -> numbers
@@ -56,14 +57,14 @@ TMXCompiler::~TMXCompiler()
 }
 
 void
-TMXCompiler::parse(string const &fichero, wstring const &lo, wstring const &lm)
+TMXCompiler::parse(string const &file, wstring const &lo, wstring const &lm)
 {
   origin_language = lo;
   meta_language = lm;
-  reader = xmlReaderForFile(fichero.c_str(), NULL, 0);
+  reader = xmlReaderForFile(file.c_str(), NULL, 0);
   if(reader == NULL)
   {
-    wcerr << "Error: Cannot open '" << fichero << "'." << endl;
+    wcerr << "Error: Cannot open '" << file << "'." << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -404,43 +405,43 @@ TMXCompiler::procTU()
 void
 TMXCompiler::procNode()
 {
-  xmlChar const *xnombre = xmlTextReaderConstName(reader);
-  wstring nombre = XMLParseUtil::towstring(xnombre);
+  xmlChar const *xname = xmlTextReaderConstName(reader);
+  wstring name = XMLParseUtil::towstring(xname);
 
   // HACER: optimizar el orden de ejecución de esta ristra de "ifs"
 
-  if(nombre == L"#text")
+  if(name == L"#text")
   {
     /* ignorar */
   }
-  else if(nombre == TMX_COMPILER_TMX_ELEM)
+  else if(name == TMX_COMPILER_TMX_ELEM)
   {
     /* ignorar */
   }
-  else if(nombre == TMX_COMPILER_HEADER_ELEM)
+  else if(name == TMX_COMPILER_HEADER_ELEM)
   {
     /* ignorar */
   }
-  else if(nombre == TMX_COMPILER_BODY_ELEM)
+  else if(name == TMX_COMPILER_BODY_ELEM)
   {
     /* ignorar */
   }
-  else if(nombre == TMX_COMPILER_PROP_ELEM)
+  else if(name == TMX_COMPILER_PROP_ELEM)
   {
     /* ignorar */
   }
-  else if(nombre == TMX_COMPILER_TU_ELEM)
+  else if(name == TMX_COMPILER_TU_ELEM)
   {
     procTU();
   }
-  else if(nombre== L"#comment")
+  else if(name== L"#comment")
   {
     /* ignorar */
   }
   else
   {
     wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << L"): Invalid node '<" << nombre << L">'." << endl;
+    wcerr << L"): Invalid node '<" << name << L">'." << endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -660,4 +661,3 @@ TMXCompiler::setMetaLanguageCode(wstring const &code)
 {
   // nada
 }
-

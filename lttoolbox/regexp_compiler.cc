@@ -23,7 +23,8 @@ RegexpCompiler::RegexpCompiler() :
 token(0),
 alphabet(0),
 state(0),
-letter(0)
+letter(0),
+default_weight(0.0000)
 {
 }
 
@@ -60,6 +61,7 @@ RegexpCompiler::copy(RegexpCompiler const &rec)
   state = rec.state;
   letter = rec.letter;
   postop = rec.postop;
+  default_weight = rec.default_weight;
 }
 
 void
@@ -310,7 +312,7 @@ RegexpCompiler::Postop()
   }
   else if(token == L'(' || token == L'[' || !isReserved(token) || 
           token == L'\\' || token == L'|' ||  token == FIN_FICHERO || 
-	  token == L')')
+          token == L')')
   {
   }
   else
@@ -354,7 +356,7 @@ RegexpCompiler::Esp()
         int mystate = t.getInitial();
         mystate = t.insertNewSingleTransduction((*alphabet)(0, 0), mystate);
         mystate = t.insertNewSingleTransduction((*alphabet)(i, i), mystate);
-	t.setFinal(mystate);
+        t.setFinal(mystate);
       }
     }
     

@@ -41,7 +41,7 @@ void endProgram(char *name)
 
 int main(int argc, char *argv[])
 {
-  if(argc != 2) 
+  if(argc != 2)
   {
     endProgram(argv[0]);
   }
@@ -67,9 +67,9 @@ int main(int argc, char *argv[])
   {
     alphabetic_chars.insert(static_cast<wchar_t>(Compression::multibyte_read(input)));
     len--;
-  }  
+  }
 
-  // symbols  
+  // symbols
   alphabet.read(input);
 
   len = Compression::multibyte_read(input);
@@ -86,10 +86,10 @@ int main(int argc, char *argv[])
     transducers[name].read(input);
 
     len--;
-  } 
+  }
 
   /////////////////////
- 
+
   FILE *output = stdout;
   map<wstring, Transducer>::iterator penum = transducers.end();
   penum--;
@@ -97,13 +97,13 @@ int main(int argc, char *argv[])
   {
     it->second.joinFinals();
     it->second.show(alphabet, output);
-    if(it != penum) 
+    if(it != penum)
     {
       fwprintf(output, L"--\n", it->first.c_str());
     }
   }
 
   fclose(input);
-  
+
   return 0;
 }

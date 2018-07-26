@@ -93,6 +93,11 @@ private:
   bool first_element;
 
   /**
+   * Default value of weight (of a transition)
+   */
+  double default_weight;
+
+  /**
    * Identifier of all the symbols during the compilation
    */
   Alphabet alphabet;  
@@ -196,7 +201,7 @@ private:
    * @return the last state of the inserted transduction
    */
   int matchTransduction(list<int> const &lp, list<int> const &rp,
-			    int state, Transducer &t);
+          int state, Transducer &t);
   /**
    * Parse the &lt;p&lt; element
    * @return a list of tokens from the dictionary's entry
@@ -277,6 +282,7 @@ public:
   static wstring const COMPILER_SDEFS_ELEM;
   static wstring const COMPILER_SDEF_ELEM;
   static wstring const COMPILER_N_ATTR;
+  static wstring const COMPILER_WEIGHT_ATTR;
   static wstring const COMPILER_PARDEFS_ELEM;
   static wstring const COMPILER_PARDEF_ELEM;
   static wstring const COMPILER_PAR_ELEM;
@@ -319,12 +325,12 @@ public:
   /**
    * Compile dictionary to letter transducers
    */
-  void parse(string const &fichero, wstring const &dir);
+  void parse(string const &file, wstring const &dir);
 
   /**
    * Read ACX file
    */
-  void parseACX(string const &fichero, wstring const &dir);
+  void parseACX(string const &file, wstring const &dir);
 
   
   /**
