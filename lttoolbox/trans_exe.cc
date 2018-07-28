@@ -20,10 +20,10 @@
 #include <lttoolbox/lttoolbox_config.h>
 #include <lttoolbox/my_stdio.h>
 
-TransExe::TransExe()
+TransExe::TransExe():
+initial_id(0),
+default_weight(0.0000)
 {
-  initial_id = 0;
-  default_weight = 0.0000;
 }
 
 TransExe::~TransExe()
@@ -83,7 +83,7 @@ TransExe::read(FILE *input, Alphabet const &alphabet)
 
     base += Compression::multibyte_read(input);
     base_weight = Compression::long_multibyte_read(input);
-    myfinals.insert(pair<int, double>(base, base_weight));
+    myfinals.insert(make_pair(base, base_weight));
   }
 
 
@@ -96,7 +96,7 @@ TransExe::read(FILE *input, Alphabet const &alphabet)
   for(map<int, double>::iterator it = myfinals.begin(), limit = myfinals.end(); 
       it != limit; it++)
   {
-    new_t.finals.insert(pair<Node*, double>(&new_t.node_list[it->first], it->second));
+    new_t.finals.insert(make_pair(&new_t.node_list[it->first], it->second));
   }
 
   while(number_of_states > 0)
@@ -131,11 +131,11 @@ TransExe::unifyFinals()
   for(map<Node *, double>::iterator it = finals.begin(), limit = finals.end();
       it != limit; it++)
   {
-    it->first->addTransition(0, 0, newfinal, it->second);
+    (it->first)->addTransition(0, 0, newfinal, it->second);
   }
 
   finals.clear();
-  finals.insert(pair<Node*, double>(newfinal, default_weight));
+  finals.insert(make_pair(newfinal, default_weight));
 }
 
 Node *

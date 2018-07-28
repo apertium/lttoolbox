@@ -119,7 +119,7 @@ State::apply(int const input)
         *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
-          new_v->push_back(make_pair(it->second.out_tag[j], it->second.weight[j]));
+          new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
       }
@@ -155,11 +155,11 @@ State::apply_override(int const input, int const old_sym, int const new_sym)
         {
           if(it->second.out_tag[j] == old_sym)
           {
-            new_v->push_back(make_pair(new_sym, it->second.weight[j]));
+            new_v->push_back(make_pair(new_sym, it->second.out_weight[j]));
           }
           else
           {
-            new_v->push_back(make_pair(it->second.out_tag[j], it->second.weight[j]));
+            new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
           }
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
@@ -176,11 +176,11 @@ State::apply_override(int const input, int const old_sym, int const new_sym)
         {
           if(it->second.out_tag[j] == old_sym)
           {
-            new_v->push_back(make_pair(new_sym, it->second.weight[j]));
+            new_v->push_back(make_pair(new_sym, it->second.out_weight[j]));
           }
           else
           {
-            new_v->push_back(make_pair(it->second.out_tag[j], it->second.weight[j]));
+            new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
           }
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, true));
@@ -217,7 +217,7 @@ State::apply(int const input, int const alt)
         *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
-          new_v->push_back(make_pair(it->second.out_tag[j], it->second.weight[j]));
+          new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
       }
@@ -231,7 +231,7 @@ State::apply(int const input, int const alt)
         *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
-          new_v->push_back(make_pair(it->second.out_tag[j], it->second.weight[j]));
+          new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, true));
       }
@@ -265,7 +265,7 @@ State::apply_careful(int const input, int const alt)
         *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
-          new_v->push_back(make_pair(it->second.out_tag[j], it->second.weight[j]));
+          new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
       }
@@ -281,7 +281,7 @@ State::apply_careful(int const input, int const alt)
           *new_v = *(state[i].sequence);
           if(it->first != 0)
           {
-            new_v->push_back(make_pair(it->second.out_tag[j], it->second.weight[j]));
+            new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
           }
           new_state.push_back(TNodeState(it->second.dest[j], new_v, true));
         }
@@ -308,7 +308,7 @@ State::epsilonClosure()
         *tmp = *(state[i].sequence);
         if(it2->second.out_tag[j] != 0)
         {
-          tmp->push_back(make_pair(it2->second.out_tag[j], it2->second.weight[j]));
+          tmp->push_back(make_pair(it2->second.out_tag[j], it2->second.out_weight[j]));
         }
         state.push_back(TNodeState(it2->second.dest[j], tmp, state[i].dirty));
       }
@@ -338,7 +338,7 @@ State::apply(int const input, int const alt1, int const alt2)
         *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
-          new_v->push_back(make_pair(it->second.out_tag[j], it->second.weight[j]));
+          new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
       }
@@ -352,7 +352,7 @@ State::apply(int const input, int const alt1, int const alt2)
         *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
-          new_v->push_back(make_pair(it->second.out_tag[j], it->second.weight[j]));
+          new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, true));
       }
@@ -366,7 +366,7 @@ State::apply(int const input, int const alt1, int const alt2)
         *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
-          new_v->push_back(make_pair(it->second.out_tag[j], it->second.weight[j]));
+          new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, true));
       }
@@ -408,7 +408,7 @@ State::apply(int const input, set<int> const alts)
         *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
-          new_v->push_back(make_pair(it->second.out_tag[j], it->second.weight[j]));
+          new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
       }
@@ -424,7 +424,7 @@ State::apply(int const input, set<int> const alts)
           *new_v = *(state[i].sequence);
           if(it->first != 0)
           {
-            new_v->push_back(make_pair(it->second.out_tag[j], it->second.weight[j]));
+            new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
           }
           new_state.push_back(TNodeState(it->second.dest[j], new_v, true));
         }
@@ -539,12 +539,12 @@ State::filterFinals(map<Node *, double> const &finals,
         unsigned int const first_char = result.size() + firstchar;
         for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
         {
-          if(escaped_chars.find((*(state[i].sequence))[j].first) != escaped_chars.end())
+          if(escaped_chars.find(((*(state[i].sequence))[j]).first) != escaped_chars.end())
           {
             result += L'\\';
           }
-          alphabet.getSymbol(result, (*(state[i].sequence))[j].first, uppercase);
-          cost += (*(state[i].sequence))[j].second;
+          alphabet.getSymbol(result, ((*(state[i].sequence))[j]).first, uppercase);
+          cost += ((*(state[i].sequence))[j]).second;
         }
         if(firstupper)
         {
@@ -558,7 +558,7 @@ State::filterFinals(map<Node *, double> const &finals,
             result[first_char] = towupper(result[first_char]);
           }
         }
-        response.insert(pair<wstring, double>(result, cost));
+        response.insert(make_pair(result, cost));
       }
       else
       {
@@ -566,14 +566,14 @@ State::filterFinals(map<Node *, double> const &finals,
         cost = 0.0000;
         for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
         {
-          if(escaped_chars.find((*(state[i].sequence))[j].first) != escaped_chars.end())
+          if(escaped_chars.find(((*(state[i].sequence))[j]).first) != escaped_chars.end())
           {
             result += L'\\';
           }
-          alphabet.getSymbol(result, (*(state[i].sequence))[j].first);
-          cost += (*(state[i].sequence))[j].second;
+          alphabet.getSymbol(result, ((*(state[i].sequence))[j]).first);
+          cost += ((*(state[i].sequence))[j]).second;
         }
-        response.insert(pair<wstring, double>(result, cost));
+        response.insert(make_pair(result, cost));
       }
     }
   }
@@ -604,12 +604,12 @@ State::filterFinalsLRX(map<Node *, double> const &finals,
       wstring current_word = L"";
       for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
       {
-        if(escaped_chars.find((*(state[i].sequence))[j].first) != escaped_chars.end())
+        if(escaped_chars.find(((*(state[i].sequence))[j]).first) != escaped_chars.end())
         {
           current_word += L'\\';
         }
         wstring sym = L"";
-        alphabet.getSymbol(sym, (*(state[i].sequence))[j].first, uppercase);
+        alphabet.getSymbol(sym, ((*(state[i].sequence))[j]).first, uppercase);
         if(sym == L"<$>")
         {
           if(current_word != L"")
@@ -622,7 +622,7 @@ State::filterFinalsLRX(map<Node *, double> const &finals,
         {
           current_word += sym;
         }
-        cost += (*(state[i].sequence))[j].second;
+        cost += ((*(state[i].sequence))[j]).second;
       }
       rule_id = current_word;
       results.insert(make_pair(make_pair(rule_id, current_result), cost));
@@ -654,21 +654,21 @@ State::filterFinalsSAO(map<Node *, double> const &finals,
       unsigned int const first_char = result.size() + firstchar;
       for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
       {
-        if(escaped_chars.find((*(state[i].sequence))[j].first) != escaped_chars.end())
+        if(escaped_chars.find(((*(state[i].sequence))[j]).first) != escaped_chars.end())
         {
           result += L'\\';
         }
-        if(alphabet.isTag((*(state[i].sequence))[j].first))
+        if(alphabet.isTag(((*(state[i].sequence))[j]).first))
         {
           annot = L"";
-          alphabet.getSymbol(annot, (*(state[i].sequence))[j].first);
+          alphabet.getSymbol(annot, ((*(state[i].sequence))[j]).first);
           result += L'&'+annot.substr(1,annot.length()-2)+L';';
         }
         else
         {
-          alphabet.getSymbol(result, (*(state[i].sequence))[j].first, uppercase);
+          alphabet.getSymbol(result, ((*(state[i].sequence))[j]).first, uppercase);
         }
-        cost += (*(state[i].sequence))[j].second;
+        cost += ((*(state[i].sequence))[j]).second;
       }
       if(firstupper)
       {
@@ -682,7 +682,7 @@ State::filterFinalsSAO(map<Node *, double> const &finals,
           result[first_char] = towupper(result[first_char]);
         }
       }
-      response.insert(pair<wstring, double>(result, cost));
+      response.insert(make_pair(result, cost));
     }
   }
 
@@ -709,14 +709,14 @@ State::filterFinalsTM(map<Node *, double> const &finals,
       cost = 0.0000;
       for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
       {
-        if(escaped_chars.find((*(state[i].sequence))[j].first) != escaped_chars.end())
+        if(escaped_chars.find(((*(state[i].sequence))[j]).first) != escaped_chars.end())
         {
           result += L'\\';
         }
-        alphabet.getSymbol(result, (*(state[i].sequence))[j].first);
-        cost += (*(state[i].sequence))[j].second;
+        alphabet.getSymbol(result, ((*(state[i].sequence))[j]).first);
+        cost += ((*(state[i].sequence))[j]).second;
       }
-      response.insert(pair<wstring, double>(result, cost));
+      response.insert(make_pair(result, cost));
     }
   }
 
@@ -804,7 +804,7 @@ State::filterFinalsTM(map<Node *, double> const &finals,
     {
       res += fragment[i];
     }
-    response.insert(pair<wstring, double>(res, cost));
+    response.insert(make_pair(res, cost));
   }
 
   return response;
@@ -825,7 +825,7 @@ State::pruneCompounds(int requiredSymbol, int separationSymbol, int compound_max
     if(lastPartHasRequiredSymbol(seq, requiredSymbol, separationSymbol))
     {
       int this_noOfCompoundElements = 0;
-      for (int j = seq.size()-2; j>0; j--) if (seq.at(j).first==separationSymbol) this_noOfCompoundElements++;
+      for (int j = seq.size()-2; j>0; j--) if ((seq.at(j)).first==separationSymbol) this_noOfCompoundElements++;
       noOfCompoundElements[i] = this_noOfCompoundElements;
       minNoOfCompoundElements = (minNoOfCompoundElements < this_noOfCompoundElements) ?
                         minNoOfCompoundElements : this_noOfCompoundElements;
@@ -868,7 +868,7 @@ State::pruneStatesWithForbiddenSymbol(int forbiddenSymbol)
     bool found = false;
     for(int i = seq->size()-1; i>=0; i--)
     {
-      if(seq->at(i).first == forbiddenSymbol)
+      if((seq->at(i)).first == forbiddenSymbol)
       {
         i=-1;
         delete (*it).sequence;
@@ -892,7 +892,7 @@ State::lastPartHasRequiredSymbol(const vector<pair<int, double>> &seq, int requi
   bool restart=false;
   for(int n=seq.size()-1; n>=0; n--)
   {
-    int symbol=seq.at(n).first;
+    int symbol=(seq.at(n)).first;
     if(symbol==requiredSymbol)
     {
       restart=true;
@@ -955,7 +955,7 @@ State::getReadableString(const Alphabet &a)
     if(seq != NULL) for (unsigned int j=0; j<seq->size(); j++)
     {
       wstring ws = L"";
-      a.getSymbol(ws, seq->at(j).first);
+      a.getSymbol(ws, (seq->at(j)).first);
       retval.append(ws);
     }
 
@@ -984,9 +984,9 @@ State::NFinals(map<wstring, double> lf, int maxAnalyses, int maxWeightClasses) c
     double last_weight = 0.0000;
     if(maxAnalyses > 0 && maxWeightClasses > 0)
     {
-      result.insert(*it);
+      result.insert(make_pair(it->first, it->second));
       maxAnalyses--;
-      if(last_weight!=(*it).second)
+      if(last_weight!=it->second)
       {
         maxWeightClasses--;
       }

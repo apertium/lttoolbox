@@ -53,32 +53,32 @@ Node::destroy()
 }
 
 void
-Node::addTransition(int const i, int const o, Node * const d, double const w)
+Node::addTransition(int const i, int const o, Node * const d, double const wt)
 {
   Dest &aux = transitions[i];
   aux.size++;
   int *out_tag = new int[aux.size];
   Node **dest = new Node*[aux.size];
-  double *weight = new double[aux.size];
+  double *out_weight = new double[aux.size];
 
   for(int i = 0; i<aux.size-1; i++)
   {
     out_tag[i] = aux.out_tag[i];
     dest[i] = aux.dest[i];
-    weight[i] = aux.weight[i];
+    out_weight[i] = aux.out_weight[i];
   }
 
   if(aux.size > 1)
   {
     delete[] aux.out_tag;
     delete[] aux.dest;
-    delete[] aux.weight;
+    delete[] aux.out_weight;
   }
 
   out_tag[aux.size-1] = o;
   dest[aux.size-1] = d;
-  weight[aux.size-1] = w;
+  out_weight[aux.size-1] = wt;
   aux.out_tag = out_tag;
   aux.dest = dest;
-  aux.weight = weight;
+  aux.out_weight = out_weight;
 }

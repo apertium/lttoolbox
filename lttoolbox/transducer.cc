@@ -82,7 +82,7 @@ Transducer::insertSingleTransduction(int const tag, int const source, double con
     {
       // new state
       int state = newState();
-      transitions[source].insert(pair<int, pair<int, double> >(tag, make_pair(state, weight)));
+      transitions[source].insert(make_pair(tag, make_pair(state, weight)));
       return state;
     }
     else if(transitions[source].count(tag) == 2)
@@ -114,7 +114,7 @@ int
 Transducer::insertNewSingleTransduction(int const tag, int const source, double const weight)
 {
   int state = newState();
-  transitions[source].insert(pair<int, pair<int, double> >(tag, make_pair(state, weight)));
+  transitions[source].insert(make_pair(tag, make_pair(state, weight)));
   return state;
 }
 
@@ -140,13 +140,13 @@ Transducer::insertTransducer(int const source, Transducer &t,
                                                         limit2 = (it->second).end();
         it2 != limit2; it2++)
     {
-      transitions[relation[it->first]].insert(pair<int, pair<int, double> >(it2->first,
+      transitions[relation[it->first]].insert(make_pair(it2->first,
                                                                             make_pair(relation[it2->second.first],
                                                                             it2->second.second)));
     }
   }
 
-  transitions[source].insert(pair<int, pair<int, double> >(epsilon_tag,
+  transitions[source].insert(make_pair(epsilon_tag,
                                                           make_pair(relation[t.initial], default_weight)));
 
   return relation[t.finals.begin()->first];
@@ -171,7 +171,7 @@ Transducer::linkStates(int const source, int const target,
       }
     }
     // end of new code
-    transitions[source].insert(pair<int, pair<int, double> >(tag, make_pair(target, weight)));
+    transitions[source].insert(make_pair(tag, make_pair(target, weight)));
   }
   else
   {
@@ -199,7 +199,7 @@ Transducer::setFinal(int const state, double const weight, bool value)
 */
   if(value)
   {
-    finals.insert(pair <int, double>(state, weight));
+    finals.insert(make_pair(state, weight));
   }
   else
   {
@@ -255,7 +255,7 @@ Transducer::joinFinals(int const epsilon_tag)
     }
 
     finals.clear();
-    finals.insert(pair <int, double>(state, default_weight));
+    finals.insert(make_pair(state, default_weight));
   }
   else if(finals.size() == 0)
   {
@@ -312,7 +312,7 @@ Transducer::determinize(int const epsilon_tag)
 
   if(isFinal(initial))
   {
-    finals_prime.insert(pair<int, double>(0, default_weight));
+    finals_prime.insert(make_pair(0, default_weight));
   }
 
   int t = 0;
@@ -332,7 +332,7 @@ Transducer::determinize(int const epsilon_tag)
       }
       if(!isEmptyIntersection(Q_prime[*it], finals_state))
       {
-        finals_prime.insert(pair<int, double>(*it, finals.find(*it)->second));
+        finals_prime.insert(make_pair(*it, finals.find(*it)->second));
       }
 
       map<int, set<int> > mymap;
@@ -370,7 +370,7 @@ Transducer::determinize(int const epsilon_tag)
           R[(t+1)%2].insert(Q_prime_inv[it2->second]);
           transitions_prime[tag].clear();
         }
-        transitions_prime[*it].insert(pair<int, pair<int, double> >(it2->first,
+        transitions_prime[*it].insert(make_pair(it2->first,
                                                                     make_pair(Q_prime_inv[it2->second],
                                                                               default_weight)));
       }
@@ -405,7 +405,7 @@ Transducer::optional(int const epsilon_tag)
   state = newState();
   linkStates(finals.begin()->first, state, epsilon_tag, finals.begin()->second);
   finals.clear();
-  finals.insert(pair <int, double>(state, default_weight));
+  finals.insert(make_pair(state, default_weight));
   linkStates(initial, state, epsilon_tag, default_weight);
 }
 
@@ -420,7 +420,7 @@ Transducer::oneOrMore(int const epsilon_tag)
   state = newState();
   linkStates(finals.begin()->first, state, epsilon_tag, finals.begin()->second);
   finals.clear();
-  finals.insert(pair <int, double>(state, default_weight));
+  finals.insert(make_pair(state, default_weight));
   linkStates(state, initial, epsilon_tag, default_weight);
 }
 
@@ -562,7 +562,7 @@ Transducer::read(FILE *input, int const decalage)
 
     base += Compression::multibyte_read(input);
     base_weight = Compression::long_multibyte_read(input);
-    new_t.finals.insert(pair <int, double>(base, base_weight));
+    new_t.finals.insert(make_pair(base, base_weight));
   }
 
   base = Compression::multibyte_read(input);
@@ -582,7 +582,7 @@ Transducer::read(FILE *input, int const decalage)
       {
         new_t.transitions[state].clear(); // force create
       }
-      new_t.transitions[current_state].insert(pair<int, pair<int, double> >(tagbase, make_pair(state, base_weight)));
+      new_t.transitions[current_state].insert(make_pair(tagbase, make_pair(state, base_weight)));
     }
     number_of_states--;
     current_state++;
@@ -637,11 +637,11 @@ Transducer::reverse(int const epsilon_tag)
     {
       if(it2->second.first >= it->first)
       {
-        transitions[it2->second.first].insert(pair<int, pair<int, double> >(it2->first, make_pair(it->first, it2->second.second)));
+        transitions[it2->second.first].insert(make_pair(it2->first, make_pair(it->first, it2->second.second)));
       }
       else
       {
-        tmp_transitions[it2->second.first].insert(pair<int, pair<int, double> >(it2->first, make_pair(it->first, it2->second.second)));
+        tmp_transitions[it2->second.first].insert(make_pair(it2->first, make_pair(it->first, it2->second.second)));
       }
     }
     if(tmp_transitions.find(it->first) != tmp_transitions.end())
@@ -659,14 +659,14 @@ Transducer::reverse(int const epsilon_tag)
                                      limit2 = it->second.end();
         it2 != limit2; it2++)
     {
-      transitions[it->first].insert(pair<int, pair<int, double> >(it2->first, it2->second));
+      transitions[it->first].insert(make_pair(it2->first, it2->second));
     }
   }
 
   int tmp = initial;
   initial = finals.begin()->first;
   finals.clear();
-  finals.insert(pair <int, double>(tmp, default_weight));
+  finals.insert(make_pair(tmp, default_weight));
 }
 
 void
@@ -789,7 +789,7 @@ Transducer::unionWith(Alphabet &my_a,
   Transducer &t,
   int const epsilon_tag)
 {
-  finals.insert(pair <int, double>(insertTransducer(initial, t, epsilon_tag), default_weight));
+  finals.insert(make_pair(insertTransducer(initial, t, epsilon_tag), default_weight));
 }
 
 Transducer
@@ -867,7 +867,7 @@ Transducer::copyWithTagsFirst(int start,
         {
           // We've reached the first tag
           new_src = states_this_new[start];
-          lemq.finals.insert(pair <int, double>(this_lemqlast, default_weight));
+          lemq.finals.insert(make_pair(this_lemqlast, default_weight));
         }
         else
         {
@@ -922,14 +922,14 @@ Transducer::copyWithTagsFirst(int start,
     // copy lemq, letting this_lemqlast be the only final state in newlemq
     Transducer newlemq = Transducer(lemq);
     newlemq.finals.clear();
-    newlemq.finals.insert(pair <int, double>(states_this_lemq[this_lemqlast], default_weight));
+    newlemq.finals.insert(make_pair(states_this_lemq[this_lemqlast], default_weight));
     newlemq.minimize();
 
     int group_start = new_t.newState();
     new_t.linkStates(states_this_new[last_tag], group_start, group_label, default_weight);
 
     // append newlemq into the group after last_tag:
-    new_t.finals.insert(pair <int, double>(
+    new_t.finals.insert(make_pair(
       new_t.insertTransducer(group_start,
                              newlemq),
       default_weight
@@ -976,7 +976,7 @@ Transducer::moveLemqsLast(Alphabet const &alphabet,
       if(left == COMPILER_GROUP_ELEM)
       {
         Transducer tagsFirst = copyWithTagsFirst(this_trg, label, alphabet, epsilon_tag);
-        new_t.finals.insert(pair <int, double>(
+        new_t.finals.insert(make_pair(
           new_t.insertTransducer(new_src, tagsFirst, epsilon_tag), default_weight
           ));
       }
@@ -1000,7 +1000,7 @@ Transducer::moveLemqsLast(Alphabet const &alphabet,
       it != limit;
       it++)
    {
-     new_t.finals.insert(pair <int, double>(states_this_new[it->first], it->second));
+     new_t.finals.insert(make_pair(states_this_new[it->first], it->second));
    }
 
   return new_t;
@@ -1217,7 +1217,7 @@ Transducer::intersect(Transducer &trimmer,
     int s_trimmed = it->second;
     if(isFinal(s_this) && trimmer.isFinal(s_trimmer))
     {
-      trimmed.finals.insert(pair <int, double>(s_trimmed, default_weight));
+      trimmed.finals.insert(make_pair(s_trimmed, default_weight));
     }
   }
 
