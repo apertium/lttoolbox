@@ -102,7 +102,7 @@ PatternList::endSequence()
       it != limit; it++)
   {
     it->push_back(alphabet(QUEUE));
-    patterns.insert(pair<int, vector<int> >(sequence_id, *it));
+    patterns.insert(make_pair(sequence_id, *it));
   }
 }
 
@@ -183,7 +183,7 @@ PatternList::insert(int const id, wstring const &lemma, wstring const &tags)
     vector<int> local;
     insertOutOfSequence(lemma, tags, local);
     local.push_back(alphabet(QUEUE));
-    patterns.insert(pair<int, vector<int> >(id, local));
+    patterns.insert(make_pair(id, local));
   }
   else
   {

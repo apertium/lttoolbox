@@ -57,6 +57,6 @@ MatchNode::destroy()
 void
 MatchNode::addTransition(int const i, MatchNode * const d, double w, int pos)
 {
-//  transitions[i].insert(pair<MatchNode*, double>(d, w));
+//  transitions[i].insert(make_pair(d, w));
   transitions.add(i, d, w, pos);
 }

@@ -233,6 +233,11 @@ private:
   int maxWeightClasses;
 
   /**
+   * Outputs the lexical form from the lexicon and weight map
+   */
+  wstring lexical_form(map<wstring, double> lexicon_map);
+
+  /**
    * Prints an error of input stream and exits
    */
   void streamError();

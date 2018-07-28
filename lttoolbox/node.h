@@ -33,7 +33,7 @@ private:
   int size;
   int *out_tag;
   Node **dest;
-  double *weight;
+  double *out_weight;
 
   friend class State;
   friend class Node;
@@ -44,7 +44,7 @@ private:
     size = d.size;
     out_tag = new int[size];
     dest = new Node*[size];
-    weight = new double[size];
+    out_weight = new double[size];
   }
 
   void destroy()
@@ -60,9 +60,9 @@ private:
       {
         delete[] dest;
       }
-      if(weight)
+      if(out_weight)
       {
-        delete[] weight;
+        delete[] out_weight;
       }
     }
   }
@@ -72,7 +72,7 @@ private:
     size = 0;
     out_tag = NULL;
     dest = NULL;
-    weight = NULL;
+    out_weight = NULL;
   }
 
 public:
@@ -163,7 +163,7 @@ public:
    * @param d destination
    * @param w weight value
    */
-  void addTransition(int i, int o, Node * const d, double w);
+  void addTransition(int i, int o, Node * const d, double wt);
 };
 
 #endif

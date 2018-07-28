@@ -181,7 +181,7 @@ public:
   /**
    * Compile dictionary to letter transducers
    */
-  void parse(string const &fichero, wstring const &lo, wstring const &lm);
+  void parse(string const &file, wstring const &lo, wstring const &lm);
   
   /**
    * Write the result of compilation 

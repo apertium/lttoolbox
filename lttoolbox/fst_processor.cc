@@ -71,6 +71,24 @@ isLastBlankTM(false)
   }
 }
 
+wstring
+FSTProcessor::lexical_form(map<wstring, double> lexicon_map)
+{
+  wstring lf = L"";
+  for(map<wstring, double>::const_iterator it = lexicon_map.begin(); it != lexicon_map.end(); it++)
+  {
+    lf += L"/";
+    lf += it->first;
+    if(displayWeightsMode != 0)
+    {
+      lf += L"<W:";
+      lf += to_wstring(it->second);
+      lf += L">";
+    }
+  }
+  return lf;
+}
+
 void
 FSTProcessor::streamError()
 {
@@ -673,31 +691,23 @@ FSTProcessor::classifyFinals()
   {
     if(endsWith(it->first, L"@inconditional"))
     {
-      for(map<Node*, double>::const_iterator it2 = it->second.getFinals().begin(); it2 != it->second.getFinals().end(); it2++)
-      {
-        inconditional.insert(pair<Node*, double>(it2->first, it2->second));
-      }
+      inconditional.insert(it->second.getFinals().begin(),
+                           it->second.getFinals().end());
     }
     else if(endsWith(it->first, L"@standard"))
     {
-      for(map<Node*, double>::const_iterator it2 = it->second.getFinals().begin(); it2 != it->second.getFinals().end(); it2++)
-      {
-        standard.insert(pair<Node*, double>(it2->first, it2->second));
-      }
+      standard.insert(it->second.getFinals().begin(),
+                      it->second.getFinals().end());
     }
     else if(endsWith(it->first, L"@postblank"))
     {
-      for(map<Node*, double>::const_iterator it2 = it->second.getFinals().begin(); it2 != it->second.getFinals().end(); it2++)
-      {
-        postblank.insert(pair<Node*, double>(it2->first, it2->second));
-      }
+      postblank.insert(it->second.getFinals().begin(),
+                       it->second.getFinals().end());
     }
     else if(endsWith(it->first, L"@preblank"))
     {
-      for(map<Node*, double>::const_iterator it2 = it->second.getFinals().begin(); it2 != it->second.getFinals().end(); it2++)
-      {
-        preblank.insert(pair<Node*, double>(it2->first, it2->second));
-      }
+      preblank.insert(it->second.getFinals().begin(),
+                      it->second.getFinals().end());
     }
     else
     {
@@ -958,13 +968,8 @@ FSTProcessor::lsx(FILE *input, FILE *output)
         /*if(s.isFinal(all_finals))
         {
           out_resp = s.filterFinals(all_finals, alphabet, escaped_chars);
-          wstring out_lm = L"";
-          for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
-          {
-            out_lm += L"/";
-            out_lm += it->first;
-          }
-          out += out_lm;
+          out_resp = s.NFinals(out_resp, maxAnalyses, maxWeightClasses);
+          out += lexical_form(out_resp);
           new_states.push_back(*initial_state);
         }*/
 
@@ -974,19 +979,7 @@ FSTProcessor::lsx(FILE *input, FILE *output)
           new_states.push_back(initial_state);
           out_resp = s.filterFinals(all_finals, alphabet, escaped_chars);
           out_resp = s.NFinals(out_resp, maxAnalyses, maxWeightClasses);
-          wstring out_lm = L"";
-          for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
-          {
-            out_lm += L"/";
-            out_lm += it->first;
-            if(displayWeightsMode != 0)
-            {
-              out_lm += L"<W:";
-              out_lm += to_wstring(it->second);
-              out_lm += L">";
-            }
-          }
-          out = out_lm;
+          out = lexical_form(out_resp);
 
 
           alt_out = L"";
@@ -1146,10 +1139,8 @@ FSTProcessor::initTMAnalysis()
                                              limit = transducers.end();
       it != limit; it++)
   {
-    for(map<Node*, double>::const_iterator it2 = it->second.getFinals().begin(); it2 != it->second.getFinals().end(); it2++)
-    {
-      all_finals.insert(pair<Node*, double>(it2->first, it2->second));
-    }
+    all_finals.insert(it->second.getFinals().begin(),
+                      it->second.getFinals().end());
   }
 }
 
@@ -1162,10 +1153,8 @@ FSTProcessor::initGeneration()
                                              limit = transducers.end();
       it != limit; it++)
   {
-    for(map<Node*, double>::const_iterator it2 = it->second.getFinals().begin(); it2 != it->second.getFinals().end(); it2++)
-    {
-      all_finals.insert(pair<Node*, double>(it2->first, it2->second));
-    }
+    all_finals.insert(it->second.getFinals().begin(),
+                      it->second.getFinals().end());
   }
 }
 
@@ -1219,18 +1208,7 @@ FSTProcessor::compoundAnalysis(wstring input_word, bool uppercase, bool firstupp
   current_state.pruneCompounds(compoundRSymbol, '+', compound_max_elements);
   map< wstring, double > response = current_state.filterFinals(all_finals, alphabet, escaped_chars, uppercase, firstupper);
   response = current_state.NFinals(response, maxAnalyses, maxWeightClasses);
-  wstring result = L"";
-  for(map<wstring, double>::const_iterator it = response.begin(); it != response.end(); it++)
-  {
-    result += L"/";
-    result += it->first;
-    if(displayWeightsMode != 0)
-    {
-      result += L"<W:";
-      result += to_wstring(it->second);
-      result += L">";
-    }
-  }
+  wstring result = lexical_form(response);
 
   return result;
 }
@@ -1316,18 +1294,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
                                               escaped_chars,
                                               uppercase, firstupper);
         out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
-        lf = L"";
-        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
-        {
-          lf += L"/";
-          lf += it->first;
-          if(displayWeightsMode != 0)
-          {
-            lf += L"<W:";
-            lf += to_wstring(it->second);
-            lf += L">";
-          }
-        }
+        lf = lexical_form(out_resp);
         last_incond = true;
         last = input_buffer.getPos();
       }
@@ -1347,18 +1314,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
                                               escaped_chars,
                                               uppercase, firstupper);
         out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
-        lf = L"";
-        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
-        {
-          lf += L"/";
-          lf += it->first;
-          if(displayWeightsMode != 0)
-          {
-            lf += L"<W:";
-            lf += to_wstring(it->second);
-            lf += L">";
-          }
-        }
+        lf = lexical_form(out_resp);
         last_postblank = true;
         last = input_buffer.getPos();
       }
@@ -1378,18 +1334,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
                                               escaped_chars,
                                               uppercase, firstupper);
         out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
-        lf = L"";
-        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
-        {
-          lf += L"/";
-          lf += it->first;
-          if(displayWeightsMode != 0)
-          {
-            lf += L"<W:";
-            lf += to_wstring(it->second);
-            lf += L">";
-          }
-        }
+        lf = lexical_form(out_resp);
         last_preblank = true;
         last = input_buffer.getPos();
       }
@@ -1409,18 +1354,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
                                               escaped_chars,
                                               uppercase, firstupper);
         out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
-        lf = L"";
-        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
-        {
-          lf += L"/";
-          lf += it->first;
-          if(displayWeightsMode != 0)
-          {
-            lf += L"<W:";
-            lf += to_wstring(it->second);
-            lf += L">";
-          }
-        }
+        lf = lexical_form(out_resp);
         last_postblank = false;
         last_preblank = false;
         last_incond = false;
@@ -1709,18 +1643,7 @@ FSTProcessor::tm_analysis(FILE *input, FILE *output)
                                           escaped_chars,
                                           blankqueue, numbers);
         out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
-        lf = L"";
-        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
-        {
-          lf += L"/";
-          lf += it->first;
-          if(displayWeightsMode != 0)
-          {
-            lf += L"<W:";
-            lf += to_wstring(it->second);
-            lf += L">";
-          }
-        }
+        lf = lexical_form(out_resp);
         lf = lf.substr(1);
         last = input_buffer.getPos();
         numbers.clear();
@@ -1947,22 +1870,11 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
           fputwc_unlocked(L'^', output);
         }
 
-        wstring out_tagged = L"";
         map <wstring, double> out_resp_tagged = current_state.filterFinals(all_finals, alphabet,
                                                   escaped_chars,
                                                   uppercase, firstupper);
         out_resp_tagged = current_state.NFinals(out_resp_tagged, maxAnalyses, maxWeightClasses);
-        for(map<wstring, double>::const_iterator it = out_resp_tagged.begin(); it != out_resp_tagged.end(); it++)
-        {
-          out_tagged += L"/";
-          out_tagged += it->first;
-          if(displayWeightsMode != 0)
-          {
-            out_tagged += L"<W:";
-            out_tagged += to_wstring(it->second);
-            out_tagged += L">";
-          }
-        }
+        wstring out_tagged = lexical_form(out_resp_tagged);
 
         fputws_unlocked(out_tagged.substr(1).c_str(), output);
         if(mode == gm_tagged || mode == gm_tagged_nm)
@@ -2093,18 +2005,7 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
                                         empty_escaped_chars,
                                         uppercase, firstupper, 0);
         out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
-        lf = L"";
-        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
-        {
-          lf += L"/";
-          lf += it->first;
-          if(displayWeightsMode != 0)
-          {
-            lf += L"<W:";
-            lf += to_wstring(it->second);
-            lf += L">";
-          }
-        }
+        lf = lexical_form(out_resp);
 
         // case of the beggining of the next word
 
@@ -2248,18 +2149,7 @@ FSTProcessor::transliteration(FILE *input, FILE *output)
       out_resp = current_state.filterFinals(all_finals, alphabet, escaped_chars,
                                       uppercase, firstupper, 0);
       out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
-      lf = L"";
-      for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
-      {
-        lf += L"/";
-        lf += it->first;
-        if(displayWeightsMode != 0)
-        {
-          lf += L"<W:";
-          lf += to_wstring(it->second);
-          lf += L">";
-        }
-      }
+      lf = lexical_form(out_resp);
       if(!lf.empty())
       {
         fputws_unlocked(lf.substr(1).c_str(), output);
@@ -2289,18 +2179,7 @@ FSTProcessor::transliteration(FILE *input, FILE *output)
         out_resp = current_state.filterFinals(all_finals, alphabet, escaped_chars,
                                         uppercase, firstupper, 0);
         out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
-        lf = L"";
-        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
-        {
-          lf += L"/";
-          lf += it->first;
-          if(displayWeightsMode != 0)
-          {
-            lf += L"<W:";
-            lf += to_wstring(it->second);
-            lf += L">";
-          }
-        }
+        lf = lexical_form(out_resp);
         last = input_buffer.getPos();
       }
 
@@ -2347,7 +2226,7 @@ wstring
 FSTProcessor::biltransfull(wstring const &input_word, bool with_delim)
 {
   State current_state = initial_state;
-  map<wstring, double> out_resp;
+  map<wstring, double> out_response;
   wstring result = L"";
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
@@ -2415,22 +2294,11 @@ FSTProcessor::biltransfull(wstring const &input_word, bool with_delim)
     }
     if(current_state.isFinal(all_finals))
     {
-      out_resp = current_state.filterFinals(all_finals, alphabet,
-                                         escaped_chars,
-                                         uppercase, firstupper, 0);
-      out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
-      result = L"";
-      for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
-      {
-        result += L"/";
-        result += it->first;
-        if(displayWeightsMode != 0)
-        {
-          result += L"<W:";
-          result += to_wstring(it->second);
-          result += L">";
-        }
-      }
+      out_response = current_state.filterFinals(all_finals, alphabet,
+                                                escaped_chars,
+                                                uppercase, firstupper, 0);
+      out_response = current_state.NFinals(out_response, maxAnalyses, maxWeightClasses);
+      result = lexical_form(out_response);
       if(with_delim)
       {
         if(mark)
@@ -2528,7 +2396,7 @@ wstring
 FSTProcessor::biltrans(wstring const &input_word, bool with_delim)
 {
   State current_state = initial_state;
-  map<wstring, double> out_resp;
+  map<wstring, double> out_response;
   wstring result = L"";
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
@@ -2596,22 +2464,11 @@ FSTProcessor::biltrans(wstring const &input_word, bool with_delim)
     }
     if(current_state.isFinal(all_finals))
     {
-      out_resp = current_state.filterFinals(all_finals, alphabet,
-                                         escaped_chars,
-                                         uppercase, firstupper, 0);
-      out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
-      result = L"";
-      for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
-      {
-        result += L"/";
-        result += it->first;
-        if(displayWeightsMode != 0)
-        {
-          result += L"<W:";
-          result += to_wstring(it->second);
-          result += L">";
-        }
-      }
+      out_response = current_state.filterFinals(all_finals, alphabet,
+                                                escaped_chars,
+                                                uppercase, firstupper, 0);
+      out_response = current_state.NFinals(out_response, maxAnalyses, maxWeightClasses);
+      result = lexical_form(out_response);
       if(with_delim)
       {
         if(mark)
@@ -2748,7 +2605,7 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
   }
 
   State current_state = initial_state;
-  map<wstring, double> out_resp;
+  map<wstring, double> out_response;
   wstring sf = L"";                   // source language analysis
   wstring queue = L"";                // symbols to be added to each target
   wstring result = L"";               // result of looking up analysis in bidix
@@ -2800,22 +2657,11 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
         bool uppercase = sf.size() > 1 && iswupper(sf[1]);
         bool firstupper= iswupper(sf[0]);
 
-        out_resp = current_state.filterFinals(all_finals, alphabet,
-                                            escaped_chars,
-                                            uppercase, firstupper, 0);
-        out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
-        result = L"";
-        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
-        {
-          result += L"/";
-          result += it->first;
-          if(displayWeightsMode != 0)
-          {
-            result += L"<W:";
-            result += to_wstring(it->second);
-            result += L">";
-          }
-        }
+        out_response = current_state.filterFinals(all_finals, alphabet,
+                                                  escaped_chars,
+                                                  uppercase, firstupper, 0);
+        out_response = current_state.NFinals(out_response, maxAnalyses, maxWeightClasses);
+        result = lexical_form(out_response);
       }
 
       if(sf[0] == L'*')
@@ -2893,22 +2739,11 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
         bool firstupper= iswupper(sf[0]);
 
         queue = L""; // the intervening tags were matched
-        out_resp = current_state.filterFinals(all_finals, alphabet,
-                                            escaped_chars,
-                                            uppercase, firstupper, 0);
-        out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
-        result = L"";
-        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
-        {
-          result += L"/";
-          result += it->first;
-          if(displayWeightsMode != 0)
-          {
-            result += L"<W:";
-            result += to_wstring(it->second);
-            result += L">";
-          }
-        }
+        out_response = current_state.filterFinals(all_finals, alphabet,
+                                                  escaped_chars,
+                                                  uppercase, firstupper, 0);
+        out_response = current_state.NFinals(out_response, maxAnalyses, maxWeightClasses);
+        result = lexical_form(out_response);
       }
       else if(result != L"")
       {
@@ -2939,7 +2774,7 @@ FSTProcessor::biltransWithQueue(wstring const &input_word, bool with_delim)
 {
   State current_state = initial_state;
   wstring result = L"";
-  map< wstring, double > out_resp;
+  map< wstring, double > out_response;
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
   wstring queue = L"";
@@ -3008,22 +2843,11 @@ FSTProcessor::biltransWithQueue(wstring const &input_word, bool with_delim)
     }
     if(current_state.isFinal(all_finals))
     {
-      out_resp = current_state.filterFinals(all_finals, alphabet,
-                                         escaped_chars,
-                                         uppercase, firstupper, 0);
-      out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
-      result = L"";
-      for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
-      {
-        result += L"/";
-        result += it->first;
-        if(displayWeightsMode != 0)
-        {
-          result += L"<W:";
-          result += to_wstring(it->second);
-          result += L">";
-        }
-      }
+      out_response = current_state.filterFinals(all_finals, alphabet,
+                                                escaped_chars,
+                                                uppercase, firstupper, 0);
+      out_response = current_state.NFinals(out_response, maxAnalyses, maxWeightClasses);
+      result = lexical_form(out_response);
       if(with_delim)
       {
         if(mark)
@@ -3143,7 +2967,7 @@ FSTProcessor::biltransWithoutQueue(wstring const &input_word, bool with_delim)
 {
   State current_state = initial_state;
   wstring result = L"";
-  map< wstring, double > out_resp;
+  map< wstring, double > out_response;
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
   bool mark = false;
@@ -3209,22 +3033,11 @@ FSTProcessor::biltransWithoutQueue(wstring const &input_word, bool with_delim)
     }
     if(current_state.isFinal(all_finals))
     {
-      out_resp = current_state.filterFinals(all_finals, alphabet,
-                                         escaped_chars,
-                                         uppercase, firstupper, 0);
-      out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
-      result = L"";
-      for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
-      {
-        result += L"/";
-        result += it->first;
-        if(displayWeightsMode != 0)
-        {
-          result += L"<W:";
-          result += to_wstring(it->second);
-          result += L">";
-        }
-      }
+      out_response = current_state.filterFinals(all_finals, alphabet,
+                                                escaped_chars,
+                                                uppercase, firstupper, 0);
+      out_response = current_state.NFinals(out_response, maxAnalyses, maxWeightClasses);
+      result = lexical_form(out_response);
       if(with_delim)
       {
         if(mark)
@@ -3394,18 +3207,7 @@ FSTProcessor::SAO(FILE *input, FILE *output)
                                         escaped_chars,
                                         uppercase, firstupper);
         out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
-        lf = L"";
-        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
-        {
-          lf += L"/";
-          lf += it->first;
-          if(displayWeightsMode != 0)
-          {
-            lf += L"<W:";
-            lf += to_wstring(it->second);
-            lf += L">";
-          }
-        }
+        lf = lexical_form(out_resp);
         last_incond = true;
         last = input_buffer.getPos();
       }
@@ -3418,18 +3220,7 @@ FSTProcessor::SAO(FILE *input, FILE *output)
                                         escaped_chars,
                                         uppercase, firstupper);
         out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
-        lf = L"";
-        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
-        {
-          lf += L"/";
-          lf += it->first;
-          if(displayWeightsMode != 0)
-          {
-            lf += L"<W:";
-            lf += to_wstring(it->second);
-            lf += L">";
-          }
-        }
+        lf = lexical_form(out_resp);
         last_postblank = true;
         last = input_buffer.getPos();
       }
@@ -3442,18 +3233,7 @@ FSTProcessor::SAO(FILE *input, FILE *output)
                                         escaped_chars,
                                         uppercase, firstupper);
         out_resp = current_state.NFinals(out_resp, maxAnalyses, maxWeightClasses);
-        lf = L"";
-        for(map<wstring, double>::const_iterator it = out_resp.begin(); it != out_resp.end(); it++)
-        {
-          lf += L"/";
-          lf += it->first;
-          if(displayWeightsMode != 0)
-          {
-            lf += L"<W:";
-            lf += to_wstring(it->second);
-            lf += L">";
-          }
-        }
+        lf = lexical_form(out_resp);
         last_postblank = false;
         last_incond = false;
         last = input_buffer.getPos();
