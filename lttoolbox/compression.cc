@@ -18,6 +18,8 @@
 #include <lttoolbox/my_stdio.h>
 
 #include <cstdlib>
+#include <cmath>
+#include <limits>
 #include <iostream>
 
 void 
@@ -299,3 +301,163 @@ Compression::string_read(FILE *input)
   return retval;
 }
 
+
+void
+Compression::long_multibyte_write(const double& value, FILE *output)
+{
+  int exp = 0;
+
+  unsigned int mantissa = static_cast<unsigned int>(0x40000000 * frexp(value, &exp));
+  unsigned int exponent = static_cast<unsigned int>(exp);
+
+  if(mantissa < 0x04000000)
+  {
+    multibyte_write(mantissa, output);
+  }
+  else
+  {
+    unsigned int low_mantissa = (unsigned int) (mantissa << 6);
+    low_mantissa = (unsigned int) (low_mantissa >> 6);
+    unsigned int up_mantissa = (unsigned int) (mantissa >> 26);
+    up_mantissa = up_mantissa | 0x04000000;
+    multibyte_write(up_mantissa, output);
+    multibyte_write(low_mantissa, output);
+  }
+
+  if(exponent < 0x04000000)
+  {
+    multibyte_write(exponent, output);
+  }
+  else
+  {
+    unsigned int low_exponent = (unsigned int) (exponent << 6);
+    low_exponent = (unsigned int) (low_exponent >> 6);
+    unsigned int up_exponent = (unsigned int) (exponent >> 26);
+    up_exponent = up_exponent | 0x04000000;
+    multibyte_write(up_exponent, output);
+    multibyte_write(low_exponent, output);
+  }
+}
+
+void
+Compression::long_multibyte_write(const double& value, ostream &output)
+{
+  int exp = 0;
+
+  unsigned int mantissa = static_cast<unsigned int>(0x40000000 * frexp(value, &exp));
+  unsigned int exponent = static_cast<unsigned int>(exp);
+
+  if(mantissa < 0x04000000)
+  {
+    multibyte_write(mantissa, output);
+  }
+  else
+  {
+    unsigned int low_mantissa = (unsigned int) (mantissa << 6);
+    low_mantissa = (unsigned int) (low_mantissa >> 6);
+    unsigned int up_mantissa = (unsigned int) (mantissa >> 26);
+    up_mantissa = up_mantissa | 0x04000000;
+    multibyte_write(up_mantissa, output);
+    multibyte_write(low_mantissa, output);
+  }
+
+  if(exponent < 0x04000000)
+  {
+    multibyte_write(exponent, output);
+  }
+  else
+  {
+    unsigned int low_exponent = (unsigned int) (exponent << 6);
+    low_exponent = (unsigned int) (low_exponent >> 6);
+    unsigned int up_exponent = (unsigned int) (exponent >> 26);
+    up_exponent = up_exponent | 0x04000000;
+    multibyte_write(up_exponent, output);
+    multibyte_write(low_exponent, output);
+  }
+}
+
+double
+Compression::long_multibyte_read(FILE *input)
+{
+  double result = 0.0;
+
+  unsigned int mantissa = 0;
+  unsigned int exponent = 0;
+
+  unsigned int up_mantissa = multibyte_read(input);
+  if(up_mantissa < 0x04000000)
+  {
+    mantissa = up_mantissa;
+  }
+  else
+  {
+    up_mantissa = up_mantissa & 0x03ffffff;
+    unsigned int aux = (unsigned int) up_mantissa;
+    aux = aux << 26;
+    unsigned int low_mantissa = multibyte_read(input);
+    mantissa = (unsigned int) (low_mantissa);
+    mantissa = mantissa | aux;
+  }
+  unsigned int up_exponent = multibyte_read(input);
+  if(up_exponent < 0x04000000)
+  {
+    exponent = up_exponent;
+  }
+  else
+  {
+    up_exponent = up_exponent & 0x03ffffff;
+    unsigned int aux = (unsigned int) up_exponent;
+    aux = aux << 26;
+    unsigned int low_exponent = multibyte_read(input);
+    exponent = (unsigned int) (low_exponent);
+    exponent = exponent | aux;
+  }
+
+  double value = static_cast<double>(static_cast<int>(mantissa)) / 0x40000000;
+  result = ldexp(value, static_cast<int>(exponent));
+
+  return result;
+}
+
+double
+Compression::long_multibyte_read(istream &input)
+{
+  double result = 0.0;
+
+  unsigned int mantissa = 0;
+  unsigned int exponent = 0;
+
+  unsigned int up_mantissa = multibyte_read(input);
+  if(up_mantissa < 0x04000000)
+  {
+    mantissa = up_mantissa;
+  }
+  else
+  {
+    up_mantissa = up_mantissa & 0x03ffffff;
+    unsigned int aux = (unsigned int) up_mantissa;
+    aux = aux << 26;
+    unsigned int low_mantissa = multibyte_read(input);
+    mantissa = (unsigned int) (low_mantissa);
+    mantissa = mantissa | aux;
+  }
+  unsigned int up_exponent = multibyte_read(input);
+  if(up_exponent < 0x04000000)
+  {
+    exponent = up_exponent;
+  }
+  else
+  {
+    up_exponent = up_exponent & 0x03ffffff;
+    unsigned int aux = (unsigned int) up_exponent;
+    aux = aux << 26;
+    unsigned int low_exponent = multibyte_read(input);
+    exponent = (unsigned int) (low_exponent);
+    exponent = exponent | aux;
+  }
+
+  double value = static_cast<double>(static_cast<int>(mantissa)) / 0x40000000;
+  result = ldexp(value, static_cast<int>(exponent));
+
+  return result;
+}

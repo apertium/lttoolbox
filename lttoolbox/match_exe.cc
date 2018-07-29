@@ -40,33 +40,33 @@ MatchExe::MatchExe(Transducer const &t, map<int, int > const &final_type)
   // memory allocation
   node_list.reserve(t.transitions.size());
 
-  for(map<int, multimap<int, int> >::const_iterator it = t.transitions.begin(),
+  for(map<int, multimap<int, pair<int, double> > >::const_iterator it = t.transitions.begin(),
         limit = t.transitions.end(); it != limit; it++)
   {
     MatchNode mynode(it->second.size());
     node_list.push_back(mynode);
   }
-  
+
   // set up finals
   for(map<int, int>::const_iterator it = final_type.begin(), limit = final_type.end();
       it != limit; it++)
   {
     finals[&node_list[it->first]] = it->second;
-  }  
- 
+  }
+
   // set up initial node
   initial_id = t.initial;
- 
+
   // set up the transitions
-  for(map<int, multimap<int, int> >::const_iterator it = t.transitions.begin(),
+  for(map<int, multimap<int, pair<int, double> > >::const_iterator it = t.transitions.begin(),
         limit = t.transitions.end(); it != limit; it++)
   {
     MatchNode &mynode = node_list[it->first];
     int i = 0;
-    for(multimap<int, int>::const_iterator it2 = it->second.begin(),
+    for(multimap<int, pair<int, double> >::const_iterator it2 = it->second.begin(),
           limit2 = it->second.end(); it2 != limit2; it2++)
     {
-      mynode.addTransition(it2->first, &node_list[it2->second], i++);
+      mynode.addTransition(it2->first, &node_list[it2->second.first], it2->second.second, i++);
     }
   }
 }

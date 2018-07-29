@@ -9,15 +9,13 @@ import signal
 class Alarm(Exception):
     pass
 
-class ProcTest():
-    """See lt_proc test for how to use this. Override runTest if you don't
+class PrintTest():
+    """See lt_print test for how to use this. Override runTest if you don't
     want to use NUL flushing."""
 
-    procdix = "data/minimal-mono.dix"
-    procdir = "lr"
-    procflags = ["-z"]
-    inputs = itertools.repeat("")
-    expectedOutputs = itertools.repeat("")
+    printdix = "data/minimal-mono.dix"
+    printdir = "lr"
+    expectedOutput = itertools.repeat("")
     expectedRetCodeFail = False
 
     def alarmHandler(self, signum, frame):
@@ -30,21 +28,17 @@ class ProcTest():
         signal.alarm(0)         # reset the alarm
         return ret
 
-    def communicateFlush(self, string):
-        self.proc.stdin.write(string.encode('utf-8'))
-        self.proc.stdin.write(b'\0')
-        self.proc.stdin.flush()
-
+    def communicateFlush(self):
         output = []
         char = None
         try:
-            char = self.withTimeout(2, self.proc.stdout.read, 1)
+            char = self.withTimeout(2, self.printresult.stdout.read, 1)
         except Alarm:
             pass
         while char and char != b'\0':
             output.append(char)
             try:
-                char = self.withTimeout(2, self.proc.stdout.read, 1)
+                char = self.withTimeout(2, self.printresult.stdout.read, 1)
             except Alarm:
                 break           # send what we got up till now
 
@@ -52,8 +46,8 @@ class ProcTest():
 
     def compileTest(self, tmpd):
         self.assertEqual(0, call(["../lttoolbox/lt-comp",
-                                  self.procdir,
-                                  self.procdix,
+                                  self.printdir,
+                                  self.printdix,
                                   tmpd+"/compiled.bin"],
                                  stdout=PIPE))
 
@@ -61,20 +55,16 @@ class ProcTest():
         tmpd = mkdtemp()
         try:
             self.compileTest(tmpd)
-            self.proc = Popen(["../lttoolbox/lt-proc"] + self.procflags + [tmpd+"/compiled.bin"],
-                              stdin=PIPE,
+            self.printresult = Popen(["../lttoolbox/lt-print"] + [tmpd+"/compiled.bin"],
                               stdout=PIPE,
                               stderr=PIPE)
 
-            for inp, exp in zip(self.inputs, self.expectedOutputs):
-                self.assertEqual(self.communicateFlush(inp+"[][\n]"),
-                                 exp+"[][\n]")
+            self.assertEqual(self.communicateFlush(), self.expectedOutput)
 
-            self.proc.communicate() # let it terminate
-            self.proc.stdin.close()
-            self.proc.stdout.close()
-            self.proc.stderr.close()
-            retCode = self.proc.poll()
+            self.printresult.communicate() # let it terminate
+            self.printresult.stdout.close()
+            self.printresult.stderr.close()
+            retCode = self.printresult.poll()
             if self.expectedRetCodeFail:
                 self.assertNotEqual(retCode, 0)
             else:

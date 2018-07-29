@@ -66,7 +66,7 @@ read_fst(FILE *bin_file)
       name += static_cast<wchar_t>(Compression::multibyte_read(bin_file));
       len2--;
     }
-    transducers[name].read(bin_file);
+    transducers[name].read(bin_file, 0, true);
 
     len--;
   }
@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
     if(!(it->second.isEmpty()))
     {
       Compression::wstring_write(it->first, output);
-      it->second.write(output);
+      it->second.write(output, 0, true);
     }
   }
 
