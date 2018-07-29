@@ -23,7 +23,8 @@ RegexpCompiler::RegexpCompiler() :
 token(0),
 alphabet(0),
 state(0),
-letter(0)
+letter(0),
+default_weight(0.0000)
 {
 }
 
@@ -60,6 +61,7 @@ RegexpCompiler::copy(RegexpCompiler const &rec)
   state = rec.state;
   letter = rec.letter;
   postop = rec.postop;
+  default_weight = rec.default_weight;
 }
 
 void
@@ -133,7 +135,7 @@ RegexpCompiler::compile(wstring const &er)
   token = static_cast<int>(input[0]);
   state = transducer.getInitial();
   S();
-  transducer.setFinal(state);
+  transducer.setFinal(state, default_weight);
 }
 
 void 
@@ -178,8 +180,8 @@ RegexpCompiler::Cola()
     RExpr();
     Cola();
    
-    state = transducer.insertNewSingleTransduction((*alphabet)(0, 0), state);
-    transducer.linkStates(e, state, (*alphabet)(0, 0));
+    state = transducer.insertNewSingleTransduction((*alphabet)(0, 0), state, default_weight);
+    transducer.linkStates(e, state, (*alphabet)(0, 0), default_weight);
   }
   else
   {
@@ -195,8 +197,8 @@ RegexpCompiler::Term()
     Transducer t;
     int e = t.getInitial();
     Letra();
-    e = t.insertNewSingleTransduction((*alphabet)(letter, letter), e);
-    t.setFinal(e);
+    e = t.insertNewSingleTransduction((*alphabet)(letter, letter), e, default_weight);
+    t.setFinal(e, default_weight);
     Postop();
     if(postop == L"*")
     {
@@ -223,7 +225,7 @@ RegexpCompiler::Term()
     consume(L'(');
     S();
     consume(L')');
-    transducer.setFinal(state);
+    transducer.setFinal(state, default_weight);
     Postop();
     if(postop == L"*")
     {
@@ -310,7 +312,7 @@ RegexpCompiler::Postop()
   }
   else if(token == L'(' || token == L'[' || !isReserved(token) || 
           token == L'\\' || token == L'|' ||  token == FIN_FICHERO || 
-	  token == L')')
+          token == L')')
   {
   }
   else
@@ -333,9 +335,9 @@ RegexpCompiler::Esp()
         it != brackets.end(); it++)
     {
       int mystate = t.getInitial();
-      mystate = t.insertNewSingleTransduction((*alphabet)(0, 0), mystate);
-      mystate = t.insertNewSingleTransduction((*alphabet)(*it, *it), mystate);
-      t.setFinal(mystate);
+      mystate = t.insertNewSingleTransduction((*alphabet)(0, 0), mystate, default_weight);
+      mystate = t.insertNewSingleTransduction((*alphabet)(*it, *it), mystate, default_weight);
+      t.setFinal(mystate, default_weight);
     }
 
     t.joinFinals((*alphabet)(0, 0));
@@ -352,9 +354,9 @@ RegexpCompiler::Esp()
       if(brackets.find(i) == brackets.end())
       {
         int mystate = t.getInitial();
-        mystate = t.insertNewSingleTransduction((*alphabet)(0, 0), mystate);
-        mystate = t.insertNewSingleTransduction((*alphabet)(i, i), mystate);
-	t.setFinal(mystate);
+        mystate = t.insertNewSingleTransduction((*alphabet)(0, 0), mystate, default_weight);
+        mystate = t.insertNewSingleTransduction((*alphabet)(i, i), mystate, default_weight);
+        t.setFinal(mystate, default_weight);
       }
     }
     

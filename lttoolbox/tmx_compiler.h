@@ -41,6 +41,11 @@ private:
    * The libxml2's XML reader
    */
   xmlTextReaderPtr reader;
+
+  /**
+   * The default value of weight
+   */
+  double default_weight;
   
   /**
    * Identifier of all the symbols during the compilation
@@ -176,7 +181,7 @@ public:
   /**
    * Compile dictionary to letter transducers
    */
-  void parse(string const &fichero, wstring const &lo, wstring const &lm);
+  void parse(string const &file, wstring const &lo, wstring const &lm);
   
   /**
    * Write the result of compilation 

@@ -20,6 +20,7 @@
 #include <lttoolbox/lt_locale.h>
 
 #include <cstdlib>
+#include <limits>
 #include <getopt.h>
 #include <iostream>
 #include <libgen.h>
@@ -38,7 +39,7 @@ using namespace std;
 void endProgram(char *name)
 {
   cout << basename(name) << ": process a stream with a letter transducer" << endl;
-  cout << "USAGE: " << basename(name) << " [ -a | -b | -c | -d | -e | -g | -n | -p | -s | -t | -v | -h -z -w ] [ -i icx_file ] [ -r rcx_file ] fst_file [input_file [output_file]]" << endl;
+  cout << "USAGE: " << basename(name) << " [ -a | -b | -c | -d | -e | -g | -n | -p | -s | -t | -v | -h -z -w ] [-W] [-N N] [-L N] [ -i icx_file ] [ -r rcx_file ] fst_file [input_file [output_file]]" << endl;
   cout << "Options:" << endl;
 #if HAVE_GETOPT_LONG
   cout << "  -a, --analysis:          morphological analysis (default behavior)" << endl;
@@ -61,6 +62,9 @@ void endProgram(char *name)
   cout << "  -w, --dictionary-case:   use dictionary case instead of surface case" << endl;
   cout << "  -C, --careful-case:      use dictionary case if present, else surface" << endl;
   cout << "  -I, --no-default-ignore: skips loading the default ignore characters" << endl;
+  cout << "  -W, --show-weights:      Print final analysis weights (if any)" << endl;
+  cout << "  -N, --analyses:          Output no more than N analyses (if the transducer is weighted, the N best analyses)" << endl;
+  cout << "  -L, --weight-classes:    Output no more than N best weight classes (where analyses with equal weight constitute a class)" << endl;
   cout << "  -h, --help:              show this help" << endl;
 #else
   cout << "  -a:   morphological analysis (default behavior)" << endl;
@@ -80,6 +84,9 @@ void endProgram(char *name)
   cout << "  -v:   version" << endl;
   cout << "  -z:   flush output on the null character " << endl;
   cout << "  -C:   use dictionary case if present, else surface" << endl;
+  cout << "  -W:   Print final analysis weights (if any)" << endl;
+  cout << "  -N:   Output no more than N analyses" << endl;
+  cout << "  -L:   Output no more than N best weight classes" << endl;
   cout << "  -I:   skips loading the default ignore characters" << endl;
   cout << "  -w:   use dictionary case instead of surface case" << endl;
   cout << "  -h:   show this help" << endl;
@@ -98,6 +105,8 @@ void checkValidity(FSTProcessor const &fstp)
 int main(int argc, char *argv[])
 {
   int cmd = 0;
+  int maxAnalyses = std::numeric_limits<int>::max();
+  int maxWeightClasses = std::numeric_limits<int>::max();
   FSTProcessor fstp;
 
 #if HAVE_GETOPT_LONG
@@ -118,10 +127,13 @@ int main(int argc, char *argv[])
       {"transliteration",   0, 0, 't'},
       {"null-flush",        0, 0, 'z'},
       {"dictionary-case",   0, 0, 'w'},
-      {"version",	    0, 0, 'v'},
+      {"version",           0, 0, 'v'},
       {"case-sensitive",    0, 0, 'c'},
       {"careful-case",      0, 0, 'C'},
       {"no-default-ignore", 0, 0, 'I'},
+      {"show-weights",      0, 0, 'W'},
+      {"analyses",          1, 0, 'N'},
+      {"weight-classes",    1, 0, 'L'},
       {"help",              0, 0, 'h'}
     };
 #endif
@@ -130,9 +142,9 @@ int main(int argc, char *argv[])
   {
 #if HAVE_GETOPT_LONG
     int option_index;
-    int c = getopt_long(argc, argv, "abcegi:r:lmndopstzwvCIh", long_options, &option_index);
+    int c = getopt_long(argc, argv, "abcegi:r:lmndopstzwvCIWN:L:h", long_options, &option_index);
 #else
-    int c = getopt(argc, argv, "abcegi:r:lmndopstzwvCIh");
+    int c = getopt(argc, argv, "abcegi:r:lmndopstzwvCIWN:L:h");
 #endif
 
     if(c == -1)
@@ -160,7 +172,31 @@ int main(int argc, char *argv[])
 
       break;
 
-    case 'e':      
+    case 'W':
+      fstp.setDisplayWeightsMode(true);
+      break;
+
+    case 'N':
+      maxAnalyses = atoi(optarg);
+      if (maxAnalyses < 1)
+      {
+        wcerr << "Invalid or no argument for analyses count" << endl;
+        exit(EXIT_FAILURE);
+      }
+      fstp.setMaxAnalysesValue(maxAnalyses);
+      break;
+
+    case 'L':
+      maxWeightClasses = atoi(optarg);
+      if (maxWeightClasses < 1)
+      {
+        wcerr << "Invalid or no argument for weight class count" << endl;
+        exit(EXIT_FAILURE);
+      }
+      fstp.setMaxWeightClassesValue(maxWeightClasses);
+      break;
+
+    case 'e':
     case 'a':
     case 'b':
     case 'o':
@@ -175,11 +211,11 @@ int main(int argc, char *argv[])
     case 'C':
       if(cmd == 0)
       {
-	cmd = c;
+        cmd = c;
       }
       else
       {
-	endProgram(argv[0]);
+        endProgram(argv[0]);
       }
       break;
 
@@ -267,8 +303,8 @@ int main(int argc, char *argv[])
   }
 
 #ifdef _MSC_VER
-  	_setmode(_fileno(input), _O_U8TEXT);
-	_setmode(_fileno(output), _O_U8TEXT);
+  _setmode(_fileno(input), _O_U8TEXT);
+  _setmode(_fileno(output), _O_U8TEXT);
 #endif
 
   try

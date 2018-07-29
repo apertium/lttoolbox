@@ -69,29 +69,34 @@ private:
   State initial_state;
 
   /**
-   * Set of final states of inconditional sections in the dictionaries
+   * Default value of weight unless specified
    */
-  set<Node *> inconditional;
+  double default_weight;
 
   /**
-   * Set of final states of standard sections in the dictionaries
+   * The final states of inconditional sections in the dictionaries
    */
-  set<Node *> standard;
+  map<Node *, double> inconditional;
 
   /**
-   * Set of final states of postblank sections in the dictionaries
+   * The final states of standard sections in the dictionaries
    */
-  set<Node *> postblank;
+  map<Node *, double> standard;
 
   /**
-   * Set of final states of preblank sections in the dictionaries
+   * The final states of postblank sections in the dictionaries
    */
-  set<Node *> preblank;
+  map<Node *, double> postblank;
+
+  /**
+   * The final states of preblank sections in the dictionaries
+   */
+  map<Node *, double> preblank;
 
   /**
    * Merge of 'inconditional', 'standard', 'postblank' and 'preblank' sets
    */
-  set<Node *> all_finals;
+  map<Node *, double> all_finals;
 
   /**
    * Queue of blanks, used in reading methods
@@ -187,6 +192,11 @@ private:
   bool useDefaultIgnoredChars;
 
   /**
+   * if true, displays the final weights (if any)
+   */
+  bool displayWeightsMode;
+
+  /**
    * try analysing unknown words as compounds
    */
   bool do_decomposition;
@@ -211,6 +221,21 @@ private:
    * Hard coded for now, but there might come a switch one day
    */
   int compound_max_elements;
+
+  /**
+   * Output no more than 'N' number of weighted analyses
+   */
+  int maxAnalyses;
+
+  /**
+   * Output no more than 'N' best weight classes
+   */
+  int maxWeightClasses;
+
+  /**
+   * Outputs the lexical form from the lexicon and weight map
+   */
+  wstring lexical_form(map<wstring, double> lexicon_map);
 
   /**
    * Prints an error of input stream and exits
@@ -412,8 +437,8 @@ public:
   pair<wstring, int> biltransWithQueue(wstring const &input_word, bool with_delim = true);
   wstring biltransWithoutQueue(wstring const &input_word, bool with_delim = true);
   void SAO(FILE *input = stdin, FILE *output = stdout);
-  void parseICX(string const &fichero);
-  void parseRCX(string const &fichero);
+  void parseICX(string const &file);
+  void parseRCX(string const &file);
 
   void load(FILE *input);
 
@@ -427,7 +452,10 @@ public:
   void setIgnoredChars(bool const value);
   void setRestoreChars(bool const value);
   void setNullFlush(bool const value);
-  void setUseDefaultIgnoredChars(bool);
+  void setUseDefaultIgnoredChars(bool const value);
+  void setDisplayWeightsMode(bool const value);
+  void setMaxAnalysesValue(int const value);
+  void setMaxWeightClassesValue(int const value);
   bool getNullFlush();
   bool getDecompoundingMode();
 };

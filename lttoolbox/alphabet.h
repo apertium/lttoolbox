@@ -38,7 +38,7 @@ private:
    * Symbol-identifier relationship. Only contains <tags>.
    * @see slexicinv
    */
-  map<wstring, int, Ltstr> slexic;  
+  map<wstring, int, Ltstr> slexic;
 
   /**
    * Identifier-symbol relationship. Only contains <tags>.
