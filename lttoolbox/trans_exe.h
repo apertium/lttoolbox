@@ -41,14 +41,19 @@ private:
   int initial_id;
 
   /**
+   * Default value of weight
+   */
+  double default_weight;
+
+  /**
    * Node list
    */
   vector<Node> node_list;
 
   /**
-   * Set of final nodes
+   * Final node set mapped to its weight walues
    */
-  set<Node *> finals;
+  map<Node *, double> finals;
 
   /**
    * Copy function
@@ -62,7 +67,7 @@ private:
   void destroy();
 
 public:
-  
+
   /**
    * Constructor
    */
@@ -91,13 +96,13 @@ public:
    * @param input the stream
    * @param alphabet the alphabet object to decode the symbols
    */
-  void read(FILE *input, Alphabet const &alphabet);
+  void read(FILE *input, Alphabet const &alphabet, bool read_weights);
 
   /**
    * Reduces all the final states to one
    */
   void unifyFinals();
-  
+
   /**
    * Gets the initial node of the transducer
    * @return the initial node
@@ -108,7 +113,7 @@ public:
    * Gets the set of final nodes
    * @return the set of final nodes
    */
-  set<Node *> & getFinals();
+  map<Node *, double> & getFinals();
 };
 
 #endif

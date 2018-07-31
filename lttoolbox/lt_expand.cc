@@ -106,11 +106,11 @@ int main(int argc, char *argv[])
       {
         wcerr << "Error: Cannot open file '" << infile << "'." << endl;
         exit(EXIT_FAILURE);
-      }      
+      }
       fclose(input);
       output = stdout;
       break;
-    
+
     case 3:
       infile = argv[argc-2];
       input = fopen(infile.c_str(), "rb");
@@ -141,6 +141,6 @@ int main(int argc, char *argv[])
 
   e.expand(infile, output);
   fclose(output);
-  
+
   return EXIT_SUCCESS;
 }

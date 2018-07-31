@@ -19,5 +19,59 @@ class BiprocSkipTags(unittest.TestCase, ProcTest):
     inputs = ["^vihki<KEPT><MATCHSOFAR><STILLMATCHING><SOMEHOWKEPT1><@SOMEHOWKEPT2>$"]
     expectedOutputs = ["^vihki<KEPT><MATCHSOFAR><STILLMATCHING><SOMEHOWKEPT1><@SOMEHOWKEPT2>/vihki<KEPT><MATCHSOFAR><STILLMATCHING><SOMEHOWKEPT1><@SOMEHOWKEPT2>$"]
 
+class WeightedTransducer(unittest.TestCase, ProcTest):
+    procdix = "data/walk-weight.att"
+    inputs = ["walk",
+              "walks"]
+    expectedOutputs = ["^walk/*walk$",
+                       "^walks/*walks$"]
+
+class WeightedCatTransducer(unittest.TestCase, ProcTest):
+    procdix = "data/cat-weight.att"
+    inputs = ["cat"]
+    expectedOutputs = ["^cat/cat+n/cat+v$"]
+
+class WeightedCatInitialTransducer(unittest.TestCase, ProcTest):
+    procdix = "data/cat-weight-initial.att"
+    inputs = ["cat"]
+    expectedOutputs = ["^cat/cat$"]
+
+class WeightedCatMiddleTransducer(unittest.TestCase, ProcTest):
+    procdix = "data/cat-weight-middle.att"
+    inputs = ["cat"]
+    expectedOutputs = ["^cat/cat$"]
+
+class WeightedCatFinalTransducer(unittest.TestCase, ProcTest):
+    procdix = "data/cat-weight-final.att"
+    inputs = ["cat"]
+    expectedOutputs = ["^cat/cat$"]
+
+class WeightedCatHeavyTransducer(unittest.TestCase, ProcTest):
+    procdix = "data/cat-weight-heavy.att"
+    inputs = ["cat"]
+    expectedOutputs = ["^cat/cat$"]
+
+class WeightedCatNegativeTransducer(unittest.TestCase, ProcTest):
+    procdix = "data/cat-weight-negative.att"
+    inputs = ["cat"]
+    expectedOutputs = ["^cat/cat+n/cat+v$"]
+
+class PrintWeights(unittest.TestCase, ProcTest):
+    procdix = "data/cat-weight.att"
+    procflags = ["-W"]
+    inputs = ["cat"]
+    expectedOutputs = ["^cat/cat+n<W:11.002748>/cat+v<W:12.034480>$"]
+
+class PrintWeightsNegative(unittest.TestCase, ProcTest):
+    procdix = "data/cat-weight-negative.att"
+    procflags = ["-W"]
+    inputs = ["cat"]
+    expectedOutputs = ["^cat/cat+n<W:9.353620>/cat+v<W:10.385352>$"]
+
+class PrintNAnalyses(unittest.TestCase, ProcTest):
+    procdix = "data/cat-weight.att"
+    procflags = ["-N 1"]
+    inputs = ["cat"]
+    expectedOutputs = ["^cat/cat+n$"]
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *

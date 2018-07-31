@@ -69,6 +69,11 @@ private:
   wstring postop;
 
   /**
+   * Default value of weight
+   */
+  double default_weight;
+
+  /**
    *
    */
   set<int> brackets;

@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
   LtLocale::tryToSetLocale();
   FSTProcessor fstp;
   FILE *aux;
-  
+
   switch(argc)
   {
     case 4:
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
       endProgram(argv[0]);
       break;
   }
-    
+
   fstp.initTMAnalysis(); 
   checkValidity(fstp);
   fstp.tm_analysis(input, output);

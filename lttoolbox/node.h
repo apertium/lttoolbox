@@ -29,22 +29,24 @@ using namespace std;
 
 class Dest
 {
-private: 
+private:
   int size;
   int *out_tag;
   Node **dest;
-  
+  double *out_weight;
+
   friend class State;
   friend class Node;
-  
+
   void copy(Dest const &d)
   {
     destroy();
     size = d.size;
     out_tag = new int[size];
     dest = new Node*[size];
+    out_weight = new double[size];
   }
-  
+
   void destroy()
   {
     if(size != 0)
@@ -58,6 +60,10 @@ private:
       {
         delete[] dest;
       }
+      if(out_weight)
+      {
+        delete[] out_weight;
+      }
     }
   }
 
@@ -65,7 +71,8 @@ private:
   {
     size = 0;
     out_tag = NULL;
-    dest = NULL;  
+    dest = NULL;
+    out_weight = NULL;
   }
 
 public:
@@ -73,12 +80,12 @@ public:
   {
     init();
   }
-  
+
   ~Dest()
   {
     destroy();
   }
-  
+
   Dest(Dest const &d)
   {
     init();
@@ -108,8 +115,8 @@ private:
   friend class State;
 
   /**
-   * The outgoing transitions of this node. 
-   * Schema: (input symbol, (output symbol, destination))
+   * The outgoing transitions of this node.
+   * Schema: (input symbol, (output symbol, destination, weight))
    */
   map<int, Dest> transitions;
 
@@ -137,7 +144,7 @@ public:
   ~Node();
 
   /**
-   * Copy constructor 
+   * Copy constructor
    * @param n the node to be copied
    */
   Node(Node const &n);
@@ -154,8 +161,9 @@ public:
    * @param i input symbol
    * @param o output symbol
    * @param d destination
+   * @param w weight value
    */
-  void addTransition(int i, int o, Node * const d);
+  void addTransition(int i, int o, Node * const d, double wt);
 };
 
 #endif

@@ -20,7 +20,7 @@ MatchNode::MatchNode(int const svsize) :
 transitions(svsize)
 {
 }
- 
+
 MatchNode::~MatchNode()
 {
   destroy();
@@ -29,7 +29,7 @@ MatchNode::~MatchNode()
 MatchNode::MatchNode(MatchNode const &n) :
 transitions(1)
 {
-  copy(n);  
+  copy(n);
 }
 
 MatchNode &
@@ -40,13 +40,13 @@ MatchNode::operator =(MatchNode const &n)
     destroy();
     copy(n);
   }
-  return *this; 
+  return *this;
 }
 
 void
 MatchNode::copy(MatchNode const &n)
 {
-  transitions = n.transitions;  
+  transitions = n.transitions;
 }
 
 void
@@ -55,8 +55,8 @@ MatchNode::destroy()
 }
 
 void
-MatchNode::addTransition(int const i, MatchNode * const d, int pos)
+MatchNode::addTransition(int const i, MatchNode * const d, double w, int pos)
 {
-//  transitions[i] = d;
-  transitions.add(i, d, pos);
+//  transitions[i].insert(make_pair(d, w));
+  transitions.add(i, d, w, pos);
 }
