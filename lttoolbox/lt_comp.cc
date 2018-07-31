@@ -36,7 +36,7 @@ using namespace std;
 void errorFunc(void *ctx, const char *msg, ...) 
 {
   return;
-} 
+}
 
 void endProgram(char *name)
 {
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
   initGenericErrorDefaultFunc(NULL);
-  
+
 
   if(opc == "lr")
   {
@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
     {
       LtLocale::tryToSetLocale();
       c.parse(infile, Compiler::COMPILER_RESTRICTION_RL_VAL);
-    }    
+    }
   }
   else
   {

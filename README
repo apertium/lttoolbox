@@ -2,32 +2,35 @@ README FILE OF LTTOOLBOX
 
 1. Programs
 
-	lt-comp   -> compiler, execute without parameters to show the
-                     instructions of use.
+    lt-comp     -> compiler, execute without parameters to show the
+                   instructions of use.
 
-	lt-proc   -> processor, works with options -a (lexical analyser, 
-                     default option), -g (lexical generator) and -p 
-                    (lexical post-generator).  Using -h will show all 
-                    flags.
+    lt-proc     -> processor, works with options -a (lexical analyser, 
+                   default option), -g (lexical generator) and -p 
+                   (lexical post-generator).  Using -h will show all 
+                   flags.
 
-	lt-expand -> generates all the pairs of transductions of a given
-	             dictionary.  Execute without parameters to show the
-                     instructions of use.
+    lt-expand   -> generates all the pairs of transductions of a given
+                   dictionary.  Execute without parameters to show the
+                   instructions of use.
 
-	lt-trim   -> (experimental) trims a compiled analyser to only
-	             contain entries which would pass through a compiled
-		     bidix, creating a new compiled and trimmed analyser.
+    lt-trim     -> (experimental) trims a compiled analyser to only
+                   contain entries which would pass through a compiled
+                   bidix, creating a new compiled and trimmed analyser.
+
+    lt-reweight -> (experimental) utility to assign weights to a
+                   compiled transducer based on a corpus.
 
 
 2. Install
 
-	a. Requirements:
-	        - i686, ppc, SPARC, etc.
-		- g++ >= 2.95
-		- gnu make
-		- libxml2 (last version)
+    a. Requirements:
+        - i686, ppc, SPARC, etc.
+        - g++ >= 2.95
+        - gnu make
+        - libxml2 (last version)
 
-	b. Building & installing
-		- ./configure
-		- make
-		- make install (o make-install script)
+    b. Building & installing
+        - ./configure
+        - make
+        - make install (o make-install script)
