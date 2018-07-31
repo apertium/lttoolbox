@@ -73,5 +73,17 @@ class PrintNAnalyses(unittest.TestCase, ProcTest):
     procflags = ["-N 1"]
     inputs = ["cat"]
     expectedOutputs = ["^cat/cat+n$"]
+
+class LemmaEntryWeights(unittest.TestCase, ProcTest):
+    procdix = "data/lemma-entry-weights.dix"
+    procflags = ["-W"]
+    inputs = ["walk"]
+    expectedOutputs = ["^walk/walk<n><W:0.100000>/walk<vblex><W:0.900000>$"]
+
+class AllEntryWeights(unittest.TestCase, ProcTest):
+    procdix = "data/entry-weights.dix"
+    procflags = ["-W"]
+    inputs = ["nanow"]
+    expectedOutputs = ["^nanow/nan<n><ma><du><gen><W:32.120000>/nan<n><ma><du><acc><W:34.120000>/nan<n><ma><pl><gen><W:39.120000>/nan<n><ma><pl><acc><W:41.120000>$"]
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *

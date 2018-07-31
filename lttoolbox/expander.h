@@ -109,19 +109,19 @@ private:
   wstring attrib(wstring const &name);
 
   /**
-   * Parse the &lt;p&lt; element
+   * Parse the &lt;p&gt; element
    * @return a pair of strings, left part and right part of a transduction
    */
   pair<wstring, wstring> procTransduction();
 
   /**
-   * Parse the &lt;i&lt; element
+   * Parse the &lt;i&gt; element
    * @return a string from the dictionary's entry
    */
   wstring procIdentity();
 
   /**
-   * Parse the &lt;ig&lt; element
+   * Parse the &lt;ig&gt; element
    * @return a pair of strings, whose right part begins with '#'
    * but are otherwise identical
    */
@@ -195,7 +195,7 @@ private:
    * @param endings the endings to be appended.
    */
   static void append(list<pair<wstring, wstring> > &result,
-	             pair<wstring, wstring> const &endings);
+                     pair<wstring, wstring> const &endings);
 
 public:
   /**
@@ -211,7 +211,8 @@ public:
   /**
    * Compile dictionary to letter transducers
    */
-  void expand(string const &fichero, FILE *output);
+  void expand(string const &file, FILE *output);
+
   /**
    * Set the alt value to use in compilation
    * @param a the value
@@ -236,6 +237,5 @@ public:
    */
    void setVariantRightValue(string const &v);
 };
-
 
 #endif

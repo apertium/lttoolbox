@@ -42,12 +42,12 @@ Expander::~Expander()
 }
 
 void
-Expander::expand(string const &fichero, FILE *output)
+Expander::expand(string const &file, FILE *output)
 {
-  reader = xmlReaderForFile(fichero.c_str(), NULL, 0);
+  reader = xmlReaderForFile(file.c_str(), NULL, 0);
   if(reader == NULL)
   {
-    wcerr << "Error: Cannot open '" << fichero << "'." << endl;
+    wcerr << "Error: Cannot open '" << file << "'." << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -70,9 +70,9 @@ Expander::expand(string const &fichero, FILE *output)
 void
 Expander::procParDef()
 {
-  int tipo=xmlTextReaderNodeType(reader);
+  int type=xmlTextReaderNodeType(reader);
 
-  if(tipo != XML_READER_TYPE_END_ELEMENT)
+  if(type != XML_READER_TYPE_END_ELEMENT)
   {
     current_paradigm = attrib(Compiler::COMPILER_N_ATTR);
   }
@@ -132,8 +132,8 @@ Expander::readString(wstring &result, wstring const &name)
   }
   else if(name == Compiler::COMPILER_GROUP_ELEM)
   {
-    int tipo=xmlTextReaderNodeType(reader);
-    if(tipo != XML_READER_TYPE_END_ELEMENT)
+    int type=xmlTextReaderNodeType(reader);
+    if(type != XML_READER_TYPE_END_ELEMENT)
     {
       result += L'#';
     }
@@ -295,17 +295,17 @@ Expander::procTransduction()
 }
 
 wstring
-Expander::attrib(wstring const &nombre)
+Expander::attrib(wstring const &name)
 {
-  return XMLParseUtil::attrib(reader, nombre);
-}
+  return XMLParseUtil::attrib(reader, name);
+} 
 
 wstring
 Expander::procPar()
 {
   EntryToken e;
-  wstring nomparadigma = attrib(Compiler::COMPILER_N_ATTR);
-  return nomparadigma;
+  wstring paradigm_name = attrib(Compiler::COMPILER_N_ATTR);
+  return paradigm_name;
 }
 
 void
@@ -325,20 +325,21 @@ Expander::requireAttribute(wstring const &value, wstring const &attrname,
 void
 Expander::procEntry(FILE *output)
 {
-  wstring atributo=this->attrib(Compiler::COMPILER_RESTRICTION_ATTR);
-  wstring entrname=this->attrib(Compiler::COMPILER_LEMMA_ATTR);
-  wstring altval = this->attrib(Compiler::COMPILER_ALT_ATTR);
-  wstring varval = this->attrib(Compiler::COMPILER_V_ATTR);
-  wstring varl   = this->attrib(Compiler::COMPILER_VL_ATTR);
-  wstring varr   = this->attrib(Compiler::COMPILER_VR_ATTR);
+  wstring attribute = this->attrib(Compiler::COMPILER_RESTRICTION_ATTR);
+  wstring entrname  = this->attrib(Compiler::COMPILER_LEMMA_ATTR);
+  wstring altval    = this->attrib(Compiler::COMPILER_ALT_ATTR);
+  wstring varval    = this->attrib(Compiler::COMPILER_V_ATTR);
+  wstring varl      = this->attrib(Compiler::COMPILER_VL_ATTR);
+  wstring varr      = this->attrib(Compiler::COMPILER_VR_ATTR);
+  wstring wsweight  = this->attrib(Compiler::COMPILER_WEIGHT_ATTR);
 
   wstring myname = L"";
   if(this->attrib(Compiler::COMPILER_IGNORE_ATTR) == L"yes"
    || altval != L"" && altval != alt
-   || (varval != L"" && varval != variant && atributo == Compiler::COMPILER_RESTRICTION_RL_VAL)
+   || (varval != L"" && varval != variant && attribute == Compiler::COMPILER_RESTRICTION_RL_VAL)
    || ((varl != L"" && varl != variant_left) && (varr != L"" && varr != variant_right))
-   || (varl != L"" && varl != variant_left && atributo == Compiler::COMPILER_RESTRICTION_RL_VAL)
-   || (varr != L"" && varr != variant_right && atributo == Compiler::COMPILER_RESTRICTION_LR_VAL))
+   || (varl != L"" && varl != variant_left && attribute == Compiler::COMPILER_RESTRICTION_RL_VAL)
+   || (varr != L"" && varr != variant_right && attribute == Compiler::COMPILER_RESTRICTION_LR_VAL))
   {
     do
     {
@@ -350,27 +351,26 @@ Expander::procEntry(FILE *output)
         exit(EXIT_FAILURE);
       }
       myname = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
-     // wcerr << L"Hola " << myname << L" " << Compiler::COMPILER_ENTRY_ELEM << endl;
     }
     while(myname != Compiler::COMPILER_ENTRY_ELEM);
     return;
   }
 
   EntList items, items_lr, items_rl;
-  if(atributo == Compiler::COMPILER_RESTRICTION_LR_VAL
-   || (varval != L"" && varval != variant && atributo != Compiler::COMPILER_RESTRICTION_RL_VAL)
+  if(attribute == Compiler::COMPILER_RESTRICTION_LR_VAL
+   || (varval != L"" && varval != variant && attribute != Compiler::COMPILER_RESTRICTION_RL_VAL)
    || varl != L"" && varl != variant_left)
   {
-    items_lr.push_back(pair<wstring, wstring>(L"", L""));
+    items_lr.push_back(make_pair(L"", L""));
   }
-  else if(atributo == Compiler::COMPILER_RESTRICTION_RL_VAL
+  else if(attribute == Compiler::COMPILER_RESTRICTION_RL_VAL
         || (varr != L"" && varr != variant_right))
   {
-    items_rl.push_back(pair<wstring, wstring>(L"", L""));
+    items_rl.push_back(make_pair(L"", L""));
   }
   else
   {
-    items.push_back(pair<wstring, wstring>(L"", L""));
+    items.push_back(make_pair(L"", L""));
   }
 
   while(true)
@@ -385,7 +385,7 @@ Expander::procEntry(FILE *output)
     wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
     skipBlanks(name);
 
-    int tipo = xmlTextReaderNodeType(reader);
+    int type = xmlTextReaderNodeType(reader);
     if(name == Compiler::COMPILER_PAIR_ELEM)
     {
       pair<wstring, wstring> p = procTransduction();
@@ -417,7 +417,7 @@ Expander::procEntry(FILE *output)
     else if(name == Compiler::COMPILER_PAR_ELEM)
     {
       wstring p = procPar();
-      // detección del uso de paradigmas no definidos
+      // detection of the use of undefined paradigms
 
       if(paradigm.find(p) == paradigm.end() &&
          paradigm_lr.find(p) == paradigm_lr.end() &&
@@ -428,7 +428,7 @@ Expander::procEntry(FILE *output)
         exit(EXIT_FAILURE);
       }
 
-      if(atributo == Compiler::COMPILER_RESTRICTION_LR_VAL)
+      if(attribute == Compiler::COMPILER_RESTRICTION_LR_VAL)
       {
         if(paradigm[p].size() == 0 && paradigm_lr[p].size() == 0)
         {
@@ -440,7 +440,7 @@ Expander::procEntry(FILE *output)
         append(items_lr, paradigm_lr[p]);
         items_lr.insert(items_lr.end(), first.begin(), first.end());
       }
-      else if(atributo == Compiler::COMPILER_RESTRICTION_RL_VAL)
+      else if(attribute == Compiler::COMPILER_RESTRICTION_RL_VAL)
       {
         if(paradigm[p].size() == 0 && paradigm_rl[p].size() == 0)
         {
@@ -474,12 +474,12 @@ Expander::procEntry(FILE *output)
         items_lr.insert(items_lr.end(), aux_lr.begin(), aux_lr.end());
       }
     }
-    else if(name == Compiler::COMPILER_ENTRY_ELEM && tipo == XML_READER_TYPE_END_ELEMENT)
+    else if(name == Compiler::COMPILER_ENTRY_ELEM && type == XML_READER_TYPE_END_ELEMENT)
     {
       if(current_paradigm == L"")
       {
         for(EntList::iterator it = items.begin(),
-                                                 limit = items.end();
+                           limit = items.end();
             it != limit; it++)
         {
           fputws_unlocked(it->first.c_str(), output);
@@ -488,7 +488,7 @@ Expander::procEntry(FILE *output)
           fputwc_unlocked(L'\n', output);
         }
         for(EntList::iterator it = items_lr.begin(),
-                                                 limit = items_lr.end();
+                           limit = items_lr.end();
             it != limit; it++)
         {
           fputws_unlocked(it->first.c_str(), output);
@@ -499,7 +499,7 @@ Expander::procEntry(FILE *output)
           fputwc_unlocked(L'\n', output);
         }
         for(EntList::iterator it = items_rl.begin(),
-                                                 limit = items_rl.end();
+                           limit = items_rl.end();
             it != limit; it++)
         {
           fputws_unlocked(it->first.c_str(), output);
@@ -541,55 +541,55 @@ Expander::procEntry(FILE *output)
 void
 Expander::procNode(FILE *output)
 {
-  xmlChar const *xnombre = xmlTextReaderConstName(reader);
-  wstring nombre = XMLParseUtil::towstring(xnombre);
+  xmlChar const *xname = xmlTextReaderConstName(reader);
+  wstring name = XMLParseUtil::towstring(xname);
 
-  // HACER: optimizar el orden de ejecución de esta ristra de "ifs"
+  // DO: optimize the execution order of this string "ifs"
 
-  if(nombre == L"#text")
+  if(name == L"#text")
   {
     /* ignorar */
   }
-  else if(nombre == Compiler::COMPILER_DICTIONARY_ELEM)
+  else if(name == Compiler::COMPILER_DICTIONARY_ELEM)
   {
     /* ignorar */
   }
-  else if(nombre == Compiler::COMPILER_ALPHABET_ELEM)
+  else if(name == Compiler::COMPILER_ALPHABET_ELEM)
   {
     /* ignorar */
   }
-  else if(nombre == Compiler::COMPILER_SDEFS_ELEM)
+  else if(name == Compiler::COMPILER_SDEFS_ELEM)
   {
     /* ignorar */
   }
-  else if(nombre == Compiler::COMPILER_SDEF_ELEM)
+  else if(name == Compiler::COMPILER_SDEF_ELEM)
   {
     /* ignorar */
   }
-  else if(nombre == Compiler::COMPILER_PARDEFS_ELEM)
+  else if(name == Compiler::COMPILER_PARDEFS_ELEM)
   {
     /* ignorar */
   }
-  else if(nombre == Compiler::COMPILER_PARDEF_ELEM)
+  else if(name == Compiler::COMPILER_PARDEF_ELEM)
   {
     procParDef();
   }
-  else if(nombre == Compiler::COMPILER_ENTRY_ELEM)
+  else if(name == Compiler::COMPILER_ENTRY_ELEM)
   {
     procEntry(output);
   }
-  else if(nombre == Compiler::COMPILER_SECTION_ELEM)
+  else if(name == Compiler::COMPILER_SECTION_ELEM)
   {
     /* ignorar */
   }
-  else if(nombre == L"#comment")
+  else if(name == L"#comment")
   {
     /* ignorar */
   }
   else
   {
     wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << L"): Invalid node '<" << nombre << L">'." << endl;
+    wcerr << L"): Invalid node '<" << name << L">'." << endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -605,7 +605,7 @@ Expander::procRegexp()
 
 void
 Expander::append(EntList &result,
-		 EntList const &endings)
+                 EntList const &endings)
 {
   EntList temp;
   EntList::iterator it, limit;
@@ -635,8 +635,8 @@ Expander::append(EntList &result, wstring const &endings)
 }
 
 void
-Expander::append(EntList &result,
-		 pair<wstring, wstring> const &endings)
+Expander::append(EntList &result, 
+                 pair<wstring, wstring> const &endings)
 {
   EntList::iterator it, limit;
   for(it = result.begin(), limit = result.end(); it != limit; it++)

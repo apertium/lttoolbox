@@ -127,7 +127,7 @@ Transducer::insertTransducer(int const source, Transducer &t,
   t.joinFinals(epsilon_tag);
 
   for(map<int, multimap<int, pair<int, double> > >::const_iterator it = t.transitions.begin(),
-                                                                  limit = t.transitions.end();
+                                                                limit = t.transitions.end();
       it != limit; it++)
   {
     relation[it->first] = newState();
@@ -137,17 +137,17 @@ Transducer::insertTransducer(int const source, Transducer &t,
       it != t.transitions.end(); it++)
   {
     for(multimap<int, pair<int, double> >::const_iterator it2 = it->second.begin(),
-                                                        limit2 = (it->second).end();
+                                                       limit2 = (it->second).end();
         it2 != limit2; it2++)
     {
       transitions[relation[it->first]].insert(make_pair(it2->first,
-                                                                            make_pair(relation[it2->second.first],
-                                                                            it2->second.second)));
+                                                        make_pair(relation[it2->second.first],
+                                                                  it2->second.second)));
     }
   }
 
   transitions[source].insert(make_pair(epsilon_tag,
-                                                          make_pair(relation[t.initial], default_weight)));
+                                       make_pair(relation[t.initial], default_weight)));
 
   return relation[t.finals.begin()->first];
 }
@@ -335,14 +335,14 @@ Transducer::determinize(int const epsilon_tag)
         finals_prime.insert(make_pair(*it, finals.find(*it)->second));
       }
 
-      map<int, set<int> > mymap;
+      map<pair<int, double>, set<int> > mymap;
 
       for(set<int>::iterator it2 = Q_prime[*it].begin(),
-                             limit2 = Q_prime[*it].end();
+                          limit2 = Q_prime[*it].end();
           it2 != limit2; it2++)
       {
         for(multimap<int, pair<int, double> >::iterator it3 = transitions[*it2].begin(),
-                                                      limit3 = transitions[*it2].end();
+                                                     limit3 = transitions[*it2].end();
             it3 != limit3; it3++)
         {
           if(it3->first != epsilon_tag)
@@ -352,14 +352,14 @@ Transducer::determinize(int const epsilon_tag)
             for(set<int>::iterator it4 = c.begin(), limit4 = c.end();
                 it4 != limit4; it4++)
             {
-              mymap[it3->first].insert(*it4);
+              mymap[make_pair(it3->first, it3->second.second)].insert(*it4);
             }
           }
         }
       }
 
       // adding new states
-      for(map<int, set<int> >::iterator it2 = mymap.begin(), limit2 = mymap.end();
+      for(map<pair<int, double>, set<int> >::iterator it2 = mymap.begin(), limit2 = mymap.end();
           it2 != limit2; it2++)
       {
         if(Q_prime_inv.find(it2->second) == Q_prime_inv.end())
@@ -370,9 +370,8 @@ Transducer::determinize(int const epsilon_tag)
           R[(t+1)%2].insert(Q_prime_inv[it2->second]);
           transitions_prime[tag].clear();
         }
-        transitions_prime[*it].insert(make_pair(it2->first,
-                                                                    make_pair(Q_prime_inv[it2->second],
-                                                                              default_weight)));
+        transitions_prime[*it].insert(make_pair(it2->first.first,
+                                                make_pair(Q_prime_inv[it2->second], it2->first.second)));
       }
     }
 
@@ -475,7 +474,7 @@ Transducer::numberOfTransitions() const
   int counter = 0;
 
   for(map<int, multimap<int, pair<int, double> > >::const_iterator it = transitions.begin(),
-                                                                   limit = transitions.end();
+                                                                limit = transitions.end();
       it != limit; it++)
   {
     counter += (it->second).size();
@@ -523,14 +522,14 @@ Transducer::write(FILE *output, int const decalage, bool write_weights)
   base = transitions.size();
   Compression::multibyte_write(base, output);
   for(map<int, multimap<int, pair<int, double> > >::iterator it = transitions.begin(),
-                                                             limit = transitions.end();
+                                                          limit = transitions.end();
       it != limit; it++)
   {
     Compression::multibyte_write(it->second.size(), output);
     int tagbase = 0;
     double tagcost = default_weight;
     for(multimap<int, pair<int, double> >::iterator it2 = it->second.begin(),
-                                                          limit2 = it->second.end();
+                                                 limit2 = it->second.end();
         it2 != limit2; it2++)
     {
       Compression::multibyte_write(it2->first-tagbase+decalage, output);
@@ -664,11 +663,11 @@ Transducer::reverse(int const epsilon_tag)
   }
 
   for(map<int, multimap<int, pair<int, double> > >::reverse_iterator it = tmp_transitions.rbegin(),
-                                                      limit = tmp_transitions.rend();
+                                                                  limit = tmp_transitions.rend();
       it != limit; it++)
   {
     for(multimap<int, pair<int, double> >::iterator it2 = it->second.begin(),
-                                     limit2 = it->second.end();
+                                                 limit2 = it->second.end();
         it2 != limit2; it2++)
     {
       transitions[it->first].insert(make_pair(it2->first, it2->second));
@@ -798,8 +797,8 @@ Transducer::recognise(wstring pattern, Alphabet &a, FILE *err)
 
 void
 Transducer::unionWith(Alphabet &my_a,
-  Transducer &t,
-  int const epsilon_tag)
+                      Transducer &t,
+                      int const epsilon_tag)
 {
   finals.insert(make_pair(insertTransducer(initial, t, epsilon_tag), default_weight));
 }
@@ -810,12 +809,12 @@ Transducer::appendDotStar(set<int> const &loopback_symbols, int const epsilon_ta
   Transducer prefix_transducer(*this);
 
   for(map<int, double>::iterator prefix_it = prefix_transducer.finals.begin(),
-                                prefix_limit = prefix_transducer.finals.end();
+                              prefix_limit = prefix_transducer.finals.end();
       prefix_it != prefix_limit;
       prefix_it++)
   {
     for(set<int>::iterator loopback_it = loopback_symbols.begin(),
-                           loopback_limit = loopback_symbols.end();
+                        loopback_limit = loopback_symbols.end();
     loopback_it != loopback_limit;
     loopback_it++)
     {
@@ -859,7 +858,7 @@ Transducer::copyWithTagsFirst(int start,
     int this_src = current.first, this_lemqlast = current.second;
 
     for(multimap<int, pair<int, double> >::iterator trans_it = transitions[this_src].begin(),
-                                                  trans_limit = transitions[this_src].end();
+                                                 trans_limit = transitions[this_src].end();
         trans_it != trans_limit;
         trans_it++)
     {
@@ -974,7 +973,7 @@ Transducer::moveLemqsLast(Alphabet const &alphabet,
     todo.pop_front();
     seen.insert(this_src);
     for(multimap<int, pair<int, double> >::iterator trans_it = transitions[this_src].begin(),
-                                                  trans_limit = transitions[this_src].end();
+                                                 trans_limit = transitions[this_src].end();
         trans_it != trans_limit;
         trans_it++)
     {

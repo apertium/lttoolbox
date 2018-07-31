@@ -45,6 +45,11 @@ private:
   wstring parName;
 
   /**
+   * Weight value for the entry (default_weight if unspecified)
+   */
+  double weight;
+
+  /**
    * Left side of transduction (if 'single_transduction')
    */
   list<int> leftSide;
@@ -100,8 +105,9 @@ public:
    * Set both parts of a single transduction.
    * @param pi left part
    * @param pd right part
+   * @param ew entry weight
    */
-  void setSingleTransduction(list<int> const &pi, list<int> const &pd);
+  void setSingleTransduction(list<int> const &pi, list<int> const &pd, double const &ew);
 
   /**
    * Set regular expression.
@@ -150,6 +156,12 @@ public:
    * @return the regular expression specification.
    */
   wstring const & regExp() const;
+
+  /**
+   * Retrieve the weight value of the entry.
+   * @return the weight value of the entry.
+   */
+  double const & entryWeight() const;
 };
 
 #endif
