@@ -114,7 +114,7 @@ public:
    * @param weight the weight value for the new transduction
    * @return the target state
    */
-  int insertSingleTransduction(int const tag, int const source, double const weight);
+  int insertSingleTransduction(int const tag, int const source, double const weight = 0.0000);
 
   /**
    * Insertion of a single transduction, forcing create a new target
@@ -124,7 +124,7 @@ public:
    * @param weight the weight value for the new transduction
    * @return the target state
    */
-  int insertNewSingleTransduction(int const tag, int const source, double const weight);
+  int insertNewSingleTransduction(int const tag, int const source, double const weight = 0.0000);
 
   /**
    * Insertion of a transducer in a given source state, unifying their
@@ -144,7 +144,7 @@ public:
    * @param tag the tag of the transduction
    * @param weight the weight value for the new transduction
    */
-  void linkStates(int const source, int const target, int const tag, double const weight);
+  void linkStates(int const source, int const target, int const tag, double const weight = 0.0000);
 
   /**
    * Test if the state is a final state
@@ -166,7 +166,7 @@ public:
    * @param weight the weight value for the final state
    * @param value if true, the state is set as final state
    */
-  void setFinal(int const state, double const weight, bool value = true);
+  void setFinal(int const state, double const weight = 0.0000, bool value = true);
 
   /**
    * Returns the initial state of a transducer
@@ -291,14 +291,14 @@ public:
    * @param output the stream to write to
    * @param decalage offset to sum to the tags
    */
-  void write(FILE *output, int const decalage, bool write_weights);
+  void write(FILE *output, int const decalage = 0, bool write_weights = false);
 
   /**
    * Read method
    * @param input the stream to read from
    * @param decalage offset to sum to the tags
    */
-  void read(FILE *input, int const decalage, bool read_weights);
+  void read(FILE *input, int const decalage = 0, bool read_weights = false);
 
   void serialise(std::ostream &serialised) const;
   void deserialise(std::istream &serialised);
