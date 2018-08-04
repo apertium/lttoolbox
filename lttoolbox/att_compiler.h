@@ -57,10 +57,7 @@ namespace
   /** Converts a string to a number. Slow, but at this point I don't care. */
   double convert(const wstring& s)
   {
-    double ret;
-    wistringstream ss(s);
-    ss >> ret;
-    return ret;
+    return stod(s);
   }
 };
 

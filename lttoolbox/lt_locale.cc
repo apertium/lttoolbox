@@ -28,19 +28,21 @@ using namespace std;
 void
 LtLocale::tryToSetLocale()
 {
+  locale::global(locale(locale::classic(), "", locale::ctype));
+
 #if !defined(__CYGWIN__) && !defined (__MINGW32__)
   if(setlocale(LC_CTYPE, "") != NULL)
   {
     return;
   }
- 
+
   wcerr << "Warning: unsupported locale, fallback to \"C\"" << endl;
 
   setlocale(LC_ALL, "C");
 #endif
-#ifdef __CYGWIN__
+
   setlocale(LC_ALL, "C.UTF-8");
-#endif
+
 #ifdef __MINGW32__
   //SetConsoleInputCP(65001);
   SetConsoleOutputCP(65001);
