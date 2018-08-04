@@ -33,6 +33,7 @@ LtLocale::tryToSetLocale()
 #if !defined(__CYGWIN__) && !defined (__MINGW32__)
   if(setlocale(LC_CTYPE, "") != NULL)
   {
+    setlocale(LC_NUMERIC, "C");
     return;
   }
 
