@@ -78,11 +78,11 @@ int main(int argc, char *argv[])
       break;
   }
 
-  fstp.initTMAnalysis(); 
+  fstp.initTMAnalysis();
   checkValidity(fstp);
   fstp.tm_analysis(input, output);
 
   fclose(input);
-  fclose(output); 
+  fclose(output);
   return EXIT_SUCCESS;
 }

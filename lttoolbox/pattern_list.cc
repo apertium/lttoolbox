@@ -96,7 +96,7 @@ PatternList::endSequence()
     exit(EXIT_FAILURE);
   }
   sequence = false;
-  
+
   for(list<vector<int> >::iterator it = sequence_data.begin(),
       limit = sequence_data.end();
       it != limit; it++)
@@ -137,7 +137,7 @@ PatternList::insertOutOfSequence(wstring const &lemma, wstring const &tags,
     for(unsigned int i = 0, limit = tagCount(tags); i < limit; i++)
     {
       wstring tag = L"<" + tagAt(tags, i) + L">";
-      
+
       if(tag == L"<*>")
       {
         result.push_back(alphabet(ANY_TAG));
@@ -152,7 +152,7 @@ PatternList::insertOutOfSequence(wstring const &lemma, wstring const &tags,
 }
 
 void
-PatternList::insertIntoSequence(int const id, wstring const &lemma, 
+PatternList::insertIntoSequence(int const id, wstring const &lemma,
 				wstring const &tags)
 {
   sequence_id = id;

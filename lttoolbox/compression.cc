@@ -22,14 +22,14 @@
 #include <limits>
 #include <iostream>
 
-void 
+void
 Compression::writeByte(unsigned char byte, FILE *output)
 {
   if(fwrite_unlocked(&byte, 1, 1, output) != 1)
   {
     wcerr << L"I/O Error writing" << endl;
     exit(EXIT_FAILURE);
-  }  
+  }
 }
 
 unsigned char
@@ -67,7 +67,7 @@ Compression::multibyte_write(unsigned int value, FILE *output)
     unsigned char low = (unsigned char) value;
     unsigned char middle = (unsigned char) (value >> 8);
     unsigned char up = (unsigned char) (value >> 16);
-    up = up | 0x80; 
+    up = up | 0x80;
     writeByte(up, output);
     writeByte(middle, output);
     writeByte(low, output);
@@ -78,7 +78,7 @@ Compression::multibyte_write(unsigned int value, FILE *output)
     unsigned char middlelow = (unsigned char) (value >> 8);
     unsigned char middleup = (unsigned char) (value >> 16);
     unsigned char up = (unsigned char) (value >> 24);
-    up = up | 0xc0; 
+    up = up | 0xc0;
     writeByte(up, output);
     writeByte(middleup, output);
     writeByte(middlelow, output);
@@ -112,11 +112,11 @@ Compression::multibyte_write(unsigned int value, ostream &output)
     unsigned char low = (unsigned char) value;
     unsigned char middle = (unsigned char) (value >> 8);
     unsigned char up = (unsigned char) (value >> 16);
-    up = up | 0x80; 
+    up = up | 0x80;
     output.write(reinterpret_cast<char *>(&up), sizeof(char));
     output.write(reinterpret_cast<char *>(&middle), sizeof(char));
     output.write(reinterpret_cast<char *>(&low), sizeof(char));
-    
+
   }
   else if(value < 0x40000000)
   {
@@ -124,7 +124,7 @@ Compression::multibyte_write(unsigned int value, ostream &output)
     unsigned char middlelow = (unsigned char) (value >> 8);
     unsigned char middleup = (unsigned char) (value >> 16);
     unsigned char up = (unsigned char) (value >> 24);
-    up = up | 0xc0; 
+    up = up | 0xc0;
 
     output.write(reinterpret_cast<char *>(&up), sizeof(char));
     output.write(reinterpret_cast<char *>(&middleup), sizeof(char));
@@ -188,7 +188,7 @@ Compression::multibyte_read(FILE *input)
     result = (unsigned int) low;
     result = result | aux;
   }
-   
+
   return result;
 }
 
@@ -248,7 +248,7 @@ Compression::multibyte_read(istream &input)
     result = (unsigned int) low;
     result = result | aux;
   }
-   
+
   return result;
 }
 
@@ -297,7 +297,7 @@ Compression::string_read(FILE *input)
   {
     retval += static_cast<char>(Compression::multibyte_read(input));
   }
-  
+
   return retval;
 }
 

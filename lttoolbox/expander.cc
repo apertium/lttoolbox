@@ -93,21 +93,21 @@ Expander::requireEmptyError(wstring const &name)
   }
 }
 
-bool 
+bool
 Expander::allBlanks()
 {
   bool flag = true;
   wstring text = XMLParseUtil::towstring(xmlTextReaderConstValue(reader));
-  
+
   for(unsigned int i = 0, limit = text.size(); i < limit; i++)
   {
     flag = flag && isspace(text[i]);
   }
-  
+
   return flag;
 }
 
-void 
+void
 Expander::readString(wstring &result, wstring const &name)
 {
   if(name == L"#text")
@@ -161,7 +161,7 @@ Expander::skipBlanks(wstring &name)
   {
     if(!allBlanks())
     {
-      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader); 
+      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
       wcerr << L"): Invalid construction." << endl;
       exit(EXIT_FAILURE);
     }
@@ -175,7 +175,7 @@ Expander::skip(wstring &name, wstring const &elem)
 {
   xmlTextReaderRead(reader);
   name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
-  
+
   if(name == L"#text")
   {
     if(!allBlanks())
@@ -186,14 +186,14 @@ Expander::skip(wstring &name, wstring const &elem)
     }
     xmlTextReaderRead(reader);
     name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
-  }    
-    
+  }
+
   if(name != elem)
   {
     wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
     wcerr << L"): Expected '<" << elem << L">'." << endl;
     exit(EXIT_FAILURE);
-  }  
+  }
 }
 
 wstring
@@ -216,7 +216,7 @@ Expander::procIdentity()
       readString(both_sides, name);
     }
   }
-  return both_sides;  
+  return both_sides;
 }
 
 pair<wstring, wstring>
@@ -251,9 +251,9 @@ Expander::procIdentityGroup()
 pair<wstring, wstring>
 Expander::procTransduction()
 {
-  wstring lhs = L"", rhs = L""; 
+  wstring lhs = L"", rhs = L"";
   wstring name = L"";
-  
+
   skip(name, Compiler::COMPILER_LEFT_ELEM);
 
   if(!xmlTextReaderIsEmptyElement(reader))
@@ -270,7 +270,7 @@ Expander::procTransduction()
       readString(lhs, name);
     }
   }
- 
+
   skip(name, Compiler::COMPILER_RIGHT_ELEM);
 
   if(!xmlTextReaderIsEmptyElement(reader))
@@ -285,11 +285,11 @@ Expander::procTransduction()
         break;
       }
       readString(rhs, name);
-    }    
+    }
   }
 
-  skip(name, Compiler::COMPILER_PAIR_ELEM);  
-  
+  skip(name, Compiler::COMPILER_PAIR_ELEM);
+
   pair<wstring, wstring> e(lhs, rhs);
   return e;
 }
@@ -298,7 +298,7 @@ wstring
 Expander::attrib(wstring const &nombre)
 {
   return XMLParseUtil::attrib(reader, nombre);
-} 
+}
 
 wstring
 Expander::procPar()
@@ -314,12 +314,12 @@ Expander::requireAttribute(wstring const &value, wstring const &attrname,
 {
   if(value == L"")
   {
-    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);  
+    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
     wcerr << L"): '<" << elemname;
     wcerr << L"' element must specify non-void '";
     wcerr<< attrname << L"' attribute." << endl;
     exit(EXIT_FAILURE);
-  }  
+  }
 }
 
 void
@@ -331,7 +331,7 @@ Expander::procEntry(FILE *output)
   wstring varval = this->attrib(Compiler::COMPILER_V_ATTR);
   wstring varl   = this->attrib(Compiler::COMPILER_VL_ATTR);
   wstring varr   = this->attrib(Compiler::COMPILER_VR_ATTR);
-  
+
   wstring myname = L"";
   if(this->attrib(Compiler::COMPILER_IGNORE_ATTR) == L"yes"
    || altval != L"" && altval != alt
@@ -339,7 +339,7 @@ Expander::procEntry(FILE *output)
    || ((varl != L"" && varl != variant_left) && (varr != L"" && varr != variant_right))
    || (varl != L"" && varl != variant_left && atributo == Compiler::COMPILER_RESTRICTION_RL_VAL)
    || (varr != L"" && varr != variant_right && atributo == Compiler::COMPILER_RESTRICTION_LR_VAL))
-  {    
+  {
     do
     {
       int ret = xmlTextReaderRead(reader);
@@ -355,9 +355,9 @@ Expander::procEntry(FILE *output)
     while(myname != Compiler::COMPILER_ENTRY_ELEM);
     return;
   }
-  
+
   EntList items, items_lr, items_rl;
-  if(atributo == Compiler::COMPILER_RESTRICTION_LR_VAL 
+  if(atributo == Compiler::COMPILER_RESTRICTION_LR_VAL
    || (varval != L"" && varval != variant && atributo != Compiler::COMPILER_RESTRICTION_RL_VAL)
    || varl != L"" && varl != variant_left)
   {
@@ -387,7 +387,7 @@ Expander::procEntry(FILE *output)
 
     int tipo = xmlTextReaderNodeType(reader);
     if(name == Compiler::COMPILER_PAIR_ELEM)
-    {      
+    {
       pair<wstring, wstring> p = procTransduction();
       append(items, p);
       append(items_lr, p);
@@ -401,7 +401,7 @@ Expander::procEntry(FILE *output)
       append(items_rl, val);
     }
     else if(name == Compiler::COMPILER_IDENTITYGROUP_ELEM)
-    {      
+    {
       pair<wstring, wstring> p = procIdentityGroup();
       append(items, p);
       append(items_lr, p);
@@ -427,7 +427,7 @@ Expander::procEntry(FILE *output)
         wcerr << L"): Undefined paradigm '" << p << L"'." <<endl;
         exit(EXIT_FAILURE);
       }
-      
+
       if(atributo == Compiler::COMPILER_RESTRICTION_LR_VAL)
       {
         if(paradigm[p].size() == 0 && paradigm_lr[p].size() == 0)
@@ -462,7 +462,7 @@ Expander::procEntry(FILE *output)
         {
           items_rl.insert(items_rl.end(), items.begin(), items.end());
         }
-        
+
         EntList aux_lr = items_lr;
         EntList aux_rl = items_rl;
         append(aux_lr, paradigm[p]);
@@ -615,7 +615,7 @@ Expander::append(EntList &result,
   {
     for(it2 = endings.begin(), limit2 = endings.end(); it2 != limit2; it2++)
     {
-      temp.push_back(pair<wstring, wstring>(it->first + it2->first, 
+      temp.push_back(pair<wstring, wstring>(it->first + it2->first,
 		   		          it->second + it2->second));
     }
   }
@@ -625,7 +625,7 @@ Expander::append(EntList &result,
 
 void
 Expander::append(EntList &result, wstring const &endings)
-{  
+{
   EntList::iterator it, limit;
   for(it = result.begin(), limit = result.end(); it != limit; it++)
   {
@@ -635,7 +635,7 @@ Expander::append(EntList &result, wstring const &endings)
 }
 
 void
-Expander::append(EntList &result, 
+Expander::append(EntList &result,
 		 pair<wstring, wstring> const &endings)
 {
   EntList::iterator it, limit;

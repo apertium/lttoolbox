@@ -60,7 +60,7 @@ public:
    * @param output output stream.
    */
   static void multibyte_write(unsigned int value, ostream &os);
-  
+
   /**
    * Read and decode an integer from the input stream.
    * @see multibyte_read()
@@ -85,7 +85,7 @@ public:
    * @param output the output stream.
    */
   static void wstring_write(wstring const &str, FILE *output);
-  
+
   /**
    * This method reads a wide string from the input stream.
    * @see wstring_write()

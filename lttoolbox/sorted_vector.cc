@@ -24,7 +24,7 @@ SortedVector::copy(SortedVector const &o)
 {
   sv = new SVNode[o.size];
   size = o.size;
-  
+
   for(int i = 0; i != size; i++)
   {
     sv[i].tag = o.sv[i].tag;

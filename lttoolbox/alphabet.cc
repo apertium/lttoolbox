@@ -52,7 +52,7 @@ Alphabet &
 Alphabet::operator =(Alphabet const &a)
 {
   if(this != &a)
-  { 
+  {
     destroy();
     copy(a);
   }
@@ -64,7 +64,7 @@ Alphabet::destroy()
 {
 }
 
-void 
+void
 Alphabet::copy(Alphabet const &a)
 {
   slexic = a.slexic;
@@ -94,7 +94,7 @@ Alphabet::operator()(int const c1, int const c2)
     spair[tmp] = spair_size;
     spairinv.push_back(tmp);
   }
-  
+
   return spair[tmp];
 }
 
@@ -153,7 +153,7 @@ Alphabet::read(FILE *input)
   Alphabet a_new;
   a_new.spairinv.clear();
   a_new.spair.clear();
-  
+
   // Reading of taglist
   int tam = Compression::multibyte_read(input);
   map<int, string> tmp;
@@ -226,7 +226,7 @@ Alphabet::getSymbol(wstring &result, int const symbol, bool uppercase) const
   {
     return;
   }
-  
+
   if(!uppercase)
   {
     if(symbol >= 0)
@@ -277,7 +277,7 @@ Alphabet::createLoopbackSymbols(set<int> &symbols, Alphabet &basis, Side s, bool
       it++)
   {
     if(s == left) {
-      if(basis.isTag(it->first)) 
+      if(basis.isTag(it->first))
       {
         tags.insert(it->first);
       }
@@ -287,7 +287,7 @@ Alphabet::createLoopbackSymbols(set<int> &symbols, Alphabet &basis, Side s, bool
       }
     }
     else {
-      if(basis.isTag(it->second)) 
+      if(basis.isTag(it->second))
       {
         tags.insert(it->second);
       }

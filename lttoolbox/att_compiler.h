@@ -40,20 +40,20 @@ using namespace std;
 /** Bitmask; 1 = WORD, 2 = PUNCT, 3 = BOTH. */
 typedef unsigned int TransducerType;
 
-namespace 
+namespace
 {
   /** Splits a string into fields. */
-  vector<wstring>& split(const wstring& s, wchar_t delim, vector<wstring> &out) 
+  vector<wstring>& split(const wstring& s, wchar_t delim, vector<wstring> &out)
   {
       wistringstream ss(s);
       wstring item;
-      while (getline(ss, item, delim)) 
+      while (getline(ss, item, delim))
       {
         out.push_back(item);
       }
       return out;
   }
-  
+
   /** Converts a string to a number. Slow, but at this point I don't care. */
   double convert(const wstring& s)
   {
@@ -140,7 +140,7 @@ private:
   set<wchar_t> letters;
 
   /** Used in AttNode. */
-  struct Transduction 
+  struct Transduction
   {
     int            to;
     wstring        upper;
@@ -155,7 +155,7 @@ private:
   };
 
   /** A node in the transducer graph. */
-  struct AttNode 
+  struct AttNode
   {
     int                  id;
     vector<Transduction> transductions;

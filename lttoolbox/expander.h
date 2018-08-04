@@ -39,38 +39,38 @@ private:
    * The libxml2's XML reader
    */
   xmlTextReaderPtr reader;
-  
+
   /**
    * The alt value
    */
   wstring alt;
-  
+
   /**
    * The variant value (monodix)
    */
   wstring variant;
-  
+
   /**
    * The variant value (left side of bidix)
    */
   wstring variant_left;
-  
+
   /**
    * The variant value (right side of bidix)
    */
   wstring variant_right;
-  
+
   /**
    * The paradigm being compiled
    */
   wstring current_paradigm;
-  
+
   /**
    * The direction of the compilation, 'lr' (left-to-right) or 'rl'
    * (right-to-left)
    */
   wstring direction;
-  
+
   /**
    * Paradigms
    */
@@ -89,7 +89,7 @@ private:
    * Parse the &lt;pardef&gt; element
    */
   void procParDef();
-  
+
   /**
    * Parse the &lt;e&gt; element
    */
@@ -145,13 +145,13 @@ private:
    * @param name the name of the node
    */
   void skipBlanks(wstring &name);
-  
-  
+
+
   void readString(wstring &result, wstring const &name);
-  
+
   /**
    * Force an element to be empty, and check for it
-   * @param name the element 
+   * @param name the element
    */
   void requireEmptyError(wstring const &name);
 
@@ -176,7 +176,7 @@ private:
    *               this method, the result of concatenations.
    * @param endings the endings to be appended.
    */
-  static void append(list<pair<wstring, wstring> > &result, 
+  static void append(list<pair<wstring, wstring> > &result,
                      list<pair<wstring, wstring> > const &endings);
 
   /**
@@ -185,7 +185,7 @@ private:
    *               this method, the result of concatenations.
    * @param endings the endings to be appended.
    */
-  static void append(list<pair<wstring, wstring> > &result, 
+  static void append(list<pair<wstring, wstring> > &result,
                      wstring const &endings);
 
   /**
@@ -194,7 +194,7 @@ private:
    *               this method, the result of concatenations.
    * @param endings the endings to be appended.
    */
-  static void append(list<pair<wstring, wstring> > &result, 
+  static void append(list<pair<wstring, wstring> > &result,
 	             pair<wstring, wstring> const &endings);
 
 public:

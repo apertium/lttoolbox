@@ -5,9 +5,9 @@ README FILE OF LTTOOLBOX
 	lt-comp   -> compiler, execute without parameters to show the
                      instructions of use.
 
-	lt-proc   -> processor, works with options -a (lexical analyser, 
-                     default option), -g (lexical generator) and -p 
-                    (lexical post-generator).  Using -h will show all 
+	lt-proc   -> processor, works with options -a (lexical analyser,
+                     default option), -g (lexical generator) and -p
+                    (lexical post-generator).  Using -h will show all
                     flags.
 
 	lt-expand -> generates all the pairs of transductions of a given

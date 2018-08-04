@@ -40,7 +40,7 @@ EntryToken::operator =(EntryToken const &e)
     destroy();
     copy(e);
   }
- 
+
   return *this;
 }
 
@@ -52,7 +52,7 @@ EntryToken::copy(EntryToken const &e)
   rightSide = e.rightSide;
   parName = e.parName;
   myregexp = e.myregexp;
-}  
+}
 
 void
 EntryToken::destroy()
@@ -111,7 +111,7 @@ EntryToken::left() const
   return leftSide;
 }
 
-list<int> const & 
+list<int> const &
 EntryToken::right() const
 {
   return rightSide;

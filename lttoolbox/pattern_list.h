@@ -47,12 +47,12 @@ private:
   void destroy();
   void insertOutOfSequence(wstring const &lemma, wstring const &tags,
                            vector<int> &result);
-  void insertIntoSequence(int const id, wstring const &lemma, 
+  void insertIntoSequence(int const id, wstring const &lemma,
                           wstring const &tags);
 
   static int tagCount(wstring const &tags);
   static wstring tagAt(wstring const &tags, int const index);
-  
+
 public:
   /**
    * This symbol stands for any char
@@ -73,17 +73,17 @@ public:
    * Constructor
    */
   PatternList();
-  
+
   /**
    * Destructor
    */
   ~PatternList();
-  
+
   /**
    * Copy constructor
    */
   PatternList(PatternList const &o);
-  
+
   /**
    * Assignment operator
    * @param o the object to be assigned
@@ -94,12 +94,12 @@ public:
    * Marks the start of a multiple word sequence
    */
   void beginSequence();
-  
+
   /**
-   * Ends the multiple word sequence 
+   * Ends the multiple word sequence
    */
   void endSequence();
-  
+
   /**
    * Insertion method
    * @param id
@@ -114,24 +114,24 @@ public:
    * @param otherid
    */
   void insert(int const id, int const otherid);
-  
+
   /**
    * Get the PatternStore
    * @returns a PatternStore object
    */
   PatternStore const & getPatterns();
-  
+
   /**
    * Build the FSM
    */
   void buildTransducer();
-  
+
   /**
    * Read PatternList from a file
    * @param input the input stream
    */
   void read(FILE *input);
-  
+
   /**
    * Write PatternList to a file
    * @param output the output stream
@@ -140,13 +140,13 @@ public:
 
   void serialise(std::ostream &serialised) const;
   void deserialise(std::istream &serialised);
-  
+
   /**
    * Create a new MatchExe from PatternList, must be freed with 'delete'
    * @return the new MatchExe object
    */
   MatchExe * newMatchExe() const;
-  
+
   /**
    * Get the alphabet of this PatternList object
    * @return the alphabet

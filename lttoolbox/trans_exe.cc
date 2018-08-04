@@ -96,7 +96,7 @@ TransExe::read(FILE *input, Alphabet const &alphabet, bool read_weights)
   int current_state = 0;
   new_t.node_list.resize(number_of_states);
 
-  for(map<int, double>::iterator it = myfinals.begin(), limit = myfinals.end(); 
+  for(map<int, double>::iterator it = myfinals.begin(), limit = myfinals.end();
       it != limit; it++)
   {
     new_t.finals.insert(make_pair(&new_t.node_list[it->first], it->second));

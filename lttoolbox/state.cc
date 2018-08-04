@@ -82,7 +82,7 @@ State::copy(State const &s)
   }
 }
 
-int 
+int
 State::size() const
 {
   return state.size();
@@ -316,7 +316,7 @@ State::epsilonClosure()
   }
 }
 
-void 
+void
 State::apply(int const input, int const alt1, int const alt2)
 {
   vector<TNodeState> new_state;
@@ -479,8 +479,8 @@ State::step(int const input, set<int> const alts)
   epsilonClosure();
 }
 
-void 
-State::step_case(wchar_t val, wchar_t val2, bool caseSensitive) 
+void
+State::step_case(wchar_t val, wchar_t val2, bool caseSensitive)
 {
   if (!iswupper(val) || caseSensitive) {
     step(val, val2);
@@ -492,7 +492,7 @@ State::step_case(wchar_t val, wchar_t val2, bool caseSensitive)
 }
 
 
-void 
+void
 State::step_case(wchar_t val, bool caseSensitive)
 {
   if (!iswupper(val) || caseSensitive) {
@@ -513,7 +513,7 @@ State::isFinal(map<Node *, double> const &finals) const
       return true;
     }
   }
-  
+
   return false;
 }
 
@@ -934,7 +934,7 @@ State::restartFinals(const map<Node *, double> &finals, int requiredSymbol, Stat
     TNodeState state_i = state.at(i);
     // A state can be a possible final state and still have transitions
 
-    if(finals.count(state_i.where) > 0) 
+    if(finals.count(state_i.where) > 0)
     {
       bool restart = lastPartHasRequiredSymbol(*(state_i.sequence), requiredSymbol, separationSymbol);
       if(restart)

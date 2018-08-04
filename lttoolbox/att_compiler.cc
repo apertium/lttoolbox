@@ -33,11 +33,11 @@ AttCompiler::~AttCompiler()
 {
 }
 
-void 
+void
 AttCompiler::clear()
 {
   for (map<int, AttNode*>::const_iterator it = graph.begin(); it != graph.end();
-      ++it) 
+      ++it)
   {
     delete it->second;
   }
@@ -45,7 +45,7 @@ AttCompiler::clear()
   alphabet = Alphabet();
 }
 
-/** 
+/**
  * Converts symbols like @0@ to epsilon, @_SPACE_@ to space, etc.
  * @todo Are there other special symbols? If so, add them, and maybe use a map
  *       for conversion?
@@ -56,7 +56,7 @@ AttCompiler::convert_hfst(wstring& symbol)
   if (symbol == L"@0@" || symbol == L"ε")
   {
     symbol = L"";
-  } 
+  }
   else if (symbol == L"@_SPACE_@")
   {
     symbol = L" ";
@@ -75,7 +75,7 @@ AttCompiler::is_word_punct(wchar_t symbol)
   {
     return true;
   }
- 
+
   return false;
 }
 
@@ -88,7 +88,7 @@ AttCompiler::is_word_punct(wchar_t symbol)
  * @return the code of the symbol, if @p symbol is multichar; its first (and
  *         only) character otherwise.
  */
-int 
+int
 AttCompiler::symbol_code(const wstring& symbol)
 {
   if (symbol.length() > 1) {
@@ -129,7 +129,7 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
     wstring upper, lower;
     double weight;
 
-    if (line.length() == 0 && first_line) 
+    if (line.length() == 0 && first_line)
     {
       wcerr << "Error: empty file '" << file_name << "'." << endl;
       exit(EXIT_FAILURE);
@@ -169,7 +169,7 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
         weight = default_weight;
       }
       finals.insert(pair <int, double>(from, weight));
-    } 
+    }
     else
     {
       to = static_cast<int>(convert(tokens[1]));
@@ -218,7 +218,7 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
 }
 
 /** Extracts the sub-transducer made of states of type @p type. */
-Transducer 
+Transducer
 AttCompiler::extract_transducer(TransducerType type)
 {
   Transducer transducer;
@@ -260,7 +260,7 @@ AttCompiler::extract_transducer(TransducerType type)
  * Recursively fills @p transducer (and @p corr) -- helper method called by
  * extract_transducer().
  */
-void 
+void
 AttCompiler::_extract_transducer(TransducerType type, int from,
                                  Transducer& transducer, map<int, int>& corr,
                                  set<int>& visited)
@@ -268,7 +268,7 @@ AttCompiler::_extract_transducer(TransducerType type, int from,
   if (visited.find(from) != visited.end())
   {
     return;
-  } 
+  }
   else
   {
     visited.insert(from);
@@ -281,7 +281,7 @@ AttCompiler::_extract_transducer(TransducerType type, int from,
   int from_t, to_t;
 
   for (vector<Transduction>::const_iterator it = source->transductions.begin();
-       it != source->transductions.end(); ++it) 
+       it != source->transductions.end(); ++it)
   {
     if ((it->type & type) != type)
     {
@@ -373,7 +373,7 @@ AttCompiler::classify(int from, map<int, TransducerType>& visited, bool path,
 }
 
 /** Writes the transducer to @p file_name in lt binary format. */
-void 
+void
 AttCompiler::write(FILE *output)
 {
 //  FILE* output = fopen(file_name, "w");

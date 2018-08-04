@@ -40,7 +40,7 @@ private:
    * The libxml2's XML reader
    */
   xmlTextReaderPtr reader;
-  
+
   /**
    * The alt value
    */
@@ -50,38 +50,38 @@ private:
    * The variant value (monodix)
    */
   wstring variant;
-  
+
   /**
    * The variant value (left side of bidix)
    */
   wstring variant_left;
-  
+
   /**
    * The variant value (right side of bidix)
    */
   wstring variant_right;
-    
+
   /**
    * The paradigm being compiled
    */
   wstring current_paradigm;
-  
+
   /**
    * The dictionary section being compiled
    */
   wstring current_section;
-  
+
   /**
    * The direction of the compilation, 'lr' (left-to-right) or 'rl'
    * (right-to-left)
    */
   wstring direction;
-  
+
   /**
    * List of characters to be considered alphabetic
    */
   wstring letters;
-  
+
   /**
    * Set verbose mode: warnings which may or may not be correct
    */
@@ -100,23 +100,23 @@ private:
   /**
    * Identifier of all the symbols during the compilation
    */
-  Alphabet alphabet;  
-  
+  Alphabet alphabet;
+
   /**
    * List of named transducers-paradigms
    */
   map<wstring, Transducer, Ltstr> paradigms;
-  
+
   /**
    * List of named dictionary sections
    */
   map<wstring, Transducer, Ltstr> sections;
-  
+
   /**
    * List of named prefix copy of a paradigm
    */
   map<wstring, map<wstring, int, Ltstr>, Ltstr> prefix_paradigms;
-  
+
   /**
    * List of named suffix copy of a paradigm
    */
@@ -131,13 +131,13 @@ private:
    * Mapping of aliases of characters specified in ACX files
    */
   map<int, set<int> > acx_map;
-  
+
   /**
    * Original char being mapped
    */
-  int acx_current_char; 
+  int acx_current_char;
 
-  /*    
+  /*
   static string range(char const a, char const b);
   string readAlphabet();
   */
@@ -167,7 +167,7 @@ private:
    * Parse the &lt;pardef&gt; element
    */
   void procParDef();
-  
+
   /**
    * Parse the &lt;e&gt; element
    */
@@ -246,13 +246,13 @@ private:
    * @param name the name of the node
    */
   void skipBlanks(wstring &name);
-  
-  
+
+
   void readString(list<int> &result, wstring const &name);
-  
+
   /**
    * Force an element to be empty, and check for it
-   * @param name the element 
+   * @param name the element
    */
   void requireEmptyError(wstring const &name);
 
@@ -332,9 +332,9 @@ public:
    */
   void parseACX(string const &file, wstring const &dir);
 
-  
+
   /**
-   * Write the result of compilation 
+   * Write the result of compilation
    * @param fd the stream where write the result
    */
   void write(FILE *fd);
