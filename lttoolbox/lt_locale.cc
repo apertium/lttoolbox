@@ -28,7 +28,12 @@ using namespace std;
 void
 LtLocale::tryToSetLocale()
 {
-  locale::global(locale(locale::classic(), "", locale::ctype));
+  try {
+    locale::global(locale(locale::classic(), "", locale::ctype));
+  }
+  catch (...) {
+    // Nothing
+  }
 
 #if !defined(__CYGWIN__) && !defined (__MINGW32__)
   if(setlocale(LC_CTYPE, "") != NULL)
@@ -40,9 +45,9 @@ LtLocale::tryToSetLocale()
 
   setlocale(LC_ALL, "C");
 #endif
-
+#ifdef __CYGWIN__
   setlocale(LC_ALL, "C.UTF-8");
-
+#endif
 #ifdef __MINGW32__
   //SetConsoleInputCP(65001);
   SetConsoleOutputCP(65001);
