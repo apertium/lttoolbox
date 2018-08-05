@@ -159,7 +159,7 @@ private:
   void procAlphabet();
 
   /**
-   * Parse the &lt;sdef&lt; element
+   * Parse the &lt;sdef&gt; element
    */
   void procSDef();
 
@@ -201,18 +201,18 @@ private:
    * @return the last state of the inserted transduction
    */
   int matchTransduction(list<int> const &lp, list<int> const &rp,
-			    int state, Transducer &t);
+                        int state, Transducer &t, double const &entry_weight);
   /**
-   * Parse the &lt;p&lt; element
+   * Parse the &lt;p&gt; element
    * @return a list of tokens from the dictionary's entry
    */
-  EntryToken procTransduction();
+  EntryToken procTransduction(wstring const &wsweight);
 
   /**
-   * Parse the &lt;i&lt; element
+   * Parse the &lt;i&gt; element
    * @return a list of tokens from the dictionary's entry
    */
-  EntryToken procIdentity(bool ig = false);
+  EntryToken procIdentity(wstring const &wsweight, bool ig = false);
 
   /**
    * Parse the &lt;par&gt; element
@@ -282,7 +282,6 @@ public:
   static wstring const COMPILER_SDEFS_ELEM;
   static wstring const COMPILER_SDEF_ELEM;
   static wstring const COMPILER_N_ATTR;
-  static wstring const COMPILER_WEIGHT_ATTR;
   static wstring const COMPILER_PARDEFS_ELEM;
   static wstring const COMPILER_PARDEF_ELEM;
   static wstring const COMPILER_PAR_ELEM;
@@ -311,6 +310,7 @@ public:
   static wstring const COMPILER_V_ATTR;
   static wstring const COMPILER_VL_ATTR;
   static wstring const COMPILER_VR_ATTR;
+  static wstring const COMPILER_WEIGHT_ATTR;
 
   /**
    * Constructor

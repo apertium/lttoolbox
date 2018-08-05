@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet>abcdefghijklmnopqrstuvwxyz</alphabet>
+  <sdefs>
+    <sdef n="n"/>
+    <sdef n="vblex"/>
+  </sdefs>
+  <section id="main" type="standard">
+    <e lm="walk" w="0.1"><p><l>walk</l><r>walk<s n="n"/></r></p></e>
+    <e lm="walk" w="0.9"><p><l>walk</l><r>walk<s n="vblex"/></r></p></e>
+  </section>
+</dictionary>

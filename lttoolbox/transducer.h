@@ -135,7 +135,7 @@ public:
    * @return the new target state
    */
   int insertTransducer(int const source, Transducer &t,
-                      int const epsilon_tag = 0);
+                       int const epsilon_tag = 0);
 
   /**
    * Link two existing states by a transduction

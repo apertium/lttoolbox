@@ -53,12 +53,6 @@ namespace
       }
       return out;
   }
-
-  /** Converts a string to a number. Slow, but at this point I don't care. */
-  double convert(const wstring& s)
-  {
-    return stod(s);
-  }
 };
 
 /**

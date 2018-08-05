@@ -147,7 +147,7 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
     }
     split(line, L'\t', tokens);
 
-    from = static_cast<int>(convert(tokens[0]));
+    from = stoi(tokens[0]);
 
     AttNode* source = get_node(from);
     /* First line: the initial state is of both types. */
@@ -162,7 +162,7 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
     {
       if (tokens.size() > 1)
       {
-        weight = static_cast<double>(convert(tokens[1]));
+        weight = stod(tokens[1]);
       }
       else
       {
@@ -172,7 +172,7 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
     }
     else
     {
-      to = static_cast<int>(convert(tokens[1]));
+      to = stoi(tokens[1]);
       if(dir == L"RL")
       {
         upper = tokens[3];
@@ -198,7 +198,7 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
       int tag = alphabet(symbol_code(upper), symbol_code(lower));
       if(tokens.size() > 4)
       {
-        weight = static_cast<double>(convert(tokens[4]));
+        weight = stod(tokens[4]);
       }
       else
       {
