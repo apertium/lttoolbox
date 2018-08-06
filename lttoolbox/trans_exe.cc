@@ -64,18 +64,25 @@ TransExe::destroy()
 #include <iostream>
 
 void
-TransExe::read(FILE *input, Alphabet const &alphabet, bool read_weights)
+TransExe::read(FILE *input, Alphabet const &alphabet)
 {
   TransExe &new_t = *this;
   new_t.destroy();
-  new_t.initial_id = Compression::multibyte_read(input);
+
+  bool read_weights = false;
+  double modified_initial = Compression::long_multibyte_read(input);
+  int initial_value = static_cast<int>(modified_initial);
+  if(modified_initial != static_cast<double>(initial_value))
+  {
+    read_weights = true;
+  }
+  new_t.initial_id = initial_value;
   int finals_size = Compression::multibyte_read(input);
 
   int base = 0;
   double base_weight = default_weight;
 
   map<int, double> myfinals;
-
 
   while(finals_size > 0)
   {

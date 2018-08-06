@@ -503,7 +503,8 @@ Transducer::isEmpty(int const state) const
 void
 Transducer::write(FILE *output, int const decalage, bool write_weights)
 {
-  Compression::multibyte_write(initial, output);
+  double modify_initial = initial + double(write_weights)/10;
+  Compression::long_multibyte_write(modify_initial, output);
   Compression::multibyte_write(finals.size(), output);
 
   int base = 0;
@@ -552,11 +553,18 @@ Transducer::write(FILE *output, int const decalage, bool write_weights)
 }
 
 void
-Transducer::read(FILE *input, int const decalage, bool read_weights)
+Transducer::read(FILE *input, int const decalage)
 {
   Transducer new_t;
 
-  new_t.initial = Compression::multibyte_read(input);
+  bool read_weights = false;
+  double modified_initial = Compression::long_multibyte_read(input);
+  int initial_value = static_cast<int>(modified_initial);
+  if(modified_initial != static_cast<double>(initial_value))
+  {
+    read_weights = true;
+  }
+  new_t.initial = initial_value;
   int finals_size = Compression::multibyte_read(input);
 
   int base = 0;

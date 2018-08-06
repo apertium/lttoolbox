@@ -827,7 +827,7 @@ FSTProcessor::load(FILE *input)
       name += static_cast<wchar_t>(Compression::multibyte_read(input));
       len2--;
     }
-    transducers[name].read(input, alphabet, true);
+    transducers[name].read(input, alphabet);
     len--;
   }
 }
