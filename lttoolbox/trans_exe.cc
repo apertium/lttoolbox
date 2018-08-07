@@ -66,17 +66,25 @@ TransExe::destroy()
 void
 TransExe::read(FILE *input, Alphabet const &alphabet)
 {
+  bool read_weights = false;
+
+  fpos_t pos;
+  if (fgetpos(input, &pos) == 0) {
+      char header[4]{};
+      fread(header, 1, 4, input);
+      if (strncmp(header, "LTTB", 4) == 0) {
+          auto features = Compression::multibyte_read(input);
+          read_weights = (features & LTF_WEIGHTS);
+      }
+      else {
+          // Old binary format
+          fsetpos(input, &pos);
+      }
+  }
+
   TransExe &new_t = *this;
   new_t.destroy();
-
-  bool read_weights = false;
-  double modified_initial = Compression::long_multibyte_read(input);
-  int initial_value = static_cast<int>(modified_initial);
-  if(modified_initial != static_cast<double>(initial_value))
-  {
-    read_weights = true;
-  }
-  new_t.initial_id = initial_value;
+  new_t.initial_id = Compression::multibyte_read(input);
   int finals_size = Compression::multibyte_read(input);
 
   int base = 0;
@@ -141,10 +149,9 @@ TransExe::unifyFinals()
 
   Node *newfinal = &node_list[node_list.size()-1];
 
-  for(map<Node *, double>::iterator it = finals.begin(), limit = finals.end();
-      it != limit; it++)
+  for(auto& it : finals)
   {
-    (it->first)->addTransition(0, 0, newfinal, it->second);
+    it.first->addTransition(0, 0, newfinal, it.second);
   }
 
   finals.clear();

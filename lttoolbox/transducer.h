@@ -25,6 +25,11 @@
 
 using namespace std;
 
+/**
+  * Default value of weight
+  */
+constexpr double default_weight = 0;
+
 class MatchExe;
 
 /**
@@ -39,11 +44,6 @@ private:
    * Initial state
    */
   int initial;
-
-  /**
-   * Default value of weight
-   */
-  double default_weight;
 
   /**
    * Final state set mapped to its weight walues
@@ -105,6 +105,12 @@ public:
    * @return the object result of the assignment
    */
   Transducer & operator =(Transducer const &t);
+
+  /**
+   * Determine whether any weight is non-default
+   * @return bool true or false
+   */
+  bool weighted();
 
   /**
    * Insertion of a single transduction, creating a new target state
@@ -291,7 +297,7 @@ public:
    * @param output the stream to write to
    * @param decalage offset to sum to the tags
    */
-  void write(FILE *output, int const decalage = 0, bool write_weights = false);
+  void write(FILE *output, int const decalage = 0);
 
   /**
    * Read method

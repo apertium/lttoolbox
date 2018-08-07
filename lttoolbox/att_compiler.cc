@@ -394,13 +394,13 @@ AttCompiler::write(FILE *output)
   }
   Compression::wstring_write(L"main@standard", output);
   Transducer word_fst = extract_transducer(WORD);
-  word_fst.write(output, 0, true);
+  word_fst.write(output);
   wcout << L"main@standard" << " " << word_fst.size();
   wcout << " " << word_fst.numberOfTransitions() << endl;
   Compression::wstring_write(L"final@inconditional", output);
   if(punct_fst.numberOfTransitions() != 0)
   {
-    punct_fst.write(output, 0, true);
+    punct_fst.write(output);
     wcout << L"final@inconditional" << " " << punct_fst.size();
     wcout << " " << punct_fst.numberOfTransitions() << endl;
   }

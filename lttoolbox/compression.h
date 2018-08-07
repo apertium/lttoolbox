@@ -18,10 +18,16 @@
 #define _COMPRESSION_
 
 #include <cstdio>
+#include <cstdint>
 #include <string>
 #include <iostream>
 
 using namespace std;
+
+enum LT_FEATURES : uint32_t {
+  LTF_WEIGHTS = (1u << 0),
+  LTF_RESERVED = (1u << 31), // If we ever reach this many feature flags, we need a flag to know how to extend beyond 32 bits
+};
 
 /**
  * Clase "Compression".

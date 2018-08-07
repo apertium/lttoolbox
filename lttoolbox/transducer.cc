@@ -40,8 +40,7 @@ Transducer::newState()
   return nstate;
 }
 
-Transducer::Transducer():
-default_weight(0.0000)
+Transducer::Transducer()
 {
   initial = newState();
 }
@@ -500,53 +499,72 @@ Transducer::isEmpty(int const state) const
   return true;
 }
 
+// Determine whether any weights are non-default (0)
+bool Transducer::weighted() {
+  for (auto& it : finals) {
+    if (it.second != default_weight) {
+      return true;
+    }
+  }
+  for (auto& it : transitions) {
+    for (auto& it2 : it.second) {
+      if (it2.second.second != default_weight) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 void
-Transducer::write(FILE *output, int const decalage, bool write_weights)
+Transducer::write(FILE *output, int const decalage)
 {
-  double modify_initial = initial + double(write_weights)/10;
-  Compression::long_multibyte_write(modify_initial, output);
+  fwrite("LTTB", 1, 4, output);
+
+  bool write_weights = weighted();
+
+  uint32_t features = 0;
+  if (write_weights) {
+      features |= LTF_WEIGHTS;
+  }
+  Compression::multibyte_write(features, output);
+
+  Compression::multibyte_write(initial, output);
   Compression::multibyte_write(finals.size(), output);
 
   int base = 0;
-  double cost = default_weight;
-  for(map<int, double>::iterator it = finals.begin(), limit = finals.end();
-      it != limit; it++)
+  for(auto& it : finals)
   {
-    Compression::multibyte_write(it->first - base, output);
-    base = it->first;
+    Compression::multibyte_write(it.first - base, output);
+    base = it.first;
     if(write_weights)
     {
-      Compression::long_multibyte_write(it->second, output);
+      Compression::long_multibyte_write(it.second, output);
     }
   }
 
   base = transitions.size();
   Compression::multibyte_write(base, output);
-  for(map<int, multimap<int, pair<int, double> > >::iterator it = transitions.begin(),
-                                                          limit = transitions.end();
-      it != limit; it++)
+  for(auto& it : transitions)
   {
-    Compression::multibyte_write(it->second.size(), output);
+    Compression::multibyte_write(it.second.size(), output);
     int tagbase = 0;
-    double tagcost = default_weight;
-    for(multimap<int, pair<int, double> >::iterator it2 = it->second.begin(),
-                                                 limit2 = it->second.end();
-        it2 != limit2; it2++)
+    for(auto& it2 : it.second)
     {
-      Compression::multibyte_write(it2->first-tagbase+decalage, output);
-      tagbase = it2->first;
+      Compression::multibyte_write(it2.first - tagbase + decalage, output);
+      tagbase = it2.first;
 
-      if(it2->second.first >= it->first)
+      if(it2.second.first >= it.first)
       {
-        Compression::multibyte_write(it2->second.first-it->first, output);
+        Compression::multibyte_write(it2.second.first - it.first, output);
       }
       else
       {
-        Compression::multibyte_write(it2->second.first+base-it->first, output);
+        Compression::multibyte_write(it2.second.first + base - it.first, output);
       }
       if(write_weights)
       {
-        Compression::long_multibyte_write(it2->second.second, output);
+        Compression::long_multibyte_write(it2.second.second, output);
       }
     }
   }
@@ -558,13 +576,22 @@ Transducer::read(FILE *input, int const decalage)
   Transducer new_t;
 
   bool read_weights = false;
-  double modified_initial = Compression::long_multibyte_read(input);
-  int initial_value = static_cast<int>(modified_initial);
-  if(modified_initial != static_cast<double>(initial_value))
-  {
-    read_weights = true;
+
+  fpos_t pos;
+  if (fgetpos(input, &pos) == 0) {
+      char header[4]{};
+      fread(header, 1, 4, input);
+      if (strncmp(header, "LTTB", 4) == 0) {
+          auto features = Compression::multibyte_read(input);
+          read_weights = (features & LTF_WEIGHTS);
+      }
+      else {
+          // Old binary format
+          fsetpos(input, &pos);
+      }
   }
-  new_t.initial = initial_value;
+
+  new_t.initial = Compression::multibyte_read(input);
   int finals_size = Compression::multibyte_read(input);
 
   int base = 0;
@@ -630,7 +657,6 @@ void
 Transducer::copy(Transducer const &t)
 {
   initial = t.initial;
-  default_weight = t.default_weight;
   finals = t.finals;
   transitions = t.transitions;
 }
@@ -762,7 +788,6 @@ Transducer::recognise(wstring pattern, Alphabet &a, FILE *err)
   for(wstring::iterator it = pattern.begin(); it != pattern.end(); it++)
   {
     set<int> new_state;        //Transducer::closure(int const state, int const epsilon_tag)
-    int sym = *it;
     // For each of the current alive states
     //fwprintf(err, L"step: %S %C (%d)\n", pattern.c_str(), *it, sym);
     for(set<int>::iterator it2 = states.begin(); it2 != states.end(); it2++)
@@ -987,7 +1012,6 @@ Transducer::moveLemqsLast(Alphabet const &alphabet,
     {
       int label = trans_it->first,
        this_trg = trans_it->second.first;
-      double this_wt = trans_it->second.second;
       wstring left = L"";
       alphabet.getSymbol(left, alphabet.decode(label).first);
       int new_src = states_this_new[this_src];
@@ -1195,7 +1219,6 @@ Transducer::intersect(Transducer &trimmer,
         {
           int trimmer_label = trimmer_trans_it->first,
               trimmer_trg   = trimmer_trans_it->second.first;
-          double trimmer_wt = trimmer_trans_it->second.second;
           wstring trimmer_left = L"";
           trimmer_a.getSymbol(trimmer_left, trimmer_a.decode(trimmer_label).first);
 

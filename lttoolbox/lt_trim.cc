@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
     if(!(it->second.isEmpty()))
     {
       Compression::wstring_write(it->first, output);
-      it->second.write(output, 0, true);
+      it->second.write(output);
     }
   }
 

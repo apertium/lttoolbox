@@ -575,7 +575,7 @@ Compiler::insertEntryTokens(vector<EntryToken> const &elements)
       }
       else if(elements[i].isSingleTransduction())
       {
-        e = matchTransduction(elements[i].left(), 
+        e = matchTransduction(elements[i].left(),
                               elements[i].right(), e, t, elements[i].entryWeight());
       }
       else if(elements[i].isRegexp())
@@ -932,7 +932,7 @@ Compiler::write(FILE *output)
     wcout << it->first << " " << it->second.size();
     wcout << " " << it->second.numberOfTransitions() << endl;
     Compression::wstring_write(it->first, output);
-    it->second.write(output, 0, true);
+    it->second.write(output);
   }
 }
 
