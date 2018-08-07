@@ -66,7 +66,7 @@ read_fst(FILE *bin_file)
       name += static_cast<wchar_t>(Compression::multibyte_read(bin_file));
       len2--;
     }
-    transducers[name].read(bin_file, 0, true);
+    transducers[name].read(bin_file);
 
     len--;
   }

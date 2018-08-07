@@ -96,7 +96,7 @@ public:
    * @param input the stream
    * @param alphabet the alphabet object to decode the symbols
    */
-  void read(FILE *input, Alphabet const &alphabet, bool read_weights);
+  void read(FILE *input, Alphabet const &alphabet);
 
   /**
    * Reduces all the final states to one

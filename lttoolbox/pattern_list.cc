@@ -370,7 +370,7 @@ PatternList::write(FILE *output)
 
   Compression::multibyte_write(1, output);
   Compression::wstring_write(tagger_name, output);
-  transducer.write(output, alphabet.size(), false);
+  transducer.write(output, alphabet.size());
 
   Compression::multibyte_write(final_type.size(), output);
 
@@ -392,7 +392,7 @@ PatternList::read(FILE *input)
   if(Compression::multibyte_read(input) == 1)
   {
     wstring mystr = Compression::wstring_read(input);
-    transducer.read(input, alphabet.size(), false);
+    transducer.read(input, alphabet.size());
 
     int finalsize = Compression::multibyte_read(input);
     for(; finalsize != 0; finalsize--)

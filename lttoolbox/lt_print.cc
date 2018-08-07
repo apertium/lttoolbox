@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
       name += static_cast<wchar_t>(Compression::multibyte_read(input));
       len2--;
     }
-    transducers[name].read(input, 0, true);
+    transducers[name].read(input);
 
     len--;
   }

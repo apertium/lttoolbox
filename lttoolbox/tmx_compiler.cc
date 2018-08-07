@@ -458,7 +458,7 @@ TMXCompiler::write(FILE *output)
   // transducers
   Compression::multibyte_write(1, output); // keeping file format
   Compression::wstring_write(L"", output); // keeping file format
-  transducer.write(output, 0, false);
+  transducer.write(output);
 
   wcout << origin_language << L"->" << meta_language << L" ";
   wcout << transducer.size() << L" " << transducer.numberOfTransitions();

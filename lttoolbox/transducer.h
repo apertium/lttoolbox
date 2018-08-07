@@ -298,7 +298,7 @@ public:
    * @param input the stream to read from
    * @param decalage offset to sum to the tags
    */
-  void read(FILE *input, int const decalage = 0, bool read_weights = false);
+  void read(FILE *input, int const decalage = 0);
 
   void serialise(std::ostream &serialised) const;
   void deserialise(std::istream &serialised);
