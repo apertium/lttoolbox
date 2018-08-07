@@ -257,9 +257,9 @@ void
 Compression::wstring_write(wstring const &str, FILE *output)
 {
   Compression::multibyte_write(str.size(), output);
-  for(unsigned int i = 0, limit = str.size(); i != limit; i++)
+  for(auto c : str)
   {
-    Compression::multibyte_write(static_cast<int>(str[i]), output);
+    Compression::multibyte_write(static_cast<int>(c), output);
   }
 }
 
@@ -281,9 +281,9 @@ void
 Compression::string_write(string const &str, FILE *output)
 {
   Compression::multibyte_write(str.size(), output);
-  for(unsigned int i = 0, limit = str.size(); i != limit; i++)
+  for(auto c : str)
   {
-    Compression::multibyte_write(static_cast<int>(str[i]), output);
+    Compression::multibyte_write(static_cast<int>(c), output);
   }
 }
 

@@ -99,9 +99,9 @@ Expander::allBlanks()
   bool flag = true;
   wstring text = XMLParseUtil::towstring(xmlTextReaderConstValue(reader));
 
-  for(unsigned int i = 0, limit = text.size(); i < limit; i++)
+  for(auto c : text)
   {
-    flag = flag && isspace(text[i]);
+    flag = flag && isspace(c);
   }
 
   return flag;
@@ -298,7 +298,7 @@ wstring
 Expander::attrib(wstring const &name)
 {
   return XMLParseUtil::attrib(reader, name);
-} 
+}
 
 wstring
 Expander::procPar()
@@ -478,35 +478,29 @@ Expander::procEntry(FILE *output)
     {
       if(current_paradigm == L"")
       {
-        for(EntList::iterator it = items.begin(),
-                           limit = items.end();
-            it != limit; it++)
+        for(auto& it : items)
         {
-          fputws_unlocked(it->first.c_str(), output);
+          fputws_unlocked(it.first.c_str(), output);
           fputwc_unlocked(L':', output);
-          fputws_unlocked(it->second.c_str(), output);
+          fputws_unlocked(it.second.c_str(), output);
           fputwc_unlocked(L'\n', output);
         }
-        for(EntList::iterator it = items_lr.begin(),
-                           limit = items_lr.end();
-            it != limit; it++)
+        for(auto& it : items_lr)
         {
-          fputws_unlocked(it->first.c_str(), output);
+          fputws_unlocked(it.first.c_str(), output);
           fputwc_unlocked(L':', output);
           fputwc_unlocked(L'>', output);
           fputwc_unlocked(L':', output);
-          fputws_unlocked(it->second.c_str(), output);
+          fputws_unlocked(it.second.c_str(), output);
           fputwc_unlocked(L'\n', output);
         }
-        for(EntList::iterator it = items_rl.begin(),
-                           limit = items_rl.end();
-            it != limit; it++)
+        for(auto& it : items_rl)
         {
-          fputws_unlocked(it->first.c_str(), output);
+          fputws_unlocked(it.first.c_str(), output);
           fputwc_unlocked(L':', output);
           fputwc_unlocked(L'<', output);
           fputwc_unlocked(L':', output);
-          fputws_unlocked(it->second.c_str(), output);
+          fputws_unlocked(it.second.c_str(), output);
           fputwc_unlocked(L'\n', output);
         }
       }
@@ -608,15 +602,13 @@ Expander::append(EntList &result,
                  EntList const &endings)
 {
   EntList temp;
-  EntList::iterator it, limit;
-  EntList::const_iterator it2, limit2;
 
-  for(it = result.begin(), limit = result.end(); it != limit; it++)
+  for(auto& it : result)
   {
-    for(it2 = endings.begin(), limit2 = endings.end(); it2 != limit2; it2++)
+    for(auto& it2 : endings)
     {
-      temp.push_back(pair<wstring, wstring>(it->first + it2->first,
-		   		          it->second + it2->second));
+      temp.push_back(pair<wstring, wstring>(it.first + it2.first,
+                          it.second + it2.second));
     }
   }
 
@@ -626,23 +618,21 @@ Expander::append(EntList &result,
 void
 Expander::append(EntList &result, wstring const &endings)
 {
-  EntList::iterator it, limit;
-  for(it = result.begin(), limit = result.end(); it != limit; it++)
+  for(auto& it : result)
   {
-    it->first.append(endings);
-    it->second.append(endings);
+    it.first.append(endings);
+    it.second.append(endings);
   }
 }
 
 void
-Expander::append(EntList &result, 
+Expander::append(EntList &result,
                  pair<wstring, wstring> const &endings)
 {
-  EntList::iterator it, limit;
-  for(it = result.begin(), limit = result.end(); it != limit; it++)
+  for(auto& it : result)
   {
-    it->first.append(endings.first);
-    it->second.append(endings.second);
+    it.first.append(endings.first);
+    it.second.append(endings.second);
   }
 }
 

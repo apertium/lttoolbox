@@ -124,11 +124,9 @@ Compiler::parse(string const &file, wstring const &dir)
 
 
   // Minimize transducers
-  for(map<wstring, Transducer, Ltstr>::iterator it = sections.begin(),
-                                               limit = sections.end();
-      it != limit; it++)
+  for(auto& it : sections)
   {
-    (it->second).minimize();
+    it.second.minimize();
   }
 }
 
@@ -273,10 +271,9 @@ Compiler::matchTransduction(list<int> const &pi,
 
       if(acx_map_ptr != acx_map.end())
       {
-        for(set<int>::iterator it = acx_map_ptr->second.begin();
-            it != acx_map_ptr->second.end(); it++)
+        for(auto& it : acx_map_ptr->second)
         {
-          t.linkStates(state, new_state, alphabet(*it ,rsymbol), weight_value);
+          t.linkStates(state, new_state, alphabet(it ,rsymbol), weight_value);
         }
       }
       state = new_state;
@@ -304,9 +301,9 @@ Compiler::allBlanks()
   bool flag = true;
   wstring text = XMLParseUtil::towstring(xmlTextReaderConstValue(reader));
 
-  for(unsigned int i = 0, limit = text.size(); i < limit; i++)
+  for(auto c : text)
   {
-    flag = flag && iswspace(text[i]);
+    flag = flag && iswspace(c);
   }
 
   return flag;
@@ -567,22 +564,22 @@ Compiler::insertEntryTokens(vector<EntryToken> const &elements)
     Transducer &t = paradigms[current_paradigm];
     int e = t.getInitial();
 
-    for(unsigned int i = 0, limit = elements.size(); i < limit; i++)
+    for(auto& element : elements)
     {
-      if(elements[i].isParadigm())
+      if(element.isParadigm())
       {
-        e = t.insertTransducer(e, paradigms[elements[i].paradigmName()]);
+        e = t.insertTransducer(e, paradigms[element.paradigmName()]);
       }
-      else if(elements[i].isSingleTransduction())
+      else if(element.isSingleTransduction())
       {
-        e = matchTransduction(elements[i].left(),
-                              elements[i].right(), e, t, elements[i].entryWeight());
+        e = matchTransduction(element.left(),
+                              element.right(), e, t, element.entryWeight());
       }
-      else if(elements[i].isRegexp())
+      else if(element.isRegexp())
       {
         RegexpCompiler analyzer;
         analyzer.initialize(&alphabet);
-        analyzer.compile(elements[i].regExp());
+        analyzer.compile(element.regExp());
         e = t.insertTransducer(e, analyzer.getTransducer(), alphabet(0,0));
       }
       else
@@ -601,7 +598,7 @@ Compiler::insertEntryTokens(vector<EntryToken> const &elements)
     Transducer &t = sections[current_section];
     int e = t.getInitial();
 
-    for(unsigned int i = 0, limit = elements.size(); i < limit; i++)
+    for(size_t i = 0, limit = elements.size(); i < limit; i++)
     {
       if(elements[i].isParadigm())
       {
@@ -924,15 +921,13 @@ Compiler::write(FILE *output)
   Compression::multibyte_write(sections.size(), output);
 
   int count=0;
-  for(map<wstring, Transducer, Ltstr>::iterator it = sections.begin(),
-                                               limit = sections.end();
-      it != limit; it++)
+  for(auto& it : sections)
   {
     count++;
-    wcout << it->first << " " << it->second.size();
-    wcout << " " << it->second.numberOfTransitions() << endl;
-    Compression::wstring_write(it->first, output);
-    it->second.write(output);
+    wcout << it.first << " " << it.second.size();
+    wcout << " " << it.second.numberOfTransitions() << endl;
+    Compression::wstring_write(it.first, output);
+    it.second.write(output);
   }
 }
 

@@ -73,8 +73,7 @@ Transducer::insertSingleTransduction(int const tag, int const source, double con
   {
     if(transitions[source].count(tag) == 1)
     {
-      pair<multimap<int,pair<int, double> >::iterator, multimap<int,pair<int, double> >::iterator > range;
-      range = transitions[source].equal_range(tag);
+      auto range = transitions[source].equal_range(tag);
       return range.first->second.first;
     }
     else if(transitions[source].count(tag) == 0)
@@ -87,8 +86,7 @@ Transducer::insertSingleTransduction(int const tag, int const source, double con
     else if(transitions[source].count(tag) == 2)
     {
       // there's a local cycle, must be ignored and treated like in '1'
-      pair<multimap<int,pair<int, double>>::iterator, multimap<int,pair<int, double>>::iterator> range;
-      range = transitions[source].equal_range(tag);
+      auto range = transitions[source].equal_range(tag);
       for(; range.first != range.second; range.first++)
       {
         if(range.first->second.first != source)
@@ -125,23 +123,18 @@ Transducer::insertTransducer(int const source, Transducer &t,
 
   t.joinFinals(epsilon_tag);
 
-  for(map<int, multimap<int, pair<int, double> > >::const_iterator it = t.transitions.begin(),
-                                                                limit = t.transitions.end();
-      it != limit; it++)
+  for(auto& it : t.transitions)
   {
-    relation[it->first] = newState();
+    relation[it.first] = newState();
   }
 
-  for(map<int, multimap<int, pair<int, double> > >::const_iterator it = t.transitions.begin();
-      it != t.transitions.end(); it++)
+  for(auto& it : t.transitions)
   {
-    for(multimap<int, pair<int, double> >::const_iterator it2 = it->second.begin(),
-                                                       limit2 = (it->second).end();
-        it2 != limit2; it2++)
+    for(auto& it2 : it.second)
     {
-      transitions[relation[it->first]].insert(make_pair(it2->first,
-                                                        make_pair(relation[it2->second.first],
-                                                                  it2->second.second)));
+      transitions[relation[it.first]].insert(make_pair(it2.first,
+                                                        make_pair(relation[it2.second.first],
+                                                                  it2.second.second)));
     }
   }
 
@@ -160,8 +153,7 @@ Transducer::linkStates(int const source, int const target,
      transitions.find(target) != transitions.end())
   {
     // new code
-    pair<multimap<int, pair<int, double> >::iterator, multimap<int, pair<int, double> >::iterator> range;
-    range = transitions[source].equal_range(tag);
+    auto range = transitions[source].equal_range(tag);
     for(;range.first != range.second; range.first++)
     {
       if(range.first->first == tag && range.first->second.first == target)
@@ -223,8 +215,7 @@ Transducer::closure(int const state, int const epsilon_tag)
   while(nonvisited.size() > 0)
   {
     int auxest = *nonvisited.begin();
-    pair<multimap<int, pair<int, double> >::iterator, multimap<int, pair<int, double> >::iterator> range;
-    range = transitions[auxest].equal_range(epsilon_tag);
+    auto range = transitions[auxest].equal_range(epsilon_tag);
     while(range.first != range.second)
     {
       if(result.find(range.first->second.first) == result.end())
@@ -247,10 +238,9 @@ Transducer::joinFinals(int const epsilon_tag)
   {
     int state = newState();
 
-    for(map<int, double>::iterator it = finals.begin(), limit = finals.end();
-        it != limit; it++)
+    for(auto& it : finals)
     {
-      linkStates(it->first, state, epsilon_tag, it->second);
+      linkStates(it.first, state, epsilon_tag, it.second);
     }
 
     finals.clear();
@@ -269,9 +259,9 @@ Transducer::isEmptyIntersection(set<int> const &s1, set<int> const &s2)
 
   if(s1.size() < s2.size())
   {
-    for(set<int>::const_iterator it = s1.begin(), limit = s1.end(); it != limit; it++)
+    for(auto& it : s1)
     {
-      if(s2.find(*it) != s2.end())
+      if(s2.count(it))
       {
         return false;
       }
@@ -279,9 +269,9 @@ Transducer::isEmptyIntersection(set<int> const &s1, set<int> const &s2)
   }
   else
   {
-    for(set<int>::const_iterator it = s2.begin(), limit = s2.end(); it != limit; it++)
+    for(auto& it : s2)
     {
-      if(s1.find(*it) != s1.end())
+      if(s1.count(it))
       {
         return false;
       }
@@ -321,56 +311,49 @@ Transducer::determinize(int const epsilon_tag)
     size_Q_prime = Q_prime.size();
     R[(t+1)%2].clear();
 
-    for(set<int>::iterator it = R[t].begin(), limit = R[t].end();
-        it != limit; it++)
+    for(auto& it : R[t])
     {
       set<int> finals_state;
-      for(map<int, double>::const_iterator it2 = finals.begin(); it2 != finals.end(); it2++)
+      for(auto& it2 : finals)
       {
-        finals_state.insert(it2->first);
+        finals_state.insert(it2.first);
       }
-      if(!isEmptyIntersection(Q_prime[*it], finals_state))
+      if(!isEmptyIntersection(Q_prime[it], finals_state))
       {
-        finals_prime.insert(make_pair(*it, finals.find(*it)->second));
+        finals_prime.insert(make_pair(it, finals.find(it)->second));
       }
 
       map<pair<int, double>, set<int> > mymap;
 
-      for(set<int>::iterator it2 = Q_prime[*it].begin(),
-                          limit2 = Q_prime[*it].end();
-          it2 != limit2; it2++)
+      for(auto& it2 : Q_prime[it])
       {
-        for(multimap<int, pair<int, double> >::iterator it3 = transitions[*it2].begin(),
-                                                     limit3 = transitions[*it2].end();
-            it3 != limit3; it3++)
+        for(auto& it3 : transitions[it2])
         {
-          if(it3->first != epsilon_tag)
+          if(it3.first != epsilon_tag)
           {
-            set<int> c = closure(it3->second.first, epsilon_tag);
+            auto c = closure(it3.second.first, epsilon_tag);
 
-            for(set<int>::iterator it4 = c.begin(), limit4 = c.end();
-                it4 != limit4; it4++)
+            for(auto& it4 : c)
             {
-              mymap[make_pair(it3->first, it3->second.second)].insert(*it4);
+              mymap[make_pair(it3.first, it3.second.second)].insert(it4);
             }
           }
         }
       }
 
       // adding new states
-      for(map<pair<int, double>, set<int> >::iterator it2 = mymap.begin(), limit2 = mymap.end();
-          it2 != limit2; it2++)
+      for(auto& it2 : mymap)
       {
-        if(Q_prime_inv.find(it2->second) == Q_prime_inv.end())
+        if(Q_prime_inv.find(it2.second) == Q_prime_inv.end())
         {
           int tag = Q_prime.size();
-          Q_prime[tag] = it2->second;
-          Q_prime_inv[it2->second] = tag;
-          R[(t+1)%2].insert(Q_prime_inv[it2->second]);
+          Q_prime[tag] = it2.second;
+          Q_prime_inv[it2.second] = tag;
+          R[(t+1)%2].insert(Q_prime_inv[it2.second]);
           transitions_prime[tag].clear();
         }
-        transitions_prime[*it].insert(make_pair(it2->first.first,
-                                                make_pair(Q_prime_inv[it2->second], it2->first.second)));
+        transitions_prime[it].insert(make_pair(it2.first.first,
+                                                make_pair(Q_prime_inv[it2.second], it2.first.second)));
       }
     }
 
@@ -472,11 +455,9 @@ Transducer::numberOfTransitions() const
 {
   int counter = 0;
 
-  for(map<int, multimap<int, pair<int, double> > >::const_iterator it = transitions.begin(),
-                                                                limit = transitions.end();
-      it != limit; it++)
+  for(auto& it : transitions)
   {
-    counter += (it->second).size();
+    counter += it.second.size();
   }
 
   return counter;
@@ -485,12 +466,11 @@ Transducer::numberOfTransitions() const
 bool
 Transducer::isEmpty(int const state) const
 {
-  map<int, multimap<int, pair<int, double> > >::const_iterator it;
 
-  it = transitions.find(state);
+  auto it = transitions.find(state);
   if(it != transitions.end())
   {
-    if((it->second).size() > 0)
+    if(it->second.size() > 0)
     {
       return false;
     }
@@ -675,23 +655,22 @@ Transducer::reverse(int const epsilon_tag)
 
   for(map<int, multimap<int, pair<int, double> > >::reverse_iterator it = transitions.rbegin(); it != transitions.rend(); it++)
   {
-    multimap<int, pair<int, double> > aux = it->second;
+    auto aux = it->second;
     it->second.clear();
-    for(multimap<int, pair<int, double> >::iterator it2 = aux.begin(), limit2 = aux.end();
-        it2 != limit2; it2++)
+    for(auto& it2 : aux)
     {
-      if(it2->second.first >= it->first)
+      if(it2.second.first >= it->first)
       {
-        transitions[it2->second.first].insert(make_pair(it2->first, make_pair(it->first, it2->second.second)));
+        transitions[it2.second.first].insert(make_pair(it2.first, make_pair(it->first, it2.second.second)));
       }
       else
       {
-        tmp_transitions[it2->second.first].insert(make_pair(it2->first, make_pair(it->first, it2->second.second)));
+        tmp_transitions[it2.second.first].insert(make_pair(it2.first, make_pair(it->first, it2.second.second)));
       }
     }
     if(tmp_transitions.find(it->first) != tmp_transitions.end())
     {
-      (it->second).insert(tmp_transitions[it->first].begin(), tmp_transitions[it->first].end());
+      it->second.insert(tmp_transitions[it->first].begin(), tmp_transitions[it->first].end());
       tmp_transitions.erase(it->first);
     }
   }
@@ -700,11 +679,9 @@ Transducer::reverse(int const epsilon_tag)
                                                                   limit = tmp_transitions.rend();
       it != limit; it++)
   {
-    for(multimap<int, pair<int, double> >::iterator it2 = it->second.begin(),
-                                                 limit2 = it->second.end();
-        it2 != limit2; it2++)
+    for(auto& it2 : it->second)
     {
-      transitions[it->first].insert(make_pair(it2->first, it2->second));
+      transitions[it->first].insert(make_pair(it2.first, it2.second));
     }
   }
 
@@ -719,15 +696,15 @@ Transducer::show(Alphabet const &alphabet, FILE *output, int const epsilon_tag) 
 {
   map<int, multimap<int, pair<int, double> > > tmp_transitions;
 
-  for(map<int, multimap<int, pair<int, double> > >::const_iterator it = transitions.begin(); it != transitions.end(); it++)
+  for(auto& it : transitions)
   {
-    multimap<int, pair<int, double> > aux = it->second;
+    auto aux = it.second;
 
-    for(multimap<int, pair<int, double> >::const_iterator it2 = aux.begin(); it2 != aux.end(); it2++)
+    for(auto& it2 : aux)
     {
-      pair<int, int> t = alphabet.decode(it2->first);
-      fwprintf(output, L"%d\t", it->first);
-      fwprintf(output, L"%d\t", it2->second.first);
+      auto t = alphabet.decode(it2.first);
+      fwprintf(output, L"%d\t", it.first);
+      fwprintf(output, L"%d\t", it2.second.first);
       wstring l = L"";
       alphabet.getSymbol(l, t.first);
       if(l == L"")  // If we find an epsilon
@@ -748,15 +725,15 @@ Transducer::show(Alphabet const &alphabet, FILE *output, int const epsilon_tag) 
       {
         fwprintf(output, L"%S\t", r.c_str());
       }
-      fwprintf(output, L"%f\t", it2->second.second);
+      fwprintf(output, L"%f\t", it2.second.second);
       fwprintf(output, L"\n");
     }
   }
 
-  for(map<int, double>::const_iterator it3 = finals.begin(); it3 != finals.end(); it3++)
+  for(auto& it3 : finals)
   {
-    fwprintf(output, L"%d\t", it3->first);
-    fwprintf(output, L"%f\n", it3->second);
+    fwprintf(output, L"%d\t", it3.first);
+    fwprintf(output, L"%f\n", it3.second);
   }
 }
 
@@ -764,13 +741,13 @@ int
 Transducer::getStateSize(int const state)
 {
  set<int> states;
- set<int> myclosure1 = closure(state, 0);
+ auto myclosure1 = closure(state, 0);
  states.insert(myclosure1.begin(), myclosure1.end());
  int num_transitions = 0;
 
- for(set<int>::iterator it2 = states.begin(); it2 != states.end(); it2++)
+ for(auto& it2 : states)
  {
-   num_transitions += transitions[*it2].size();
+   num_transitions += transitions[it2].size();
  }
 
  return num_transitions;
@@ -782,23 +759,23 @@ Transducer::recognise(wstring pattern, Alphabet &a, FILE *err)
   bool accepted = false;
   set<int> states;
 
-  set<int> myclosure1 = closure(getInitial(), 0);
+  auto myclosure1 = closure(getInitial(), 0);
   states.insert(myclosure1.begin(), myclosure1.end());
   // For each of the characters in the input string
-  for(wstring::iterator it = pattern.begin(); it != pattern.end(); it++)
+  for(auto& it : pattern)
   {
     set<int> new_state;        //Transducer::closure(int const state, int const epsilon_tag)
     // For each of the current alive states
     //fwprintf(err, L"step: %S %C (%d)\n", pattern.c_str(), *it, sym);
-    for(set<int>::iterator it2 = states.begin(); it2 != states.end(); it2++)
+    for(auto& it2 : states)
     {
-      multimap<int, pair<int, double> > p = transitions[*it2];
+      auto& p = transitions[it2];
       // For each of the transitions in the state
 
-      for(multimap<int, pair<int, double> >::iterator it3 = p.begin(); it3 != p.end(); it3++)
+      for(auto& it3 : p)
       {
 
-        pair<int, int> t = a.decode(it3->first);
+        auto t = a.decode(it3.first);
         wstring l = L"";
         a.getSymbol(l, t.first);
         //wstring r = L"";
@@ -806,9 +783,9 @@ Transducer::recognise(wstring pattern, Alphabet &a, FILE *err)
 
         //fwprintf(err, L"  -> state: %d, trans: %S:%S, targ: %d\n", *it2, (l == L"") ?  L"ε" : l.c_str(),  (r == L"") ?  L"ε" : r.c_str(), it3->second);
         //if(l.find(*it) != wstring::npos || l == L"" )
-        if(l.find(*it) != wstring::npos)
+        if(l.find(it) != wstring::npos)
         {
-          set<int> myclosure = closure(it3->second.first, 0);
+          auto myclosure = closure(it3.second.first, 0);
           //wcerr << L"Before closure alives: " <<new_state.size() << endl;
           new_state.insert(myclosure.begin(), myclosure.end());
           //wcerr << L"After closure alives: " <<new_state.size() << endl;
@@ -817,9 +794,9 @@ Transducer::recognise(wstring pattern, Alphabet &a, FILE *err)
     }
     states = new_state;
   }
-  for(set<int>::iterator it4 = states.begin(); it4 != states.end(); it4++)
+  for(auto& it4 : states)
   {
-    if(isFinal(*it4))
+    if(isFinal(it4))
     {
       accepted = true;
     }
@@ -841,19 +818,13 @@ Transducer::appendDotStar(set<int> const &loopback_symbols, int const epsilon_ta
 {
   Transducer prefix_transducer(*this);
 
-  for(map<int, double>::iterator prefix_it = prefix_transducer.finals.begin(),
-                              prefix_limit = prefix_transducer.finals.end();
-      prefix_it != prefix_limit;
-      prefix_it++)
+  for(auto& prefix_it : prefix_transducer.finals)
   {
-    for(set<int>::iterator loopback_it = loopback_symbols.begin(),
-                        loopback_limit = loopback_symbols.end();
-    loopback_it != loopback_limit;
-    loopback_it++)
+    for(auto& loopback_it : loopback_symbols)
     {
-      if((*loopback_it) != epsilon_tag) // TODO: Necessary? Minimization should remove epsilon loopbacks anyway
+      if(loopback_it != epsilon_tag) // TODO: Necessary? Minimization should remove epsilon loopbacks anyway
       {
-        prefix_transducer.linkStates(prefix_it->first, prefix_it->first, *loopback_it, prefix_it->second);
+        prefix_transducer.linkStates(prefix_it.first, prefix_it.first, loopback_it, prefix_it.second);
       }
     }
   }
@@ -890,13 +861,10 @@ Transducer::copyWithTagsFirst(int start,
     seen.insert(current);
     int this_src = current.first, this_lemqlast = current.second;
 
-    for(multimap<int, pair<int, double> >::iterator trans_it = transitions[this_src].begin(),
-                                                 trans_limit = transitions[this_src].end();
-        trans_it != trans_limit;
-        trans_it++)
+    for(auto& trans_it : transitions[this_src])
     {
-      int label = trans_it->first, this_trg = trans_it->second.first;
-      double this_wt = trans_it->second.second;
+      int label = trans_it.first, this_trg = trans_it.second.first;
+      double this_wt = trans_it.second.second;
       int left_symbol = alphabet.decode(label).first;
 
       // Anything after the first tag goes before the lemq, whether
@@ -957,12 +925,10 @@ Transducer::copyWithTagsFirst(int start,
     } // end for transitions
   } // end while todo
 
-  for(set<SearchState>::iterator it = finally.begin(), limit = finally.end();
-      it != limit;
-      it++)
+  for(auto& it : finally)
   {
-    int last_tag = it->first,
-      this_lemqlast = it->second;
+    int last_tag = it.first,
+      this_lemqlast = it.second;
     // copy lemq, letting this_lemqlast be the only final state in newlemq
     Transducer newlemq = Transducer(lemq);
     newlemq.finals.clear();
@@ -973,11 +939,7 @@ Transducer::copyWithTagsFirst(int start,
     new_t.linkStates(states_this_new[last_tag], group_start, group_label, default_weight);
 
     // append newlemq into the group after last_tag:
-    new_t.finals.insert(make_pair(
-      new_t.insertTransducer(group_start,
-                             newlemq),
-      default_weight
-      ));
+    new_t.finals.insert(make_pair(new_t.insertTransducer(group_start, newlemq), default_weight));
   }
 
   return new_t;
@@ -1005,13 +967,10 @@ Transducer::moveLemqsLast(Alphabet const &alphabet,
     int this_src = todo.front();
     todo.pop_front();
     seen.insert(this_src);
-    for(multimap<int, pair<int, double> >::iterator trans_it = transitions[this_src].begin(),
-                                                 trans_limit = transitions[this_src].end();
-        trans_it != trans_limit;
-        trans_it++)
+    for(auto& trans_it : transitions[this_src])
     {
-      int label = trans_it->first,
-       this_trg = trans_it->second.first;
+      int label = trans_it.first,
+       this_trg = trans_it.second.first;
       wstring left = L"";
       alphabet.getSymbol(left, alphabet.decode(label).first);
       int new_src = states_this_new[this_src];
@@ -1039,11 +998,9 @@ Transducer::moveLemqsLast(Alphabet const &alphabet,
     }
   }
 
-  for(map<int, double>::iterator it = finals.begin(), limit = finals.end();
-      it != limit;
-      it++)
+  for(auto& it : finals)
    {
-     new_t.finals.insert(make_pair(states_this_new[it->first], it->second));
+     new_t.finals.insert(make_pair(states_this_new[it.first], it.second));
    }
 
   return new_t;
@@ -1106,13 +1063,10 @@ Transducer::intersect(Transducer &trimmer,
     int trimmed_src = states_this_trimmed[current];
 
     // First loop through _epsilon_ transitions of trimmer
-    for(multimap<int, pair<int, double> >::iterator trimmer_trans_it = trimmer.transitions.at(trimmer_src).begin(),
-          trimmer_trans_limit = trimmer.transitions.at(trimmer_src).end();
-        trimmer_trans_it != trimmer_trans_limit;
-        trimmer_trans_it++) {
-      int trimmer_label = trimmer_trans_it->first,
-          trimmer_trg   = trimmer_trans_it->second.first;
-      double trimmer_wt = trimmer_trans_it->second.second;
+    for(auto& trimmer_trans_it : trimmer.transitions.at(trimmer_src)) {
+      int trimmer_label = trimmer_trans_it.first,
+          trimmer_trg   = trimmer_trans_it.second.first;
+      double trimmer_wt = trimmer_trans_it.second.second;
       wstring trimmer_left = L"";
       trimmer_a.getSymbol(trimmer_left, trimmer_a.decode(trimmer_label).first);
 
@@ -1139,14 +1093,11 @@ Transducer::intersect(Transducer &trimmer,
 
     // Loop through arcs from this_src; when our arc matches an arc
     // from live_trimmer_states, add that to (the front of) todo:
-    for(multimap<int, pair<int, double> >::iterator trans_it = transitions[this_src].begin(),
-                                                  trans_limit = transitions[this_src].end();
-        trans_it != trans_limit;
-        trans_it++)
+    for(auto& trans_it : transitions[this_src])
     {
-      int this_label = trans_it->first,
-          this_trg   = trans_it->second.first;
-      double this_wt = trans_it->second.second;
+      int this_label = trans_it.first,
+          this_trg   = trans_it.second.first;
+      double this_wt = trans_it.second.second;
       wstring this_right = L"";
       this_a.getSymbol(this_right, this_a.decode(this_label).second);
 
@@ -1212,13 +1163,10 @@ Transducer::intersect(Transducer &trimmer,
           trimmer_src = trimmer_preplus;
         }
 
-        for(multimap<int, pair<int, double> >::iterator trimmer_trans_it = trimmer.transitions.at(trimmer_src).begin(),
-              trimmer_trans_limit = trimmer.transitions.at(trimmer_src).end();
-            trimmer_trans_it != trimmer_trans_limit;
-            trimmer_trans_it++)
+        for(auto& trimmer_trans_it : trimmer.transitions.at(trimmer_src))
         {
-          int trimmer_label = trimmer_trans_it->first,
-              trimmer_trg   = trimmer_trans_it->second.first;
+          int trimmer_label = trimmer_trans_it.first,
+              trimmer_trg   = trimmer_trans_it.second.first;
           wstring trimmer_left = L"";
           trimmer_a.getSymbol(trimmer_left, trimmer_a.decode(trimmer_label).first);
 
@@ -1249,14 +1197,11 @@ Transducer::intersect(Transducer &trimmer,
     } // end loop arcs from this_src
   } // end while todo
 
-  for(map<SearchState, int >::iterator it = states_this_trimmed.begin(),
-        limit = states_this_trimmed.end();
-      it != limit;
-      it++)
+  for(auto& it : states_this_trimmed)
   {
-    int s_this = it->first.first;
-    int s_trimmer = it->first.second.first; // ignore the preplus here
-    int s_trimmed = it->second;
+    int s_this = it.first.first;
+    int s_trimmer = it.first.second.first; // ignore the preplus here
+    int s_trimmed = it.second;
     if(isFinal(s_this) && trimmer.isFinal(s_trimmer))
     {
       trimmed.finals.insert(make_pair(s_trimmed, default_weight));

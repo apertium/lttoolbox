@@ -104,9 +104,9 @@ TMXCompiler::allBlanks()
   bool flag = true;
   wstring text = XMLParseUtil::towstring(xmlTextReaderConstValue(reader));
 
-  for(unsigned int i = 0, limit = text.size(); i < limit; i++)
+  for(auto c : text)
   {
-    flag = flag && iswspace(text[i]);
+    flag = flag && iswspace(c);
   }
 
   return flag;
@@ -306,9 +306,9 @@ TMXCompiler::align_blanks(vector<int> &o, vector<int> &m)
   }
   else
   {
-    for(unsigned int i = 0, limit = so.size(); i != limit; i++)
+    for(auto& s : so)
     {
-      trim(so[i]);
+      trim(s);
     }
     for(unsigned int i = 0, limit = sm.size(); i != limit; i++)
     {
@@ -482,12 +482,12 @@ TMXCompiler::trim(vector<int> &v) const
 
   bool principio = true;
   vector<int> aux;
-  for(unsigned int i = 0, limit = v.size(); i < limit; i++)
+  for(auto c : v)
   {
-    if(!iswspace(v[i]) || !principio)
+    if(!iswspace(c) || !principio)
     {
       principio = false;
-      aux.push_back(v[i]);
+      aux.push_back(c);
     }
   }
 

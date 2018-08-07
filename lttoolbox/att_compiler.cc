@@ -36,10 +36,9 @@ AttCompiler::~AttCompiler()
 void
 AttCompiler::clear()
 {
-  for (map<int, AttNode*>::const_iterator it = graph.begin(); it != graph.end();
-      ++it)
+  for (auto& it : graph)
   {
-    delete it->second;
+    delete it.second;
   }
   graph.clear();
   alphabet = Alphabet();
@@ -231,11 +230,11 @@ AttCompiler::extract_transducer(TransducerType type)
 
   /* The final states. */
   bool noFinals = true;
-  for (map<int, double>::const_iterator f = finals.begin(); f != finals.end(); ++f)
+  for (auto& f : finals)
   {
-    if (corr.find(f->first) != corr.end())
+    if (corr.find(f.first) != corr.end())
     {
-      transducer.setFinal(corr[f->first], f->second);
+      transducer.setFinal(corr[f.first], f.second);
       noFinals = false;
     }
   }
@@ -246,9 +245,9 @@ AttCompiler::extract_transducer(TransducerType type)
     wcerr << L"No final states (" << type << ")" << endl;
     wcerr << L"  were:" << endl;
     wcerr << L"\t" ;
-    for (set<int>::const_iterator f = finals.begin(); f != finals.end(); ++f)
+    for (auto& f : finals)
     {
-      wcerr << *f << L" ";
+      wcerr << f.first << L" ";
     }
     wcerr << endl;
   }
@@ -280,15 +279,14 @@ AttCompiler::_extract_transducer(TransducerType type, int from,
   bool new_from = corr.find(from) == corr.end();
   int from_t, to_t;
 
-  for (vector<Transduction>::const_iterator it = source->transductions.begin();
-       it != source->transductions.end(); ++it)
+  for (auto& it : source->transductions)
   {
-    if ((it->type & type) != type)
+    if ((it.type & type) != type)
     {
       continue;  // Not the right type
     }
     /* Is the target state new? */
-    bool new_to = corr.find(it->to) == corr.end();
+    bool new_to = corr.find(it.to) == corr.end();
 
     if (new_from)
     {
@@ -300,16 +298,16 @@ AttCompiler::_extract_transducer(TransducerType type, int from,
     if (!new_to)
     {
       /* We already know it, possibly by a different name: link them! */
-      to_t = corr[it->to];
-      transducer.linkStates(from_t, to_t, it->tag, it->weight);
+      to_t = corr[it.to];
+      transducer.linkStates(from_t, to_t, it.tag, it.weight);
     }
     else
     {
       /* We haven't seen it yet: add a new state! */
-      to_t = transducer.insertNewSingleTransduction(it->tag, from_t, it->weight);
-      corr[it->to] = to_t;
+      to_t = transducer.insertNewSingleTransduction(it.tag, from_t, it.weight);
+      corr[it.to] = to_t;
     }
-    _extract_transducer(type, it->to, transducer, corr, visited);
+    _extract_transducer(type, it.to, transducer, corr, visited);
   }  // for
 }
 
@@ -345,18 +343,17 @@ AttCompiler::classify(int from, map<int, TransducerType>& visited, bool path,
     visited[from] |= type;
   }
 
-  for (vector<Transduction>::iterator it = source->transductions.begin();
-       it != source->transductions.end(); ++it)
+  for (auto& it : source->transductions)
   {
     bool next_path = path;
     int  next_type = type;
-    bool first_transition = !path && it->upper != L"";
+    bool first_transition = !path && it.upper != L"";
     if (first_transition)
     {
       /* First transition: we now know the type of the path! */
-      bool upper_word  = (it->upper.length() == 1 &&
-                          letters.find(it->upper[0]) != letters.end());
-      bool upper_punct = (it->upper.length() == 1 && iswpunct(it->upper[0]));
+      bool upper_word  = (it.upper.length() == 1 &&
+                          letters.find(it.upper[0]) != letters.end());
+      bool upper_punct = (it.upper.length() == 1 && iswpunct(it.upper[0]));
       next_type = UNDECIDED;
       if (upper_word)  next_type |= WORD;
       if (upper_punct) next_type |= PUNCT;
@@ -367,8 +364,8 @@ AttCompiler::classify(int from, map<int, TransducerType>& visited, bool path,
       /* Otherwise (not yet, already): target's type is the same as ours. */
       next_type = type;
     }
-    it->type |= next_type;
-    classify(it->to, visited, next_path, next_type);
+    it.type |= next_type;
+    classify(it.to, visited, next_path, next_type);
   }  // for
 }
 
