@@ -694,13 +694,9 @@ Transducer::reverse(int const epsilon_tag)
 void
 Transducer::show(Alphabet const &alphabet, FILE *output, int const epsilon_tag) const
 {
-  map<int, multimap<int, pair<int, double> > > tmp_transitions;
-
   for(auto& it : transitions)
   {
-    auto aux = it.second;
-
-    for(auto& it2 : aux)
+    for(auto& it2 : it.second)
     {
       auto t = alphabet.decode(it2.first);
       fwprintf(output, L"%d\t", it.first);
