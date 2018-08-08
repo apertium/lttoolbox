@@ -449,6 +449,10 @@ TMXCompiler::procNode()
 void
 TMXCompiler::write(FILE *output)
 {
+  fwrite(HEADER_LTTOOLBOX, 1, 4, output);
+  uint32_t features = 0;
+  Compression::multibyte_write(features, output);
+
   // letters (empty to keep the file format)
   Compression::wstring_write(L"", output);
 

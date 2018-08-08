@@ -374,6 +374,10 @@ void
 AttCompiler::write(FILE *output)
 {
 //  FILE* output = fopen(file_name, "w");
+  fwrite(HEADER_LTTOOLBOX, 1, 4, output);
+  uint32_t features = 0;
+  Compression::multibyte_write(features, output);
+
   Transducer punct_fst = extract_transducer(PUNCT);
 
   /* Non-multichar symbols. */

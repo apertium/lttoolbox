@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
   delete[] lo;
   delete[] lm;
 
-  FILE *output = fopen(argv[argc-1], "w");
+  FILE *output = fopen(argv[argc-1], "wb");
   if(!output)
   {
     wcerr << "Error: Cannot open file '" << argv[2] << "'." << endl;

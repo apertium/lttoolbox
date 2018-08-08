@@ -805,6 +805,22 @@ FSTProcessor::isAlphabetic(wchar_t const c) const
 void
 FSTProcessor::load(FILE *input)
 {
+  fpos_t pos;
+  if (fgetpos(input, &pos) == 0) {
+      char header[4]{};
+      fread(header, 1, 4, input);
+      if (strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
+          auto features = Compression::multibyte_read(input);
+          if (features >= LTF_UNKNOWN) {
+              throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
+          }
+      }
+      else {
+          // Old binary format
+          fsetpos(input, &pos);
+      }
+  }
+
   // letters
   int len = Compression::multibyte_read(input);
   while(len > 0)

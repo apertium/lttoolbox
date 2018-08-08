@@ -499,13 +499,13 @@ bool Transducer::weighted() {
 void
 Transducer::write(FILE *output, int const decalage)
 {
-  fwrite("LTTB", 1, 4, output);
+  fwrite(HEADER_TRANSDUCER, 1, 4, output);
 
   bool write_weights = weighted();
 
   uint32_t features = 0;
   if (write_weights) {
-      features |= LTF_WEIGHTS;
+      features |= TDF_WEIGHTS;
   }
   Compression::multibyte_write(features, output);
 
@@ -561,9 +561,12 @@ Transducer::read(FILE *input, int const decalage)
   if (fgetpos(input, &pos) == 0) {
       char header[4]{};
       fread(header, 1, 4, input);
-      if (strncmp(header, "LTTB", 4) == 0) {
+      if (strncmp(header, HEADER_TRANSDUCER, 4) == 0) {
           auto features = Compression::multibyte_read(input);
-          read_weights = (features & LTF_WEIGHTS);
+          if (features >= TDF_UNKNOWN) {
+              throw std::runtime_error("Transducer has features that are unknown to this version of lttoolbox - upgrade!");
+          }
+          read_weights = (features & TDF_WEIGHTS);
       }
       else {
           // Old binary format

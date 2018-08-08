@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
   LtLocale::tryToSetLocale();
 
 
-  FILE *input = fopen(argv[1], "r");
+  FILE *input = fopen(argv[1], "rb");
   if(!input)
   {
     wcerr << "Error: Cannot open file '" << argv[1] << "'." << endl;
@@ -60,6 +60,22 @@ int main(int argc, char *argv[])
   set<wchar_t> alphabetic_chars;
 
   map<wstring, Transducer> transducers;
+
+  fpos_t pos;
+  if (fgetpos(input, &pos) == 0) {
+      char header[4]{};
+      fread(header, 1, 4, input);
+      if (strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
+          auto features = Compression::multibyte_read(input);
+          if (features >= LTF_UNKNOWN) {
+              throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
+          }
+      }
+      else {
+          // Old binary format
+          fsetpos(input, &pos);
+      }
+  }
 
   // letters
   int len = Compression::multibyte_read(input);

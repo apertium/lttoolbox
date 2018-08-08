@@ -24,9 +24,19 @@
 
 using namespace std;
 
+// Global lttoolbox features
+constexpr char HEADER_LTTOOLBOX[4]{'L', 'T', 'T', 'B'};
 enum LT_FEATURES : uint32_t {
-  LTF_WEIGHTS = (1u << 0),
+  LTF_UNKNOWN = (1u << 0), // Features >= this are unknown, so throw an error; Inc this if more features are added
   LTF_RESERVED = (1u << 31), // If we ever reach this many feature flags, we need a flag to know how to extend beyond 32 bits
+};
+
+// Invididual transducer features
+constexpr char HEADER_TRANSDUCER[4]{'L', 'T', 'T', 'D'};
+enum TD_FEATURES : uint32_t {
+  TDF_WEIGHTS = (1u << 0),
+  TDF_UNKNOWN = (1u << 1), // Features >= this are unknown, so throw an error; Inc this if more features are added
+  TDF_RESERVED = (1u << 31), // If we ever reach this many feature flags, we need a flag to know how to extend beyond 32 bits
 };
 
 /**
