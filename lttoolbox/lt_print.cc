@@ -41,7 +41,7 @@ void endProgram(char *name)
 
 int main(int argc, char *argv[])
 {
-  if(argc != 2) 
+  if(argc != 2)
   {
     endProgram(argv[0]);
   }
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
   LtLocale::tryToSetLocale();
 
 
-  FILE *input = fopen(argv[1], "r");
+  FILE *input = fopen(argv[1], "rb");
   if(!input)
   {
     wcerr << "Error: Cannot open file '" << argv[1] << "'." << endl;
@@ -61,15 +61,31 @@ int main(int argc, char *argv[])
 
   map<wstring, Transducer> transducers;
 
+  fpos_t pos;
+  if (fgetpos(input, &pos) == 0) {
+      char header[4]{};
+      fread(header, 1, 4, input);
+      if (strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
+          auto features = Compression::multibyte_read(input);
+          if (features >= LTF_UNKNOWN) {
+              throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
+          }
+      }
+      else {
+          // Old binary format
+          fsetpos(input, &pos);
+      }
+  }
+
   // letters
   int len = Compression::multibyte_read(input);
   while(len > 0)
   {
     alphabetic_chars.insert(static_cast<wchar_t>(Compression::multibyte_read(input)));
     len--;
-  }  
+  }
 
-  // symbols  
+  // symbols
   alphabet.read(input);
 
   len = Compression::multibyte_read(input);
@@ -86,10 +102,10 @@ int main(int argc, char *argv[])
     transducers[name].read(input);
 
     len--;
-  } 
+  }
 
   /////////////////////
- 
+
   FILE *output = stdout;
   map<wstring, Transducer>::iterator penum = transducers.end();
   penum--;
@@ -97,13 +113,13 @@ int main(int argc, char *argv[])
   {
     it->second.joinFinals();
     it->second.show(alphabet, output);
-    if(it != penum) 
+    if(it != penum)
     {
       fwprintf(output, L"--\n", it->first.c_str());
     }
   }
 
   fclose(input);
-  
+
   return 0;
 }

@@ -20,8 +20,9 @@
 #include <lttoolbox/lttoolbox_config.h>
 #include <lttoolbox/my_stdio.h>
 
-TransExe::TransExe() :
-initial_id(0)
+TransExe::TransExe():
+initial_id(0),
+default_weight(0.0000)
 {
 }
 
@@ -50,6 +51,7 @@ void
 TransExe::copy(TransExe const &te)
 {
   initial_id = te.initial_id;
+  default_weight = te.default_weight;
   node_list = te.node_list;
   finals = te.finals;
 }
@@ -64,35 +66,58 @@ TransExe::destroy()
 void
 TransExe::read(FILE *input, Alphabet const &alphabet)
 {
+  bool read_weights = false;
+
+  fpos_t pos;
+  if (fgetpos(input, &pos) == 0) {
+      char header[4]{};
+      fread(header, 1, 4, input);
+      if (strncmp(header, HEADER_TRANSDUCER, 4) == 0) {
+          auto features = Compression::multibyte_read(input);
+          if (features >= TDF_UNKNOWN) {
+              throw std::runtime_error("Transducer has features that are unknown to this version of lttoolbox - upgrade!");
+          }
+          read_weights = (features & TDF_WEIGHTS);
+      }
+      else {
+          // Old binary format
+          fsetpos(input, &pos);
+      }
+  }
+
   TransExe &new_t = *this;
   new_t.destroy();
   new_t.initial_id = Compression::multibyte_read(input);
   int finals_size = Compression::multibyte_read(input);
 
   int base = 0;
+  double base_weight = default_weight;
 
-  set<int> myfinals;
-
+  map<int, double> myfinals;
 
   while(finals_size > 0)
   {
     finals_size--;
 
     base += Compression::multibyte_read(input);
-    myfinals.insert(base);
+    if(read_weights)
+    {
+      base_weight = Compression::long_multibyte_read(input);
+    }
+    myfinals.insert(make_pair(base, base_weight));
   }
-  
+
 
   base = Compression::multibyte_read(input);
 
   int number_of_states = base;
-  int current_state = 0;   
+  int current_state = 0;
   new_t.node_list.resize(number_of_states);
 
-  for(set<int>::iterator it = myfinals.begin(), limit = myfinals.end(); 
+  for(map<int, double>::iterator it = myfinals.begin(), limit = myfinals.end();
       it != limit; it++)
   {
-    new_t.finals.insert(&new_t.node_list[*it]);
+    new_t.finals.insert(make_pair(&new_t.node_list[it->first], it->second));
   }
 
   while(number_of_states > 0)
@@ -106,11 +131,15 @@ TransExe::read(FILE *input, Alphabet const &alphabet)
       number_of_local_transitions--;
       tagbase += Compression::multibyte_read(input);
       int state = (current_state + Compression::multibyte_read(input)) % base;
+      if(read_weights)
+      {
+        base_weight = Compression::long_multibyte_read(input);
+      }
       int i_symbol = alphabet.decode(tagbase).first;
       int o_symbol = alphabet.decode(tagbase).second;
-      
-      mynode.addTransition(i_symbol, o_symbol, &new_t.node_list[state]);
-    }   
+
+      mynode.addTransition(i_symbol, o_symbol, &new_t.node_list[state], base_weight);
+    }
     number_of_states--;
     current_state++;
   }
@@ -123,14 +152,13 @@ TransExe::unifyFinals()
 
   Node *newfinal = &node_list[node_list.size()-1];
 
-  for(set<Node *>::iterator it = finals.begin(), limit = finals.end(); 
-      it != limit; it++)
+  for(auto& it : finals)
   {
-    (*it)->addTransition(0, 0, newfinal);
+    it.first->addTransition(0, 0, newfinal, it.second);
   }
-  
+
   finals.clear();
-  finals.insert(newfinal);
+  finals.insert(make_pair(newfinal, default_weight));
 }
 
 Node *
@@ -139,7 +167,7 @@ TransExe::getInitial()
   return &node_list[initial_id];
 }
 
-set<Node *> &
+map<Node *, double> &
 TransExe::getFinals()
 {
   return finals;

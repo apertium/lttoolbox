@@ -27,7 +27,7 @@ using namespace std;
 #define FIN_FICHERO - 1
 
 /**
- * Compiler that builds a transducer to identify regular expressions.  This 
+ * Compiler that builds a transducer to identify regular expressions.  This
  * compiler is a recursive descendent parser (RDP).
  */
 class RegexpCompiler
@@ -37,12 +37,12 @@ private:
    * Last token
    */
   int token;
- 
+
   /**
    * Input string
    */
   wstring input;
- 
+
   /**
    * Alphabet to encode symbols
    */
@@ -52,12 +52,12 @@ private:
    * Transducer to store analysis
    */
   Transducer transducer;
-  
+
   /**
    * Current state
    */
   int state;
- 
+
   /**
    * Current letter
    */
@@ -67,6 +67,11 @@ private:
    * Post-operator: '+', '?', '*'
    */
   wstring postop;
+
+  /**
+   * Default value of weight
+   */
+  double default_weight;
 
   /**
    *
@@ -86,59 +91,59 @@ private:
 
   /**
    * RDP top function
-   */  
+   */
   void S();
-  
+
   /**
    * RDP function
    */
   void RExpr();
-  
+
   /**
    * RDP function
    */
   void Cola();
-  
+
   /**
    * RDP function
    */
   void Term();
-  
+
   /**
    * RDP function
    */
   void RExprp();
-  
+
   /**
    * RDP function
    */
   void Letra();
-  
+
   /**
    * RDP function
    */
   void Postop();
-  
+
   /**
    * RDP function
    */
   void Esp();
-  
+
   /**
    * RDP function
    */
   void Lista();
-  
+
   /**
    * RDP function
    */
   void Reservado();
-  
+
   /**
    * RDP function
    */
   void Elem();
-  
+
   /**
    * RDP function
    */
@@ -160,7 +165,7 @@ private:
    * @param t the token being consumed
    */
   void errorConsuming(int const t);
-  
+
   /**
    * Detect if it is a reserved token
    * @param t the token
@@ -172,7 +177,7 @@ public:
    * Constructor
    */
   RegexpCompiler();
-  
+
   /**
    * Destructor
    */
@@ -213,7 +218,7 @@ public:
    * Initializes the compiler
    * @param a the alphabet
    */
-  void initialize(Alphabet *a); 
+  void initialize(Alphabet *a);
 };
 
 #endif

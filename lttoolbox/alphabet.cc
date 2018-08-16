@@ -52,7 +52,7 @@ Alphabet &
 Alphabet::operator =(Alphabet const &a)
 {
   if(this != &a)
-  { 
+  {
     destroy();
     copy(a);
   }
@@ -64,7 +64,7 @@ Alphabet::destroy()
 {
 }
 
-void 
+void
 Alphabet::copy(Alphabet const &a)
 {
   slexic = a.slexic;
@@ -87,14 +87,14 @@ Alphabet::includeSymbol(wstring const &s)
 int
 Alphabet::operator()(int const c1, int const c2)
 {
-  pair<int, int> tmp = pair<int, int>(c1, c2);
+  auto tmp = make_pair(c1, c2);
   if(spair.find(tmp) == spair.end())
   {
     int spair_size = spair.size();
     spair[tmp] = spair_size;
     spairinv.push_back(tmp);
   }
-  
+
   return spair[tmp];
 }
 
@@ -107,7 +107,7 @@ Alphabet::operator()(wstring const &s)
 int
 Alphabet::operator()(wstring const &s) const
 {
-  map<wstring, int, Ltstr>::const_iterator it = slexic.find(s);
+  auto it = slexic.find(s);
   if (it == slexic.end()) {
     return -1;
   }
@@ -153,7 +153,7 @@ Alphabet::read(FILE *input)
   Alphabet a_new;
   a_new.spairinv.clear();
   a_new.spair.clear();
-  
+
   // Reading of taglist
   int tam = Compression::multibyte_read(input);
   map<int, string> tmp;
@@ -174,11 +174,11 @@ Alphabet::read(FILE *input)
     int first = Compression::multibyte_read(input);
     int second = Compression::multibyte_read(input);
     pair<int, int> tmp(first - bias, second - bias);
-	int spair_size = a_new.spair.size();
+    int spair_size = a_new.spair.size();
     a_new.spair[tmp] = spair_size;
     a_new.spairinv.push_back(tmp);
   }
-  
+
   *this = a_new;
 }
 
@@ -226,7 +226,7 @@ Alphabet::getSymbol(wstring &result, int const symbol, bool uppercase) const
   {
     return;
   }
-  
+
   if(!uppercase)
   {
     if(symbol >= 0)
@@ -271,43 +271,37 @@ Alphabet::createLoopbackSymbols(set<int> &symbols, Alphabet &basis, Side s, bool
   // Non-tag letters get the same int in spairinv across alphabets,
   // but tags may differ, so do those separately afterwards.
   set<int> tags;
-  for(vector<pair<int, int> >::iterator it = basis.spairinv.begin(),
-                                        limit = basis.spairinv.end();
-      it != limit;
-      it++)
+  for(auto& it : basis.spairinv)
   {
     if(s == left) {
-      if(basis.isTag(it->first)) 
+      if(basis.isTag(it.first))
       {
-        tags.insert(it->first);
+        tags.insert(it.first);
       }
       else if(nonTagsToo)
       {
-        symbols.insert(operator()(it->first, it->first));
+        symbols.insert(operator()(it.first, it.first));
       }
     }
     else {
-      if(basis.isTag(it->second)) 
+      if(basis.isTag(it.second))
       {
-        tags.insert(it->second);
+        tags.insert(it.second);
       }
       else if(nonTagsToo)
       {
-        symbols.insert(operator()(it->second, it->second));
+        symbols.insert(operator()(it.second, it.second));
       }
     }
   }
-  for(map<wstring, int, Ltstr>::iterator it = basis.slexic.begin(),
-                                         limit = basis.slexic.end();
-      it != limit;
-      it++)
+  for(auto& it : basis.slexic)
   {
     // Only include tags that were actually seen on the correct side
-    if(tags.find(it->second) != tags.end()) 
+    if(tags.find(it.second) != tags.end())
     {
-      includeSymbol(it->first);
-      symbols.insert(operator()(operator()(it->first),
-                                operator()(it->first)));
+      includeSymbol(it.first);
+      symbols.insert(operator()(operator()(it.first),
+                                operator()(it.first)));
     }
   }
 }

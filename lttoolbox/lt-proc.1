@@ -10,17 +10,17 @@ architecture: \fBhttp://www.apertium.org\fR.
 .SH SYNOPSIS
 .B lt-proc
 [
-.B \-a \fR| 
-.B \-b \fR| 
-.B \-o \fR| 
-.B \-c \fR| 
-.B \-d \fR| 
-.B \-e \fR| 
+.B \-a \fR|
+.B \-b \fR|
+.B \-o \fR|
+.B \-c \fR|
+.B \-d \fR|
+.B \-e \fR|
 .B \-g \fR|
 .B \-n \fR|
 .B \-p \fR|
 .B \-s \fR|
-.B \-t \fR| 
+.B \-t \fR|
 .B \-v \fR|
 .B \-h
 .B \-z
@@ -31,7 +31,7 @@ architecture: \fBhttp://www.apertium.org\fR.
 .PP
 .B lt-proc
 [
-.B \-\-analysis \fR| 
+.B \-\-analysis \fR|
 .B \-\-bilingual \fR|
 .B \-\-surf\-bilingual \fR|
 .B \-\-case\-sensitive \fR|
@@ -52,7 +52,7 @@ architecture: \fBhttp://www.apertium.org\fR.
 .B \-\-ignored\-chars \fR icx_file
 ] fst_file [input_file [output_file]]
 .SH DESCRIPTION
-.BR lt-proc 
+.BR lt-proc
 is the application responsible for providing the four lexical
 processing functionalities
 
@@ -104,13 +104,13 @@ forms analysis produces output like the one in these examples:
 Does lexical transference, attaching queues of morphological symbols
 not specified in the dictionaries. As the analysis mode, supports
 multiple lexical forms in the target language for a given lexical
-form in the source language. Works tipically with the output of
+form in the source language. Works typically with the output of
 apertium-pretransfer.
 .TP
 .B \-o, \-\-surf\-bilingual
 As with \-b, but takes input from apertium\-tagger \-p , with
 surface forms, and if the lexical form is not found in the bilingual
-dictionary, it outputs the surface form of the word. 
+dictionary, it outputs the surface form of the word.
 .TP
 
 .B \-c, \-\-case\-sensitive

@@ -70,40 +70,40 @@ int main(int argc, char *argv[])
       {"meta-code", required_argument, 0, 'm'},
       {0, 0, 0, 0}
     };
-    
+
     int c_t = getopt_long(argc, argv, "o:m:", long_options, &option_index);
 #else
     int c_t = getopt(argc, argv, "o:m:");
-#endif   
+#endif
     if(c_t == -1)
     {
       break;
     }
-    
+
     switch(c_t)
     {
       case 'o':
         {
           wchar_t *param = new wchar_t[strlen(optarg)+1];
           if((size_t) -1 != mbstowcs(param, optarg, strlen(optarg)))
-	  {
+          {
             c.setOriginLanguageCode(param);
-	  }
-    	  delete[] param;
+          }
+          delete[] param;
         }
         break;
-      
+
       case 'm':
         {
           wchar_t *param = new wchar_t[strlen(optarg)+1];
           if((size_t) -1 != mbstowcs(param, optarg, strlen(optarg)))
-	  {
+          {
             c.setMetaLanguageCode(param);
-	  }
-    	  delete[] param;
+          }
+          delete[] param;
         }
         break;
-        
+
       default:
         endProgram(argv[0]);
         break;
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
   wchar_t* lo = new wchar_t[opc.size()+1];
   wchar_t* lm = new wchar_t[opc.size()+1];
 
-  if(((size_t) -1 == mbstowcs(lo, opc.substr(0, opc.find('-')).c_str(), opc.size()))|| 
+  if(((size_t) -1 == mbstowcs(lo, opc.substr(0, opc.find('-')).c_str(), opc.size()))||
      ((size_t) -1 == mbstowcs(lm, opc.substr(opc.find('-')+1).c_str(), opc.size())))
   {
     delete[] lo;
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
   delete[] lo;
   delete[] lm;
 
-  FILE *output = fopen(argv[argc-1], "w");
+  FILE *output = fopen(argv[argc-1], "wb");
   if(!output)
   {
     wcerr << "Error: Cannot open file '" << argv[2] << "'." << endl;

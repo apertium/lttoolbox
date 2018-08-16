@@ -18,10 +18,26 @@
 #define _COMPRESSION_
 
 #include <cstdio>
+#include <cstdint>
 #include <string>
 #include <iostream>
 
 using namespace std;
+
+// Global lttoolbox features
+constexpr char HEADER_LTTOOLBOX[4]{'L', 'T', 'T', 'B'};
+enum LT_FEATURES : uint32_t {
+  LTF_UNKNOWN = (1u << 0), // Features >= this are unknown, so throw an error; Inc this if more features are added
+  LTF_RESERVED = (1u << 31), // If we ever reach this many feature flags, we need a flag to know how to extend beyond 32 bits
+};
+
+// Invididual transducer features
+constexpr char HEADER_TRANSDUCER[4]{'L', 'T', 'T', 'D'};
+enum TD_FEATURES : uint32_t {
+  TDF_WEIGHTS = (1u << 0),
+  TDF_UNKNOWN = (1u << 1), // Features >= this are unknown, so throw an error; Inc this if more features are added
+  TDF_RESERVED = (1u << 31), // If we ever reach this many feature flags, we need a flag to know how to extend beyond 32 bits
+};
 
 /**
  * Clase "Compression".
@@ -60,7 +76,7 @@ public:
    * @param output output stream.
    */
   static void multibyte_write(unsigned int value, ostream &os);
-  
+
   /**
    * Read and decode an integer from the input stream.
    * @see multibyte_read()
@@ -85,7 +101,7 @@ public:
    * @param output the output stream.
    */
   static void wstring_write(wstring const &str, FILE *output);
-  
+
   /**
    * This method reads a wide string from the input stream.
    * @see wstring_write()
@@ -110,6 +126,38 @@ public:
    * @return the string read.
    */
   static string string_read(FILE *input);
+
+  /**
+   * Encodes a double value and writes it into the output stream
+   * @see long_multibyte_read()
+   * @param value double to write.
+   * @param output output stream.
+   */
+  static void long_multibyte_write(const double& value, FILE *output);
+
+  /**
+   * Encodes a double value and writes it into the output stream
+   * @see long_multibyte_read()
+   * @param value double to write.
+   * @param output output stream.
+   */
+  static void long_multibyte_write(const double& value, ostream &os);
+
+  /**
+   * Read and decode a double from the input stream.
+   * @see long_multibyte_read()
+   * @param input input stream.
+   * @return the double value read.
+   */
+  static double long_multibyte_read(FILE *input);
+
+  /**
+   * Read and decode a double from the input stream.
+   * @see long_multibyte_read()
+   * @param input input stream.
+   * @return the double value read.
+   */
+  static double long_multibyte_read(istream &is);
 };
 
 #endif

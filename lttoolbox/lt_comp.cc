@@ -28,15 +28,15 @@
 
 using namespace std;
 
-/* 
+/*
  * Error function that does nothing so that when we fallback from
  * XML to AT&T, the user doesn't get a message unless it's really
  * invalid XML.
- */ 
-void errorFunc(void *ctx, const char *msg, ...) 
+ */
+void errorFunc(void *ctx, const char *msg, ...)
 {
   return;
-} 
+}
 
 void endProgram(char *name)
 {
@@ -58,11 +58,11 @@ void endProgram(char *name)
 
 int main(int argc, char *argv[])
 {
-  char ttype = 'x'; 
+  char ttype = 'x';
   Compiler c;
-  AttCompiler a; 
+  AttCompiler a;
   c.setVerbose(false);
-  
+
 #if HAVE_GETOPT_LONG
   int option_index=0;
 #endif
@@ -78,8 +78,8 @@ int main(int argc, char *argv[])
       {"var",       required_argument, 0, 'v'},
       {"var-left",  required_argument, 0, 'l'},
       {"var-right", required_argument, 0, 'r'},
-      {"help",      no_argument,       0, 'h'}, 
-      {"verbose",   no_argument,       0, 'V'}, 
+      {"help",      no_argument,       0, 'h'},
+      {"verbose",   no_argument,       0, 'V'},
       {0, 0, 0, 0}
     };
 
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
   initGenericErrorDefaultFunc(NULL);
-  
+
 
   if(opc == "lr")
   {
@@ -175,15 +175,9 @@ int main(int argc, char *argv[])
       cout << "Error: -l specified, but mode is lr" << endl;
       endProgram(argv[0]);
     }
-    if(ttype == 'a') 
+    if(ttype == 'a')
     {
-#if defined __clang__
-      locale::global(locale(""));;
-#elif defined __APPLE__
       LtLocale::tryToSetLocale();
-#else
-      locale::global(locale(""));;
-#endif
       a.parse(infile, Compiler::COMPILER_RESTRICTION_LR_VAL);
     }
     else
@@ -192,7 +186,7 @@ int main(int argc, char *argv[])
       if(acxfile != "")
       {
         c.parseACX(acxfile, Compiler::COMPILER_RESTRICTION_LR_VAL);
-      }    
+      }
       c.parse(infile, Compiler::COMPILER_RESTRICTION_LR_VAL);
     }
   }
@@ -205,20 +199,14 @@ int main(int argc, char *argv[])
     }
     if(ttype == 'a')
     {
-#if defined __clang__
-      locale::global(locale(""));;
-#elif defined __APPLE__
       LtLocale::tryToSetLocale();
-#else
-      locale::global(locale(""));;
-#endif
       a.parse(infile, Compiler::COMPILER_RESTRICTION_RL_VAL);
     }
     else
     {
       LtLocale::tryToSetLocale();
       c.parse(infile, Compiler::COMPILER_RESTRICTION_RL_VAL);
-    }    
+    }
   }
   else
   {
@@ -231,7 +219,7 @@ int main(int argc, char *argv[])
     wcerr << "Error: Cannot open file '" << outfile << "'." << endl;
     exit(EXIT_FAILURE);
   }
-  if(ttype == 'a') 
+  if(ttype == 'a')
   {
     a.write(output);
   }

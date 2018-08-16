@@ -41,7 +41,12 @@ private:
    * The libxml2's XML reader
    */
   xmlTextReaderPtr reader;
-  
+
+  /**
+   * The default value of weight
+   */
+  double default_weight;
+
   /**
    * Identifier of all the symbols during the compilation
    */
@@ -49,8 +54,8 @@ private:
 
   /**
    * Main transducer representing the TM
-   */  
-  Transducer transducer;  
+   */
+  Transducer transducer;
 
   /**
    * Origin language
@@ -61,7 +66,7 @@ private:
    * Meta language
    */
   wstring meta_language;
-  
+
   /**
    * Origin language code in the TMX
    */
@@ -109,10 +114,10 @@ private:
    * @param name the name of the node
    */
   void skipBlanks(wstring &name);
-  
+
   /**
    * Force an element to be empty, and check for it
-   * @param name the element 
+   * @param name the element
    */
   void requireEmptyError(wstring const &name);
 
@@ -143,7 +148,7 @@ private:
   vector<int> join(vector<vector<int> > const &v, int const s) const;
 
   static void printvector(vector<int> const &v, wostream &wos = std::wcout);  //eliminar este método
-  
+
 public:
 
   /*
@@ -158,7 +163,7 @@ public:
   static wstring const TMX_COMPILER_HI_ELEM;
   static wstring const TMX_COMPILER_PH_ELEM;
   static wstring const TMX_COMPILER_XMLLANG_ATTR;
-  static wstring const TMX_COMPILER_LANG_ATTR;  
+  static wstring const TMX_COMPILER_LANG_ATTR;
   static wstring const TMX_COMPILER_SEG_ELEM;
   static wstring const TMX_COMPILER_PROP_ELEM;
 
@@ -176,10 +181,10 @@ public:
   /**
    * Compile dictionary to letter transducers
    */
-  void parse(string const &fichero, wstring const &lo, wstring const &lm);
-  
+  void parse(string const &file, wstring const &lo, wstring const &lm);
+
   /**
-   * Write the result of compilation 
+   * Write the result of compilation
    * @param fd the stream where write the result
    */
   void write(FILE *fd);
@@ -195,7 +200,7 @@ public:
    * @param code the code of the meta language into the TMX file being compiled
    */
   void setMetaLanguageCode(wstring const &code);
- 
+
 };
 
 #endif

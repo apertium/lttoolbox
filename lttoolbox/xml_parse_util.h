@@ -31,6 +31,6 @@ public:
   static string latin1(xmlChar const * input); // mark for deletion
   static wstring towstring(xmlChar const * input);
   static wstring stows(string const &str);
-};  
+};
 
 #endif

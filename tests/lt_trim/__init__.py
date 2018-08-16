@@ -2,8 +2,8 @@
 from __future__ import unicode_literals
 
 # If you have HFST installed, you can diff lttoolbox binaries like this:
-# $ lt-print full.bin | sed 's/ /@_SPACE_@/g' | hfst-txt2fst -e ε | hfst-fst2strings -c1 > full.strings 
-# $ lt-print trim.bin | sed 's/ /@_SPACE_@/g' | hfst-txt2fst -e ε | hfst-fst2strings -c1 > trim.strings 
+# $ lt-print full.bin | sed 's/ /@_SPACE_@/g' | hfst-txt2fst -e ε | hfst-fst2strings -c1 > full.strings
+# $ lt-print trim.bin | sed 's/ /@_SPACE_@/g' | hfst-txt2fst -e ε | hfst-fst2strings -c1 > trim.strings
 # $ diff -y full.strings trim.strings | less
 # This is similar to diffing the lt-expand of uncompiled XML dictionaries.
 # See also `man hfst-fst2strings'.

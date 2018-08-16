@@ -23,7 +23,8 @@ RegexpCompiler::RegexpCompiler() :
 token(0),
 alphabet(0),
 state(0),
-letter(0)
+letter(0),
+default_weight(0.0000)
 {
 }
 
@@ -60,6 +61,7 @@ RegexpCompiler::copy(RegexpCompiler const &rec)
   state = rec.state;
   letter = rec.letter;
   postop = rec.postop;
+  default_weight = rec.default_weight;
 }
 
 void
@@ -67,10 +69,10 @@ RegexpCompiler::destroy()
 {
 }
 
-bool 
+bool
 RegexpCompiler::isReserved(int const t)
 {
-  switch(t) 
+  switch(t)
   {
     case L'(':
     case L')':
@@ -85,7 +87,7 @@ RegexpCompiler::isReserved(int const t)
     case L'|':
     case FIN_FICHERO:
       return true;
- 
+
     default:
       return false;
   }
@@ -98,14 +100,14 @@ RegexpCompiler::error()
   exit(EXIT_FAILURE);
 }
 
-void 
+void
 RegexpCompiler::errorConsuming(int const t)
 {
   wcerr << L"Error parsing regexp" << endl;
   exit(EXIT_FAILURE);
 }
 
-void 
+void
 RegexpCompiler::consume(int const t)
 {
   if(token == t)
@@ -126,17 +128,17 @@ RegexpCompiler::consume(int const t)
   }
 }
 
-void 
+void
 RegexpCompiler::compile(wstring const &er)
 {
   input = er;
   token = static_cast<int>(input[0]);
   state = transducer.getInitial();
   S();
-  transducer.setFinal(state);
+  transducer.setFinal(state, default_weight);
 }
 
-void 
+void
 RegexpCompiler::S()
 {
   if(token == L'(' || token == L'[' || !isReserved(token) || token == L'\\')
@@ -150,7 +152,7 @@ RegexpCompiler::S()
   }
 }
 
-void 
+void
 RegexpCompiler::RExpr()
 {
   if(token == L'(' || token == L'[' || !isReserved(token) || token == L'\\')
@@ -164,7 +166,7 @@ RegexpCompiler::RExpr()
   }
 }
 
-void 
+void
 RegexpCompiler::Cola()
 {
   if(token == FIN_FICHERO || token == L')')
@@ -177,9 +179,9 @@ RegexpCompiler::Cola()
     consume(L'|');
     RExpr();
     Cola();
-   
-    state = transducer.insertNewSingleTransduction((*alphabet)(0, 0), state);
-    transducer.linkStates(e, state, (*alphabet)(0, 0));
+
+    state = transducer.insertNewSingleTransduction((*alphabet)(0, 0), state, default_weight);
+    transducer.linkStates(e, state, (*alphabet)(0, 0), default_weight);
   }
   else
   {
@@ -187,7 +189,7 @@ RegexpCompiler::Cola()
   }
 }
 
-void 
+void
 RegexpCompiler::Term()
 {
   if(!isReserved(token) || token == L'\\')
@@ -195,8 +197,8 @@ RegexpCompiler::Term()
     Transducer t;
     int e = t.getInitial();
     Letra();
-    e = t.insertNewSingleTransduction((*alphabet)(letter, letter), e);
-    t.setFinal(e);
+    e = t.insertNewSingleTransduction((*alphabet)(letter, letter), e, default_weight);
+    t.setFinal(e, default_weight);
     Postop();
     if(postop == L"*")
     {
@@ -223,7 +225,7 @@ RegexpCompiler::Term()
     consume(L'(');
     S();
     consume(L')');
-    transducer.setFinal(state);
+    transducer.setFinal(state, default_weight);
     Postop();
     if(postop == L"*")
     {
@@ -253,7 +255,7 @@ RegexpCompiler::Term()
   }
 }
 
-void 
+void
 RegexpCompiler::RExprp()
 {
   if(token == L'(' || token == L'[' || !isReserved(token) || token == L'\\')
@@ -308,9 +310,9 @@ RegexpCompiler::Postop()
     consume(L'+');
     postop = L"+";
   }
-  else if(token == L'(' || token == L'[' || !isReserved(token) || 
-          token == L'\\' || token == L'|' ||  token == FIN_FICHERO || 
-	  token == L')')
+  else if(token == L'(' || token == L'[' || !isReserved(token) ||
+          token == L'\\' || token == L'|' ||  token == FIN_FICHERO ||
+          token == L')')
   {
   }
   else
@@ -329,13 +331,13 @@ RegexpCompiler::Esp()
     consume(L']');
     Postop();
 
-    for(set<int>::iterator it = brackets.begin(); 
+    for(set<int>::iterator it = brackets.begin();
         it != brackets.end(); it++)
     {
       int mystate = t.getInitial();
-      mystate = t.insertNewSingleTransduction((*alphabet)(0, 0), mystate);
-      mystate = t.insertNewSingleTransduction((*alphabet)(*it, *it), mystate);
-      t.setFinal(mystate);
+      mystate = t.insertNewSingleTransduction((*alphabet)(0, 0), mystate, default_weight);
+      mystate = t.insertNewSingleTransduction((*alphabet)(*it, *it), mystate, default_weight);
+      t.setFinal(mystate, default_weight);
     }
 
     t.joinFinals((*alphabet)(0, 0));
@@ -346,18 +348,18 @@ RegexpCompiler::Esp()
     Lista();
     consume(L']');
     Postop();
-   
+
     for(int i = 0; i < 256 ;i++)
     {
       if(brackets.find(i) == brackets.end())
       {
         int mystate = t.getInitial();
-        mystate = t.insertNewSingleTransduction((*alphabet)(0, 0), mystate);
-        mystate = t.insertNewSingleTransduction((*alphabet)(i, i), mystate);
-	t.setFinal(mystate);
+        mystate = t.insertNewSingleTransduction((*alphabet)(0, 0), mystate, default_weight);
+        mystate = t.insertNewSingleTransduction((*alphabet)(i, i), mystate, default_weight);
+        t.setFinal(mystate, default_weight);
       }
     }
-    
+
     t.joinFinals((*alphabet)(0, 0));
   }
   else
@@ -367,7 +369,7 @@ RegexpCompiler::Esp()
 
   if(postop == L"+")
   {
-    t.oneOrMore((*alphabet)(0, 0));     
+    t.oneOrMore((*alphabet)(0, 0));
   }
   else if(postop == L"*")
   {
@@ -383,7 +385,7 @@ RegexpCompiler::Esp()
   state = transducer.insertTransducer(state, t, (*alphabet)(0, 0));
 }
 
-void 
+void
 RegexpCompiler::Lista()
 {
   if(!isReserved(token) || token == L'\\')
@@ -400,7 +402,7 @@ RegexpCompiler::Lista()
   }
 }
 
-void 
+void
 RegexpCompiler::Reservado()
 {
   if(isReserved(token))
@@ -413,7 +415,7 @@ RegexpCompiler::Reservado()
   }
 }
 
-void 
+void
 RegexpCompiler::Elem()
 {
   if(!isReserved(token) || token == L'\\')

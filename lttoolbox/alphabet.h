@@ -38,7 +38,7 @@ private:
    * Symbol-identifier relationship. Only contains <tags>.
    * @see slexicinv
    */
-  map<wstring, int, Ltstr> slexic;  
+  map<wstring, int, Ltstr> slexic;
 
   /**
    * Identifier-symbol relationship. Only contains <tags>.
@@ -59,7 +59,7 @@ private:
    * @see spair
    */
   vector<pair<int, int> > spairinv;
-  
+
 
   void copy(Alphabet const &a);
   void destroy();
@@ -70,17 +70,17 @@ public:
    * Constructor.
    */
   Alphabet();
-  
+
   /**
    * Destructor.
    */
   ~Alphabet();
-  
+
   /**
    * Copy constructor.
    */
   Alphabet(Alphabet const &a);
-  
+
   /**
    * Assign operator.
    */
@@ -89,7 +89,7 @@ public:
   /**
    * Include a symbol into the alphabet.
    */
-  void includeSymbol(wstring const &s);  
+  void includeSymbol(wstring const &s);
 
   /**
    * Get an unique code for every symbol pair.  This flavour is for
@@ -100,7 +100,7 @@ public:
    */
   int operator()(int const c1, int const c2);
   int operator()(wstring const &s) const;
-  
+
   /**
    * Gets the individual symbol identifier. Assumes it already exists!
    * @see isSymbolDefined to check if it exists first.
@@ -127,7 +127,7 @@ public:
    * @param output output stream.
    */
   void write(FILE *output);
-  
+
   /**
    * Read method.
    * @param input input stream.
@@ -143,16 +143,16 @@ public:
    * @param output output stream.
    */
   void writeSymbol(int const symbol, FILE *output) const;
-  
+
   /**
    * Concat a symbol in the string that is passed by reference.
    * @param result string where the symbol should be concatenated
    * @param symbol code of the symbol
    * @param uppercase true if we want an uppercase symbol
-   */  
-  void getSymbol(wstring &result, int const symbol, 
+   */
+  void getSymbol(wstring &result, int const symbol,
 		 bool uppercase = false) const;
-		 
+
   /**
    * Checks whether a symbol is a tag or not.
    * @param symbol the code of the symbol

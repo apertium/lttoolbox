@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <queue>
+#include <climits>
 
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/node.h>
@@ -32,7 +33,7 @@
 using namespace std;
 
 /**
- * Class to represent the current state of transducer processing 
+ * Class to represent the current state of transducer processing
  */
 class State
 {
@@ -43,11 +44,11 @@ private:
   struct TNodeState
   {
     Node *where;
-    vector<int> *sequence;
+    vector<pair<int, double>> *sequence;
     // a state is "dirty" if it was introduced at runtime (case variants, etc.)
     bool dirty;
-    
-    TNodeState(Node * const &w, vector<int> * const &s, bool const &d): where(w), sequence(s), dirty(d){}
+
+    TNodeState(Node * const &w, vector<pair<int, double>> * const &s, bool const &d): where(w), sequence(s), dirty(d){}
     TNodeState & operator=(TNodeState const &other)
     {
       where = other.where;
@@ -56,7 +57,7 @@ private:
       return *this;
     }
   };
-  
+
   vector<TNodeState> state;
 
   /**
@@ -94,11 +95,11 @@ private:
    */
   void apply_careful(int const input, int const alt);
 
-  /** 
+  /**
    * Make a transition, but overriding the output symbol
    * @param input symbol
-   * @param output symbol we expect to appear 
-   * @param output symbol we want to appear 
+   * @param output symbol we expect to appear
+   * @param output symbol we want to appear
    */
   void apply_override(int const input, int const old_sym, int const new_sym);
 
@@ -108,7 +109,7 @@ private:
    */
   void epsilonClosure();
 
-  bool lastPartHasRequiredSymbol(const vector<int> &seq, int requiredSymbol, int separationSymbol);
+  bool lastPartHasRequiredSymbol(const vector<pair<int, double>> &seq, int requiredSymbol, int separationSymbol);
 
 public:
 
@@ -141,7 +142,7 @@ public:
    * @return the object that results from the assignation
    */
   State & operator =(State const &s);
-  
+
   /**
    * Number of alive transductions
    * @return the size
@@ -185,7 +186,7 @@ public:
   void init(Node *initial);
 
   /**
-    * Remove states not containing a specific symbol in their last 'part', and states 
+    * Remove states not containing a specific symbol in their last 'part', and states
     * with more than a number of 'parts'
     * @param requieredSymbol the symbol requiered in the last part
     * @param separationSymbol the symbol that represent the separation between two parts
@@ -200,46 +201,72 @@ public:
   void pruneStatesWithForbiddenSymbol(int forbiddenSymbol);
 
   /**
+   * Returns the lexical form in a sorted by weights manner
+   * and restricts to N analyses or N weight classes if those options are provided.
+   * @param the original lexical form map
+   * @param the max number of printable analyses
+   * @param the max number of printable weight classes
+   * @return the sorted lexical form
+   */
+
+  template <typename T1, typename T2>
+  struct sort_weights {
+      typedef pair<T1, T2> type;
+      bool operator ()(type const& a, type const& b) const {
+          return a.second < b.second;
+      }
+  };
+
+  vector<pair< wstring, double >> NFinals(vector<pair<wstring, double>> lf,
+                                          int maxAnalyses,
+                                          int maxWeightClasses) const;
+
+  /**
    * Print all outputs of current parsing, preceded by a bar '/',
    * from the final nodes of the state
    * @param finals the set of final nodes
    * @param a the alphabet to decode strings
-   * @param escaped_chars the set of chars to be preceded with one 
+   * @param escaped_chars the set of chars to be preceded with one
    *                      backslash
    * @param uppercase true if the word is uppercase
    * @param firstupper true if the first letter of a word is uppercase
    * @param firstchar first character of the word
    * @return the result of the transduction
    */
-  wstring filterFinals(set<Node *> const &finals, Alphabet const &a,
-                      set<wchar_t> const &escaped_chars,
-                      bool uppercase = false,
-                      bool firstupper = false,
-                      int firstchar = 0) const;
+  wstring filterFinals(map<Node *, double> const &finals,
+                       Alphabet const &a,
+                       set<wchar_t> const &escaped_chars,
+                       bool display_weights = false,
+                       int max_analyses = INT_MAX,
+                       int max_weight_classes = INT_MAX,
+                       bool uppercase = false,
+                       bool firstupper = false,
+                       int firstchar = 0) const;
 
   /**
    * Same as previous one, but  the output is adapted to the SAO system
    * @param finals the set of final nodes
    * @param a the alphabet to decode strings
-   * @param escaped_chars the set of chars to be preceded with one 
+   * @param escaped_chars the set of chars to be preceded with one
    *                      backslash
    * @param uppercase true if the word is uppercase
    * @param firstupper true if the first letter of a word is uppercase
    * @param firstchar first character of the word
    * @return the result of the transduction
    */
-  wstring filterFinalsSAO(set<Node *> const &finals, Alphabet const &a,
-                      set<wchar_t> const &escaped_chars,
-                      bool uppercase = false,
-                      bool firstupper = false,
-                      int firstchar = 0) const;
+  wstring filterFinalsSAO(map<Node *, double> const &finals,
+                          Alphabet const &a,
+                          set<wchar_t> const &escaped_chars,
+                          bool uppercase = false,
+                          bool firstupper = false,
+                          int firstchar = 0) const;
 
 
   /**
    * Same as previous one, but  the output is adapted to the LRX system
    * @param finals the set of final nodes
    * @param a the alphabet to decode strings
-   * @param escaped_chars the set of chars to be preceded with one 
+   * @param escaped_chars the set of chars to be preceded with one
    *                      backslash
    * @param uppercase true if the word is uppercase
    * @param firstupper true if the first letter of a word is uppercase
@@ -247,25 +274,26 @@ public:
    * @return the result of the transduction
    */
 
-  set<pair<wstring, vector<wstring> > > filterFinalsLRX(set<Node *> const &finals, Alphabet const &a,
-                      set<wchar_t> const &escaped_chars,
-                      bool uppercase = false,
-                      bool firstupper = false,
-                      int firstchar = 0) const;
+  set<pair<wstring, vector<wstring> > > filterFinalsLRX(map<Node *, double> const &finals,
+                                                        Alphabet const &a,
+                                                        set<wchar_t> const &escaped_chars,
+                                                        bool uppercase = false,
+                                                        bool firstupper = false,
+                                                        int firstchar = 0) const;
 
 
 
 
 
   /**
-   * Find final states, remove those that not has a requiredSymbol and 'restart' each of them as the 
+   * Find final states, remove those that not has a requiredSymbol and 'restart' each of them as the
    * set of initial states, but remembering the sequence and adding a separationSymbol
    * @param finals
    * @param requiredSymbol
    * @param restart_state
    * @param separationSymbol
    */
-    void restartFinals(const set<Node *> &finals, int requiredSymbol, State *restart_state, int separationSymbol);
+    void restartFinals(const map<Node *, double> &finals, int requiredSymbol, State *restart_state, int separationSymbol);
 
 
   /**
@@ -274,18 +302,19 @@ public:
    * @param finals set of final nodes @return
    * @true if the state is final
    */
-  bool isFinal(set<Node *> const &finals) const;
+  bool isFinal(map<Node *, double> const &finals) const;
 
   /**
    * Return the full states string (to allow debuging...) using a Java ArrayList.toString style
    */
   wstring getReadableString(const Alphabet &a);
 
-  wstring filterFinalsTM(set<Node *> const &finals, 
-			 Alphabet const &alphabet,
+  wstring filterFinalsTM(map<Node *, double> const &finals,
+                         Alphabet const &alphabet,
                          set<wchar_t> const &escaped_chars,
-			 queue<wstring> &blanks, 
+                         queue<wstring> &blanks,
                          vector<wstring> &numbers) const;
+
 };
 
 #endif

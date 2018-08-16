@@ -40,27 +40,18 @@ using namespace std;
 /** Bitmask; 1 = WORD, 2 = PUNCT, 3 = BOTH. */
 typedef unsigned int TransducerType;
 
-namespace 
+namespace
 {
   /** Splits a string into fields. */
-  vector<wstring>& split(const wstring& s, wchar_t delim, vector<wstring> &out) 
+  vector<wstring>& split(const wstring& s, wchar_t delim, vector<wstring> &out)
   {
       wistringstream ss(s);
       wstring item;
-      while (getline(ss, item, delim)) 
+      while (getline(ss, item, delim))
       {
         out.push_back(item);
       }
       return out;
-  }
-  
-  /** Converts a string to a number. Slow, but at this point I don't care. */
-  int convert(const wstring& s) 
-  {
-    int ret;
-    wistringstream ss(s);
-    ss >> ret;
-    return ret;
   }
 };
 
@@ -72,7 +63,7 @@ namespace
  *       encoding of the file, just set it by adding
  *       <tt>std::locale::global(locale(""));</tt> to your code.
  */
-class AttCompiler 
+class AttCompiler
 {
 public:
   /**
@@ -127,33 +118,38 @@ public:
 private:
 
   /** The final state(s). */
-  set<int> finals;
+  map<int, double> finals;
   /**
    * Id of the starting state. We assume it is the source state of the first
    * transduction in the file.
    */
   int starting_state;
+  /**
+   * Default value of weight of a transduction unless specified.
+   */
+  double default_weight;
 
   Alphabet alphabet;
   /** All non-multicharacter symbols. */
   set<wchar_t> letters;
 
   /** Used in AttNode. */
-  struct Transduction 
+  struct Transduction
   {
     int            to;
     wstring        upper;
     wstring        lower;
     int            tag;
+    double         weight;
     TransducerType type;
 
-    Transduction(int to, wstring upper, wstring lower, int tag,
+    Transduction(int to, wstring upper, wstring lower, int tag, double weight,
                  TransducerType type=UNDECIDED) :
-      to(to), upper(upper), lower(lower), tag(tag), type(type) {}
+      to(to), upper(upper), lower(lower), tag(tag), weight(weight), type(type) {}
   };
 
   /** A node in the transducer graph. */
-  struct AttNode 
+  struct AttNode
   {
     int                  id;
     vector<Transduction> transductions;
@@ -175,7 +171,7 @@ private:
   AttNode* get_node(int id)
   {
     AttNode* state;
-  
+
     if (graph.find(id) != graph.end())
     {
       state = graph[id];
@@ -188,13 +184,13 @@ private:
     return state;
   }
 
-  /** 
+  /**
    * Returns true for combining diacritics and modifier letters
    *
    */
   bool is_word_punct(wchar_t symbol);
 
-  /** 
+  /**
    * Converts symbols like @0@ to epsilon, @_SPACE_@ to space, etc.
    * @todo Are there other special symbols? If so, add them, and maybe use a map
    *       for conversion?

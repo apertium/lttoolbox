@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÄÅÆÇÈÉÊËÍÑÒÓÔÕÖØÙÚÜČĐŊŠŦŽabcdefghijklmnopqrstuvwxyzàáâäåæçèéêëíñòóôõöøùúüčđŋšŧž­-</alphabet>
+<sdefs>
+  <sdef n="n"     c="Noun"/>
+
+  <sdef n="ma"    c="Masculine (animate)"/>
+  <sdef n="mi"    c="Masculine (inanimate)"/>
+  <sdef n="nt"    c="Neuter"/>
+  <sdef n="f"     c="Feminine"/>
+
+  <sdef n="sg"    c="Singular"/>
+  <sdef n="du"    c="Dual"/>
+  <sdef n="pl"    c="Plural"/>
+
+  <sdef n="nom"   c="Nominative"/>
+  <sdef n="gen"   c="Genitive"/>
+  <sdef n="dat"   c="Dative"/>
+  <sdef n="acc"   c="Accusative"/>
+  <sdef n="ins"   c="Instrumental"/>
+  <sdef n="loc"   c="Locative"/>
+  <sdef n="voc"   c="Vocative"/>
+</sdefs>
+<pardefs>
+  <pardef n="nan__n_ma">
+    <e w="1.56"><p><l></l><r><s n="n"/><s n="ma"/><s n="sg"/><s n="nom"/></r></p></e>
+    <e w="2.56"><p><l>a</l><r><s n="n"/><s n="ma"/><s n="sg"/><s n="gen"/></r></p></e>
+    <e w="3.56"><p><l>ej</l><r><s n="n"/><s n="ma"/><s n="sg"/><s n="dat"/></r></p></e>
+    <e w="4.56"><p><l>a</l><r><s n="n"/><s n="ma"/><s n="sg"/><s n="acc"/></r></p></e>
+    <e w="5.56"><p><l>om</l><r><s n="n"/><s n="ma"/><s n="sg"/><s n="ins"/></r></p></e>
+    <e w="6.56"><p><l>je</l><r><s n="n"/><s n="ma"/><s n="sg"/><s n="loc"/></r></p></e>
+    <e w="7.56"><p><l>o</l><r><s n="n"/><s n="ma"/><s n="sg"/><s n="voc"/></r></p></e>
+
+    <e w="8.56"><p><l>aj</l><r><s n="n"/><s n="ma"/><s n="du"/><s n="nom"/></r></p></e>
+    <e w="9.56"><p><l>ow</l><r><s n="n"/><s n="ma"/><s n="du"/><s n="gen"/></r></p></e>
+    <e w="10.56"><p><l>omaj</l><r><s n="n"/><s n="ma"/><s n="du"/><s n="dat"/></r></p></e>
+    <e w="11.56"><p><l>ow</l><r><s n="n"/><s n="ma"/><s n="du"/><s n="acc"/></r></p></e>
+    <e w="12.56"><p><l>omaj</l><r><s n="n"/><s n="ma"/><s n="du"/><s n="ins"/></r></p></e>
+    <e w="13.56"><p><l>omaj</l><r><s n="n"/><s n="ma"/><s n="du"/><s n="loc"/></r></p></e>
+    <e w="14.56"><p><l>aj</l><r><s n="n"/><s n="ma"/><s n="du"/><s n="voc"/></r></p></e>
+
+    <e w="15.56"><p><l>ojo</l><r><s n="n"/><s n="ma"/><s n="pl"/><s n="nom"/></r></p></e>
+    <e w="16.56"><p><l>ow</l><r><s n="n"/><s n="ma"/><s n="pl"/><s n="gen"/></r></p></e>
+    <e w="17.56"><p><l>am</l><r><s n="n"/><s n="ma"/><s n="pl"/><s n="dat"/></r></p></e>
+    <e w="18.56"><p><l>ow</l><r><s n="n"/><s n="ma"/><s n="pl"/><s n="acc"/></r></p></e>
+    <e w="19.56"><p><l>ami</l><r><s n="n"/><s n="ma"/><s n="pl"/><s n="ins"/></r></p></e>
+    <e w="20.56"><p><l>ach</l><r><s n="n"/><s n="ma"/><s n="pl"/><s n="loc"/></r></p></e>
+    <e w="21.56"><p><l>ojo</l><r><s n="n"/><s n="ma"/><s n="pl"/><s n="voc"/></r></p></e>
+  </pardef>
+</pardefs>
+
+  <section id="main" type="standard">
+    <e lm="nan" w="22.56"><i>nan</i><par n="nan__n_ma"/></e>    
+  </section>
+
+</dictionary>

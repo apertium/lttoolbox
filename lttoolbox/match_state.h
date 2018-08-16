@@ -27,7 +27,7 @@
 using namespace std;
 
 /**
- * Class to represent the current state of transducer processing 
+ * Class to represent the current state of transducer processing
  */
 class MatchState
 {
@@ -53,7 +53,7 @@ private:
    */
   void destroy();
 
-  
+
   void applySymbol(MatchNode *pnode, int const symbol);
 public:
   /**
@@ -78,7 +78,7 @@ public:
    * @return the object that results from the assignation
    */
   MatchState & operator =(MatchState const &s);
-  
+
   /**
    * Number of alive transductions
    * @return the size
@@ -90,7 +90,7 @@ public:
    * @param input the input symbol
    */
   void step(int const input);
-  
+
   /**
    * step = apply + epsilonClosure
    * @param input the input symbol
@@ -105,13 +105,13 @@ public:
   void init(MatchNode *initial);
 
   int classifyFinals(map<MatchNode *, int> const &final_class, set<int> const &banned_rules) const;
-  
+
   int classifyFinals(map<MatchNode *, int> const &final_class) const;
 
   void debug();
-  
+
   void clear();
-  
+
 };
 
 #endif

@@ -19,6 +19,7 @@
 #include <cstring>
 #include <cwctype>
 #include <climits>
+#include <algorithm>
 
 //debug//
 //#include <iostream>
@@ -28,7 +29,7 @@
 State::State()
 {
 }
- 
+
 State::~State()
 {
   destroy();
@@ -51,7 +52,7 @@ State::operator =(State const &s)
   return *this;
 }
 
-void 
+void
 State::destroy()
 {
   for(size_t i = 0, limit = state.size(); i != limit; i++)
@@ -75,13 +76,13 @@ State::copy(State const &s)
 
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
-    vector<int> *tmp = new vector<int>();
+    vector<pair<int, double>> *tmp = new vector<pair<int, double>>();
     *tmp = *(state[i].sequence);
     state[i].sequence = tmp;
   }
 }
 
-int 
+int
 State::size() const
 {
   return state.size();
@@ -91,10 +92,10 @@ void
 State::init(Node *initial)
 {
   state.clear();
-  state.push_back(TNodeState(initial, new vector<int>(), false));
+  state.push_back(TNodeState(initial, new vector<pair<int, double>>(), false));
   state[0].sequence->clear();
-  epsilonClosure();  
-}  
+  epsilonClosure();
+}
 
 void
 State::apply(int const input)
@@ -105,7 +106,7 @@ State::apply(int const input)
     state = new_state;
     return;
   }
-  
+
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     map<int, Dest>::const_iterator it;
@@ -114,22 +115,22 @@ State::apply(int const input)
     {
       for(int j = 0; j != it->second.size; j++)
       {
-        vector<int> *new_v = new vector<int>();
+        vector<pair<int, double>> *new_v = new vector<pair<int, double>>();
         *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
-          new_v->push_back(it->second.out_tag[j]);
+          new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
       }
     }
     delete state[i].sequence;
   }
-  
+
   state = new_state;
 }
 
-void 
+void
 State::apply_override(int const input, int const old_sym, int const new_sym)
 {
   vector<TNodeState> new_state;
@@ -139,7 +140,7 @@ State::apply_override(int const input, int const old_sym, int const new_sym)
     return;
   }
 
-  
+
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     map<int, Dest>::const_iterator it;
@@ -148,17 +149,17 @@ State::apply_override(int const input, int const old_sym, int const new_sym)
     {
       for(int j = 0; j != it->second.size; j++)
       {
-        vector<int> *new_v = new vector<int>();
-	*new_v = *(state[i].sequence);
+        vector<pair<int, double>> *new_v = new vector<pair<int, double>>();
+        *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
-          if(it->second.out_tag[j] == old_sym) 
+          if(it->second.out_tag[j] == old_sym)
           {
-            new_v->push_back(new_sym);
-          } 
-          else 
+            new_v->push_back(make_pair(new_sym, it->second.out_weight[j]));
+          }
+          else
           {
-            new_v->push_back(it->second.out_tag[j]);
+            new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
           }
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
@@ -169,17 +170,17 @@ State::apply_override(int const input, int const old_sym, int const new_sym)
     {
       for(int j = 0; j != it->second.size; j++)
       {
-        vector<int> *new_v = new vector<int>();
+        vector<pair<int, double>> *new_v = new vector<pair<int, double>>();
         *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
-          if(it->second.out_tag[j] == old_sym) 
+          if(it->second.out_tag[j] == old_sym)
           {
-            new_v->push_back(new_sym);
-          } 
-          else 
+            new_v->push_back(make_pair(new_sym, it->second.out_weight[j]));
+          }
+          else
           {
-            new_v->push_back(it->second.out_tag[j]);
+            new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
           }
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, true));
@@ -193,7 +194,7 @@ State::apply_override(int const input, int const old_sym, int const new_sym)
 
 
 
-void 
+void
 State::apply(int const input, int const alt)
 {
   vector<TNodeState> new_state;
@@ -203,7 +204,7 @@ State::apply(int const input, int const alt)
     return;
   }
 
-  
+
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     map<int, Dest>::const_iterator it;
@@ -212,11 +213,11 @@ State::apply(int const input, int const alt)
     {
       for(int j = 0; j != it->second.size; j++)
       {
-        vector<int> *new_v = new vector<int>();
-	*new_v = *(state[i].sequence);
+        vector<pair<int, double>> *new_v = new vector<pair<int, double>>();
+        *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
-          new_v->push_back(it->second.out_tag[j]);
+          new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
       }
@@ -226,11 +227,11 @@ State::apply(int const input, int const alt)
     {
       for(int j = 0; j != it->second.size; j++)
       {
-        vector<int> *new_v = new vector<int>();
+        vector<pair<int, double>> *new_v = new vector<pair<int, double>>();
         *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
-          new_v->push_back(it->second.out_tag[j]);
+          new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, true));
       }
@@ -241,7 +242,7 @@ State::apply(int const input, int const alt)
   state = new_state;
 }
 
-void 
+void
 State::apply_careful(int const input, int const alt)
 {
   vector<TNodeState> new_state;
@@ -251,7 +252,7 @@ State::apply_careful(int const input, int const alt)
     return;
   }
 
-  
+
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     map<int, Dest>::const_iterator it;
@@ -260,11 +261,11 @@ State::apply_careful(int const input, int const alt)
     {
       for(int j = 0; j != it->second.size; j++)
       {
-        vector<int> *new_v = new vector<int>();
-	*new_v = *(state[i].sequence);
+        vector<pair<int, double>> *new_v = new vector<pair<int, double>>();
+        *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
-          new_v->push_back(it->second.out_tag[j]);
+          new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
       }
@@ -276,11 +277,11 @@ State::apply_careful(int const input, int const alt)
       {
         for(int j = 0; j != it->second.size; j++)
         {
-          vector<int> *new_v = new vector<int>();
+          vector<pair<int, double>> *new_v = new vector<pair<int, double>>();
           *new_v = *(state[i].sequence);
           if(it->first != 0)
           {
-            new_v->push_back(it->second.out_tag[j]);
+            new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
           }
           new_state.push_back(TNodeState(it->second.dest[j], new_v, true));
         }
@@ -303,19 +304,19 @@ State::epsilonClosure()
     {
       for(int j = 0 ; j != it2->second.size; j++)
       {
-        vector<int> *tmp = new vector<int>();
+        vector<pair<int, double>> *tmp = new vector<pair<int, double>>();
         *tmp = *(state[i].sequence);
         if(it2->second.out_tag[j] != 0)
         {
-	  tmp->push_back(it2->second.out_tag[j]);
+          tmp->push_back(make_pair(it2->second.out_tag[j], it2->second.out_weight[j]));
         }
         state.push_back(TNodeState(it2->second.dest[j], tmp, state[i].dirty));
-      }          
+      }
     }
   }
 }
 
-void 
+void
 State::apply(int const input, int const alt1, int const alt2)
 {
   vector<TNodeState> new_state;
@@ -324,7 +325,7 @@ State::apply(int const input, int const alt1, int const alt2)
     state = new_state;
     return;
   }
-  
+
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     map<int, Dest>::const_iterator it;
@@ -333,11 +334,11 @@ State::apply(int const input, int const alt1, int const alt2)
     {
       for(int j = 0; j != it->second.size; j++)
       {
-        vector<int> *new_v = new vector<int>();
-	*new_v = *(state[i].sequence);
+        vector<pair<int, double>> *new_v = new vector<pair<int, double>>();
+        *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
-          new_v->push_back(it->second.out_tag[j]);
+          new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
       }
@@ -347,11 +348,11 @@ State::apply(int const input, int const alt1, int const alt2)
     {
       for(int j = 0; j != it->second.size; j++)
       {
-        vector<int> *new_v = new vector<int>();
+        vector<pair<int, double>> *new_v = new vector<pair<int, double>>();
         *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
-          new_v->push_back(it->second.out_tag[j]);
+          new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, true));
       }
@@ -361,11 +362,11 @@ State::apply(int const input, int const alt1, int const alt2)
     {
       for(int j = 0; j != it->second.size; j++)
       {
-        vector<int> *new_v = new vector<int>();
+        vector<pair<int, double>> *new_v = new vector<pair<int, double>>();
         *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
-          new_v->push_back(it->second.out_tag[j]);
+          new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, true));
       }
@@ -403,11 +404,11 @@ State::apply(int const input, set<int> const alts)
     {
       for(int j = 0; j != it->second.size; j++)
       {
-        vector<int> *new_v = new vector<int>();
-	*new_v = *(state[i].sequence);
+        vector<pair<int, double>> *new_v = new vector<pair<int, double>>();
+        *new_v = *(state[i].sequence);
         if(it->first != 0)
         {
-          new_v->push_back(it->second.out_tag[j]);
+          new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
         }
         new_state.push_back(TNodeState(it->second.dest[j], new_v, state[i].dirty||false));
       }
@@ -419,11 +420,11 @@ State::apply(int const input, set<int> const alts)
       {
         for(int j = 0; j != it->second.size; j++)
         {
-          vector<int> *new_v = new vector<int>();
+          vector<pair<int, double>> *new_v = new vector<pair<int, double>>();
           *new_v = *(state[i].sequence);
           if(it->first != 0)
           {
-            new_v->push_back(it->second.out_tag[j]);
+            new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
           }
           new_state.push_back(TNodeState(it->second.dest[j], new_v, true));
         }
@@ -478,8 +479,8 @@ State::step(int const input, set<int> const alts)
   epsilonClosure();
 }
 
-void 
-State::step_case(wchar_t val, wchar_t val2, bool caseSensitive) 
+void
+State::step_case(wchar_t val, wchar_t val2, bool caseSensitive)
 {
   if (!iswupper(val) || caseSensitive) {
     step(val, val2);
@@ -491,8 +492,8 @@ State::step_case(wchar_t val, wchar_t val2, bool caseSensitive)
 }
 
 
-void 
-State::step_case(wchar_t val, bool caseSensitive) 
+void
+State::step_case(wchar_t val, bool caseSensitive)
 {
   if (!iswupper(val) || caseSensitive) {
     step(val);
@@ -503,7 +504,7 @@ State::step_case(wchar_t val, bool caseSensitive)
 
 
 bool
-State::isFinal(set<Node *> const &finals) const
+State::isFinal(map<Node *, double> const &finals) const
 {
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
@@ -512,17 +513,47 @@ State::isFinal(set<Node *> const &finals) const
       return true;
     }
   }
-  
+
   return false;
 }
 
-wstring
-State::filterFinals(set<Node *> const &finals, 
-		    Alphabet const &alphabet,
-		    set<wchar_t> const &escaped_chars,
-		    bool uppercase, bool firstupper, int firstchar) const
+
+vector<pair< wstring, double >>
+State::NFinals(vector<pair<wstring, double>> lf, int maxAnalyses, int maxWeightClasses) const
 {
+  vector<pair<wstring, double>> result;
+
+  sort(lf.begin(), lf.end(), sort_weights<wstring, double>());
+
+  for(vector<pair<wstring, double> >::iterator it = lf.begin(); it != lf.end(); it++)
+  {
+    double last_weight = 0.0000;
+    if(maxAnalyses > 0 && maxWeightClasses > 0)
+    {
+      result.push_back(make_pair(it->first, it->second));
+      maxAnalyses--;
+      if(last_weight!=it->second)
+      {
+        maxWeightClasses--;
+      }
+    }
+    else break;
+  }
+  return result;
+}
+
+
+wstring
+State::filterFinals(map<Node *, double> const &finals,
+                    Alphabet const &alphabet,
+                    set<wchar_t> const &escaped_chars,
+                    bool display_weights, int max_analyses, int max_weight_classes,
+                    bool uppercase, bool firstupper, int firstchar) const
+{
+  vector<pair< wstring, double >> response;
+
   wstring result = L"";
+  double cost = 0.0000;
 
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
@@ -530,58 +561,78 @@ State::filterFinals(set<Node *> const &finals,
     {
       if(state[i].dirty)
       {
-        result += L'/';
+        result.clear();
+        cost = 0.0000;
         unsigned int const first_char = result.size() + firstchar;
         for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
         {
-          if(escaped_chars.find((*(state[i].sequence))[j]) != escaped_chars.end())
+          if(escaped_chars.find(((*(state[i].sequence))[j]).first) != escaped_chars.end())
           {
             result += L'\\';
           }
-          alphabet.getSymbol(result, (*(state[i].sequence))[j], uppercase);
+          alphabet.getSymbol(result, ((*(state[i].sequence))[j]).first, uppercase);
+          cost += ((*(state[i].sequence))[j]).second;
         }
         if(firstupper)
         {
-  	  if(result[first_char] == L'~')
-	  {
-	    // skip post-generation mark
-	    result[first_char+1] = towupper(result[first_char+1]);
-	  }
-	  else
-	  {
+          if(result[first_char] == L'~')
+          {
+            // skip post-generation mark
+            result[first_char+1] = towupper(result[first_char+1]);
+          }
+          else
+          {
             result[first_char] = towupper(result[first_char]);
-	  }
+          }
         }
       }
       else
       {
-        result += L'/';
+        result.clear();
+        cost = 0.0000;
         for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
         {
-          if(escaped_chars.find((*(state[i].sequence))[j]) != escaped_chars.end())
+          if(escaped_chars.find(((*(state[i].sequence))[j]).first) != escaped_chars.end())
           {
             result += L'\\';
           }
-          alphabet.getSymbol(result, (*(state[i].sequence))[j]);
+          alphabet.getSymbol(result, ((*(state[i].sequence))[j]).first);
+          cost += ((*(state[i].sequence))[j]).second;
         }
       }
+      response.push_back(make_pair(result, cost));
     }
   }
-  
+
+  response = NFinals(response, max_analyses, max_weight_classes);
+
+  result = L"";
+  for(vector<pair<wstring, double>>::iterator it = response.begin(); it != response.end(); it++)
+  {
+    result += L'/';
+    result += it->first;
+    if(display_weights)
+    {
+      result += L"<W:";
+      result += to_wstring(it->second);
+      result += L">";
+    }
+  }
+
   return result;
 }
 
 
 set<pair<wstring, vector<wstring> > >
-State::filterFinalsLRX(set<Node *> const &finals, 
-		    Alphabet const &alphabet,
-		    set<wchar_t> const &escaped_chars,
-		    bool uppercase, bool firstupper, int firstchar) const
+State::filterFinalsLRX(map<Node *, double> const &finals,
+                       Alphabet const &alphabet,
+                       set<wchar_t> const &escaped_chars,
+                       bool uppercase, bool firstupper, int firstchar) const
 {
   set<pair<wstring, vector<wstring> > > results;
 
   vector<wstring> current_result;
-  wstring rule_id = L""; 
+  wstring rule_id = L"";
 
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
@@ -592,43 +643,43 @@ State::filterFinalsLRX(set<Node *> const &finals,
       wstring current_word = L"";
       for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
       {
-        if(escaped_chars.find((*(state[i].sequence))[j]) != escaped_chars.end())
+        if(escaped_chars.find(((*(state[i].sequence))[j]).first) != escaped_chars.end())
         {
           current_word += L'\\';
         }
         wstring sym = L"";
-        alphabet.getSymbol(sym, (*(state[i].sequence))[j], uppercase);
-        if(sym == L"<$>") 
-        { 
-          if(current_word != L"")  
+        alphabet.getSymbol(sym, ((*(state[i].sequence))[j]).first, uppercase);
+        if(sym == L"<$>")
+        {
+          if(current_word != L"")
           {
-            current_result.push_back(current_word); 
+            current_result.push_back(current_word);
           }
           current_word = L"";
         }
-        else 
+        else
         {
-          current_word += sym; 
+          current_word += sym;
         }
       }
       rule_id = current_word;
-      results.insert(make_pair(rule_id, current_result)); 
+      results.insert(make_pair(rule_id, current_result));
     }
   }
-    
+
   return results;
 }
 
 
 wstring
-State::filterFinalsSAO(set<Node *> const &finals, 
-		       Alphabet const &alphabet,
-		       set<wchar_t> const &escaped_chars,
-		       bool uppercase, bool firstupper, int firstchar) const
+State::filterFinalsSAO(map<Node *, double> const &finals,
+                       Alphabet const &alphabet,
+                       set<wchar_t> const &escaped_chars,
+                       bool uppercase, bool firstupper, int firstchar) const
 {
   wstring result = L"";
   wstring annot = L"";
-  
+
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     if(finals.find(state[i].where) != finals.end())
@@ -637,42 +688,42 @@ State::filterFinalsSAO(set<Node *> const &finals,
       unsigned int const first_char = result.size() + firstchar;
       for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
       {
-        if(escaped_chars.find((*(state[i].sequence))[j]) != escaped_chars.end())
+        if(escaped_chars.find(((*(state[i].sequence))[j]).first) != escaped_chars.end())
         {
           result += L'\\';
         }
-        if(alphabet.isTag((*(state[i].sequence))[j]))
+        if(alphabet.isTag(((*(state[i].sequence))[j]).first))
         {
           annot = L"";
-          alphabet.getSymbol(annot, (*(state[i].sequence))[j]);
+          alphabet.getSymbol(annot, ((*(state[i].sequence))[j]).first);
           result += L'&'+annot.substr(1,annot.length()-2)+L';';
         }
         else
         {
-          alphabet.getSymbol(result, (*(state[i].sequence))[j], uppercase);
+          alphabet.getSymbol(result, ((*(state[i].sequence))[j]).first, uppercase);
         }
       }
       if(firstupper)
       {
-	if(result[first_char] == L'~')
-	{
-	  // skip post-generation mark
-	  result[first_char+1] = towupper(result[first_char+1]);
-	}
-	else
-	{
+        if(result[first_char] == L'~')
+        {
+          // skip post-generation mark
+          result[first_char+1] = towupper(result[first_char+1]);
+        }
+        else
+        {
           result[first_char] = towupper(result[first_char]);
-	}
+        }
       }
     }
   }
-  
+
   return result;
 }
 
 wstring
-State::filterFinalsTM(set<Node *> const &finals, 
-		      Alphabet const &alphabet,
+State::filterFinalsTM(map<Node *, double> const &finals,
+                      Alphabet const &alphabet,
                       set<wchar_t> const &escaped_chars,
                       queue<wstring> &blankqueue, vector<wstring> &numbers) const
 {
@@ -685,116 +736,116 @@ State::filterFinalsTM(set<Node *> const &finals,
       result += L'/';
       for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
       {
-        if(escaped_chars.find((*(state[i].sequence))[j]) != escaped_chars.end())
+        if(escaped_chars.find((*(state[i].sequence))[j].first) != escaped_chars.end())
         {
           result += L'\\';
         }
-        alphabet.getSymbol(result, (*(state[i].sequence))[j]);
+        alphabet.getSymbol(result, (*(state[i].sequence))[j].first);
       }
     }
   }
 
 
   wstring result2 = L"";
-  vector<wstring> fragmentos;
-  fragmentos.push_back(L"");
- 
+  vector<wstring> fragment;
+  fragment.push_back(L"");
+
   for(unsigned int i = 0, limit = result.size(); i != limit ; i++)
   {
     if(result[i] == L')')
     {
-      fragmentos.push_back(L"");
+      fragment.push_back(L"");
     }
     else
     {
-      fragmentos[fragmentos.size()-1] += result[i];
+      fragment[fragment.size()-1] += result[i];
     }
   }
-  
-  for(unsigned int i = 0, limit = fragmentos.size(); i != limit; i++)
+
+  for(unsigned int i = 0, limit = fragment.size(); i != limit; i++)
   {
     if(i != limit -1)
     {
-      if(fragmentos[i].size() >=2 && fragmentos[i].substr(fragmentos[i].size()-2) == L"(#")
+      if(fragment[i].size() >=2 && fragment[i].substr(fragment[i].size()-2) == L"(#")
       {
         wstring whitespace = L" ";
         if(blankqueue.size() != 0)
-	{
+        {
           whitespace = blankqueue.front().substr(1);
-	  blankqueue.pop();
-	  whitespace = whitespace.substr(0, whitespace.size() - 1);
-        }  
-        fragmentos[i] = fragmentos[i].substr(0, fragmentos[i].size()-2) +
-	                whitespace;
+          blankqueue.pop();
+          whitespace = whitespace.substr(0, whitespace.size() - 1);
+        }
+        fragment[i] = fragment[i].substr(0, fragment[i].size()-2) +
+                        whitespace;
       }
       else
       {
-        bool sustituido = false;
-	for(int j = fragmentos[i].size() - 1; j >= 0; j--)
-	{
-	  if(fragmentos[i].size()-j > 3 && fragmentos[i][j] == L'\\' && 
-	     fragmentos[i][j+1] == L'@' && fragmentos[i][j+2] == L'(')
-	  {
-	    int num = 0;
-	    bool correcto = true;
-	    for(unsigned int k = (unsigned int) j+3, limit2 = fragmentos[i].size();
-		k != limit2; k++)
-	    {
-	      if(iswdigit(fragmentos[i][k]))
-	      {
-		num = num * 10;
-		num += (int) fragmentos[i][k] - 48;	
-	      }
-	      else
-	      {
-		correcto = false;
-		break;
-	      }
-	    }
-	    if(correcto)
-	    {
-	      fragmentos[i] = fragmentos[i].substr(0, j) + numbers[num - 1];
-	      sustituido = true;
-	      break;
-	    }
-	  }
-	}
-	if(sustituido == false)
-	{
-	  fragmentos[i] += L')';
-	}
+        bool substitute = false;
+        for(int j = fragment[i].size() - 1; j >= 0; j--)
+        {
+          if(fragment[i].size()-j > 3 && fragment[i][j] == L'\\' &&
+             fragment[i][j+1] == L'@' && fragment[i][j+2] == L'(')
+          {
+            int num = 0;
+            bool correct = true;
+            for(unsigned int k = (unsigned int) j+3, limit2 = fragment[i].size();
+                k != limit2; k++)
+            {
+              if(iswdigit(fragment[i][k]))
+              {
+                num = num * 10;
+                num += (int) fragment[i][k] - 48;
+              }
+              else
+              {
+                correct = false;
+                break;
+              }
+            }
+            if(correct)
+            {
+              fragment[i] = fragment[i].substr(0, j) + numbers[num - 1];
+              substitute = true;
+              break;
+            }
+          }
+        }
+        if(substitute == false)
+        {
+          fragment[i] += L')';
+        }
       }
-    }    
+    }
   }
-  
+
   result = L"";
 
-  for(unsigned int i = 0, limit = fragmentos.size(); i != limit; i++)
+  for(unsigned int i = 0, limit = fragment.size(); i != limit; i++)
   {
-    result += fragmentos[i];
+    result += fragment[i];
   }
-  
+
   return result;
 }
 
 
 
 void
-State::pruneCompounds(int requiredSymbol, int separationSymbol, int compound_max_elements) 
+State::pruneCompounds(int requiredSymbol, int separationSymbol, int compound_max_elements)
 {
   int minNoOfCompoundElements = compound_max_elements;
   int *noOfCompoundElements = new int[state.size()];
 
   for(unsigned int i = 0; i<state.size(); i++)
   {
-    vector<int> seq = *state.at(i).sequence;
+    vector<pair<int, double>> seq = *state.at(i).sequence;
 
     if(lastPartHasRequiredSymbol(seq, requiredSymbol, separationSymbol))
     {
       int this_noOfCompoundElements = 0;
-      for (int j = seq.size()-2; j>0; j--) if (seq.at(j)==separationSymbol) this_noOfCompoundElements++;
+      for (int j = seq.size()-2; j>0; j--) if ((seq.at(j)).first==separationSymbol) this_noOfCompoundElements++;
       noOfCompoundElements[i] = this_noOfCompoundElements;
-      minNoOfCompoundElements = (minNoOfCompoundElements < this_noOfCompoundElements) ? 
+      minNoOfCompoundElements = (minNoOfCompoundElements < this_noOfCompoundElements) ?
                         minNoOfCompoundElements : this_noOfCompoundElements;
     }
     else
@@ -826,16 +877,16 @@ State::pruneCompounds(int requiredSymbol, int separationSymbol, int compound_max
 
 
 void
-State::pruneStatesWithForbiddenSymbol(int forbiddenSymbol) 
+State::pruneStatesWithForbiddenSymbol(int forbiddenSymbol)
 {
   vector<TNodeState>::iterator it = state.begin();
   while(it != state.end())
   {
-    vector<int> *seq = (*it).sequence;
+    vector<pair<int, double>> *seq = (*it).sequence;
     bool found = false;
     for(int i = seq->size()-1; i>=0; i--)
     {
-      if(seq->at(i) == forbiddenSymbol)
+      if((seq->at(i)).first == forbiddenSymbol)
       {
         i=-1;
         delete (*it).sequence;
@@ -853,13 +904,13 @@ State::pruneStatesWithForbiddenSymbol(int forbiddenSymbol)
 
 
 bool
-State::lastPartHasRequiredSymbol(const vector<int> &seq, int requiredSymbol, int separationSymbol) 
+State::lastPartHasRequiredSymbol(const vector<pair<int, double>> &seq, int requiredSymbol, int separationSymbol)
 {
   // state is final - it should be restarted it with all elements in stateset restart_state, with old symbols conserved
   bool restart=false;
   for(int n=seq.size()-1; n>=0; n--)
   {
-    int symbol=seq.at(n);
+    int symbol=(seq.at(n)).first;
     if(symbol==requiredSymbol)
     {
       restart=true;
@@ -875,7 +926,7 @@ State::lastPartHasRequiredSymbol(const vector<int> &seq, int requiredSymbol, int
 
 
 void
-State::restartFinals(const set<Node *> &finals, int requiredSymbol, State *restart_state, int separationSymbol) 
+State::restartFinals(const map<Node *, double> &finals, int requiredSymbol, State *restart_state, int separationSymbol)
 {
 
   for(unsigned int i=0;  i<state.size(); i++)
@@ -883,7 +934,7 @@ State::restartFinals(const set<Node *> &finals, int requiredSymbol, State *resta
     TNodeState state_i = state.at(i);
     // A state can be a possible final state and still have transitions
 
-    if(finals.count(state_i.where) > 0) 
+    if(finals.count(state_i.where) > 0)
     {
       bool restart = lastPartHasRequiredSymbol(*(state_i.sequence), requiredSymbol, separationSymbol);
       if(restart)
@@ -893,14 +944,14 @@ State::restartFinals(const set<Node *> &finals, int requiredSymbol, State *resta
           for(unsigned int j=0; j<restart_state->state.size(); j++)
           {
             TNodeState initst = restart_state->state.at(j);
-            vector<int> *tnvec = new vector<int>;
+            vector<pair<int, double>> *tnvec = new vector<pair<int, double>>;
 
             for(unsigned int k=0; k < state_i.sequence->size(); k++)
             {
               tnvec->push_back(state_i.sequence->at(k));
             }
             TNodeState tn(initst.where, tnvec, state_i.dirty);
-            tn.sequence->push_back(separationSymbol);
+            tn.sequence->push_back(make_pair(separationSymbol, 0.0000));
             state.push_back(tn);
           }
         }
@@ -912,17 +963,17 @@ State::restartFinals(const set<Node *> &finals, int requiredSymbol, State *resta
 
 
 wstring
-State::getReadableString(const Alphabet &a) 
+State::getReadableString(const Alphabet &a)
 {
   wstring retval = L"[";
 
   for(unsigned int i=0; i<state.size(); i++)
   {
-    vector<int>* seq = state.at(i).sequence;
+    vector<pair<int, double>>* seq = state.at(i).sequence;
     if(seq != NULL) for (unsigned int j=0; j<seq->size(); j++)
     {
       wstring ws = L"";
-      a.getSymbol(ws, seq->at(j));
+      a.getSymbol(ws, (seq->at(j)).first);
       retval.append(ws);
     }
 
@@ -934,4 +985,3 @@ State::getReadableString(const Alphabet &a)
   retval.append(L"]");
   return retval;
 }
-

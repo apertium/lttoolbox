@@ -29,7 +29,7 @@ XMLParseUtil::attrib(xmlTextReaderPtr reader, wstring const &name)
   {
     mystr += static_cast<char>(name[i]);
   }
- 
+
   xmlChar *attrname = xmlCharStrdup(mystr.c_str());
   xmlChar *myattr = xmlTextReaderGetAttribute(reader, attrname);
   wstring result = towstring(myattr);
@@ -50,7 +50,7 @@ XMLParseUtil::latin1(xmlChar const *input)
   int inputlen = xmlStrlen(input);
 
   unsigned char* output = new unsigned char[outputlen];
-  
+
   if(UTF8Toisolat1(output, &outputlen, input, &inputlen) != 0)
   {
   }
@@ -58,14 +58,14 @@ XMLParseUtil::latin1(xmlChar const *input)
   output[outputlen] = 0;
   string result = reinterpret_cast<char *>(output);
   delete[] output;
-  return result;  
+  return result;
 }
 
 wstring
 XMLParseUtil::towstring(xmlChar const * input)
-{ 
+{
   wstring result = L"";
-  
+
   for(int i = 0, limit = xmlStrlen(input); i != limit; i++)
   {
     int val = 0;
@@ -77,7 +77,7 @@ XMLParseUtil::towstring(xmlChar const * input)
     {
       val = (input[i] & 0x1F) << 6;
       i++;
-      val += input[i] & 0x7F;  
+      val += input[i] & 0x7F;
     }
     else if(((unsigned char) input[i] & 0xF0) == 0xE0)
     {
@@ -103,15 +103,15 @@ XMLParseUtil::towstring(xmlChar const * input)
     else
     {
       wcerr << L"UTF-8 invalid string" << endl;
-      exit(EXIT_FAILURE);  
+      exit(EXIT_FAILURE);
     }
-    
+
     result += static_cast<wchar_t>(val);
   }
   return result;
 }
 
-wstring 
+wstring
 XMLParseUtil::stows(string const &str)
 {
   wchar_t* result = new wchar_t[str.size()+1];
