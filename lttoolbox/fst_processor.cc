@@ -1568,6 +1568,22 @@ FSTProcessor::postgeneration_wrapper_null_flush(FILE *input, FILE *output)
 }
 
 void
+FSTProcessor::intergeneration_wrapper_null_flush(FILE *input, FILE *output)
+{
+  setNullFlush(false);
+  while (!feof(input))
+  {
+    intergeneration(input, output);
+    fputwc_unlocked(L'\0', output);
+    int code = fflush(output);
+    if (code != 0)
+    {
+      wcerr << L"Could not flush output " << errno << endl;
+    }
+  }
+}
+
+void
 FSTProcessor::transliteration_wrapper_null_flush(FILE *input, FILE *output)
 {
   setNullFlush(false);
@@ -2069,6 +2085,199 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
 	sf = L"";
 	skip_mode = true;
       }
+    }
+  }
+
+  // print remaining blanks
+  flushBlanks(output);
+}
+
+void
+FSTProcessor::intergeneration(FILE *input, FILE *output)
+{
+  if (getNullFlush())
+  {
+    intergeneration_wrapper_null_flush(input, output);
+  }
+
+  bool skip_mode = true;
+  State current_state = initial_state;
+  wstring target = L"";
+  wstring source = L"";
+  int last = 0;
+  set<wchar_t> empty_escaped_chars;
+
+  while (true)
+  {
+    wchar_t val = readPostgeneration(input);
+
+    if (val == L'~')
+    {
+      skip_mode = false;
+    }
+
+    if (skip_mode)
+    {
+      if (iswspace(val))
+      {
+        printSpace(val, output);
+      }
+      else
+      {
+        if (isEscaped(val))
+        {
+          fputwc_unlocked(L'\\', output);
+        }
+        fputwc_unlocked(val, output);
+      }
+    }
+    else
+    {
+      // test for final states
+      if (current_state.isFinal(all_finals))
+      {
+        bool firstupper = iswupper(source[1]);
+        bool uppercase = source.size() > 1 && firstupper && iswupper(source[2]);
+        target = current_state.filterFinals(all_finals, alphabet,
+                                        empty_escaped_chars,
+                                        uppercase, firstupper, 0);
+
+        // case of the beggining of the next word
+
+        wstring mybuf = L"";
+        for (size_t i = source.size(); i > 0; --i)
+        {
+          if (!isalpha(source[i - 1]))
+          {
+            break;
+          }
+          else
+          {
+            mybuf = source[i - 1] + mybuf;
+          }
+        }
+
+        if (mybuf.size() > 0)
+        {
+          bool myfirstupper = iswupper(mybuf[0]);
+          bool myuppercase = mybuf.size() > 1 && iswupper(mybuf[1]);
+
+          for (size_t i = target.size(); i > 0; --i)
+          {
+            if (!isalpha(target[i - 1]))
+            {
+              if (myfirstupper && i != target.size())
+              {
+                target[i] = towupper(target[i]);
+              }
+              else
+              {
+                target[i] = towlower(target[i]);
+              }
+              break;
+            }
+            else
+            {
+              if (myuppercase)
+              {
+                target[i - 1] = towupper(target[i - 1]);
+              }
+              else
+              {
+                target[i - 1] = towlower(target[i - 1]);
+              }
+            }
+          }
+        }
+
+        last = input_buffer.getPos();
+      }
+
+      if (val != L'\0')
+      {
+        if (!iswupper(val) || caseSensitive)
+        {
+          current_state.step(val);
+        }
+        else
+        {
+          current_state.step(val, towlower(val));
+        }
+      }
+
+      if (val != L'\0' && current_state.size() != 0)
+      {
+        alphabet.getSymbol(source, val);
+      }
+      else
+      {
+        if (target == L"") // no match
+        {
+          if (val == L'\0')
+          {
+            // flush source
+            fputws_unlocked(source.c_str(), output);
+          }
+          else
+          {
+            fputwc_unlocked(source[0], output);
+
+            unsigned int mark, limit;
+            for (mark = 1, limit = source.size(); mark < limit && source[mark] != L'~' ; mark++)
+            {
+              fputwc_unlocked(source[mark], output);
+            }
+
+            if (mark != source.size())
+            {
+              int back = source.size() - mark;
+              input_buffer.back(back);
+            }
+
+            if (val == L'~')
+            {
+              input_buffer.back(1);
+            } else {
+               fputwc_unlocked(val, output);
+            }
+          }
+        }
+        else
+        {
+          for(unsigned int i=1; i<target.size(); i++) {
+            wchar_t c = target[i];
+
+            if (iswspace(c))
+            {
+              printSpace(c, output);
+            }
+            else
+            {
+              if (isEscaped(c))
+              {
+                fputwc_unlocked(L'\\', output);
+              }
+              fputwc_unlocked(c, output);
+            }
+          }
+
+          if (val != L'\0')
+          {
+            input_buffer.setPos(last);
+            input_buffer.back(1);
+          }
+        }
+
+        current_state = initial_state;
+        target = L"";
+        source = L"";
+        skip_mode = true;
+      }
+    }
+
+    if (val == L'\0')
+    {
+      break;
     }
   }
 

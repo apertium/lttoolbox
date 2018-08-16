@@ -378,6 +378,7 @@ private:
   void generation_wrapper_null_flush(FILE *input, FILE *output,
                                      GenerationMode mode);
   void postgeneration_wrapper_null_flush(FILE *input, FILE *output);
+  void intergeneration_wrapper_null_flush(FILE *input, FILE *output);
   void transliteration_wrapper_null_flush(FILE *input, FILE *output);
 
   wstring compose(wstring const &lexforms, wstring const &queue) const;
@@ -404,6 +405,7 @@ public:
   void tm_analysis(FILE *input = stdin, FILE *output = stdout);
   void generation(FILE *input = stdin, FILE *output = stdout, GenerationMode mode = gm_unknown);
   void postgeneration(FILE *input = stdin, FILE *output = stdout);
+  void intergeneration(FILE *input = stdin, FILE *output = stdout);
   void transliteration(FILE *input = stdin, FILE *output = stdout);
   void decomposition(FILE *input = stdin, FILE *output = stdout);
   wstring biltrans(wstring const &input_word, bool with_delim = true);
