@@ -375,8 +375,8 @@ AttCompiler::write(FILE *output)
 {
 //  FILE* output = fopen(file_name, "w");
   fwrite(HEADER_LTTOOLBOX, 1, 4, output);
-  uint32_t features = 0;
-  Compression::multibyte_write(features, output);
+  uint64_t features = 0;
+  write_le(output, features);
 
   Transducer punct_fst = extract_transducer(PUNCT);
 

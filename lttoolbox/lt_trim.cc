@@ -49,7 +49,7 @@ read_fst(FILE *bin_file)
       char header[4]{};
       fread(header, 1, 4, bin_file);
       if (strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
-          auto features = Compression::multibyte_read(bin_file);
+          auto features = read_le<uint64_t>(bin_file);
           if (features >= LTF_UNKNOWN) {
               throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
           }

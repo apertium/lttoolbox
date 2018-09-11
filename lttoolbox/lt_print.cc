@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
       char header[4]{};
       fread(header, 1, 4, input);
       if (strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
-          auto features = Compression::multibyte_read(input);
+          auto features = read_le<uint64_t>(input);
           if (features >= LTF_UNKNOWN) {
               throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
           }
