@@ -68,7 +68,7 @@ EntryToken::setParadigm(wstring const &np)
 }
 
 void
-EntryToken::setSingleTransduction(list<int> const &pi, list<int> const &pd, double const &ew)
+EntryToken::setSingleTransduction(list<int> const &pi, list<int> const &pd, double const ew)
 {
   weight = ew;
   leftSide = pi;

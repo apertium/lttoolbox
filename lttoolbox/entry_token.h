@@ -107,7 +107,7 @@ public:
    * @param pd right part
    * @param ew entry weight
    */
-  void setSingleTransduction(list<int> const &pi, list<int> const &pd, double const &ew);
+  void setSingleTransduction(list<int> const &pi, list<int> const &pd, double const ew = 0);
 
   /**
    * Set regular expression.
