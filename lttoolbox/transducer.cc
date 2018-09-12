@@ -320,7 +320,12 @@ Transducer::determinize(int const epsilon_tag)
       }
       if(!isEmptyIntersection(Q_prime[it], finals_state))
       {
-        finals_prime.insert(make_pair(it, finals.find(it)->second));
+        double w = default_weight;
+        auto it3 = finals.find(it);
+        if (it3 != finals.end()) {
+          w = it3->second;
+        }
+        finals_prime.insert(make_pair(it, w));
       }
 
       map<pair<int, double>, set<int> > mymap;
