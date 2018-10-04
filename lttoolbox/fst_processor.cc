@@ -2166,6 +2166,7 @@ FSTProcessor::intergeneration(FILE *input, FILE *output)
         bool uppercase = source.size() > 1 && firstupper && iswupper(source[2]);
         target = current_state.filterFinals(all_finals, alphabet,
                                         empty_escaped_chars,
+                                        displayWeightsMode, maxAnalyses, maxWeightClasses,
                                         uppercase, firstupper, 0);
 
         // case of the beggining of the next word
