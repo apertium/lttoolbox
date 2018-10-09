@@ -1,71 +1,60 @@
-.TH lt-expand 1 2006-03-08 "" ""
-.SH NAME
-lt-expand \- This application is part of the lexical processing modules
-and tools (
-.B lttoolbox
-)
-.PP
-This tool is part of the apertium machine translation
-architecture: \fBhttp://www.apertium.org\fR.
-.SH SYNOPSIS
-.B lt-expand
-[
-.B \-a \fR|
-.B \-v \fR|
-.B \-l \fR|
-.B \-r \fR|
-.B \-h
-]
-dictionary_file [output_file]
-.PP
-.B lt-expand
-[
-.B \-\-alt \fR|
-.B \-\-var \fR|
-.B \-\-var\-left \fR|
-.B \-\-var\-right \fR|
-.B \-\-help
-]
-dictionary_file [output_file]
-.PP
-.SH DESCRIPTION
-.BR lt-expand
-Is the application responsible for expanding a dictionary into a
-simple list of input string-output string pairs by eliminating
-paradigms through substitution and unfolding.
-.PP
-The output goes to \fIoutput_file\fR if it is present or to standard
-output if it is missing.
-.PP
-.SH OPTIONS
-.TP
-.B \-a, \-\-alt
-Sets the value of the \fIalt\fR attribute to use in expansion
-.TP
-.B \-v, \-\-var
-Sets the value of the \fIv\fR attribute to use in expansion of monodixes
-.TP
-.B \-l, \-\-var\-left
-Sets the value of the \fIvl\fR attribute to use in expansion of bidixes
-.TP
-.B \-r, \-\-var\-right
-Sets the value of the \fIvr\fR attribute to use in expansion of bidixes
-.TP
-.B \-h, \-\-help
+.Dd March 8, 2006
+.Dt LT-EXPAND 1
+.Os Apertium
+.Sh NAME
+.Nm lt-expand
+.Nd dictionary expander for Apertium
+.Sh SYNOPSIS
+.Nm lt-expand
+.Op Fl a | v | l | r | h
+.Ar dictionary_file
+.Op Ar output_file
+.Sh DESCRIPTION
+.Nm lt-expand
+is the application responsible for expanding a dictionary
+into a simple list of input string-output string pairs
+by eliminating paradigms through substitution and unfolding.
+.Pp
+The output goes to
+.Ar output_file
+if it is present or to standard output if it is missing.
+.Sh OPTIONS
+.Bl -tag -width Ds
+.It Fl a , Fl Fl alt
+Sets the value of the
+.Sy alt
+attribute to use in expansion
+.It Fl v , Fl Fl var
+Sets the value of the
+.Sy v
+attribute to use in expansion of monodixes
+.It Fl l , Fl Fl var-left
+Sets the value of the
+.Sy vl
+attribute to use in expansion of bidixes
+.It Fl r , Fl Fl var-right
+Sets the value of the
+.Sy vr
+attribute to use in expansion of bidixes
+.It Fl h , Fl Fl help
 Prints a short help message
-.PP
-.SH FILES
-.B dictionary_file
+.El
+.Sh FILES
+.Bl -tag -width Ds
+.It Ar dictionary_file
 The input dictionary to expand.
-.PP
-.B output_file
+.It Ar output_file
 Text containing the expanded dictionary information.
-.SH SEE ALSO
-.I lt-proc\fR(1),
-.I lt-comp\fR(1),
-.I apertium-tagger\fR(1),
-.I apertium\fR(1).
-.SH BUGS
-Lots of...lurking in the dark and waiting for you!
-.SH AUTHOR
-(c) 2005,2006 Universitat d'Alacant / Universidad de Alicante.
+.El
+.Sh SEE ALSO
+.Xr apertium 1 ,
+.Xr apertium-tagger 1 ,
+.Xr lt-comp 1 ,
+.Xr lt-proc 1
+.Sh COPYRIGHT
+Copyright \(co 2005, 2006 Universitat d'Alacant / Universidad de Alicante.
+This is free software.
+You may redistribute copies of it under the terms of
+.Lk https://www.gnu.org/licenses/gpl.html the GNU General Public License .
+.Sh BUGS
+Many... lurking in the dark and waiting for you!

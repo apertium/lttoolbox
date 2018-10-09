@@ -1,97 +1,87 @@
-.TH lt-comp 1 2006-03-08 "" ""
-.SH NAME
-lt-comp \- This application is part of the lexical processing modules
-and tools (
-.B lttoolbox
-)
-.PP
-This tool is part of the apertium machine translation
-architecture: \fBhttp://www.apertium.org\fR.
-.SH SYNOPSIS
-.B lt-comp
-[
-.B \-a \fR|
-.B \-v \fR|
-.B \-l \fR|
-.B \-r \fR|
-.B \-h
-]
-[
-.B lr \fR|
-.B rl
-] dictionary_file output_file [acx_file]
-.PP
-.B lt-comp
-[
-.B \-\-alt \fR|
-.B \-\-var \fR|
-.B \-\-var\-left \fR|
-.B \-\-var\-right \fR|
-.B \-\-help
-]
-[
-.B lr \fR|
-.B rl
-] dictionary_file output_file [acx_file]
-.PP
-.SH DESCRIPTION
-.BR lt-comp
-Is the application responsible of compiling dictionaries used by
-\fBlt-proc\fR in \fIApertium\fR into a compact and efficient
-representation (a class of finite-state transducers called augmented
-letter transducers).
-.PP
-.SH OPTIONS
-.TP
-.B \-a, \-\-alt
-Sets the value of the \fIalt\fR attribute to use in compilation.
-
+.Dd March 8, 2006
+.Dt LT-COMP 1
+.Os Apertium
+.Sh NAME
+.Nm lt-comp
+.Nd augmented letter transducer compiler for Apertium
+.Sh SYNOPSIS
+.Nm lt-comp
+.Op Fl a | v | l | r | h
+.Cm lr | rl
+.Ar dictionary_file
+.Ar output_file
+.Op Ar acx_file
+.Sh DESCRIPTION
+.Nm lt-comp
+is the application responsible for compiling dictionaries used by
+.Xr lt-proc 1
+in Apertium into a compact and efficient representation
+(a class of finite-state transducers called augmented letter transducers).
+.Sh OPTIONS
+.Bl -tag -width Ds
+.It Fl a , Fl Fl alt
+Sets the value of the
+.Sy alt
+attribute to use in compilation.
+.Pp
 Note that if no value is set, all entries containing an \fIalt\fR
 attribute are omitted.
-.TP
-.B \-v, \-\-var
-Sets the value of the \fIv\fR attribute to use in compilation.
-This should only be used with monodixes; for bidixes, see \-l and \-r.
-
-Note that if no value is set, all entries containing a \fIv\fR
-attribute are considered to be \fIleft-to-right\fR.
-.TP
-.B \-l, \-\-var\-left
-Sets the value of the \fIvl\fR attribute for use in compilation of bidixes.
-"Left" here refers to the side of the dictionary, so this option is only valid
-in \fIrl\fR mode.
-.TP
-.B \-r, \-\-var\-right
-Sets the value of the \fIvr\fR attribute for use in compilation of bidixes.
-"Right" here refers to the side of the dictionary, so this option is only valid
-in \fIlr\fR mode.
-.TP
-.B \-h, \-\-help
-Prints a short help message
-.TP
-.B lr
+.It Fl v , Fl Fl var
+Sets the value of the
+.Sy v
+attribute to use in compilation.
+This should only be used with monodixes; for bidixes, see
+.Fl l
+and
+.Fl r .
+.Pp
+Note that if no value is set, all entries containing a
+.Sy v
+attribute are considered to be
+.Em left-to-right .
+.It Fl l , Fl Fl var-left
+Sets the value of the
+.Sy vl
+attribute for use in compilation of bidixes.
+.Dq Left
+here refers to the side of the dictionary, so this option is only valid in
+.Cm rl
+mode.
+.It Fl r , Fl Fl var-right
+Sets the value of the
+.Sy vr
+attribute for use in compilation of bidixes.
+.Dq Right
+here refers to the side of the dictionary, so this option is only valid in
+.Cm lr
+mode.
+.It Fl h , Fl Fl help
+Prints a short help message.
+.It Cm lr
 The resulting transducer will process dictionary entries
-\fIleft-to-right\fR.
-.TP
-.B rl
+.Em left-to-right .
+.It Cm rl
 The resulting transducer will process dictionary entries
-\fIright-to-left\fR.
-.SH FILES
-.B dictionary_file
+.Em right-to-left .
+.El
+.Sh FILES
+.Bl -tag -width Ds
+.It Ar dictionary_file
 The input dictionary.
-.PP
-.B output_file
+.It Ar output_file
 The compiled dictionary (a finite state transducer).
-.PP
-.B acx_file
+.It Ar acx_file
 Optional XML file of equivalent characters in monodices.
-
-.SH SEE ALSO
-.I lt-proc\fR(1),
-.I lt-expand\fR(1),
-.I apertium-tagger\fR(1),
-.I apertium\fR(1).
-.SH BUGS
-Lots of...lurking in the dark and waiting for you!
-.SH AUTHOR
-(c) 2005,2006 Universitat d'Alacant / Universidad de Alicante.
+.El
+.Sh SEE ALSO
+.Xr apertium 1 ,
+.Xr apertium-tagger 1 ,
+.Xr lt-expand 1 ,
+.Xr lt-proc 1
+.Sh COPYRIGHT
+Copyright \(co 2005, 2006 Universitat d'Alacant / Universidad de Alicante.
+This is free software.
+You may redistribute copies of it under the terms of
+.Lk https://www.gnu.org/licenses/gpl.html the GNU General Public License .
+.Sh BUGS
+Many... lurking in the dark and waiting for you!
