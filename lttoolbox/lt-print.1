@@ -1,34 +1,32 @@
-.TH lt-print 1 2006-03-08 "" ""
-.SH NAME
-lt-print \- This application is part of the lexical processing modules
-and tools (
-.B lttoolbox
-)
-.PP
-This tool is part of the apertium machine translation
-architecture: \fBhttp://www.apertium.org\fR.
-.SH SYNOPSIS
-.B lt-print
- bin_file
-.PP
-.SH DESCRIPTION
-.BR lt-print
-Is the application responsible for printing compiled dictionaries in
-ATT format.
-.PP
-.B bin_file
-The compiled input file .
-.PP
-.B output_file
-The transducer in ATT format .
-
-.SH SEE ALSO
-.I lt-comp\fR(1),
-.I lt-proc\fR(1),
-.I lt-expand\fR(1),
-.I apertium-tagger\fR(1),
-.I apertium\fR(1).
-.SH BUGS
+.Dd March 8, 2006
+.Dt LT-PRINT 1
+.Os Apertium
+.Sh NAME
+.Nm lt-print
+.Nd compiled dictionary printer for Apertium
+.Sh SYNOPSIS
+.Nm lt-print
+.Ar bin_file
+.Op Ar output_file
+.Sh DESCRIPTION
+.Nm lt-print
+is the application responsible for printing compiled dictionaries in ATT format.
+.Bl -tag -width Ds
+.It Ar bin_file
+The compiled input file.
+.It Ar output_file
+The transducer in ATT format.
+.El
+.Sh SEE ALSO
+.Xr apertium 1 ,
+.Xr apertium-tagger 1 ,
+.Xr lt-comp 1 ,
+.Xr lt-expand 1 ,
+.Xr lt-proc 1
+.Sh COPYRIGHT
+Copyright \(co 2005, 2006 Universitat d'Alacant / Universidad de Alicante.
+This is free software.
+You may redistribute copies of it under the terms of
+.Lk https://www.gnu.org/licenses/gpl.html the GNU General Public License .
+.Sh BUGS
 Currently requires a UTF-8 locale (and doesn't crash if it doesn't have one).
-.SH AUTHOR
-(c) 2005--2016 Universitat d'Alacant / Universidad de Alicante.
