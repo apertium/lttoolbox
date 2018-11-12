@@ -249,21 +249,21 @@ int main(int argc, char *argv[])
     FILE *in = fopen(argv[optind], "rb");
     if(in == NULL || ferror(in))
     {
-      wcerr << "Error: Cannot not open file '" << argv[optind] << "'." << endl << endl;
+      wcerr << "Error: Cannot open file '" << argv[optind] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
     input = fopen(argv[optind+1], "rb");
     if(input == NULL || ferror(input))
     {
-      wcerr << "Error: Cannot not open file '" << argv[optind+1] << "'." << endl << endl;
+      wcerr << "Error: Cannot open file '" << argv[optind+1] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
     output= fopen(argv[optind+2], "wb");
     if(output == NULL || ferror(output))
     {
-      wcerr << "Error: Cannot not open file '" << argv[optind+2] << "'." << endl << endl;
+      wcerr << "Error: Cannot open file '" << argv[optind+2] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
@@ -275,14 +275,14 @@ int main(int argc, char *argv[])
     FILE *in = fopen(argv[optind], "rb");
     if(in == NULL || ferror(in))
     {
-      wcerr << "Error: Cannot not open file '" << argv[optind] << "'." << endl << endl;
+      wcerr << "Error: Cannot open file '" << argv[optind] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
     input = fopen(argv[optind+1], "rb");
     if(input == NULL || ferror(input))
     {
-      wcerr << "Error: Cannot not open file '" << argv[optind+1] << "'." << endl << endl;
+      wcerr << "Error: Cannot open file '" << argv[optind+1] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
     FILE *in = fopen(argv[optind], "rb");
     if(in == NULL || ferror(in))
     {
-      wcerr << "Error: Cannot not open file '" << argv[optind] << "'." << endl << endl;
+      wcerr << "Error: Cannot open file '" << argv[optind] << "'." << endl << endl;
       exit(EXIT_FAILURE);
      }
     fstp.load(in);
