@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+ <alphabet/>
+ <sdefs>
+   <sdef n="n"/>
+   <sdef n="np"/>
+   <sdef n="m"/>
+   <sdef n="f"/>
+   <sdef n="pl"/>
+   <sdef n="def"/>
+ </sdefs>
+ <section id="main" type="standard">
+
+<e><p><l>kakene</l><r>kake<s n="n"/><s n="f"/><s n="pl"/><s n="def"/></r></p></e>
+<e><p><l>KK</l><r>KK<s n="np"/></r></p></e>
+
+<e><p><l>pc-ane</l><r>pc<s n="n"/><s n="m"/><s n="pl"/><s n="def"/></r></p></e>
+<e><p><l>PC-ane</l><r>PC<s n="n"/><s n="m"/><s n="pl"/><s n="def"/></r></p></e>
+
+ </section>
+</dictionary>

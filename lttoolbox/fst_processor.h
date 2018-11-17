@@ -161,6 +161,12 @@ private:
   bool caseSensitive;
 
   /**
+   * if true, prefer generating upper using case of dictionary lemma
+   * if we can, fallback to uppercasing
+   */
+  bool carefulCase;
+
+  /**
    * if true, uses the dictionary case, discarding surface case
    * information
    */
@@ -444,6 +450,7 @@ public:
   bool valid() const;
 
   void setCaseSensitiveMode(bool const value);
+  void setCarefulCaseMode(bool const value);
   void setDictionaryCaseMode(bool const value);
   void setBiltransSurfaceForms(bool const value);
   void setIgnoredChars(bool const value);

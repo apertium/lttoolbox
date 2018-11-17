@@ -5,6 +5,9 @@ import sys
 import unittest
 from proctest import ProcTest
 
+# These fail on some systems:
+#from null_flush_invalid_stream_format import *
+
 class ValidInput(unittest.TestCase, ProcTest):
     inputs = ["ab",
               "ABC jg",
@@ -92,5 +95,23 @@ class Intergeneration(unittest.TestCase, ProcTest):
     inputs = ["la dona ~dóna tot"]
     expectedOutputs = ["la dona dona tot"]
 
-# These fail on some systems:
-#from null_flush_invalid_stream_format import *
+class CarefulUnknownD(unittest.TestCase, ProcTest):
+    procdix = "data/careful-unknown-mono.dix"
+    procdir = "rl"
+    procflags = ["-C", "-d", "-z"]
+    inputs = ['^kake<n><f><pl><def>$ ^KAKE<n><f><pl><def>$ ^pc<n><m><pl><def>$ ^PC<n><m><pl><def>$']
+    expectedOutputs = ["kakene KAKENE pc-ane PC-ane"]
+
+class CarefulUnknownG(unittest.TestCase, ProcTest):
+    procdix = "data/careful-unknown-mono.dix"
+    procdir = "rl"
+    procflags = ["-C", "-g", "-z"]
+    inputs = ['^kake<n><f><pl><def>$ ^KAKE<n><f><pl><def>$ ^pc<n><m><pl><def>$ ^PC<n><m><pl><def>$']
+    expectedOutputs = ["kakene KAKENE pc-ane PC-ane"]
+
+class CarefulAmbig(unittest.TestCase, ProcTest):
+    procdix = "data/careful-ambig-mono.dix"
+    procdir = "rl"
+    procflags = ["-C", "-g", "-z"]
+    inputs = ['^KK<np>$ ^kk<np>$ ^kake<n><f><pl><def>$ ^KAKE<n><f><pl><def>$ ^pc<n><m><pl><def>$ ^PC<n><m><pl><def>$']
+    expectedOutputs = ["KK #kk kakene KAKENE pc-ane PC-ane"]

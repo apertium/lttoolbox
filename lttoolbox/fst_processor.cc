@@ -1877,7 +1877,6 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
           writeEscapedWithTags(sf, output);
           fputwc_unlocked(L'$', output);
         }
-
       }
       else
       {
@@ -1932,7 +1931,7 @@ FSTProcessor::generation(FILE *input, FILE *output, GenerationMode mode)
       {
         if(!alphabet.isTag(val) && iswupper(val) && !caseSensitive)
         {
-          if(mode == gm_carefulcase)
+          if(carefulCase)
           {
             current_state.step_careful(val, towlower(val));
           }
@@ -3521,6 +3520,12 @@ void
 FSTProcessor::setCaseSensitiveMode(bool const value)
 {
   caseSensitive = value;
+}
+
+void
+FSTProcessor::setCarefulCaseMode(bool const value)
+{
+  carefulCase = value;
 }
 
 void

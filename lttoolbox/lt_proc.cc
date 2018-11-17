@@ -38,7 +38,7 @@ using namespace std;
 void endProgram(char *name)
 {
   cout << basename(name) << ": process a stream with a letter transducer" << endl;
-  cout << "USAGE: " << basename(name) << " [ -a | -b | -c | -d | -e | -g | -n | -p | -x | -s | -t | -v | -h -z -w ] [-W] [-N N] [-L N] [ -i icx_file ] [ -r rcx_file ] fst_file [input_file [output_file]]" << endl;
+  cout << "USAGE: " << basename(name) << " [ -a | -b | -d | -e | -g | -n | -p | -x | -s | -t | -v | -h ] [-c] [-w] [-z] [-C] [-W] [-N N] [-L N] [ -i icx_file ] [ -r rcx_file ] fst_file [input_file [output_file]]" << endl;
   cout << "Options:" << endl;
 #if HAVE_GETOPT_LONG
   cout << "  -a, --analysis:          morphological analysis (default behavior)" << endl;
@@ -160,6 +160,10 @@ int main(int argc, char *argv[])
       fstp.setCaseSensitiveMode(true);
       break;
 
+    case 'C':
+      fstp.setCarefulCaseMode(true);
+      break;
+
     case 'i':
       fstp.setIgnoredChars(true);
       fstp.parseICX(optarg);
@@ -168,10 +172,10 @@ int main(int argc, char *argv[])
     case 'r':
       fstp.setRestoreChars(true);
       fstp.parseRCX(optarg);
+      break;
 
     case 'I':
       fstp.setUseDefaultIgnoredChars(false);
-
       break;
 
     case 'W':
@@ -211,7 +215,6 @@ int main(int argc, char *argv[])
     case 'x':
     case 't':
     case 's':
-    case 'C':
       if(cmd == 0)
       {
         cmd = c;
@@ -342,12 +345,6 @@ int main(int argc, char *argv[])
         fstp.initGeneration();
         checkValidity(fstp);
         fstp.generation(input, output, gm_tagged_nm);
-        break;
-
-      case 'C':
-        fstp.initGeneration();
-        checkValidity(fstp);
-        fstp.generation(input, output, gm_carefulcase);
         break;
 
       case 'p':
