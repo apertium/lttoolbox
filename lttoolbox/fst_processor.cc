@@ -2169,54 +2169,6 @@ FSTProcessor::intergeneration(FILE *input, FILE *output)
                                         displayWeightsMode, maxAnalyses, maxWeightClasses,
                                         uppercase, firstupper, 0);
 
-        // case of the beggining of the next word
-
-        wstring mybuf = L"";
-        for (size_t i = source.size(); i > 0; --i)
-        {
-          if (!isalpha(source[i - 1]))
-          {
-            break;
-          }
-          else
-          {
-            mybuf = source[i - 1] + mybuf;
-          }
-        }
-
-        if (mybuf.size() > 0)
-        {
-          bool myfirstupper = iswupper(mybuf[0]);
-          bool myuppercase = mybuf.size() > 1 && iswupper(mybuf[1]);
-
-          for (size_t i = target.size(); i > 0; --i)
-          {
-            if (!isalpha(target[i - 1]))
-            {
-              if (myfirstupper && i != target.size())
-              {
-                target[i] = towupper(target[i]);
-              }
-              else
-              {
-                target[i] = towlower(target[i]);
-              }
-              break;
-            }
-            else
-            {
-              if (myuppercase)
-              {
-                target[i - 1] = towupper(target[i - 1]);
-              }
-              else
-              {
-                target[i - 1] = towlower(target[i - 1]);
-              }
-            }
-          }
-        }
-
         last = input_buffer.getPos();
       }
 
