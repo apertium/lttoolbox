@@ -2150,11 +2150,14 @@ FSTProcessor::intergeneration(FILE *input, FILE *output)
       }
       else
       {
-        if (isEscaped(val))
+        if(val != L'\0')
         {
-          fputwc_unlocked(L'\\', output);
+          if (isEscaped(val))
+          {
+            fputwc_unlocked(L'\\', output);
+          }
+          fputwc_unlocked(val, output);
         }
-        fputwc_unlocked(val, output);
       }
     }
     else
