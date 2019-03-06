@@ -6,8 +6,10 @@
 .Nd lexical processor for Apertium
 .Sh SYNOPSIS
 .Nm lt-proc
-.Op Fl a | b | o | c | d | e | g | h | p | s | t | v | h
-.Op Fl zw
+.Op Fl a | b | o | c | d | e | g | h | p | s | t | v | h | z | w
+.Op Fl W
+.Op Fl N N
+.Op Fl L N
 .Op Fl i Ar icx_file
 .Ar fst_file
 .Op Ar input_file Op Ar output_file
@@ -146,6 +148,14 @@ Ignores characters specified in the file
 .Ar icx_file
 .It Fl z , Fl Fl null-flush
 Flush output on the null character
+.It Fl C , Fl Fl careful-case
+Use dictionary case if present, else surface
+.It Fl N , Fl Fl analyses
+Output no more than N analyses (if the transducer is weighted, the N best analyses)
+.It Fl L , Fl Fl weight-classes
+Output no more than N best weight classes (where analyses with equal weight constitute a class)
+.It Fl W , Fl Fl show-weights
+Print final analysis weights (if any)
 .It Fl v , Fl Fl version
 Display the version number.
 .It Fl h , Fl Fl help
