@@ -882,14 +882,11 @@ FSTProcessor::lsx(FILE *input, FILE *output)
 
   alive_states.push_back(initial_state);
 
-  while(!feof(input))
-  {
-    int val = fgetwc_unlocked(input);
+  int val = -1;
 
-    if (val == 0) {
-      blankqueue.push(blank);
-      break;
-    }
+  while(!feof(input) && val != 0)
+  {
+    val = fgetwc_unlocked(input);
 
     if(val == L'+' && isEscaped(val) && !outOfWord)
     {
@@ -897,7 +894,7 @@ FSTProcessor::lsx(FILE *input, FILE *output)
       plus_thing = true;
     }
 
-    if((val == L'^' && isEscaped(val) && outOfWord) || feof(input))
+    if((val == L'^' && isEscaped(val) && outOfWord) || feof(input) || val == 0)
     {
       blankqueue.push(blank);
 
@@ -940,7 +937,7 @@ FSTProcessor::lsx(FILE *input, FILE *output)
       continue;
     }
 
-    //wcerr << L"\n[!] " << (wchar_t)val << L" ||| " << outOfWord << endl;
+    // wcerr << L"\n[!] " << (wchar_t)val << L" ||| " << outOfWord << endl;
 
     if(outOfWord)
     {
@@ -948,7 +945,7 @@ FSTProcessor::lsx(FILE *input, FILE *output)
       continue;
     }
 
-    if((feof(input) || val == L'$') && !outOfWord) // && isEscaped(val)
+    if((val == 0 || feof(input) || val == L'$') && !outOfWord) // && isEscaped(val)
     {
       new_states.clear();
       for(vector<State>::const_iterator it = alive_states.begin(); it != alive_states.end(); it++)
