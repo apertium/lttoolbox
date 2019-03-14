@@ -129,6 +129,7 @@
       <xs:attribute name="v"/>
       <xs:attribute name="vl"/>
       <xs:attribute name="vr"/>
+      <xs:attribute name="w"/>
     </xs:complexType>
   </xs:element>
   <!-- entry -->
@@ -158,6 +159,7 @@
         <xs:element ref="j"/>
         <xs:element ref="a"/>
       </xs:choice>
+      <xs:attribute name="c"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="f">
@@ -180,6 +182,7 @@
         <xs:element ref="l"/>
         <xs:element ref="r"/>
       </xs:sequence>
+      <xs:attribute name="c"/>
     </xs:complexType>
   </xs:element>
   <!-- pair of strings -->
@@ -192,6 +195,7 @@
         <xs:element ref="j"/>
         <xs:element ref="s"/>
       </xs:choice>
+      <xs:attribute name="c"/>
     </xs:complexType>
   </xs:element>
   <!-- left part of p -->
@@ -204,6 +208,7 @@
         <xs:element ref="j"/>
         <xs:element ref="s"/>
       </xs:choice>
+      <xs:attribute name="c"/>
     </xs:complexType>
   </xs:element>
   <!-- right part of p -->
