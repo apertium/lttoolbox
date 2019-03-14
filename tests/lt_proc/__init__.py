@@ -85,5 +85,12 @@ class AllEntryWeights(unittest.TestCase, ProcTest):
     procflags = ["-W"]
     inputs = ["nanow"]
     expectedOutputs = ["^nanow/nan<n><ma><du><gen><W:32.120000>/nan<n><ma><du><acc><W:34.120000>/nan<n><ma><pl><gen><W:39.120000>/nan<n><ma><pl><acc><W:41.120000>$"]
+
+class Intergeneration(unittest.TestCase, ProcTest):
+    procdix = "data/intergen.dix"
+    procflags = ["-x"]
+    inputs = ["la dona ~dóna tot"]
+    expectedOutputs = ["la dona dona tot"]
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *

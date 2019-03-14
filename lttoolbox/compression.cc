@@ -307,8 +307,8 @@ Compression::long_multibyte_write(const double& value, FILE *output)
 {
   int exp = 0;
 
-  unsigned int mantissa = static_cast<unsigned int>(0x40000000 * frexp(value, &exp));
-  unsigned int exponent = static_cast<unsigned int>(exp);
+  unsigned int mantissa = static_cast<unsigned int>(static_cast<int>(0x40000000 * frexp(value, &exp)));
+  unsigned int exponent = static_cast<unsigned int>(static_cast<int>(exp));
 
   if(mantissa < 0x04000000)
   {
@@ -344,8 +344,8 @@ Compression::long_multibyte_write(const double& value, ostream &output)
 {
   int exp = 0;
 
-  unsigned int mantissa = static_cast<unsigned int>(0x40000000 * frexp(value, &exp));
-  unsigned int exponent = static_cast<unsigned int>(exp);
+  unsigned int mantissa = static_cast<unsigned int>(static_cast<int>(0x40000000 * frexp(value, &exp)));
+  unsigned int exponent = static_cast<unsigned int>(static_cast<int>(exp));
 
   if(mantissa < 0x04000000)
   {

@@ -120,6 +120,7 @@
         </xs:simpleType>
       </xs:attribute>
       <xs:attribute name="lm"/>
+      <xs:attribute name="w"/>
       <xs:attribute name="a"/>
       <xs:attribute name="c"/>
       <xs:attribute name="i"/>

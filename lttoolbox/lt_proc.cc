@@ -38,7 +38,7 @@ using namespace std;
 void endProgram(char *name)
 {
   cout << basename(name) << ": process a stream with a letter transducer" << endl;
-  cout << "USAGE: " << basename(name) << " [ -a | -b | -c | -d | -e | -g | -n | -p | -x | -s | -t | -v | -h -z -w ] [-W] [-N N] [-L N] [ -i icx_file ] [ -r rcx_file ] fst_file [input_file [output_file]]" << endl;
+  cout << "USAGE: " << basename(name) << " [ -a | -b | -c | -d | -e | -g | -n | -p | -x | -s | -t | -v | -h | -z | -w ] [-W] [-N N] [-L N] [ -i icx_file ] [ -r rcx_file ] fst_file [input_file [output_file]]" << endl;
   cout << "Options:" << endl;
 #if HAVE_GETOPT_LONG
   cout << "  -a, --analysis:          morphological analysis (default behavior)" << endl;
@@ -249,21 +249,21 @@ int main(int argc, char *argv[])
     FILE *in = fopen(argv[optind], "rb");
     if(in == NULL || ferror(in))
     {
-      wcerr << "Error: Cannot not open file '" << argv[optind] << "'." << endl << endl;
+      wcerr << "Error: Cannot open file '" << argv[optind] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
     input = fopen(argv[optind+1], "rb");
     if(input == NULL || ferror(input))
     {
-      wcerr << "Error: Cannot not open file '" << argv[optind+1] << "'." << endl << endl;
+      wcerr << "Error: Cannot open file '" << argv[optind+1] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
     output= fopen(argv[optind+2], "wb");
     if(output == NULL || ferror(output))
     {
-      wcerr << "Error: Cannot not open file '" << argv[optind+2] << "'." << endl << endl;
+      wcerr << "Error: Cannot open file '" << argv[optind+2] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
@@ -275,14 +275,14 @@ int main(int argc, char *argv[])
     FILE *in = fopen(argv[optind], "rb");
     if(in == NULL || ferror(in))
     {
-      wcerr << "Error: Cannot not open file '" << argv[optind] << "'." << endl << endl;
+      wcerr << "Error: Cannot open file '" << argv[optind] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
     input = fopen(argv[optind+1], "rb");
     if(input == NULL || ferror(input))
     {
-      wcerr << "Error: Cannot not open file '" << argv[optind+1] << "'." << endl << endl;
+      wcerr << "Error: Cannot open file '" << argv[optind+1] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
     FILE *in = fopen(argv[optind], "rb");
     if(in == NULL || ferror(in))
     {
-      wcerr << "Error: Cannot not open file '" << argv[optind] << "'." << endl << endl;
+      wcerr << "Error: Cannot open file '" << argv[optind] << "'." << endl << endl;
       exit(EXIT_FAILURE);
      }
     fstp.load(in);

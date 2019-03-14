@@ -171,13 +171,13 @@ int main(int argc, char *argv[])
   FILE *analyser = fopen(argv[1], "rb");
   if(!analyser)
   {
-    wcerr << "Error: Cannot not open file '" << argv[1] << "'." << endl << endl;
+    wcerr << "Error: Cannot open file '" << argv[1] << "'." << endl << endl;
     exit(EXIT_FAILURE);
   }
   FILE *bidix = fopen(argv[2], "rb");
   if(!bidix)
   {
-    wcerr << "Error: Cannot not open file '" << argv[2] << "'." << endl << endl;
+    wcerr << "Error: Cannot open file '" << argv[2] << "'." << endl << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
   FILE *output = fopen(argv[3], "wb");
   if(!output)
   {
-    wcerr << "Error: Cannot not open file '" << argv[3] << "'." << endl << endl;
+    wcerr << "Error: Cannot open file '" << argv[3] << "'." << endl << endl;
     exit(EXIT_FAILURE);
   }
 
