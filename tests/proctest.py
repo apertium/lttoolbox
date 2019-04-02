@@ -66,6 +66,8 @@ class ProcTest():
                               stdout=PIPE,
                               stderr=PIPE)
 
+            self.assertEqual(len(self.inputs),
+                             len(self.expectedOutputs))
             for inp, exp in zip(self.inputs, self.expectedOutputs):
                 self.assertEqual(self.communicateFlush(inp+"[][\n]"),
                                  exp+"[][\n]")

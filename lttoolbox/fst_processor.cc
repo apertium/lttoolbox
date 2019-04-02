@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 Universitat d'Alacant / Universidad de Alicante
+ * Copyright (C) 2005-2019 Universitat d'Alacant / Universidad de Alicante
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -284,6 +284,9 @@ FSTProcessor::readAnalysis(FILE *input)
       default:
         streamError();
     }
+  }
+  if(val == L' ') {
+    blankqueue.push(L" ");
   }
 
   input_buffer.add(val);
@@ -631,7 +634,7 @@ FSTProcessor::readBilingual(FILE *input, FILE *output)
 void
 FSTProcessor::flushBlanks(FILE *output)
 {
-  for(unsigned int i = blankqueue.size(); i > 0; i--)
+  for(size_t i = blankqueue.size(); i > 0; i--)
   {
     fputws_unlocked(blankqueue.front().c_str(), output);
     blankqueue.pop();
@@ -714,6 +717,22 @@ FSTProcessor::writeEscaped(wstring const &str, FILE *output)
 }
 
 void
+FSTProcessor::writeEscapedPopBlanks(wstring const &str, FILE *output)
+{
+  for(unsigned int i = 0, limit = str.size(); i < limit; i++)
+  {
+    if(escaped_chars.find(str[i]) != escaped_chars.end())
+    {
+      fputwc_unlocked(L'\\', output);
+    }
+    fputwc_unlocked(str[i], output);
+    if (str[i] == L' ' && blankqueue.front() == L" ") {
+      blankqueue.pop();
+    }
+  }
+}
+
+void
 FSTProcessor::writeEscapedWithTags(wstring const &str, FILE *output)
 {
   for(unsigned int i = 0, limit = str.size(); i < limit; i++)
@@ -739,6 +758,15 @@ FSTProcessor::printWord(wstring const &sf, wstring const &lf, FILE *output)
 {
   fputwc_unlocked(L'^', output);
   writeEscaped(sf, output);
+  fputws_unlocked(lf.c_str(), output);
+  fputwc_unlocked(L'$', output);
+}
+
+void
+FSTProcessor::printWordPopBlank(wstring const &sf, wstring const &lf, FILE *output)
+{
+  fputwc_unlocked(L'^', output);
+  writeEscapedPopBlanks(sf, output);
   fputws_unlocked(lf.c_str(), output);
   fputwc_unlocked(L'$', output);
 }
@@ -782,7 +810,8 @@ FSTProcessor::printSpace(wchar_t const val, FILE *output)
 {
   if(blankqueue.size() > 0)
   {
-    flushBlanks(output);
+    fputws_unlocked(blankqueue.front().c_str(), output);
+    blankqueue.pop();
   }
   else
   {
@@ -1409,8 +1438,8 @@ FSTProcessor::analysis(FILE *input, FILE *output)
       }
       else if(last_postblank)
       {
-        printWord(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
-                  lf, output);
+        printWordPopBlank(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
+                          lf, output);
         fputwc_unlocked(L' ', output);
         input_buffer.setPos(last);
         input_buffer.back(1);
@@ -1418,15 +1447,15 @@ FSTProcessor::analysis(FILE *input, FILE *output)
       else if(last_preblank)
       {
         fputwc_unlocked(L' ', output);
-        printWord(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
-                  lf, output);
+        printWordPopBlank(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
+                          lf, output);
         input_buffer.setPos(last);
         input_buffer.back(1);
       }
       else if(last_incond)
       {
-        printWord(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
-                  lf, output);
+        printWordPopBlank(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
+                          lf, output);
         input_buffer.setPos(last);
         input_buffer.back(1);
       }
@@ -1519,8 +1548,8 @@ FSTProcessor::analysis(FILE *input, FILE *output)
       }
       else
       {
-        printWord(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
-                  lf, output);
+        printWordPopBlank(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
+                          lf, output);
         input_buffer.setPos(last);
         input_buffer.back(1);
       }

@@ -92,5 +92,22 @@ class Intergeneration(unittest.TestCase, ProcTest):
     inputs = ["la dona ~dóna tot"]
     expectedOutputs = ["la dona dona tot"]
 
+class GardenPathMwe(unittest.TestCase, ProcTest):
+    procdix = "data/gardenpath-mwe.dix"
+    inputs          = ["x[ <br/> ]opp.",
+                        "legge opp[<br/>]x.",
+                       "y[A]x",
+                        "[A]y x",
+                        "legge opp[<br/>]",
+                        "legge[][\n]L[<\/p>\n]",
+                       ]
+    expectedOutputs = ["^x/*x$[ <br/> ]^opp/opp<pr>$.",
+                        "^legge/legge<vblex><inf>$ ^opp/opp<pr>$[<br/>]^x/*x$.",
+                       "^y/*y$[A]^x/*x$",
+                        "[A]^y/*y$ ^x/*x$",
+                        "^legge/legge<vblex><inf>$ ^opp/opp<pr>$[<br/>]",
+                        "^legge/legge<vblex><inf>$[][\n]^L/*L$[<\/p>\n]",
+                       ]
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *
