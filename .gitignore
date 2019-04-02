@@ -1,5 +1,6 @@
 *.pyc
-**.deps/
+**/*.deps/
+/.ccls-cache/
 /*.pc
 /aclocal.m4
 /autom4te.cache
@@ -57,3 +58,16 @@
 *.out
 *.app
 
+/compile_commands.json
+/lttoolbox/lt-comp
+/lttoolbox/lt-proc
+/lttoolbox/lt-trim
+/lttoolbox/Makefile
+/lttoolbox/Makefile.in
+/lttoolbox/lt-tmxcomp
+/lttoolbox/lt-print
+/lttoolbox/stamp-h1
+/lttoolbox/lttoolbox_config.h.in
+/lttoolbox/lttoolbox_config.h
+/lttoolbox/lt-tmxproc
+/lttoolbox/lt-expand
