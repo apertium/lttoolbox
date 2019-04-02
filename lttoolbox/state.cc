@@ -600,6 +600,9 @@ State::filterFinals(map<Node *, double> const &finals,
           cost += ((*(state[i].sequence))[j]).second;
         }
       }
+
+      // Add the weight of the final state
+      cost += (*(finals.find(state[i].where))).second;
       response.push_back(make_pair(result, cost));
     }
   }
