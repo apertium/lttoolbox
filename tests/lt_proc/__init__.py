@@ -60,13 +60,13 @@ class PrintWeights(unittest.TestCase, ProcTest):
     procdix = "data/cat-weight.att"
     procflags = ["-W"]
     inputs = ["cat"]
-    expectedOutputs = ["^cat/cat+n<W:11.002748>/cat+v<W:12.034480>$"]
+    expectedOutputs = ["^cat/cat+n<W:11.528235>/cat+v<W:12.559967>$"]
 
 class PrintWeightsNegative(unittest.TestCase, ProcTest):
     procdix = "data/cat-weight-negative.att"
     procflags = ["-W"]
     inputs = ["cat"]
-    expectedOutputs = ["^cat/cat+n<W:9.353620>/cat+v<W:10.385352>$"]
+    expectedOutputs = ["^cat/cat+n<W:8.828133>/cat+v<W:9.859865>$"]
 
 class PrintNAnalyses(unittest.TestCase, ProcTest):
     procdix = "data/cat-weight.att"
