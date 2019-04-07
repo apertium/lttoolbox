@@ -810,8 +810,7 @@ FSTProcessor::printSpace(wchar_t const val, FILE *output)
 {
   if(blankqueue.size() > 0)
   {
-    fputws_unlocked(blankqueue.front().c_str(), output);
-    blankqueue.pop();
+    flushBlanks(output);
   }
   else
   {
@@ -1425,7 +1424,15 @@ FSTProcessor::analysis(FILE *input, FILE *output)
       {
         if(iswspace(val))
         {
-          printSpace(val, output);
+          if (blankqueue.size() > 0)
+          {
+            fputws_unlocked(blankqueue.front().c_str(), output);
+            blankqueue.pop();
+          }
+          else
+          {
+            fputwc_unlocked(val, output);
+          }
         }
         else
         {
