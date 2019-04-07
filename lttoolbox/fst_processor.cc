@@ -716,20 +716,25 @@ FSTProcessor::writeEscaped(wstring const &str, FILE *output)
   }
 }
 
-void
+size_t
 FSTProcessor::writeEscapedPopBlanks(wstring const &str, FILE *output)
 {
-  for(unsigned int i = 0, limit = str.size(); i < limit; i++)
+  size_t postpop = 0;
+  for (unsigned int i = 0, limit = str.size(); i < limit; i++)
   {
-    if(escaped_chars.find(str[i]) != escaped_chars.end())
-    {
+    if (escaped_chars.find(str[i]) != escaped_chars.end()) {
       fputwc_unlocked(L'\\', output);
     }
     fputwc_unlocked(str[i], output);
-    if (str[i] == L' ' && blankqueue.front() == L" ") {
-      blankqueue.pop();
+    if (str[i] == L' ') {
+      if (blankqueue.front() == L" ") {
+        blankqueue.pop();
+      } else {
+        postpop++;
+      }
     }
   }
+  return postpop;
 }
 
 void
@@ -766,9 +771,14 @@ void
 FSTProcessor::printWordPopBlank(wstring const &sf, wstring const &lf, FILE *output)
 {
   fputwc_unlocked(L'^', output);
-  writeEscapedPopBlanks(sf, output);
+  size_t postpop = writeEscapedPopBlanks(sf, output);
   fputws_unlocked(lf.c_str(), output);
   fputwc_unlocked(L'$', output);
+  while (postpop-- && blankqueue.size() > 0)
+  {
+    fputws(blankqueue.front().c_str(), output);
+    blankqueue.pop();
+  }
 }
 
 void

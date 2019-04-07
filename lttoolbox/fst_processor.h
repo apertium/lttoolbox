@@ -333,12 +333,14 @@ private:
 
   /**
    * Write a string to an output stream.
-   * If we print a space, we may pop a space from blankqueue.
+   * If we print a space, we may pop a space from blankqueue
+   * immediately, otherwise it should be printed afterwards.
    *
    * @param str the string to write, escaping characters
    * @param output the stream to write in
+   * @return how many blanks to pop and print after printing lu
    */
-  void writeEscapedPopBlanks(wstring const &str, FILE *output);
+  size_t writeEscapedPopBlanks(wstring const &str, FILE *output);
 
   /**
    * Write a string to an output stream, escaping all escapable characters

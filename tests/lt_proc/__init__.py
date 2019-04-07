@@ -101,12 +101,28 @@ class GardenPathMwe(unittest.TestCase, ProcTest):
                         "legge opp[<br/>]",
                         "legge[][\n]L[<\/p>\n]",
                        ]
-    expectedOutputs = ["^x/*x$[ <br/> ]^opp/opp<pr>$.",
-                        "^legge/legge<vblex><inf>$ ^opp/opp<pr>$[<br/>]^x/*x$.",
+    expectedOutputs = ["^x/*x$[ <br/> ]^opp/opp<pr>$^./.<sent>$",
+                        "^legge/legge<vblex><inf>$ ^opp/opp<pr>$[<br/>]^x/*x$^./.<sent>$",
                        "^y/*y$[A]^x/*x$",
                         "[A]^y/*y$ ^x/*x$",
                         "^legge/legge<vblex><inf>$ ^opp/opp<pr>$[<br/>]",
                         "^legge/legge<vblex><inf>$[][\n]^L/*L$[<\/p>\n]",
+                       ]
+
+class GardenPathMweNewlines(unittest.TestCase, ProcTest):
+    procdix = "data/gardenpath-mwe.dix"
+    inputs          = ["""St.[
+]Petersburg[
+]X y.[][
+
+]F G.[][
+]"""]
+    expectedOutputs = ["""^St. Petersburg/St. Petersburg<np>$[
+][
+]^X y/X y<np>$^./.<sent>$[][
+
+]^F/F<np>$ ^G/G<np>$^./.<sent>$[][
+]"""
                        ]
 
 # These fail on some systems:
