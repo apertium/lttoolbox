@@ -837,7 +837,7 @@ FSTProcessor::isEscaped(wchar_t const c) const
 bool
 FSTProcessor::isAlphabetic(wchar_t const c) const
 {
-  return alphabetic_chars.find(c) != alphabetic_chars.end();
+  return (bool)std::iswalnum(c) || alphabetic_chars.find(c) != alphabetic_chars.end();
 }
 
 void
