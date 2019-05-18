@@ -455,7 +455,6 @@ public:
   void postgeneration(FILE *input = stdin, FILE *output = stdout);
   void intergeneration(FILE *input = stdin, FILE *output = stdout);
   void transliteration(FILE *input = stdin, FILE *output = stdout);
-  void decomposition(FILE *input = stdin, FILE *output = stdout);
   wstring biltrans(wstring const &input_word, bool with_delim = true);
   wstring biltransfull(wstring const &input_word, bool with_delim = true);
   void bilingual(FILE *input = stdin, FILE *output = stdout);
