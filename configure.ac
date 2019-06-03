@@ -142,4 +142,12 @@ static_assert(!is_same<size_t,uint64_t>::value, "size_t == uint64_t");
 
 AM_PATH_PYTHON([2], [], [AC_MSG_WARN([Can't run 'make test' without Python installed.])])
 
+AC_CONFIG_FILES([
+        python/Makefile
+        python/setup.py
+        ])
+AX_PKG_SWIG(4.0.0) # check swig version
+AX_SWIG_ENABLE_CXX # fill some variable usefull later
+AX_SWIG_PYTHON # same
+
 AC_OUTPUT([Makefile lttoolbox.pc lttoolbox/Makefile])
