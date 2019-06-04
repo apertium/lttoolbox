@@ -1,2 +1,0 @@
-- add python & swig checkers in config.ac from libdivun
-- 

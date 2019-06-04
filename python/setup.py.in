@@ -18,28 +18,29 @@ def getenv_list(var_name):
 def get_sources():
     from os import path
     sources = ['analysis_wrap.cpp']
-    cc = 'alphabet.cc compression.cc fst_processor.cc lt_locale.cc node.cc state.cc trans_exe.cc xml_parse_util.cc' 
+    cc = 'alphabet.cc compression.cc fst_processor.cc lt_locale.cc \
+        node.cc state.cc trans_exe.cc xml_parse_util.cc' 
     rel_path = '@top_srcdir@/lttoolbox/'
     sources.extend([path.join(rel_path, f) for f in cc.split()])
     return sources
 
 
 analysis_module = Extension(
-        '_analysis',
-        sources=get_sources(),
-        include_dirs=['@top_srcdir@', '/usr/include/libxml2'],
-        library_dirs=['@top_srcdir@/lttoolbox/.libs', '/usr/include/libxml2'],
-        extra_compile_args=getenv_list('CPPFLAGS') + getenv_list('CXXFLAGS'),
-        extra_link_args= (getenv_list('LDFLAGS')) + ['-lxml2'])
+    '_analysis',
+    sources=get_sources(),
+    include_dirs=['@top_srcdir@', '/usr/include/libxml2'],
+    library_dirs=['/usr/include/libxml2'],
+    extra_compile_args=getenv_list('CPPFLAGS') + getenv_list('CXXFLAGS'),
+    extra_link_args=getenv_list('LDFLAGS') + ['-lxml2'])
 
 
 setup(name='python-@PACKAGE@',
-      version='@PACKAGE_VERSION@',
-      description='SWIG interface to @PACKAGE_NAME@',
-      long_description="SWIG interface to @PACKAGE_NAME@ for use in apertium-python",
-      # TODO: author, maintainer, url
-      author_email='@PACKAGE_BUGREPORT@',
-      license='GPL-3.0+',
-      maintainer_email='@PACKAGE_BUGREPORT@',
-      py_modules=['analysis'],
-      ext_modules=[analysis_module])
+    version='@PACKAGE_VERSION@',
+    description='SWIG interface to @PACKAGE_NAME@',
+    long_description="SWIG interface to @PACKAGE_NAME@ for use in apertium-python",
+    # TODO: author, maintainer, url
+    author_email='@PACKAGE_BUGREPORT@',
+    license='GPL-3.0+',
+    maintainer_email='@PACKAGE_BUGREPORT@',
+    py_modules=['analysis'],
+    ext_modules=[analysis_module])
