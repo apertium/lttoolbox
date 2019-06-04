@@ -4,7 +4,17 @@
 Setup for SWIG Python bindings for lttoolbox
 """
 
-from distutils.core import setup, Extension
+from setuptools import Extension, setup
+from distutils.command.build import build
+
+
+class CustomBuild(build):
+    sub_commands = [
+        ('build_ext', build.has_ext_modules),
+        ('build_py', build.has_pure_modules),
+        ('build_clib', build.has_c_libraries),
+        ('build_scripts', build.has_scripts),
+    ]
 
 
 def getenv_list(var_name):
@@ -15,26 +25,28 @@ def getenv_list(var_name):
     else:
         return []
 
+
 def get_sources():
     from os import path
     sources = ['analysis_wrap.cpp']
-    cc = 'alphabet.cc compression.cc fst_processor.cc lt_locale.cc \
-        node.cc state.cc trans_exe.cc xml_parse_util.cc' 
+    cc_sources = 'alphabet.cc compression.cc fst_processor.cc\
+         lt_locale.cc node.cc state.cc trans_exe.cc xml_parse_util.cc'
     rel_path = '@top_srcdir@/lttoolbox/'
-    sources.extend([path.join(rel_path, f) for f in cc.split()])
+    sources.extend([path.join(rel_path, f) for f in cc_sources.split()])
     return sources
 
 
 analysis_module = Extension(
-    '_analysis',
+    name='_analysis',
     sources=get_sources(),
     include_dirs=['@top_srcdir@', '/usr/include/libxml2'],
     library_dirs=['/usr/include/libxml2'],
     extra_compile_args=getenv_list('CPPFLAGS') + getenv_list('CXXFLAGS'),
-    extra_link_args=getenv_list('LDFLAGS') + ['-lxml2'])
+    extra_link_args=getenv_list('LDFLAGS') + ['-lxml2']
+)
 
-
-setup(name='python-@PACKAGE@',
+setup(
+    name='python-@PACKAGE@',
     version='@PACKAGE_VERSION@',
     description='SWIG interface to @PACKAGE_NAME@',
     long_description="SWIG interface to @PACKAGE_NAME@ for use in apertium-python",
@@ -42,5 +54,6 @@ setup(name='python-@PACKAGE@',
     author_email='@PACKAGE_BUGREPORT@',
     license='GPL-3.0+',
     maintainer_email='@PACKAGE_BUGREPORT@',
-    py_modules=['analysis'],
-    ext_modules=[analysis_module])
+    cmdclass={'build': CustomBuild},
+    ext_modules=[analysis_module],
+)
