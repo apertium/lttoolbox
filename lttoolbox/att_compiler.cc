@@ -146,6 +146,11 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
     }
     split(line, L'\t', tokens);
 
+    if (tokens[0].find('-') == 0)
+    {
+      wcerr << "Warning: Multiple fsts in '" << file_name << "' will be disjuncted." << endl;
+      continue;
+    }
     from = stoi(tokens[0]);
 
     AttNode* source = get_node(from);
