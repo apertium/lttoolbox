@@ -7,25 +7,18 @@
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/lt_locale.h>
 
-class FST: private FSTProcessor
+class FST: public FSTProcessor
 {
 public:
   /**
    * Reads from input_path and stores result at output_path
    */  
-  void init_analysis(char *automorf_path, char *input_path, char *output_path);
-  bool validity() const;
-
+  void analyze(char *automorf_path, char *input_path, char *output_path);
 };
 
-bool 
-FST::validity() const
-{
-  return valid();
-}
 
 void 
-FST::init_analysis(char *automorf_path, char *input_path, char *output_path)
+FST::analyze(char *automorf_path, char *input_path, char *output_path)
 {
   setDictionaryCaseMode(true);
   LtLocale::tryToSetLocale();
@@ -42,17 +35,16 @@ FST::init_analysis(char *automorf_path, char *input_path, char *output_path)
 %}
 
 
-#include <lttoolbox/fst_processor.h>
-#include <lttoolbox/lttoolbox_config.h>
-#include <lttoolbox/my_stdio.h>
-#include <lttoolbox/lt_locale.h>
+%include <lttoolbox/fst_processor.h>
+%include <lttoolbox/lttoolbox_config.h>
+%include <lttoolbox/my_stdio.h>
+%include <lttoolbox/lt_locale.h>
 
-class FST: private FSTProcessor
+class FST: public FSTProcessor
 {
 public:
   /**
    * Reads from input_path and stores result at output_path
    */  
-  void init_analysis(char *automorf_path, char *input_path, char *output_path);
-  bool validity() const;
-};  
+  void analyze(char *automorf_path, char *input_path, char *output_path);
+};
