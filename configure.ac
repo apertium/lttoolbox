@@ -140,12 +140,12 @@ static_assert(!is_same<size_t,uint32_t>::value, "size_t == uint32_t");
 static_assert(!is_same<size_t,uint64_t>::value, "size_t == uint64_t");
    ]])], [AC_DEFINE([SIZET_NOT_CSTDINT], [1], [size_t != (uint32_t, uint64_t)])])
 
-AM_PATH_PYTHON([2], [], [AC_MSG_WARN([Can't run 'make test' without Python installed.])])
+AM_PATH_PYTHON([3.4], [], [AC_MSG_WARN([Can't generate wrapper without Python])])
 
 AC_CONFIG_FILES([
   python/setup.py
   ])
-AX_PKG_SWIG(4.0.0) 
+AX_PKG_SWIG(3.0.4) 
 AX_SWIG_ENABLE_CXX 
 AX_SWIG_PYTHON
 

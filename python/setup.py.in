@@ -17,15 +17,6 @@ class CustomBuild(build):
     ]
 
 
-def getenv_list(var_name):
-    from os import getenv
-    var = getenv(var_name)
-    if var:
-        return var.split()
-    else:
-        return []
-
-
 def get_sources():
     from os import path
     sources = ['analysis_wrap.cpp']
@@ -35,14 +26,13 @@ def get_sources():
     sources.extend([path.join(rel_path, f) for f in cc_sources.split()])
     return sources
 
-
 analysis_module = Extension(
     name='_analysis',
     sources=get_sources(),
     include_dirs=['@top_srcdir@', '/usr/include/libxml2'],
     library_dirs=['/usr/include/libxml2'],
-    extra_compile_args=getenv_list('CPPFLAGS') + getenv_list('CXXFLAGS'),
-    extra_link_args=getenv_list('LDFLAGS') + ['-lxml2']
+    extra_compile_args='@CXXFLAGS@'.split(),
+    extra_link_args=['-lxml2'],
 )
 
 setup(
