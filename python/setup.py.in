@@ -35,7 +35,7 @@ analysis_module = Extension(
 )
 
 setup(
-    name='python-@PACKAGE@',
+    name='@PACKAGE@',
     version='@PACKAGE_VERSION@',
     description='SWIG interface to @PACKAGE_NAME@',
     long_description="SWIG interface to @PACKAGE_NAME@ for use in apertium-python",
