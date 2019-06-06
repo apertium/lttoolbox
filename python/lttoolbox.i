@@ -1,4 +1,4 @@
-%module analysis
+%module lttoolbox
 
 %{
 #define SWIG_FILE_WITH_INIT

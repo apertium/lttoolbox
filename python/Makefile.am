@@ -1,8 +1,8 @@
-SWIG_SOURCES = analysis.i
+SWIG_SOURCES = lttoolbox.i
 
-BUILT_SOURCES = analysis_wrap.cpp analysis.py
+BUILT_SOURCES = lttoolbox_wrap.cpp lttoolbox.py
 
-analysis_wrap.cpp: $(SWIG_SOURCES) setup.py
+lttoolbox_wrap.cpp: $(SWIG_SOURCES) setup.py
 	$(SWIG) $(AX_SWIG_PYTHON_OPT) -I$(top_srcdir) -o $@ $<
 	$(PYTHON) setup.py build
 

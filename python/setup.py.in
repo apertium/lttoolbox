@@ -18,15 +18,15 @@ class CustomBuild(build):
 
 
 def get_sources():
-    sources = ['analysis_wrap.cpp']
+    sources = ['lttoolbox_wrap.cpp']
     cc_sources = ['alphabet.cc', 'compression.cc', 'fst_processor.cc', 'lt_locale.cc',
                   'node.cc', 'state.cc', 'trans_exe.cc', 'xml_parse_util.cc']
     rel_path = '@top_srcdir@/lttoolbox/'
     sources.extend(path.join(rel_path, f) for f in cc_sources)
     return sources
 
-analysis_module = Extension(
-    name='_analysis',
+lttoolbox_module = Extension(
+    name='_lttoolbox',
     sources=get_sources(),
     include_dirs=['@top_srcdir@', '/usr/include/libxml2'],
     library_dirs=['/usr/include/libxml2'],
@@ -44,6 +44,6 @@ setup(
     license='GPL-3.0+',
     maintainer_email='@PACKAGE_BUGREPORT@',
     cmdclass={'build': CustomBuild},
-    ext_modules=[analysis_module],
-    py_modules=['analysis'],
+    ext_modules=[lttoolbox_module],
+    py_modules=['lttoolbox'],
 )
