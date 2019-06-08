@@ -125,5 +125,10 @@ class GardenPathMweNewlines(unittest.TestCase, ProcTest):
 ]"""
                        ]
 
+class CatMultipleFstsTransducer(unittest.TestCase, ProcTest):
+    procdix = "data/cat-multiple-fst.att"
+    inputs = ["cat", "cats"]
+    expectedOutputs = ["^cat/cat+n/cat+v$", "^cats/cat+n+<pl>$"]
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *
