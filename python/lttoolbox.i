@@ -14,19 +14,35 @@ public:
    * Reads from input_path and stores result at output_path
    */  
   void analyze(char *automorf_path, char *input_path, char *output_path);
+
+  /**
+   * Reads from input_path and stores result at output_path
+   */
+  void generate(char *autogen_path, char *input_path, char *output_path);
 };
 
 
 void 
 FST::analyze(char *automorf_path, char *input_path, char *output_path)
 {
-  setDictionaryCaseMode(true);
-  LtLocale::tryToSetLocale();
   FILE *in = fopen(automorf_path, "rb");
   load(in);
   initAnalysis();
   FILE *input = fopen(input_path, "r"), *output = fopen(output_path, "w");
   analysis(input, output);
+  fclose(in);
+  fclose(input);
+  fclose(output);
+}
+
+void
+FST::generate(char *autogen_path, char *input_path, char *output_path)
+{
+  FILE *in = fopen(autogen_path, "rb");
+  load(in);
+  initGeneration();
+  FILE *input = fopen(input_path, "r"), *output = fopen(output_path, "w");
+  generation(input, output);
   fclose(in);
   fclose(input);
   fclose(output);
@@ -47,4 +63,9 @@ public:
    * Reads from input_path and stores result at output_path
    */  
   void analyze(char *automorf_path, char *input_path, char *output_path);
+
+  /**
+   * Reads from input_path and stores result at output_path
+   */
+  void generate(char *autogen_path, char *input_path, char *output_path);
 };
