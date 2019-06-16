@@ -11,38 +11,41 @@ class FST: public FSTProcessor
 {
 public:
   /**
-   * Reads from input_path and stores result at output_path
-   */  
-  void analyze(char *automorf_path, char *input_path, char *output_path);
-
-  /**
-   * Reads from input_path and stores result at output_path
+   * Imitates functionality of lt-proc using file path
    */
-  void generate(char *autogen_path, char *input_path, char *output_path);
+  void lt_proc(char arg, char *dictionary_path, char *input_path, char *output_path);
 };
 
 
 void 
-FST::analyze(char *automorf_path, char *input_path, char *output_path)
+FST::lt_proc(char arg, char *dictionary_path, char *input_path, char *output_path)
 {
-  FILE *in = fopen(automorf_path, "rb");
+  FILE *in = fopen(dictionary_path, "rb");
   load(in);
-  initAnalysis();
   FILE *input = fopen(input_path, "r"), *output = fopen(output_path, "w");
-  analysis(input, output);
-  fclose(in);
-  fclose(input);
-  fclose(output);
-}
+  switch(arg)
+  {
+    case 'g':
+      initGeneration();
+      generation(input, output);
+      break;
+    case 'b':
+      initBiltrans();
+      bilingual(input, output);
+      break;
+    case 'p':
+      initPostgeneration();
+      intergeneration(input, output);
+      break;
+    case 'w':
+      setDictionaryCaseMode(true);
+    case 'a':
+    default:
+      initAnalysis();
+      analysis(input, output);
+      break;
+  }
 
-void
-FST::generate(char *autogen_path, char *input_path, char *output_path)
-{
-  FILE *in = fopen(autogen_path, "rb");
-  load(in);
-  initGeneration();
-  FILE *input = fopen(input_path, "r"), *output = fopen(output_path, "w");
-  generation(input, output);
   fclose(in);
   fclose(input);
   fclose(output);
@@ -60,12 +63,7 @@ class FST: public FSTProcessor
 {
 public:
   /**
-   * Reads from input_path and stores result at output_path
-   */  
-  void analyze(char *automorf_path, char *input_path, char *output_path);
-
-  /**
-   * Reads from input_path and stores result at output_path
+   * Imitates functionality of lt-proc using file path
    */
-  void generate(char *autogen_path, char *input_path, char *output_path);
+  void lt_proc(char arg, char *dictionary_path, char *input_path, char *output_path);
 };
