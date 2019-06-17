@@ -1,21 +1,68 @@
 #! /bin/sh
-FST=$1
-CORPUS=$2
-OUTPUT_FST=$3
 
-# Temporary directory for intermediate files
-TEMP_DIR=".tmp"
-# Check if it exists
-if ! [ -d "$TEMP_DIR" ]; then
-	mkdir $TEMP_DIR
+usage="$(basename "$0"): weight a dictionary file using a regex weightlist
+USAGE: $(basename "$0") [-h] input_file output_file weighted_regex
+input_file	the input compiled dictionary (a finite state transducer)
+output_file	the weighted dictionary (a finite state transducer)
+weighted_regex	the weightlist in XEROX regex format
+
+Options:
+    -h, --help:	show this help
+"
+while :; do
+    case $1 in
+        -h|-\?|--help)
+            printf "$usage"
+            exit
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -?*)
+            printf "WARN: Unknown option (ignored): %s\n" "$1" >&2
+            ;;
+        *)
+            break
+    esac
+
+    shift
+done
+
+FST=$1
+OUTPUT_FST=$2
+WEIGHTED_REGEXP=$3
+
+no_of_missing_args=0
+if [ ! -f "$FST" ]
+then
+	printf "ERROR: input_file \"%s\" doesn't exist\n" "$FST" >&2
+	no_of_missing_args=$((no_of_missing_args + 1))
 fi
 
-CLEANED_CORPUS="$TEMP_DIR/clean-corpus.tagged"
+if [ -z "$OUTPUT_FST" ]
+then
+	printf "ERROR: output_file isn't set\n" >&2
+	no_of_missing_args=$((no_of_missing_args + 1))
+fi
+
+if [ ! -f "$WEIGHTED_REGEXP" ]
+then
+	printf "ERROR: weighted_regex \"%s\" doesn't exist\n" "$WEIGHTED_REGEXP">&2
+	no_of_missing_args=$((no_of_missing_args + 1))
+fi
+
+if [ $no_of_missing_args -gt 0 ]
+then
+	printf "$usage"
+	exit
+fi
+# Temporary directory for intermediate files
+TEMP_DIR=$(mktemp -d)
 
 ATTFST="$TEMP_DIR/transducer.att"
 HFST_FST="$TEMP_DIR/transducer.hfst"
 
-WEIGHTED_REGEXP="$TEMP_DIR/weighted-regex"
 WEIGHTED_FST="$TEMP_DIR/weighted-pairs.hfst"
 COMPOSED_FST="$TEMP_DIR/weighted-transducer.hfst"
 SUBTRACTED_FST="$TEMP_DIR/subtracted-transducer.hfst"
@@ -25,31 +72,22 @@ MINIMIZED_FST="$TEMP_DIR/minimized-weighted-transducer.hfst"
 MINIMIZED_ATTFST="$TEMP_DIR/weighted-transducer.att"
 
 # Convert the input FST to HFST
-lt-print "$FST" | sed -e 's/:/\\:/' -e :a -e 's/ /@_SPACE_@/;ta'> $ATTFST
-
-hfst-txt2fst --epsilon=ε -i $ATTFST -o $HFST_FST
-
-# Clean the input tagged corpus
-# REMOVE EMPTY LINES
-sed -e '/^$/d' "$CORPUS" > $CLEANED_CORPUS
+lt-print "$FST" | sed -e "s/:/\\:/" -e :a -e "s/ /@_SPACE_@/;ta"> "$ATTFST"
+hfst-txt2fst --epsilon=ε -i "$ATTFST" -o "$HFST_FST"
 
 # Generate a weighted FST from the string pairs
-LINES=$(wc -l $CLEANED_CORPUS | cut -d ' ' -f1)
-
-sed -e 's/[ \t]//' -e 's/\^.*\///' -e 's/\$$//' $CLEANED_CORPUS > $WEIGHTED_REGEXP
-python prepare_regex_strings.py $WEIGHTED_REGEXP
-hfst-regexp2fst -j -i $WEIGHTED_REGEXP -o $WEIGHTED_FST
+hfst-regexp2fst -j -i "$WEIGHTED_REGEXP" -o "$WEIGHTED_FST"
 
 # Compose the input FST and the weighted FST
-hfst-compose -1 $HFST_FST -2 $WEIGHTED_FST -v -o $COMPOSED_FST
-hfst-subtract $HFST_FST $COMPOSED_FST -o $SUBTRACTED_FST
-hfst-reweight -i $SUBTRACTED_FST -o $DEFAULT_WEIGHTED_FST -e -a 1000000
-hfst-disjunct $DEFAULT_WEIGHTED_FST $COMPOSED_FST -o $DISJUNCTED_FST
-hfst-minimize $DISJUNCTED_FST -o $MINIMIZED_FST
-hfst-fst2txt -i $MINIMIZED_FST -o $MINIMIZED_ATTFST
+hfst-compose -1 "$HFST_FST" -2 "$WEIGHTED_FST" -v -o "$COMPOSED_FST"
+hfst-subtract "$HFST_FST" "$COMPOSED_FST" -o "$SUBTRACTED_FST"
+hfst-reweight -i "$SUBTRACTED_FST" -o "$DEFAULT_WEIGHTED_FST" -e -a 1000000
+hfst-disjunct "$DEFAULT_WEIGHTED_FST" "$COMPOSED_FST" -o "$DISJUNCTED_FST"
+hfst-minimize "$DISJUNCTED_FST" -o "$MINIMIZED_FST"
+hfst-fst2txt -i "$MINIMIZED_FST" -o "$MINIMIZED_ATTFST"
 
 # Compile the FST back using lttoolbox
-lt-comp lr $MINIMIZED_ATTFST $OUTPUT_FST
+../lttoolbox/lt-comp lr "$MINIMIZED_ATTFST" "$OUTPUT_FST"
 
 # Delete the temporary files
 rm -rf "$TEMP_DIR"

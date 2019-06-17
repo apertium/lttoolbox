@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+
+import math
+import argparse
+from collections import Counter
+from utils.utils import extract_analysis, generate_regex
+
+if __name__ == '__main__':
+	parser = argparse.ArgumentParser(description='generate a regex weightlist given an annotated corpus')
+	parser.add_argument('tagged_corpus',
+						type=argparse.FileType('r'),
+						help='input tagged corpus')
+	parser.add_argument('output_weighlist',
+						type=argparse.FileType('w'),
+						help='output weightlist')
+	args = parser.parse_args()
+	TAGGED_CORPUS = args.tagged_corpus
+	OUTPUT_WEIGHTLIST_FILE = args.output_weighlist
+
+	analyses = [extract_analysis(line.strip()) for line in TAGGED_CORPUS.readlines()]
+
+	regex_tags = [generate_regex(analysis) for analysis in analyses if not analysis.startswith('*')]
+	weighted_regex_tags = ['{}::{}'.format(regex, -math.log(count/len(regex_tags)))
+							for regex, count in Counter(regex_tags).most_common()]
+
+	for regex in weighted_regex_tags:
+		OUTPUT_WEIGHTLIST_FILE.write(regex+'\n')
