@@ -147,4 +147,11 @@ AX_PKG_SWIG(3.0.4)
 AX_SWIG_ENABLE_CXX 
 AX_SWIG_PYTHON
 
+AC_ARG_ENABLE([python-bindings],
+              AS_HELP_STRING([--enable-python-bindings],
+                             [build python bindings (default=disabled)]),
+              [enable_python_bindings=$enableval],
+              [enable_python_bindings=no])
+AM_CONDITIONAL([HAVE_PYTHON_BINDINGS], [test x$enable_python_bindings = xyes])
+
 AC_OUTPUT([Makefile lttoolbox.pc lttoolbox/Makefile python/Makefile])
