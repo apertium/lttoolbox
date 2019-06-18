@@ -18,7 +18,7 @@ class CustomBuild(build):
 
 
 def get_sources():
-    sources = ['lttoolbox_wrap.cpp']
+    sources = ['lttoolbox.i']
     cc_sources = ['alphabet.cc', 'compression.cc', 'fst_processor.cc', 'lt_locale.cc',
                   'node.cc', 'state.cc', 'trans_exe.cc', 'xml_parse_util.cc']
     rel_path = '@top_srcdir@/lttoolbox/'
@@ -28,6 +28,7 @@ def get_sources():
 lttoolbox_module = Extension(
     name='_lttoolbox',
     sources=get_sources(),
+    swig_opts = ["-c++", "-I@top_srcdir@", "-Wall"],
     include_dirs=['@top_srcdir@', '/usr/include/libxml2'],
     library_dirs=['/usr/include/libxml2'],
     extra_compile_args='@CXXFLAGS@'.split(),

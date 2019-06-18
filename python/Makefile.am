@@ -3,7 +3,6 @@ SWIG_INTERFACE = lttoolbox.i
 BUILT_SOURCES = lttoolbox_wrap.cpp lttoolbox.py
 
 lttoolbox_wrap.cpp: $(SWIG_INTERFACE) setup.py
-	$(SWIG) $(AX_SWIG_PYTHON_OPT) -I$(top_srcdir) -o $@ $<
 	$(PYTHON) setup.py build
 
 install-exec-local:

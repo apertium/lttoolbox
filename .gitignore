@@ -77,3 +77,5 @@
 /python/lttoolbox.py
 /python/setup.py
 /python/build*
+*.egg-info/
+*.egg
