@@ -1,9 +1,9 @@
 SWIG_INTERFACE = lttoolbox.i
 
-BUILT_SOURCES = lttoolbox_wrap.cpp
+BUILT_SOURCES = %_wrap.cpp.cpp
 
-lttoolbox_wrap.cpp: $(SWIG_INTERFACE) setup.py
+%_wrap.cpp.cpp: $(SWIG_INTERFACE) setup.py
 	$(PYTHON) setup.py build
 
 install-exec-local:
-	$(PYTHON) setup.py install
+	$(PYTHON) setup.py install --prefix=$(DESTDIR)$(prefix)

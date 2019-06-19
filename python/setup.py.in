@@ -4,7 +4,7 @@
 Setup for SWIG Python bindings for lttoolbox
 """
 from os import path
-from setuptools import Extension, setup
+from distutils.core import Extension, setup
 from distutils.command.build import build
 
 
