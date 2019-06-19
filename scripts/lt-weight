@@ -1,0 +1,35 @@
+#! /bin/sh
+FST=$1
+CORPUS=$2
+OUTPUT_FST=$3
+
+# Temporary intermediate files
+ATTFST='transducer.att'
+HFST_FST='transducer.hfst'
+WEIGHTED_FST='weighted-pairs.hfst'
+COMPOSED_FST='weighted-transducer.hfst'
+MULTICHAR='multichar_symbols'
+
+# Convert the input FST to HFST
+lt-print $FST > $ATTFST
+hfst-txt2fst --epsilon=ε -i $ATTFST -o $HFST_FST
+
+LINES=$(wc -l $CORPUS | cut -d ' ' -f1)
+
+# Prepare the multichar symbols files
+awk -F '[<>]' '{print "<"$(NF-1)">"}' data/corpus.tagged | tr -d , | sort | uniq > $MULTICHAR
+
+# Generate a weighted FST from the string pairs
+cat $CORPUS | sed -e 's/[ \t]//' | sed -e 's/\^.*\///' |
+sed -e 's/\$$//' | sort | uniq -c | sed -e 's/^[ \t]*//' |
+awk -v lines="$LINES" '{$1=-log($1/lines); print $2":" $2 "\t" $1}' |
+hfst-strings2fst -j -o $WEIGHTED_FST -m $MULTICHAR
+
+# Compose the input FST and the weighted FST
+hfst-compose -1 $HFST_FST -2 $WEIGHTED_FST | hfst-fst2txt > $COMPOSED_FST
+
+# Compile the FST back using lttoolbox
+lt-comp lr $COMPOSED_FST $OUTPUT_FST
+
+# Delete the temporary files
+rm $ATTFST $HFST_FST $WEIGHTED_FST $MULTICHAR $COMPOSED_FST
