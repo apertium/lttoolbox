@@ -6,6 +6,8 @@ os:
 compiler:
   - clang
   - gcc
+before_install:
+  - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install -y swig python3-setuptools; else brew install swig; fi
 script:
   - ./autogen.sh
   - ./configure

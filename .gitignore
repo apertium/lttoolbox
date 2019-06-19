@@ -71,3 +71,11 @@
 /lttoolbox/lttoolbox_config.h
 /lttoolbox/lt-tmxproc
 /lttoolbox/lt-expand
+/python/Makefile
+/python/Makefile.in
+/python/lttoolbox_wrap.cpp
+/python/lttoolbox.py
+/python/setup.py
+/python/build*
+*.egg-info/
+*.egg
