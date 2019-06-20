@@ -1,0 +1,40 @@
+#! /bin/sh
+
+usage="$(basename "$0"): generate an equally probable regex weightlist
+USAGE: $(basename "$0") [-h] output_weighted_regex
+output_weighted_regex	the output weightlist in XEROX regex format
+
+Options:
+    -h, --help:	show this help
+"
+while :; do
+    case $1 in
+        -h|-\?|--help)
+            echo "$usage"
+            exit
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -?*)
+            printf "WARN: Unknown option (ignored): %s\n" "$1" >&2
+            ;;
+        *)
+            break
+    esac
+
+    shift
+done
+
+OUTPUT_WEIGHTLIST_FILE_NAME=$1
+
+if [ -z "$OUTPUT_WEIGHTLIST_FILE_NAME" ]
+then
+	printf "ERROR: output_weighted_regex isn't set\n" >&2
+	echo "$usage"
+	exit
+fi
+
+# Just give a weight of 1 to all the analyses
+echo '[?*]::1' > "$OUTPUT_WEIGHTLIST_FILE_NAME"
