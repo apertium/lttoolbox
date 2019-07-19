@@ -1,0 +1,72 @@
+#! /bin/sh
+
+usage="$(basename "$0"): weight a dictionary file according to the analysis length
+USAGE: $(basename "$0") [-h] input_file output_file
+input_file	the input compiled dictionary (a finite state transducer)
+output_file	the weighted dictionary (a finite state transducer)
+
+Options:
+    -h, --help:	show this help
+"
+while :; do
+    case $1 in
+        -h|-\?|--help)
+            printf "$usage"
+            exit
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -?*)
+            printf "WARN: Unknown option (ignored): %s\n" "$1" >&2
+            ;;
+        *)
+            break
+    esac
+
+    shift
+done
+
+FST=$1
+OUTPUT_FST=$2
+
+no_of_missing_args=0
+if [ ! -f "$FST" ]
+then
+	printf "ERROR: input_file \"%s\" doesn't exist\n" "$FST" >&2
+	no_of_missing_args=$((no_of_missing_args + 1))
+fi
+
+if [ -z "$OUTPUT_FST" ]
+then
+	printf "ERROR: output_file isn't set\n" >&2
+	no_of_missing_args=$((no_of_missing_args + 1))
+fi
+
+if [ $no_of_missing_args -gt 0 ]
+then
+	printf "$usage"
+	exit
+fi
+# Temporary directory for intermediate files
+TEMP_DIR=$(mktemp -d)
+
+ATTFST="$TEMP_DIR/transducer.att"
+HFST_FST="$TEMP_DIR/transducer.hfst"
+WEIGHTED_FST="$TEMP_DIR/weighted_transducer.hfst"
+WEIGHTED_ATTFST="$TEMP_DIR/weighted_transducer.att"
+
+# Convert the input FST to HFST
+lt-print "$FST" | sed -e "s/:/\\:/" -e :a -e "s/ /@_SPACE_@/;ta"> "$ATTFST"
+hfst-txt2fst --epsilon=ε -i "$ATTFST" -o "$HFST_FST"
+
+# Generate a weighted FST from the string pairs
+hfst-reweight -i "$HFST_FST" -o "$WEIGHTED_FST" -a 1
+hfst-fst2txt -i "$WEIGHTED_FST" -o "$WEIGHTED_ATTFST"
+
+# Compile the FST back using lttoolbox
+../lttoolbox/lt-comp lr "$WEIGHTED_ATTFST" "$OUTPUT_FST"
+
+# Delete the temporary files
+rm -rf "$TEMP_DIR"
