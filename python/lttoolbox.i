@@ -13,43 +13,42 @@ public:
   /**
    * Imitates functionality of lt-proc using file path
    */
-  void lt_proc(char arg, char *dictionary_path, char *input_path, char *output_path);
-};
-
-
-void 
-FST::lt_proc(char arg, char *dictionary_path, char *input_path, char *output_path)
-{
-  FILE *in = fopen(dictionary_path, "rb");
-  load(in);
-  FILE *input = fopen(input_path, "r"), *output = fopen(output_path, "w");
-  switch(arg)
+  FST(char *dictionary_path)
   {
-    case 'g':
-      initGeneration();
-      generation(input, output);
-      break;
-    case 'b':
-      initBiltrans();
-      bilingual(input, output);
-      break;
-    case 'p':
-      initPostgeneration();
-      intergeneration(input, output);
-      break;
-    case 'w':
-      setDictionaryCaseMode(true);
-    case 'a':
-    default:
-      initAnalysis();
-      analysis(input, output);
-      break;
+    FILE *dictionary = fopen(dictionary_path, "rb");
+    load(dictionary);
+    fclose(dictionary);
   }
+  void lt_proc(char arg, char *input_path, char *output_path)
+  {
+    FILE *input = fopen(input_path, "r"), *output = fopen(output_path, "w");
+    switch(arg)
+    {
+      case 'g':
+        initGeneration();
+        generation(input, output);
+        break;
+      case 'b':
+        initBiltrans();
+        bilingual(input, output);
+        break;
+      case 'p':
+        initPostgeneration();
+        intergeneration(input, output);
+        break;
+      case 'w':
+        setDictionaryCaseMode(true);
+      case 'a':
+      default:
+        initAnalysis();
+        analysis(input, output);
+        break;
+    }
 
-  fclose(in);
-  fclose(input);
-  fclose(output);
-}
+    fclose(input);
+    fclose(output);
+  }
+};
 
 %}
 
@@ -62,8 +61,6 @@ FST::lt_proc(char arg, char *dictionary_path, char *input_path, char *output_pat
 class FST: public FSTProcessor
 {
 public:
-  /**
-   * Imitates functionality of lt-proc using file path
-   */
-  void lt_proc(char arg, char *dictionary_path, char *input_path, char *output_path);
+  FST(char *dictionary_path);
+  void lt_proc(char arg, char *input_path, char *output_path);
 };
