@@ -3,25 +3,57 @@
 import math
 import argparse
 from collections import Counter
-from utils.utils import extract_analysis, generate_regex
+from utils.utils import extract_analysis, generate_regex, extract_tag_from_analysis
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='generate a regex weightlist given an annotated corpus')
 	parser.add_argument('tagged_corpus',
 						type=argparse.FileType('r'),
 						help='input tagged corpus')
-	parser.add_argument('output_weighlist',
+	parser.add_argument('analysis_weightlist',
 						type=argparse.FileType('w'),
-						help='output weightlist')
+						help='weightlist for specific analyses')
+	parser.add_argument('--tag_weightlist',
+						type=argparse.FileType('w'),
+						help='weightlist for specific tags')
+	parser.add_argument('--default_weightlist',
+						type=argparse.FileType('w'),
+						help='weightlist for out-of-corpus tokens')
+
 	args = parser.parse_args()
 	TAGGED_CORPUS = args.tagged_corpus
-	OUTPUT_WEIGHTLIST_FILE = args.output_weighlist
+	ANALYSIS_WEIGHTLIST_FILE = args.analysis_weightlist
+	TAG_WEIGHTLIST_FILE = args.tag_weightlist
+	DEFAULT_WEIGHTLIST_FILE = args.default_weightlist
 
-	analyses = [extract_analysis(line.strip()) for line in TAGGED_CORPUS.readlines()]
+	lines = TAGGED_CORPUS.readlines()
+	analyses = [extract_analysis(line.strip()) for line in lines]
+	regex_analyses = Counter([generate_regex(analysis) for analysis in analyses if not analysis.startswith('*')])
+	den = sum(regex_analyses.values())
+	num_offset = 0
 
-	regex_tags = [generate_regex(analysis) for analysis in analyses if not analysis.startswith('*')]
-	weighted_regex_tags = ['{}::{}'.format(regex, -math.log(count/len(regex_tags)))
-							for regex, count in Counter(regex_tags).most_common()]
+	if TAG_WEIGHTLIST_FILE:
+		tags = [extract_tag_from_analysis(line.strip()) for line in lines]
+		regex_tags = Counter([generate_regex(tag, match_all_prefixes=True) for tag in tags if tag and not tag.startswith('*')])
+		den += sum(regex_tags.values()) * (1+len(regex_analyses))
+		num_offset += sum(regex_tags.values())
 
-	for regex in weighted_regex_tags:
-		OUTPUT_WEIGHTLIST_FILE.write(regex+'\n')
+	if DEFAULT_WEIGHTLIST_FILE:
+		den += 1 + len(regex_analyses)
+		if TAG_WEIGHTLIST_FILE:
+			den += len(regex_tags)
+		num_offset += 1
+
+	weighted_regex_analyses = ['{}::{}'.format(regex, -math.log(count + num_offset)+math.log(den))
+							for regex, count in regex_analyses.most_common()]
+	ANALYSIS_WEIGHTLIST_FILE.write('\n'.join(weighted_regex_analyses))
+
+	if TAG_WEIGHTLIST_FILE:
+		offset = 1 if DEFAULT_WEIGHTLIST_FILE else 0
+		weighted_regex_tags = ['{}::{}'.format(regex, -math.log(count + offset) +math.log(den))
+								for regex, count in regex_tags.most_common()]
+		TAG_WEIGHTLIST_FILE.write('\n'.join(weighted_regex_tags))
+
+
+	if DEFAULT_WEIGHTLIST_FILE:
+		DEFAULT_WEIGHTLIST_FILE.write('[?*]::{}'.format(-math.log(1) +math.log(den)))
