@@ -1,10 +1,10 @@
 #! /bin/sh
 
-usage="$(basename "$0"): weight a dictionary file using a regex weightlist
-USAGE: $(basename "$0") [-h] input_file output_file weighted_regex
+usage="$(basename "$0"): weight a dictionary file using multiple regexp weightlists sequentially
+USAGE: $(basename "$0") [-h] input_file output_file weighted_regexp_files
 input_file	the input compiled dictionary (a finite state transducer)
 output_file	the weighted dictionary (a finite state transducer)
-weighted_regex	the weightlist in XEROX regex format
+weighted_regexp_files	the weighted weightlists in XEROX regexp format
 
 Options:
     -h, --help:	show this help
@@ -12,7 +12,7 @@ Options:
 while :; do
     case $1 in
         -h|-\?|--help)
-            printf "$usage"
+            echo "$usage"
             exit
             ;;
         --)
@@ -31,7 +31,12 @@ done
 
 FST=$1
 OUTPUT_FST=$2
-WEIGHTED_REGEXP=$3
+#TODO: Is there a better way for parsing the input?
+if [ $# -gt 2 ]; then
+	shift 2
+	WEIGHTED_REGEXP_FILES=$*
+fi
+
 
 no_of_missing_args=0
 if [ ! -f "$FST" ]
@@ -46,27 +51,36 @@ then
 	no_of_missing_args=$((no_of_missing_args + 1))
 fi
 
-if [ ! -f "$WEIGHTED_REGEXP" ]
+if [ -z "$WEIGHTED_REGEXP_FILES" ]
 then
-	printf "ERROR: weighted_regex \"%s\" doesn't exist\n" "$WEIGHTED_REGEXP">&2
+	printf "ERROR: weighted_regexp_files isn't set\n">&2
 	no_of_missing_args=$((no_of_missing_args + 1))
+else
+	for regexp_file in $WEIGHTED_REGEXP_FILES
+	do
+		if [ ! -f "$regexp_file" ]
+		then
+			printf "ERROR: weighted_regexp_file \"%s\" doesn't exist\n" "$regexp_file">&2
+			no_of_missing_args=$((no_of_missing_args + 1))
+		fi
+	done
 fi
 
 if [ $no_of_missing_args -gt 0 ]
 then
-	printf "$usage"
+	echo "$usage"
 	exit
 fi
+
 # Temporary directory for intermediate files
 TEMP_DIR=$(mktemp -d)
 
 ATTFST="$TEMP_DIR/transducer.att"
 HFST_FST="$TEMP_DIR/transducer.hfst"
 
-WEIGHTED_FST="$TEMP_DIR/weighted-pairs.hfst"
+WEIGHTED_FST="$TEMP_DIR/weighted-regexp.hfst"
 COMPOSED_FST="$TEMP_DIR/weighted-transducer.hfst"
 SUBTRACTED_FST="$TEMP_DIR/subtracted-transducer.hfst"
-DEFAULT_WEIGHTED_FST="$TEMP_DIR/default-weighted-transducer.hfst"
 DISJUNCTED_FST="$TEMP_DIR/disjuncted-weighted-transducer.hfst"
 MINIMIZED_FST="$TEMP_DIR/minimized-weighted-transducer.hfst"
 MINIMIZED_ATTFST="$TEMP_DIR/weighted-transducer.att"
@@ -75,19 +89,29 @@ MINIMIZED_ATTFST="$TEMP_DIR/weighted-transducer.att"
 lt-print "$FST" | sed -e "s/:/\\:/" -e :a -e "s/ /@_SPACE_@/;ta"> "$ATTFST"
 hfst-txt2fst --epsilon=ε -i "$ATTFST" -o "$HFST_FST"
 
-# Generate a weighted FST from the string pairs
-hfst-regexp2fst -j -i "$WEIGHTED_REGEXP" -o "$WEIGHTED_FST"
+for regexp_file in $WEIGHTED_REGEXP_FILES
+do
+	# Generate a weighted FST from the regexp weightlist
+	hfst-regexp2fst -j -i "$regexp_file" -o "$WEIGHTED_FST"
 
-# Compose the input FST and the weighted FST
-hfst-compose -1 "$HFST_FST" -2 "$WEIGHTED_FST" -v -o "$COMPOSED_FST"
-hfst-subtract "$HFST_FST" "$COMPOSED_FST" -o "$SUBTRACTED_FST"
-hfst-reweight -i "$SUBTRACTED_FST" -o "$DEFAULT_WEIGHTED_FST" -e -a 1000000
-hfst-disjunct "$DEFAULT_WEIGHTED_FST" "$COMPOSED_FST" -o "$DISJUNCTED_FST"
-hfst-minimize "$DISJUNCTED_FST" -o "$MINIMIZED_FST"
+	# Compose the input FST and the weighted regexp FST
+	hfst-compose -1 "$HFST_FST" -2 "$WEIGHTED_FST" -v -o "$COMPOSED_FST"
+
+	if [ -f "$MINIMIZED_FST" ]; then
+		# This weightlist need to be applied only to unweighted parts
+		hfst-subtract "$COMPOSED_FST" "$MINIMIZED_FST" -o "$SUBTRACTED_FST"
+		hfst-disjunct "$SUBTRACTED_FST" "$MINIMIZED_FST" -o "$DISJUNCTED_FST"
+		hfst-minimize "$DISJUNCTED_FST" -o "$MINIMIZED_FST"
+	else
+		# This is the first weightlist
+		hfst-minimize "$COMPOSED_FST" -o "$MINIMIZED_FST"
+	fi
+done
+
 hfst-fst2txt -i "$MINIMIZED_FST" -o "$MINIMIZED_ATTFST"
 
 # Compile the FST back using lttoolbox
-../lttoolbox/lt-comp lr "$MINIMIZED_ATTFST" "$OUTPUT_FST"
+lt-comp lr "$MINIMIZED_ATTFST" "$OUTPUT_FST"
 
 # Delete the temporary files
 rm -rf "$TEMP_DIR"
