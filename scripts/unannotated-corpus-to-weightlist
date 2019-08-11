@@ -1,11 +1,12 @@
 #! /bin/sh
 
 usage="$(basename "$0"): generate a regex weightlist given an un-annotated corpus
-USAGE: $(basename "$0") [-h] input_file corpus constraint_grammar_file output_weighted_regex
+USAGE: $(basename "$0") [-h] input_file corpus constraint_grammar_file output_weighted_regex default_weightlist
 input_file	the input compiled dictionary (a finite state transducer)
 corpus	the large un-annotated corpus
 constraint_grammar_file 	the constraint grammar to filter the analyses
 output_weighted_regex	the output weightlist in XEROX regex format
+deafult_weightlist	the default fallback weightlist in XEROX regex format
 
 Options:
     -h, --help:	show this help
@@ -13,7 +14,7 @@ Options:
 while :; do
     case $1 in
         -h|-\?|--help)
-            printf "$usage"
+            echo "$usage"
             exit
             ;;
         --)
@@ -34,6 +35,7 @@ FST=$1
 UNTAGGED_CORPUS=$2
 CONSTRAINT_GRAMMAR=$3
 OUTPUT_WEIGHTLIST_FILE_NAME=$4
+DEFAULT_WEIGHTLIST_FILE_NAME=$5
 no_of_missing_args=0
 
 if [ ! -f "$FST" ]
@@ -59,23 +61,30 @@ then
 	printf "ERROR: output_file isn't set\n" >&2
 	no_of_missing_args=$((no_of_missing_args + 1))
 fi
+
+if [ -z "$DEFAULT_WEIGHTLIST_FILE_NAME" ]
+then
+	printf "ERROR: default_weightlist isn't set\n" >&2
+	no_of_missing_args=$((no_of_missing_args + 1))
+fi
+
 if [ $no_of_missing_args -gt 0 ]
 then
-	printf "$usage"
+	echo "$usage"
 	exit
 fi
 
 TEMP_DIR=$(mktemp -d)
 TEMP_CORPUS_FILE="$TEMP_DIR/tagged_corpus"
 
-apertium-destxt $UNTAGGED_CORPUS |
-	../lttoolbox/lt-proc $FST |
-	cg-proc $CONSTRAINT_GRAMMAR |
+apertium-destxt "$UNTAGGED_CORPUS" |
+	lt-proc "$FST" |
+	cg-proc "$CONSTRAINT_GRAMMAR" |
 	apertium-cleanstream -n |
 	sed -e 's/^\^//' -e 's/\$$//'|
-	awk '{n=split($0,array,"/"); for(i=2;i<=n;i++) print "^"array[1]"/" array[i]"$"}' > $TEMP_CORPUS_FILE
+	awk '{n=split($0,array,"/"); for(i=2;i<=n;i++) print "^"array[1]"/" array[i]"$"}' > "$TEMP_CORPUS_FILE"
 
 # Estimate the unigram-based weightlist using the filtered analyses
-./annotated-corpus-to-weightlist $TEMP_CORPUS_FILE $OUTPUT_WEIGHTLIST_FILE_NAME
+./annotated-corpus-to-weightlist "$TEMP_CORPUS_FILE" "$OUTPUT_WEIGHTLIST_FILE_NAME" --default_weightlist "$DEFAULT_WEIGHTLIST_FILE_NAME"
 
-rm -rf $TEMP_DIR
+rm -rf "$TEMP_DIR"
