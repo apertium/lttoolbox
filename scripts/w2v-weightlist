@@ -1,0 +1,85 @@
+#!/bin/sh
+
+usage="$(basename "$0"): generate a disambiguated weightlist using a word2vec model
+USAGE: $(basename "$0") [-h] corpus input_file output_weightlist
+corpus	a raw corpus file
+input_file	the input compiled dictionary (a finite state transducer)
+output_weightlist	a weightlist for unambiguous words in corpus
+default_weightlist	a laplace smoothed weightlist for OOV words
+
+Options:
+    -h, --help:	show this help
+"
+
+while :; do
+    case $1 in
+        -h|-\?|--help)
+            printf "$usage"
+            exit
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -?*)
+            printf "WARN: Unknown option (ignored): %s\n" "$1" >&2
+            ;;
+        *)
+            break
+    esac
+
+    shift
+done
+
+CORPUS=$1
+INPUT_FST=$2
+OUTPUT_WEIGHTLIST=$3
+DEFAULT_WEIGHTLIST=$4
+
+no_of_missing_args=0
+if [ ! -f "$CORPUS" ]
+then
+	printf "ERROR: corpus file \"%s\" doesn't exist\n" "$CORPUS" >&2
+	no_of_missing_args=$((no_of_missing_args + 1))
+fi
+
+if [ ! -f "$INPUT_FST" ]
+then
+	printf "ERROR: input_file \"%s\" doesn't exist\n" "$INPUT_FST" >&2
+	no_of_missing_args=$((no_of_missing_args + 1))
+fi
+
+if [ -z "$OUTPUT_WEIGHTLIST" ]
+then
+	printf "ERROR: output_weightlist isn't set\n" >&2
+	no_of_missing_args=$((no_of_missing_args + 1))
+fi
+
+if [ -z "$DEFAULT_WEIGHTLIST" ]
+then
+	printf "ERROR: default_weightlist isn't set\n" >&2
+	no_of_missing_args=$((no_of_missing_args + 1))
+fi
+
+if [ $no_of_missing_args -gt 0 ]
+then
+	printf "$usage"
+	exit
+fi
+
+TEMP_DIR=$(mktemp -d)
+WORD_FILE="$TEMP_DIR/word"
+SIMILAR_WORD_FILE="$TEMP_DIR/similar"
+./utils/w2v_get_similar_words.py --corpus "$CORPUS" --output_words_file "$WORD_FILE" --output_similar_words_file "$SIMILAR_WORD_FILE"
+
+ANALYZED_WORDS="$TEMP_DIR/analyzed_words"
+ANALYZED_SIMILAR_WORDS="$TEMP_DIR/analyzed_similar_words"
+
+apertium-destxt "$WORD_FILE" | lt-proc "$INPUT_FST" | apertium-retxt > "$ANALYZED_WORDS"
+apertium-destxt "$SIMILAR_WORD_FILE" | lt-proc "$INPUT_FST" | apertium-retxt > "$ANALYZED_SIMILAR_WORDS"
+
+# TODO: WHY?
+CLEANED_WORDS="$TEMP_DIR/cleaned_words"
+apertium-cleanstream -n < "$ANALYZED_WORDS" > "$CLEANED_WORDS"
+
+./utils/w2v_generate_weights.py "$CLEANED_WORDS" "$ANALYZED_SIMILAR_WORDS" "$OUTPUT_WEIGHTLIST" "$DEFAULT_WEIGHTLIST"
