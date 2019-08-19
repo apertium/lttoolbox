@@ -4,31 +4,31 @@
 %include <lttoolbox/lt_locale.h>
 
 
-%typemap(in) char ** {
+%typemap(in) (int argc, char **argv) {
   if (PyList_Check($input)) {
-    int size = PyList_Size($input);
     int i = 0;
-    $1 = (char **) malloc((size+1)*sizeof(char *));
-    for (i = 0; i < size; i++) {
+    $1 = PyList_Size($input);
+    $2 = (char **) malloc(($1 + 1)*sizeof(char *));
+    for (i = 0; i < $1; i++) {
       PyObject *py_obj = PyList_GetItem($input, i);
       if (PyUnicode_Check(py_obj)) {
-        $1[i] = strdup(PyUnicode_AsUTF8(py_obj));
+        $2[i] = strdup(PyUnicode_AsUTF8(py_obj));
       }
       else {
         PyErr_SetString(PyExc_TypeError, "list must contain strings");
-        free($1);
+        free($2);
         return NULL;
       }
     }
-    $1[i] = 0;
+    $2[i] = 0;
   } else {
     PyErr_SetString(PyExc_TypeError, "not a list");
     return NULL;
   }
 }
 
-%typemap(freearg) char ** {
-  free((char *) $1);
+%typemap(freearg) (int argc, char **argv) {
+  free((char *) $2);
 }
 
 %inline%{
@@ -53,7 +53,7 @@ public:
     fclose(dictionary);
   }
 
-  void lt_proc(char argc, char **argv, char *input_path, char *output_path)
+  void lt_proc(int argc, char **argv, char *input_path, char *output_path)
   {
     FILE* input = fopen(input_path, "r");
     FILE* output = fopen(output_path, "w");
