@@ -4,12 +4,9 @@ import itertools
 from subprocess import Popen, PIPE, call
 from tempfile import mkdtemp
 from shutil import rmtree
+from basictest import BasicTest
 
-import signal
-class Alarm(Exception):
-    pass
-
-class PrintTest():
+class PrintTest(BasicTest):
     """See lt_print test for how to use this. Override runTest if you don't
     want to use NUL flushing."""
 
@@ -17,32 +14,6 @@ class PrintTest():
     printdir = "lr"
     expectedOutput = itertools.repeat("")
     expectedRetCodeFail = False
-
-    def alarmHandler(self, signum, frame):
-        raise Alarm
-
-    def withTimeout(self, seconds, cmd, *args, **kwds):
-        signal.signal(signal.SIGALRM, self.alarmHandler)
-        signal.alarm(seconds)
-        ret = cmd(*args, **kwds)
-        signal.alarm(0)         # reset the alarm
-        return ret
-
-    def communicateFlush(self):
-        output = []
-        char = None
-        try:
-            char = self.withTimeout(2, self.printresult.stdout.read, 1)
-        except Alarm:
-            pass
-        while char and char != b'\0':
-            output.append(char)
-            try:
-                char = self.withTimeout(2, self.printresult.stdout.read, 1)
-            except Alarm:
-                break           # send what we got up till now
-
-        return b"".join(output).decode('utf-8')
 
     def compileTest(self, tmpd):
         self.assertEqual(0, call(["../lttoolbox/lt-comp",
@@ -59,7 +30,7 @@ class PrintTest():
                               stdout=PIPE,
                               stderr=PIPE)
 
-            self.assertEqual(self.communicateFlush(), self.expectedOutput)
+            self.assertEqual(self.communicateFlush(None, self.printresult), self.expectedOutput)
 
             self.printresult.communicate() # let it terminate
             self.printresult.stdout.close()
