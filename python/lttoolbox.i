@@ -5,24 +5,24 @@
 
 
 %typemap(in) (int argc, char **argv) {
-  if (PyList_Check($input)) {
+  if (PyTuple_Check($input)) {
     int i = 0;
-    $1 = PyList_Size($input);
+    $1 = PyTuple_Size($input);
     $2 = (char **) malloc(($1 + 1)*sizeof(char *));
     for (i = 0; i < $1; i++) {
-      PyObject *py_obj = PyList_GetItem($input, i);
+      PyObject *py_obj = PyTuple_GetItem($input, i);
       if (PyUnicode_Check(py_obj)) {
         $2[i] = strdup(PyUnicode_AsUTF8(py_obj));
       }
       else {
-        PyErr_SetString(PyExc_TypeError, "list must contain strings");
+        PyErr_SetString(PyExc_TypeError, "tuple must contain strings");
         free($2);
         return NULL;
       }
     }
     $2[i] = 0;
   } else {
-    PyErr_SetString(PyExc_TypeError, "not a list");
+    PyErr_SetString(PyExc_TypeError, "not a tuple");
     return NULL;
   }
 }
@@ -62,14 +62,16 @@ public:
     optind = 1;
     while (true)
     {
-      c = getopt(argc, argv, "gw");
+      c = getopt(argc, argv, "bgpw");
       if (c == -1)
       {
         break;
       }
       switch(c)
       {
+        case 'b':
         case 'g':
+        case 'p':
           if(cmd == 0)
           {
             cmd = c;
@@ -85,8 +87,16 @@ public:
 
     switch(cmd)
     {
+      case 'b':
+        bilingual(input, output);
+        break;
+
       case 'g':
         generation(input, output);
+        break;
+
+      case 'p':
+        postgeneration(input, output);
         break;
 
       default:
