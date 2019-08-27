@@ -207,6 +207,11 @@ private:
    *         only) character otherwise.
    */
   int symbol_code(const wstring& symbol);
+
+  /**
+   * Finds whether an at&t file contains multiple FSTs or not
+  */
+  bool has_multiple_fsts(string const &file_name);
 };
 
 #endif /* _MYATT_COMPILER_ */

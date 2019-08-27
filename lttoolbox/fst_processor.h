@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 Universitat d'Alacant / Universidad de Alicante
+ * Copyright (C) 2005-2019 Universitat d'Alacant / Universidad de Alicante
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -267,14 +267,14 @@ private:
   bool isEscaped(wchar_t const c) const;
 
   /**
-   * Read text from stream (analysis version, also used in postgeneration)
+   * Read text from stream (analysis version)
    * @param input the stream to read
    * @return the next symbol in the stream
    */
   int readAnalysis(FILE *input);
 
   /**
-   * Read text from stream (generation version, also used in generation)
+   * Read text from stream (decomposition version)
    * @param input the stream to read
    * @return the next symbol in the stream
    */
@@ -331,6 +331,16 @@ private:
    */
   void writeEscaped(wstring const &str, FILE *output);
 
+  /**
+   * Write a string to an output stream.
+   * If we print a space, we may pop a space from blankqueue
+   * immediately, otherwise it should be printed afterwards.
+   *
+   * @param str the string to write, escaping characters
+   * @param output the stream to write in
+   * @return how many blanks to pop and print after printing lu
+   */
+  size_t writeEscapedPopBlanks(wstring const &str, FILE *output);
 
   /**
    * Write a string to an output stream, escaping all escapable characters
@@ -356,6 +366,16 @@ private:
    * @param output stream where the word is written
    */
   void printWord(wstring const &sf, wstring const &lf, FILE *output);
+
+  /**
+   * Prints a word.
+   * If we print a space, we may pop a space from blankqueue.
+   *
+   * @param sf surface form of the word
+   * @param lf lexical form of the word
+   * @param output stream where the word is written
+   */
+  void printWordPopBlank(wstring const &sf, wstring const &lf, FILE *output);
 
   /**
    * Prints a word (Bilingual version)
@@ -386,7 +406,15 @@ private:
   int readTMAnalysis(FILE *input);
 
   unsigned int lastBlank(wstring const &str);
+
+  /**
+   * Print one blankqueue item if there is one, or a given "space" value.
+   *
+   * @param val the space character to use if no blank queue
+   * @param output stream where the word is written
+   */
   void printSpace(wchar_t const val, FILE *output);
+
   void skipUntil(FILE *input, FILE *output, wint_t const character);
   static wstring removeTags(wstring const &str);
   wstring compoundAnalysis(wstring str, bool uppercase, bool firstupper);
@@ -427,7 +455,6 @@ public:
   void postgeneration(FILE *input = stdin, FILE *output = stdout);
   void intergeneration(FILE *input = stdin, FILE *output = stdout);
   void transliteration(FILE *input = stdin, FILE *output = stdout);
-  void decomposition(FILE *input = stdin, FILE *output = stdout);
   wstring biltrans(wstring const &input_word, bool with_delim = true);
   wstring biltransfull(wstring const &input_word, bool with_delim = true);
   void bilingual(FILE *input = stdin, FILE *output = stdout);

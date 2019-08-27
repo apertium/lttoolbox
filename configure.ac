@@ -140,6 +140,15 @@ static_assert(!is_same<size_t,uint32_t>::value, "size_t == uint32_t");
 static_assert(!is_same<size_t,uint64_t>::value, "size_t == uint64_t");
    ]])], [AC_DEFINE([SIZET_NOT_CSTDINT], [1], [size_t != (uint32_t, uint64_t)])])
 
-AM_PATH_PYTHON([2], [], [AC_MSG_WARN([Can't run 'make test' without Python installed.])])
+AM_PATH_PYTHON([3.4], [], [AC_MSG_WARN([Can't generate SWIG wrapper or run tests without Python])])
 
-AC_OUTPUT([Makefile lttoolbox.pc lttoolbox/Makefile])
+AC_CONFIG_FILES([python/setup.py])
+
+AC_ARG_ENABLE([python-bindings],
+              AS_HELP_STRING([--enable-python-bindings],
+                             [build python bindings (default=disabled)]),
+              [enable_python_bindings=$enableval],
+              [enable_python_bindings=no])
+AM_CONDITIONAL([HAVE_PYTHON_BINDINGS], [test x$enable_python_bindings = xyes])
+
+AC_OUTPUT([Makefile lttoolbox.pc lttoolbox/Makefile python/Makefile])

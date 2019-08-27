@@ -111,6 +111,20 @@ AttCompiler::symbol_code(const wstring& symbol)
   }
 }
 
+bool
+AttCompiler::has_multiple_fsts(string const &file_name)
+{
+  wifstream infile(file_name.c_str());  // TODO: error checking
+  wstring line;
+
+  while(getline(infile, line)){
+    if (line.find('-') == 0)
+      return true;
+  }
+
+  return false;
+}
+
 void
 AttCompiler::parse(string const &file_name, wstring const &dir)
 {
@@ -119,8 +133,19 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
   wifstream infile(file_name.c_str());  // TODO: error checking
   vector<wstring> tokens;
   wstring line;
-  bool first_line = true;       // First line -- see below
+  bool first_line_in_fst = true;       // First line -- see below
   bool seen_input_symbol = false;
+  int state_id_offset = 0;
+  int largest_seen_state_id = 0;
+
+  if (has_multiple_fsts(file_name)){
+    wcerr << "Warning: Multiple fsts in '" << file_name << "' will be disjuncted." << endl;
+
+    // Set the starting state to 0 (Epsilon transtions will be added later)
+    starting_state = 0;
+    state_id_offset = 1;
+  }
+
   while (getline(infile, line))
   {
     tokens.clear();
@@ -128,12 +153,12 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
     wstring upper, lower;
     double weight;
 
-    if (line.length() == 0 && first_line)
+    if (line.length() == 0 && first_line_in_fst)
     {
       wcerr << "Error: empty file '" << file_name << "'." << endl;
       exit(EXIT_FAILURE);
     }
-    if (first_line && line.find(L"\t") == wstring::npos)
+    if (first_line_in_fst && line.find(L"\t") == wstring::npos)
     {
       wcerr << "Error: invalid format '" << file_name << "'." << endl;
       exit(EXIT_FAILURE);
@@ -146,14 +171,34 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
     }
     split(line, L'\t', tokens);
 
-    from = stoi(tokens[0]);
+    if (tokens[0].find('-') == 0)
+    {
+      // Update the offset for the new FST
+      state_id_offset = largest_seen_state_id + 1;
+      first_line_in_fst = true;
+      continue;
+    }
+
+    from = stoi(tokens[0]) + state_id_offset;
+    largest_seen_state_id = max(largest_seen_state_id, from);
 
     AttNode* source = get_node(from);
     /* First line: the initial state is of both types. */
-    if (first_line)
+    if (first_line_in_fst)
     {
-      starting_state = from;
-      first_line = false;
+      // If the file has a single FST - No need for state id mapping
+      if (state_id_offset == 0)
+        starting_state = from;
+      else{
+        AttNode * starting_node = get_node(starting_state);
+
+        // Add an Epsilon transition from the new starting state
+        starting_node->transductions.push_back(
+          Transduction(from, L"", L"",
+            alphabet(symbol_code(L""), symbol_code(L"")),
+            default_weight));
+      }
+      first_line_in_fst = false;
     }
 
     /* Final state. */
@@ -171,7 +216,8 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
     }
     else
     {
-      to = stoi(tokens[1]);
+      to = stoi(tokens[1]) + state_id_offset;
+      largest_seen_state_id = max(largest_seen_state_id, to);
       if(dir == L"RL")
       {
         upper = tokens[3];

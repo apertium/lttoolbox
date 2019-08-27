@@ -4,12 +4,9 @@ import itertools
 from subprocess import Popen, PIPE, call
 from tempfile import mkdtemp
 from shutil import rmtree
+from basictest import BasicTest
 
-import signal
-class Alarm(Exception):
-    pass
-
-class ProcTest():
+class ProcTest(BasicTest):
     """See lt_proc test for how to use this. Override runTest if you don't
     want to use NUL flushing."""
 
@@ -19,36 +16,6 @@ class ProcTest():
     inputs = itertools.repeat("")
     expectedOutputs = itertools.repeat("")
     expectedRetCodeFail = False
-
-    def alarmHandler(self, signum, frame):
-        raise Alarm
-
-    def withTimeout(self, seconds, cmd, *args, **kwds):
-        signal.signal(signal.SIGALRM, self.alarmHandler)
-        signal.alarm(seconds)
-        ret = cmd(*args, **kwds)
-        signal.alarm(0)         # reset the alarm
-        return ret
-
-    def communicateFlush(self, string):
-        self.proc.stdin.write(string.encode('utf-8'))
-        self.proc.stdin.write(b'\0')
-        self.proc.stdin.flush()
-
-        output = []
-        char = None
-        try:
-            char = self.withTimeout(2, self.proc.stdout.read, 1)
-        except Alarm:
-            pass
-        while char and char != b'\0':
-            output.append(char)
-            try:
-                char = self.withTimeout(2, self.proc.stdout.read, 1)
-            except Alarm:
-                break           # send what we got up till now
-
-        return b"".join(output).decode('utf-8')
 
     def compileTest(self, tmpd):
         self.assertEqual(0, call(["../lttoolbox/lt-comp",
@@ -66,8 +33,10 @@ class ProcTest():
                               stdout=PIPE,
                               stderr=PIPE)
 
+            self.assertEqual(len(self.inputs),
+                             len(self.expectedOutputs))
             for inp, exp in zip(self.inputs, self.expectedOutputs):
-                self.assertEqual(self.communicateFlush(inp+"[][\n]"),
+                self.assertEqual(self.communicateFlush(inp+"[][\n]", self.proc),
                                  exp+"[][\n]")
 
             self.proc.communicate() # let it terminate

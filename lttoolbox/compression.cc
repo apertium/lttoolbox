@@ -35,7 +35,7 @@ Compression::writeByte(unsigned char byte, FILE *output)
 unsigned char
 Compression::readByte(FILE *input)
 {
-  unsigned char value;
+  unsigned char value = 0;
   if(fread_unlocked(&value, 1, 1, input) != 1)
   {
 //    Not uncomment this code since
