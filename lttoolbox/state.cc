@@ -204,6 +204,11 @@ State::apply(int const input, int const alt)
     return;
   }
 
+  if(input == alt)
+  {
+    apply(input);
+    return;
+  }
 
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
@@ -326,6 +331,17 @@ State::apply(int const input, int const alt1, int const alt2)
     return;
   }
 
+  if(input == alt1)
+  {
+    apply(input, alt2);
+    return;
+  }
+  else if(input == alt2)
+  {
+    apply(input, alt1);
+    return;
+  }
+
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     map<int, Dest>::const_iterator it;
@@ -415,6 +431,7 @@ State::apply(int const input, set<int> const alts)
     }
     for(set<int>::iterator sit = alts.begin(); sit != alts.end(); sit++)
     {
+      if(*sit == input) continue;
       it = state[i].where->transitions.find(*sit);
       if(it != state[i].where->transitions.end())
       {
