@@ -5,7 +5,7 @@ AC_PREREQ(2.52)
 
 m4_define([required_libxml_version], [2.6.17])
 
-AC_INIT([lttoolbox/lttoolbox.h], [3.5.0], [sortiz@users.sourceforge.net])
+AC_INIT([lttoolbox/lttoolbox.h], [3.5.1], [apertium-stuff@lists.sourceforge.net])
 AC_CONFIG_HEADER([lttoolbox/lttoolbox_config.h])
 
 AC_CANONICAL_SYSTEM
@@ -15,7 +15,7 @@ GENERIC_LIBRARY_NAME=lttoolbox
 # Release versioning
 GENERIC_MAJOR_VERSION=3
 GENERIC_MINOR_VERSION=5
-GENERIC_MICRO_VERSION=0
+GENERIC_MICRO_VERSION=1
 
 # API version (often = GENERIC_MAJOR_VERSION.GENERIC_MINOR_VERSION)
 GENERIC_API_VERSION=$GENERIC_MAJOR_VERSION.$GENERIC_MINOR_VERSION
@@ -24,17 +24,6 @@ AC_SUBST(GENERIC_MAJOR_VERSION)
 
 # Shared library versioning
 GENERIC_LIBRARY_VERSION=1:0:0
-#                       | | |
-#                +------+ | +---+
-#                |        |     |
-#             current:revision:age
-#                |        |     |
-#                |        |     +- increment if interfaces have been added
-#                |        |        set to zero if interfaces have been removed
-#                                  or changed
-#                |        +- increment if source code has changed
-#                |           set to zero if current is incremented
-#                +- increment if interfaces have been added, removed or changed
 
 AC_SUBST(GENERIC_LIBRARY_VERSION)
 PACKAGE=$GENERIC_LIBRARY_NAME
