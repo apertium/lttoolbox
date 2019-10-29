@@ -105,7 +105,6 @@
   <xs:element name="e">
     <xs:complexType>
       <xs:choice maxOccurs="unbounded">
-        <xs:element ref="f"/>
         <xs:element ref="i"/>
         <xs:element ref="ig"/>
         <xs:element ref="p"/>
@@ -172,17 +171,6 @@
         <xs:element ref="a"/>
       </xs:choice>
       <xs:attribute name="c"/>
-    </xs:complexType>
-  </xs:element>
-  <xs:element name="f">
-    <xs:complexType mixed="true">
-      <xs:choice minOccurs="0" maxOccurs="unbounded">
-        <xs:element ref="b"/>
-        <xs:element ref="s"/>
-        <xs:element ref="g"/>
-        <xs:element ref="j"/>
-        <xs:element ref="a"/>
-      </xs:choice>
     </xs:complexType>
   </xs:element>
   <!-- identity -->
