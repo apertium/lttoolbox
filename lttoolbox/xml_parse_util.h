@@ -27,7 +27,13 @@ using namespace std;
 class XMLParseUtil
 {
 public:
+
+  /* If attrib does not exist (or other error), returns an empty string: */
   static wstring attrib(xmlTextReaderPtr reader, wstring const &name);
+
+  /* If attrib does not exist (or other error), returns fallback: */
+  static wstring attrib(xmlTextReaderPtr reader, wstring const &name, const wstring fallback);
+
   static string latin1(xmlChar const * input); // mark for deletion
   static wstring towstring(xmlChar const * input);
   static wstring stows(string const &str);

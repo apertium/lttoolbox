@@ -38,6 +38,28 @@ XMLParseUtil::attrib(xmlTextReaderPtr reader, wstring const &name)
   return result;
 }
 
+wstring
+XMLParseUtil::attrib(xmlTextReaderPtr reader, wstring const &name, const wstring fallback)
+{
+  string mystr = "";
+  for (int i = 0, limit = name.size(); i != limit; i++) {
+    mystr += static_cast<char>(name[i]);
+  }
+
+  xmlChar *attrname = xmlCharStrdup(mystr.c_str());
+  xmlChar *myattr = xmlTextReaderGetAttribute(reader, attrname);
+  wstring result = XMLParseUtil::towstring(myattr);
+  xmlFree(myattr);
+  xmlFree(attrname);
+  if(myattr == NULL) {
+    return fallback;
+  }
+  else {
+    return result;
+  }
+}
+
+
 string
 XMLParseUtil::latin1(xmlChar const *input)
 {
