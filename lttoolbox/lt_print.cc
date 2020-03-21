@@ -34,7 +34,7 @@ void endProgram(char *name)
   if(name != NULL)
   {
     cout << basename(name) << " v" << PACKAGE_VERSION <<": dump a transducer to text in ATT format" << endl;
-    cout << "USAGE: " << basename(name) << " [-Hh] bin_file " << endl;
+    cout << "USAGE: " << basename(name) << " [-Hh] bin_file [output_file] " << endl;
     cout << "    -H, --hfst:     use HFST-compatible character escapes" << endl;
     cout << "    -h, --help:     print this message and exit" << endl;
   }
