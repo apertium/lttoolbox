@@ -700,7 +700,31 @@ Transducer::reverse(int const epsilon_tag)
 }
 
 void
-Transducer::show(Alphabet const &alphabet, FILE *output, int const epsilon_tag) const
+Transducer::escapeSymbol(wstring& symbol, bool hfst) const
+{
+  if(symbol == L"") // If it's an epsilon
+  {
+    if(hfst)
+    {
+      symbol = L"@0@";
+    }
+    else
+    {
+      symbol = L"ε";
+    }
+  }
+  else if(hfst && symbol == L" ")
+  {
+    symbol = L"@SPACE@";
+  }
+  else if(hfst && symbol == L"\t")
+  {
+    symbol = L"@TAB@";
+  }
+}
+
+void
+Transducer::show(Alphabet const &alphabet, FILE *output, int const epsilon_tag, bool hfst) const
 {
   for(auto& it : transitions)
   {
@@ -711,24 +735,12 @@ Transducer::show(Alphabet const &alphabet, FILE *output, int const epsilon_tag) 
       fwprintf(output, L"%d\t", it2.second.first);
       wstring l = L"";
       alphabet.getSymbol(l, t.first);
-      if(l == L"")  // If we find an epsilon
-      {
-        fwprintf(output, L"ε\t", l.c_str());
-      }
-      else
-      {
-        fwprintf(output, L"%S\t", l.c_str());
-      }
+      escapeSymbol(l, hfst);
+      fwprintf(output, L"%S\t", l.c_str());
       wstring r = L"";
       alphabet.getSymbol(r, t.second);
-      if(r == L"")  // If we find an epsilon
-      {
-        fwprintf(output, L"ε\t", r.c_str());
-      }
-      else
-      {
-        fwprintf(output, L"%S\t", r.c_str());
-      }
+      escapeSymbol(r, hfst);
+      fwprintf(output, L"%S\t", r.c_str());
       fwprintf(output, L"%f\t", it2.second.second);
       fwprintf(output, L"\n");
     }
@@ -739,6 +751,12 @@ Transducer::show(Alphabet const &alphabet, FILE *output, int const epsilon_tag) 
     fwprintf(output, L"%d\t", it3.first);
     fwprintf(output, L"%f\n", it3.second);
   }
+}
+
+void
+Transducer::show(Alphabet const &alphabet, FILE *output, int const epsilon_tag) const
+{
+  return show(alphabet, output, epsilon_tag, false);
 }
 
 int

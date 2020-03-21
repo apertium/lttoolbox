@@ -25,6 +25,7 @@
 #include <iostream>
 #include <libgen.h>
 #include <string>
+#include <getopt.h>
 
 using namespace std;
 
@@ -33,7 +34,9 @@ void endProgram(char *name)
   if(name != NULL)
   {
     cout << basename(name) << " v" << PACKAGE_VERSION <<": dump a transducer to text in ATT format" << endl;
-    cout << "USAGE: " << basename(name) << " bin_file " << endl;
+    cout << "USAGE: " << basename(name) << " [-Hh] bin_file [output_file] " << endl;
+    cout << "    -H, --hfst:     use HFST-compatible character escapes" << endl;
+    cout << "    -h, --help:     print this message and exit" << endl;
   }
   exit(EXIT_FAILURE);
 }
@@ -41,19 +44,78 @@ void endProgram(char *name)
 
 int main(int argc, char *argv[])
 {
-  if(argc != 2)
-  {
-    endProgram(argv[0]);
-  }
+  bool hfst = false;
+  FILE* input = NULL;
+  FILE* output = stdout;
 
   LtLocale::tryToSetLocale();
 
+#if HAVE_GETOPT_LONG
+  int option_index=0;
+#endif
 
-  FILE *input = fopen(argv[1], "rb");
+  while (true) {
+#if HAVE_GETOPT_LONG
+    static struct option long_options[] =
+    {
+      {"hfst",      no_argument, 0, 'H'},
+      {"help",      no_argument, 0, 'h'},
+      {0, 0, 0, 0}
+    };
+
+    int cnt=getopt_long(argc, argv, "Hh", long_options, &option_index);
+#else
+    int cnt=getopt(argc, argv, "Hh");
+#endif
+    if (cnt==-1)
+      break;
+
+    switch (cnt)
+    {
+      case 'H':
+        hfst = true;
+        break;
+
+      case 'h':
+      default:
+        endProgram(argv[0]);
+        break;
+    }
+  }
+
+  string infile;
+  string outfile;
+  switch(argc - optind)
+  {
+    case 1:
+      infile = argv[argc-1];
+      break;
+
+    case 2:
+      infile = argv[argc-2];
+      outfile = argv[argc-1];
+      break;
+
+    default:
+      endProgram(argv[0]);
+      break;
+  }
+
+  input = fopen(infile.c_str(), "rb");
   if(!input)
   {
-    wcerr << "Error: Cannot open file '" << argv[1] << "'." << endl;
+    cerr << "Error: Cannot open file '" << infile << "' for reading." << endl;
     exit(EXIT_FAILURE);
+  }
+
+  if(outfile != "")
+  {
+    output = fopen(outfile.c_str(), "w");
+    if(!output)
+    {
+      cerr << "Error: Cannot open file '" << outfile << "' for writing." << endl;
+      exit(EXIT_FAILURE);
+    }
   }
 
   Alphabet alphabet;
@@ -106,13 +168,12 @@ int main(int argc, char *argv[])
 
   /////////////////////
 
-  FILE *output = stdout;
   map<wstring, Transducer>::iterator penum = transducers.end();
   penum--;
   for(map<wstring, Transducer>::iterator it = transducers.begin(); it != transducers.end(); it++)
   {
     it->second.joinFinals();
-    it->second.show(alphabet, output);
+    it->second.show(alphabet, output, 0, hfst);
     if(it != penum)
     {
       fwprintf(output, L"--\n", it->first.c_str());
@@ -120,6 +181,10 @@ int main(int argc, char *argv[])
   }
 
   fclose(input);
+  if(output != stdout)
+  {
+    fclose(output);
+  }
 
   return 0;
 }
