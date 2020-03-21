@@ -81,6 +81,13 @@ private:
    * Empty transducer
    */
   void destroy();
+
+  /**
+   * Helper function for show()
+   * @param symbol the string to be escaped
+   * @param hfst if true, use HFST-compatible escape sequences
+   */
+  void escapeSymbol(wstring& symbol, bool hfst) const;
 public:
 
   /**
@@ -213,9 +220,10 @@ public:
 
   /**
    * Print all the transductions of a transducer in ATT format
+   * @param hfst if true, use HFST-compatible escape characters
    * @param epsilon_tag the tag to take as epsilon
    */
-  void show(Alphabet const &a, FILE *output = stdout, int const epsilon_tag = 0) const;
+  void show(Alphabet const &a, FILE *output = stdout, bool hfst = false, int const epsilon_tag = 0) const;
 
   /**
    * Determinize the transducer
