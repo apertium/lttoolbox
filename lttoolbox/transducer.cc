@@ -724,7 +724,7 @@ Transducer::escapeSymbol(wstring& symbol, bool hfst) const
 }
 
 void
-Transducer::show(Alphabet const &alphabet, FILE *output, bool hfst, int const epsilon_tag) const
+Transducer::show(Alphabet const &alphabet, FILE *output, int const epsilon_tag, bool hfst) const
 {
   for(auto& it : transitions)
   {

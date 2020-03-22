@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
   for(map<wstring, Transducer>::iterator it = transducers.begin(); it != transducers.end(); it++)
   {
     it->second.joinFinals();
-    it->second.show(alphabet, output, hfst);
+    it->second.show(alphabet, output, 0, hfst);
     if(it != penum)
     {
       fwprintf(output, L"--\n", it->first.c_str());
