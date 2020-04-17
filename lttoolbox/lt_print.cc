@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 
   if(outfile != "")
   {
-    output = fopen(outfile.c_str(), "w");
+    output = fopen(outfile.c_str(), "wb");
     if(!output)
     {
       cerr << "Error: Cannot open file '" << outfile << "' for writing." << endl;

@@ -168,10 +168,11 @@ int main(int argc, char *argv[])
     case 'r':
       fstp.setRestoreChars(true);
       fstp.parseRCX(optarg);
+      fstp.setUseDefaultIgnoredChars(false);
+      break;
 
     case 'I':
       fstp.setUseDefaultIgnoredChars(false);
-
       break;
 
     case 'W':

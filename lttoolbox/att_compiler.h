@@ -43,7 +43,7 @@ typedef unsigned int TransducerType;
 namespace
 {
   /** Splits a string into fields. */
-  vector<wstring>& split(const wstring& s, wchar_t delim, vector<wstring> &out)
+  inline vector<wstring>& split(const wstring& s, wchar_t delim, vector<wstring> &out)
   {
       wistringstream ss(s);
       wstring item;

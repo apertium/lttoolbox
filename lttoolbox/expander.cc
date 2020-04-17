@@ -335,7 +335,7 @@ Expander::procEntry(FILE *output)
 
   wstring myname = L"";
   if(this->attrib(Compiler::COMPILER_IGNORE_ATTR) == L"yes"
-   || altval != L"" && altval != alt
+   || (altval != L"" && altval != alt)
    || (varval != L"" && varval != variant && attribute == Compiler::COMPILER_RESTRICTION_RL_VAL)
    || ((varl != L"" && varl != variant_left) && (varr != L"" && varr != variant_right))
    || (varl != L"" && varl != variant_left && attribute == Compiler::COMPILER_RESTRICTION_RL_VAL)
@@ -359,7 +359,7 @@ Expander::procEntry(FILE *output)
   EntList items, items_lr, items_rl;
   if(attribute == Compiler::COMPILER_RESTRICTION_LR_VAL
    || (varval != L"" && varval != variant && attribute != Compiler::COMPILER_RESTRICTION_RL_VAL)
-   || varl != L"" && varl != variant_left)
+   || (varl != L"" && varl != variant_left))
   {
     items_lr.push_back(make_pair(L"", L""));
   }

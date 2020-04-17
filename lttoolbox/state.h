@@ -49,6 +49,13 @@ private:
     bool dirty;
 
     TNodeState(Node * const &w, vector<pair<int, double>> * const &s, bool const &d): where(w), sequence(s), dirty(d){}
+
+    TNodeState(const TNodeState& other)
+      : where(other.where)
+      , sequence(other.sequence)
+      , dirty(other.dirty)
+    {}
+
     TNodeState & operator=(TNodeState const &other)
     {
       where = other.where;

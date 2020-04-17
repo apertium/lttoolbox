@@ -419,7 +419,7 @@ AttCompiler::classify(int from, map<int, TransducerType>& visited, bool path,
 void
 AttCompiler::write(FILE *output)
 {
-//  FILE* output = fopen(file_name, "w");
+//  FILE* output = fopen(file_name, "wb");
   fwrite(HEADER_LTTOOLBOX, 1, 4, output);
   uint64_t features = 0;
   write_le(output, features);
