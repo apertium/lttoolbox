@@ -715,11 +715,11 @@ Transducer::escapeSymbol(wstring& symbol, bool hfst) const
   }
   else if(hfst && symbol == L" ")
   {
-    symbol = L"@SPACE@";
+    symbol = L"@_SPACE_@";
   }
   else if(hfst && symbol == L"\t")
   {
-    symbol = L"@TAB@";
+    symbol = L"@_TAB_@";
   }
 }
 
