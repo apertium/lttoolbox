@@ -16,7 +16,6 @@
  */
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
-#include <lttoolbox/lttoolbox_config.h>
 
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/lt_locale.h>
@@ -26,6 +25,11 @@
 #include <libgen.h>
 #include <string>
 #include <getopt.h>
+
+#ifdef _MSC_VER
+#include <io.h>
+#include <fcntl.h>
+#endif
 
 using namespace std;
 
@@ -49,6 +53,10 @@ int main(int argc, char *argv[])
   FILE* output = stdout;
 
   LtLocale::tryToSetLocale();
+
+#ifdef _MSC_VER
+  _setmode(_fileno(output), _O_U8TEXT);
+#endif
 
 #if HAVE_GETOPT_LONG
   int option_index=0;
@@ -176,7 +184,7 @@ int main(int argc, char *argv[])
     it->second.show(alphabet, output, 0, hfst);
     if(it != penum)
     {
-      fwprintf(output, L"--\n", it->first.c_str());
+      fwprintf(output, L"--\n", it->first.c_str()); // ToDo: Was %ls meant to go somewhere here?
     }
   }
 

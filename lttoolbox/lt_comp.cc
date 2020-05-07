@@ -16,7 +16,6 @@
  */
 #include <lttoolbox/compiler.h>
 #include <lttoolbox/att_compiler.h>
-#include <lttoolbox/lttoolbox_config.h>
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/string_to_wostream.h>
 

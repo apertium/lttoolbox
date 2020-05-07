@@ -16,7 +16,6 @@
  */
 
 #include <lttoolbox/match_exe.h>
-#include <lttoolbox/lttoolbox_config.h>
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/compression.h>
 

@@ -15,7 +15,6 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 #include <lttoolbox/tmx_compiler.h>
-#include <lttoolbox/lttoolbox_config.h>
 #include <lttoolbox/lt_locale.h>
 #include <cstdlib>
 #include <iostream>

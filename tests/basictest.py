@@ -8,10 +8,14 @@ class BasicTest:
         raise Alarm
 
     def withTimeout(self, seconds, cmd, *args, **kwds):
-        signal.signal(signal.SIGALRM, self.alarmHandler)
-        signal.alarm(seconds)
-        ret = cmd(*args, **kwds)
-        signal.alarm(0)         # reset the alarm
+        # Windows doesn't have SIGALRM
+        try:
+            signal.signal(signal.SIGALRM, self.alarmHandler)
+            signal.alarm(seconds)
+            ret = cmd(*args, **kwds)
+            signal.alarm(0)         # reset the alarm
+        except AttributeError:
+            ret = cmd(*args, **kwds)
         return ret
 
     def communicateFlush(self, string, process):
@@ -33,4 +37,4 @@ class BasicTest:
             except Alarm:
                 break           # send what we got up till now
 
-        return b"".join(output).decode('utf-8')
+        return b"".join(output).decode('utf-8').replace('\r\n', '\n')

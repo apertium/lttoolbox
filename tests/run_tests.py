@@ -7,6 +7,10 @@ sys.path.append(os.path.realpath("."))
 import unittest
 import lt_proc, lt_trim, lt_print
 
+os.environ['LTTOOLBOX_PATH'] = '../lttoolbox'
+if len(sys.argv) > 1:
+	os.environ['LTTOOLBOX_PATH'] = sys.argv[1]
+
 if __name__ == "__main__":
     os.chdir(os.path.dirname(__file__))
     failures = 0

@@ -26,7 +26,7 @@
 #include <cwchar>
 #include <cwctype>
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_MSC_VER)
 #include <utf8_fwrap.h>
 #endif
 
@@ -162,7 +162,7 @@ Alphabet::read(FILE *input)
     tam--;
     wstring mytag = L"<" + Compression::wstring_read(input) + L">";
     a_new.slexicinv.push_back(mytag);
-    a_new.slexic[mytag]= -a_new.slexicinv.size();
+    a_new.slexic[mytag]= -a_new.slexicinv.size(); // ToDo: This does not turn the result negative due to unsigned semantics
   }
 
   // Reading of pairlist
@@ -198,7 +198,7 @@ Alphabet::deserialise(std::istream &serialised)
   spair.clear();
   slexicinv = Deserialiser<vector<wstring> >::deserialise(serialised);
   for (size_t i = 0; i < slexicinv.size(); i++) {
-    slexic[slexicinv[i]] = -i - 1;
+    slexic[slexicinv[i]] = -i - 1; // ToDo: This does not turn the result negative due to unsigned semantics
   }
   spairinv = Deserialiser<vector<pair<int, int> > >::deserialise(serialised);
   for (size_t i = 0; i < slexicinv.size(); i++) {

@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 # This is similar to diffing the lt-expand of uncompiled XML dictionaries.
 # See also `man hfst-fst2strings'.
 
+import os
 from proctest import ProcTest
 import unittest
 
@@ -23,17 +24,17 @@ class TrimProcTest(ProcTest):
     procflags = ["-z"]
 
     def compileTest(self, tmpd):
-        self.assertEqual(0, call(["../lttoolbox/lt-comp",
+        self.assertEqual(0, call([os.environ['LTTOOLBOX_PATH']+"/lt-comp",
                                   self.monodir,
                                   self.monodix,
                                   tmpd+"/mono.bin"],
                                  stdout=PIPE))
-        self.assertEqual(0, call(["../lttoolbox/lt-comp",
+        self.assertEqual(0, call([os.environ['LTTOOLBOX_PATH']+"/lt-comp",
                                   self.bidir,
                                   self.bidix,
                                   tmpd+"/bi.bin"],
                                  stdout=PIPE))
-        self.assertEqual(0, call(["../lttoolbox/lt-trim",
+        self.assertEqual(0, call([os.environ['LTTOOLBOX_PATH']+"/lt-trim",
                                   tmpd+"/mono.bin",
                                   tmpd+"/bi.bin",
                                   tmpd+"/compiled.bin"],
@@ -151,17 +152,17 @@ class Empty(unittest.TestCase, TrimProcTest):
     def runTest(self):
         tmpd = mkdtemp()
         try:
-            self.assertEqual(0, call(["../lttoolbox/lt-comp",
+            self.assertEqual(0, call([os.environ['LTTOOLBOX_PATH']+"/lt-comp",
                                       "lr",
                                       "data/empty-mono.dix",
                                       tmpd+"/empty-mono.bin"],
                                      stdout=PIPE))
-            self.assertEqual(0, call(["../lttoolbox/lt-comp",
+            self.assertEqual(0, call([os.environ['LTTOOLBOX_PATH']+"/lt-comp",
                                       "rl", # rl!
                                       "data/empty-bi.dix",
                                       tmpd+"/empty-bi.bin"],
                                      stdout=PIPE))
-            self.assertEqual(1, call(["../lttoolbox/lt-trim",
+            self.assertEqual(1, call([os.environ['LTTOOLBOX_PATH']+"/lt-trim",
                                       tmpd+"/empty-mono.bin",
                                       tmpd+"/empty-bi.bin",
                                       tmpd+"/empty-trimmed.bin"],

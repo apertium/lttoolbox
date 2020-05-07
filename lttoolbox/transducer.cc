@@ -17,7 +17,6 @@
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
 #include <lttoolbox/alphabet.h>
-#include <lttoolbox/lttoolbox_config.h>
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/deserialiser.h>
 #include <lttoolbox/serialiser.h>
@@ -736,11 +735,11 @@ Transducer::show(Alphabet const &alphabet, FILE *output, int const epsilon_tag, 
       wstring l = L"";
       alphabet.getSymbol(l, t.first);
       escapeSymbol(l, hfst);
-      fwprintf(output, L"%S\t", l.c_str());
+      fwprintf(output, L"%ls\t", l.c_str());
       wstring r = L"";
       alphabet.getSymbol(r, t.second);
       escapeSymbol(r, hfst);
-      fwprintf(output, L"%S\t", r.c_str());
+      fwprintf(output, L"%ls\t", r.c_str());
       fwprintf(output, L"%f\t", it2.second.second);
       fwprintf(output, L"\n");
     }
@@ -788,7 +787,7 @@ Transducer::recognise(wstring pattern, Alphabet &a, FILE *err)
   {
     set<int> new_state;        //Transducer::closure(int const state, int const epsilon_tag)
     // For each of the current alive states
-    //fwprintf(err, L"step: %S %C (%d)\n", pattern.c_str(), *it, sym);
+    //fwprintf(err, L"step: %ls %lc (%d)\n", pattern.c_str(), *it, sym);
     for(auto& it2 : states)
     {
       auto& p = transitions[it2];
@@ -803,7 +802,7 @@ Transducer::recognise(wstring pattern, Alphabet &a, FILE *err)
         //wstring r = L"";
         //a.getSymbol(r, t.second);
 
-        //fwprintf(err, L"  -> state: %d, trans: %S:%S, targ: %d\n", *it2, (l == L"") ?  L"ε" : l.c_str(),  (r == L"") ?  L"ε" : r.c_str(), it3->second);
+        //fwprintf(err, L"  -> state: %d, trans: %ls:%ls, targ: %d\n", *it2, (l == L"") ?  L"ε" : l.c_str(),  (r == L"") ?  L"ε" : r.c_str(), it3->second);
         //if(l.find(*it) != wstring::npos || l == L"" )
         if(l.find(it) != wstring::npos)
         {

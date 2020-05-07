@@ -20,6 +20,7 @@
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
 #include <lttoolbox/string_to_wostream.h>
+#include <algorithm>
 
 using namespace std;
 

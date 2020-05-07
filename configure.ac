@@ -1,12 +1,5 @@
-#                                               -*- Autoconf -*-
-# Process this file with autoconf to produce a configure script.
-
 AC_PREREQ(2.52)
-
-m4_define([required_libxml_version], [2.6.17])
-
-AC_INIT([lttoolbox/lttoolbox.h], [3.5.1], [apertium-stuff@lists.sourceforge.net])
-AC_CONFIG_HEADER([lttoolbox/lttoolbox_config.h])
+AC_INIT([lttoolbox/lttoolbox.h], [3.5.2], [apertium-stuff@lists.sourceforge.net])
 
 AC_CANONICAL_SYSTEM
 
@@ -15,7 +8,7 @@ GENERIC_LIBRARY_NAME=lttoolbox
 # Release versioning
 GENERIC_MAJOR_VERSION=3
 GENERIC_MINOR_VERSION=5
-GENERIC_MICRO_VERSION=1
+GENERIC_MICRO_VERSION=2
 
 # API version (often = GENERIC_MAJOR_VERSION.GENERIC_MINOR_VERSION)
 GENERIC_API_VERSION=$GENERIC_MAJOR_VERSION.$GENERIC_MINOR_VERSION
@@ -57,7 +50,7 @@ AC_ARG_ENABLE(profile,
               [CXXFLAGS="-pg -g -Wall"; CFLAGS="-pg -g -Wall"; LDFLAGS="-pg"])
 
 
-PKG_CHECK_MODULES(LTTOOLBOX, [libxml-2.0 >= required_libxml_version])
+PKG_CHECK_MODULES(LTTOOLBOX, [libxml-2.0 >= 2.6.17])
 
 # Check for wide strings
 AC_DEFUN([AC_CXX_WSTRING],[
@@ -131,7 +124,7 @@ static_assert(!is_same<size_t,uint64_t>::value, "size_t == uint64_t");
 
 AM_PATH_PYTHON([3.4], [], [AC_MSG_WARN([Can't generate SWIG wrapper or run tests without Python])])
 
-AC_CONFIG_FILES([python/setup.py])
+AC_CONFIG_FILES([python/lttoolbox.i python/setup.py])
 
 AC_ARG_ENABLE([python-bindings],
               AS_HELP_STRING([--enable-python-bindings],

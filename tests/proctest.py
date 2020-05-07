@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import itertools
 from subprocess import Popen, PIPE, call
 from tempfile import mkdtemp
@@ -18,7 +19,7 @@ class ProcTest(BasicTest):
     expectedRetCodeFail = False
 
     def compileTest(self, tmpd):
-        self.assertEqual(0, call(["../lttoolbox/lt-comp",
+        self.assertEqual(0, call([os.environ['LTTOOLBOX_PATH']+"/lt-comp",
                                   self.procdir,
                                   self.procdix,
                                   tmpd+"/compiled.bin"],
@@ -28,7 +29,7 @@ class ProcTest(BasicTest):
         tmpd = mkdtemp()
         try:
             self.compileTest(tmpd)
-            self.proc = Popen(["../lttoolbox/lt-proc"] + self.procflags + [tmpd+"/compiled.bin"],
+            self.proc = Popen([os.environ['LTTOOLBOX_PATH']+"/lt-proc"] + self.procflags + [tmpd+"/compiled.bin"],
                               stdin=PIPE,
                               stdout=PIPE,
                               stderr=PIPE)

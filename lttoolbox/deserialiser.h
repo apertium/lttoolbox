@@ -30,25 +30,8 @@
 #include <vector>
 
 #include <typeinfo>
-
-#if __cplusplus >= 201103L
 #include <type_traits>
-#else
-namespace std {
-template <typename T>
-struct remove_const;
-template <typename T>
-struct remove_const
-{
-    typedef T type;
-};
-template <typename T>
-struct remove_const<const T>
-{
-    typedef T type;
-};
-}
-#endif
+#include <iterator>
 
 template <typename DeserialisedType> class Deserialiser;
 
@@ -208,8 +191,7 @@ Deserialiser<Container>::deserialise(std::istream &Stream_) {
   uint64_t SerialisedValueCount =
       Deserialiser<uint64_t>::deserialise(Stream_);
   typename std::remove_const<Container>::type SerialisedType_;
-  std::insert_iterator<typename std::remove_const<Container>::type> insert_it =
-      std::inserter(SerialisedType_, SerialisedType_.begin());
+  auto insert_it = std::inserter(SerialisedType_, SerialisedType_.begin());
 
   for (; SerialisedValueCount != 0; --SerialisedValueCount) {
     *(insert_it++) = Deserialiser<typename Container::value_type>::deserialise(Stream_);

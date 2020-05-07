@@ -28,6 +28,16 @@
 #include <set>
 #include <libxml/xmlreader.h>
 
+#ifdef _MSC_VER
+  #if !defined(LTTOOLBOX_EXPORTS)
+    #define LTTOOLBOX_IMPORTS __declspec(dllimport)
+  #else
+    #define LTTOOLBOX_IMPORTS
+  #endif
+#else
+  #define LTTOOLBOX_IMPORTS
+#endif
+
 using namespace std;
 
 /**
@@ -277,40 +287,40 @@ public:
    * Constants to represent the element and the attributes of
    * dictionaries
    */
-  static wstring const COMPILER_DICTIONARY_ELEM;
-  static wstring const COMPILER_ALPHABET_ELEM;
-  static wstring const COMPILER_SDEFS_ELEM;
-  static wstring const COMPILER_SDEF_ELEM;
-  static wstring const COMPILER_N_ATTR;
-  static wstring const COMPILER_PARDEFS_ELEM;
-  static wstring const COMPILER_PARDEF_ELEM;
-  static wstring const COMPILER_PAR_ELEM;
-  static wstring const COMPILER_ENTRY_ELEM;
-  static wstring const COMPILER_RESTRICTION_ATTR;
-  static wstring const COMPILER_RESTRICTION_LR_VAL;
-  static wstring const COMPILER_RESTRICTION_RL_VAL;
-  static wstring const COMPILER_PAIR_ELEM;
-  static wstring const COMPILER_LEFT_ELEM;
-  static wstring const COMPILER_RIGHT_ELEM;
-  static wstring const COMPILER_S_ELEM;
-  static wstring const COMPILER_REGEXP_ELEM;
-  static wstring const COMPILER_SECTION_ELEM;
-  static wstring const COMPILER_ID_ATTR;
-  static wstring const COMPILER_TYPE_ATTR;
-  static wstring const COMPILER_IDENTITY_ELEM;
-  static wstring const COMPILER_IDENTITYGROUP_ELEM;
-  static wstring const COMPILER_JOIN_ELEM;
-  static wstring const COMPILER_BLANK_ELEM;
-  static wstring const COMPILER_POSTGENERATOR_ELEM;
-  static wstring const COMPILER_GROUP_ELEM;
-  static wstring const COMPILER_LEMMA_ATTR;
-  static wstring const COMPILER_IGNORE_ATTR;
-  static wstring const COMPILER_IGNORE_YES_VAL;
-  static wstring const COMPILER_ALT_ATTR;
-  static wstring const COMPILER_V_ATTR;
-  static wstring const COMPILER_VL_ATTR;
-  static wstring const COMPILER_VR_ATTR;
-  static wstring const COMPILER_WEIGHT_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_DICTIONARY_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_ALPHABET_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_SDEFS_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_SDEF_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_N_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_PARDEFS_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_PARDEF_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_PAR_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_ENTRY_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_RESTRICTION_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_RESTRICTION_LR_VAL;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_RESTRICTION_RL_VAL;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_PAIR_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_LEFT_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_RIGHT_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_S_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_REGEXP_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_SECTION_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_ID_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_TYPE_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_IDENTITY_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_IDENTITYGROUP_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_JOIN_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_BLANK_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_POSTGENERATOR_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_GROUP_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_LEMMA_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_IGNORE_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_IGNORE_YES_VAL;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_ALT_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_V_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_VL_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_VR_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_WEIGHT_ATTR;
 
   /**
    * Constructor

@@ -408,7 +408,7 @@ TMXCompiler::procNode()
   xmlChar const *xname = xmlTextReaderConstName(reader);
   wstring name = XMLParseUtil::towstring(xname);
 
-  // HACER: optimizar el orden de ejecución de esta ristra de "ifs"
+  // HACER: optimizar el orden de ejecuciÃ³n de esta ristra de "ifs"
 
   if(name == L"#text")
   {
@@ -665,4 +665,3 @@ TMXCompiler::setMetaLanguageCode(wstring const &code)
 {
   // nada
 }
-

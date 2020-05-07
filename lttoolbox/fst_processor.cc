@@ -22,8 +22,9 @@
 #include <iostream>
 #include <cerrno>
 #include <climits>
+#include <cwctype>
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_MSC_VER)
 #include <utf8_fwrap.h>
 #endif
 
@@ -2803,7 +2804,7 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
     symbol = tr.first;
     val = tr.second;
 
-    //fwprintf(stderr, L"> %S : %C : %d\n", tr.first.c_str(), tr.second, tr.second);
+    //fwprintf(stderr, L"> %ls : %lc : %d\n", tr.first.c_str(), tr.second, tr.second);
     if(biltransSurfaceForms && !seensurface && !outOfWord)
     {
       while(val != L'/' && val != 0x7fffffff)
@@ -2813,7 +2814,7 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
         tr = readBilingual(input, output);
         symbol = tr.first;
         val = tr.second;
-        //fwprintf(stderr, L" == %S : %C : %d => %S\n", symbol.c_str(), val, val, surface.c_str());
+        //fwprintf(stderr, L" == %ls : %lc : %d => %ls\n", symbol.c_str(), val, val, surface.c_str());
       }
       seensurface = true;
       tr = readBilingual(input, output);

@@ -15,7 +15,6 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 #include <lttoolbox/fst_processor.h>
-#include <lttoolbox/lttoolbox_config.h>
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/lt_locale.h>
 
@@ -29,7 +28,7 @@
 #include <fcntl.h>
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_MSC_VER)
 #include <utf8_fwrap.h>
 #endif
 
