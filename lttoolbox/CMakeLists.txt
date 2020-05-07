@@ -71,10 +71,10 @@ else()
 	set(GETOPT)
 endif()
 
-set(LibLttoolbox "lttoolbox${PROJECT_VERSION_MAJOR}-${API_VERSION}")
+set(LibLttoolbox "lttoolbox${PROJECT_VERSION_MAJOR}-${VERSION_API}")
 add_library(${LibLttoolbox} ${LIBLTTOOLBOX_SOURCES})
 target_compile_definitions(${LibLttoolbox} PRIVATE LTTOOLBOX_EXPORTS)
-set_target_properties(${LibLttoolbox} PROPERTIES SOVERSION ${SOVERSION})
+set_target_properties(${LibLttoolbox} PROPERTIES SOVERSION ${SOVERSION} VERSION ${VERSION})
 target_link_libraries(${LibLttoolbox} ${LIBXML2_LIBRARIES})
 
 add_executable(lt-print lt_print.cc)
@@ -106,7 +106,7 @@ endif()
 install(TARGETS ${LibLttoolbox}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES ${LIBLTTOOLBOX_HEADERS}
-	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/lttoolbox-${API_VERSION}/lttoolbox)
+	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/lttoolbox-${VERSION_API}/lttoolbox)
 install(TARGETS lt-print lt-trim lt-comp lt-proc lt-expand lt-tmxcomp lt-tmxproc
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 

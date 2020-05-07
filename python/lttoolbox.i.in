@@ -34,7 +34,6 @@
 %inline%{
 #define SWIG_FILE_WITH_INIT
 #include <lttoolbox/fst_processor.h>
-#include <lttoolbox/lttoolbox_config.h>
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/lt_locale.h>
 

@@ -5,7 +5,8 @@ project(lttoolbox
 	LANGUAGES CXX C
 	)
 set(VERSION ${PROJECT_VERSION})
-set(API_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+set(VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+set(VERSION_API "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
 set(SOVERSION 1.0.0)
 set(PACKAGE_BUGREPORT "apertium-stuff@lists.sourceforge.net")
 
@@ -82,9 +83,9 @@ else()
 
 	# Generate pkg-config file
 	set(prefix      ${CMAKE_INSTALL_PREFIX})
-	set(exec_prefix ${CMAKE_INSTALL_PREFIX})
-	set(libdir      ${CMAKE_INSTALL_LIBDIR})
-	set(includedir  ${CMAKE_INSTALL_INCLUDEDIR})
+	set(exec_prefix "\${prefix}")
+	set(libdir      "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
+	set(includedir  "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
 	configure_file(lttoolbox.pc.in lttoolbox.pc @ONLY)
 	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/lttoolbox.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig/")
 endif()
