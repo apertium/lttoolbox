@@ -516,17 +516,39 @@ FSTProcessor::readGeneration(FILE *input, FILE *output)
   {
     wstring cad = L"";
     cad += static_cast<wchar_t>(val);
+      
+    bool isSecondaryTag = false;
+      
     while((val = fgetwc_unlocked(input)) != L'>')
     {
       if(feof(input))
       {
         streamError();
       }
+      if(val == L':')
+      {
+        isSecondaryTag = true;
+        break;
+      }
       cad += static_cast<wchar_t>(val);
     }
     cad += static_cast<wchar_t>(val);
-
-    return alphabet(cad);
+    
+    if(isSecondaryTag)
+    {
+      while((val = fgetwc_unlocked(input)) != L'$')
+      {
+        //do nothing
+      }
+        
+      outOfWord = true;
+      return static_cast<int>(L'$');
+    }
+    else
+    {
+      return alphabet(cad);
+    }
+    
   }
   else if(val == L'[')
   {
