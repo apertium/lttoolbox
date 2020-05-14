@@ -538,7 +538,10 @@ FSTProcessor::readGeneration(FILE *input, FILE *output)
     {
       while((val = fgetwc_unlocked(input)) != L'$')
       {
-        //do nothing
+        if(feof(input))
+        {
+          streamError();
+        }
       }
         
       outOfWord = true;
