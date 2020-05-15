@@ -564,13 +564,13 @@ FSTProcessor::readGeneration(FILE *input, FILE *output)
           {
             isSecondaryTag = true;
           }
-          else if(val == L'#')
-          {
-            return static_cast<int>(L'#');
-          }
           else if(val == L'$')
           {
               break;
+          }
+          else
+          {
+            return static_cast<int>(val);
           }
         }
       }
