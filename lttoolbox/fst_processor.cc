@@ -536,8 +536,10 @@ FSTProcessor::readGeneration(FILE *input, FILE *output)
     
     if(isSecondaryTag)
     {
-      while((val = fgetwc_unlocked(input)) != L'$')
+      while(true)
       {
+        val = fgetwc_unlocked(input);
+          
         if(feof(input))
         {
           streamError();
@@ -548,9 +550,28 @@ FSTProcessor::readGeneration(FILE *input, FILE *output)
           val = fgetwc_unlocked(input);
           continue;
         }
-        else if(val == L'#')
+        
+        if(isSecondaryTag)
         {
-          return static_cast<int>(L'#');
+          if(val == L'>')
+          {
+            isSecondaryTag = false;
+          }
+        }
+        else
+        {
+          if(val == L'<')
+          {
+            isSecondaryTag = true;
+          }
+          else if(val == L'#')
+          {
+            return static_cast<int>(L'#');
+          }
+          else if(val == L'$')
+          {
+              break;
+          }
         }
       }
         
