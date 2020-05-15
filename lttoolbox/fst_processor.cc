@@ -542,6 +542,16 @@ FSTProcessor::readGeneration(FILE *input, FILE *output)
         {
           streamError();
         }
+        
+        if(val == L'\\')
+        {
+          val = fgetwc_unlocked(input);
+          continue;
+        }
+        else if(val == L'#')
+        {
+          return static_cast<int>(L'#');
+        }
       }
         
       outOfWord = true;
