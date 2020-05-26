@@ -1047,6 +1047,9 @@ Transducer::intersect(Transducer &trimmer,
   wstring compoundRSymbol = L"<compound-R>";
   wstring COMPILER_JOIN_ELEM = L"+";
   wstring COMPILER_GROUP_ELEM = L"#";
+  wstring COMPILER_ANY_TAG = L"<ANY_TAG>";
+  wstring COMPILER_ANY_CHAR = L"<ANY_CHAR>";
+  wstring COMPILER_SEPARABLE_BOUNDARY = L"<$>";
 
   // When searching, we need to record (this, (trimmer, trimmer_pre_plus))
   typedef std::pair<int, std::pair<int, int > > SearchState;
@@ -1122,7 +1125,7 @@ Transducer::intersect(Transducer &trimmer,
       wstring this_right = L"";
       this_a.getSymbol(this_right, this_a.decode(this_label).second);
 
-      if(this_right == COMPILER_JOIN_ELEM)
+      if(this_right == COMPILER_JOIN_ELEM || this_right == COMPILER_SEPARABLE_BOUNDARY)
       {
         if(trimmer_preplus == trimmer_src) {
           // Keep the old preplus state if it was set; equal to current trimmer state means unset:
@@ -1143,6 +1146,10 @@ Transducer::intersect(Transducer &trimmer,
                            trimmed_trg, // toState
                            this_label, // symbol-pair, using this alphabet
                            this_wt); //weight of transduction
+        if(this_right == COMPILER_SEPARABLE_BOUNDARY && isFinal(this_trg))
+        {
+          trimmed.setFinal(trimmed_trg, default_weight);
+        }
       }
       else if ( this_right == compoundOnlyLSymbol
                 || this_right == compoundRSymbol
@@ -1196,7 +1203,9 @@ Transducer::intersect(Transducer &trimmer,
             trimmer_preplus_next = trimmer_trg;
           }
 
-          if(trimmer_left != L"" && this_right == trimmer_left) // we've already dealt with trimmer epsilons
+          if(trimmer_left != L"" && // we've already dealt with trimmer epsilons
+             (this_right == trimmer_left ||
+              (this_right == ((trimmer_left[0] == L'<') ? COMPILER_ANY_TAG : COMPILER_ANY_CHAR))))
           {
             next = make_pair(this_trg, make_pair(trimmer_trg, trimmer_preplus_next));
             if(seen.find(next) == seen.end())
