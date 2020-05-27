@@ -135,7 +135,6 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
   vector<wstring> tokens;
   wstring line;
   bool first_line_in_fst = true;       // First line -- see below
-  bool seen_input_symbol = false;
   int state_id_offset = 0;
   int largest_seen_state_id = 0;
 
@@ -231,16 +230,6 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
       }
       convert_hfst(upper);
       convert_hfst(lower);
-      if(upper != L"")
-      {
-        seen_input_symbol = true;
-      }
-      /* skip lines that have an empty left side and output
-         if we haven't seen an input symbol */
-      if(upper == L"" && lower != L"" && !seen_input_symbol)
-      {
-        continue;
-      }
       int tag = alphabet(symbol_code(upper), symbol_code(lower));
       if(tokens.size() > 4)
       {
