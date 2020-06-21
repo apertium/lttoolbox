@@ -6,7 +6,7 @@
 .Nd augmented letter transducer compiler for Apertium
 .Sh SYNOPSIS
 .Nm lt-comp
-.Op Fl a | v | l | r | h
+.Op Fl a | v | l | r | m | h
 .Cm lr | rl
 .Ar dictionary_file
 .Ar output_file
@@ -55,6 +55,8 @@ attribute for use in compilation of bidixes.
 here refers to the side of the dictionary, so this option is only valid in
 .Cm lr
 mode.
+.It Fl m , Fl Fl keep-boundaries
+Keep any morpheme boundaries defined by the '<m/>' symbol
 .It Fl h , Fl Fl help
 Prints a short help message.
 .It Cm lr

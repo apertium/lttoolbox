@@ -6,7 +6,7 @@
 .Nd dictionary expander for Apertium
 .Sh SYNOPSIS
 .Nm lt-expand
-.Op Fl a | v | l | r | h
+.Op Fl a | v | l | r | m | h
 .Ar dictionary_file
 .Op Ar output_file
 .Sh DESCRIPTION
@@ -36,6 +36,8 @@ attribute to use in expansion of bidixes
 Sets the value of the
 .Sy vr
 attribute to use in expansion of bidixes
+.It Fl m , Fl Fl keep-boundaries
+Keep any morpheme boundaries defined by the <m/> symbol
 .It Fl h , Fl Fl help
 Prints a short help message
 .El
