@@ -1,4 +1,3 @@
-dist: xenial
 language: cpp
 os:
   - linux
@@ -6,12 +5,14 @@ os:
 compiler:
   - clang
   - gcc
+
 before_install:
   - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install -y swig; else brew install swig; fi
 script:
-  - ./autogen.sh
+  - $CXX --version
+  - autoreconf -fvi
   - ./configure
-  - make
+  - make -j4 V=1 VERBOSE=1
   - make test
 notifications:
   irc:
