@@ -265,6 +265,7 @@
           <ref name="g"/>
           <ref name="j"/>
           <ref name="s"/>
+          <ref name="m"/>
         </choice>
       </zeroOrMore>
     </element>
@@ -302,7 +303,17 @@
     <empty/>
   </define>
   <!-- post-generator wake-up mark -->
-  <define name="b">
+  <define name="m">
+    <element name="m">
+      <ref name="attlist.m"/>
+      <empty/>
+    </element>
+  </define>
+  <define name="attlist.m" combine="interleave">
+    <empty/>
+  </define>
+  <!-- morpheme boundary mark --> 
+   <define name="b">
     <element name="b">
       <ref name="attlist.b"/>
       <empty/>
