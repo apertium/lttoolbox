@@ -190,6 +190,7 @@
     <xs:complexType mixed="true">
       <xs:choice minOccurs="0" maxOccurs="unbounded">
         <xs:element ref="a"/>
+        <xs:element ref="m"/>
         <xs:element ref="b"/>
         <xs:element ref="g"/>
         <xs:element ref="j"/>
@@ -217,6 +218,10 @@
   </xs:element>
   <!-- post-generator wake-up mark -->
   <xs:element name="b">
+    <xs:complexType/>
+  </xs:element>
+  <!-- morpheme boundary symbol -->
+  <xs:element name="m">
     <xs:complexType/>
   </xs:element>
   <!-- blank chars block mark -->
