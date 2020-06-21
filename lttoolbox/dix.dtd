@@ -108,7 +108,7 @@
 <!ELEMENT p (l, r)>
 	<!-- pair of strings -->
 
-<!ELEMENT l (#PCDATA | a | b | g | j | s)*>
+<!ELEMENT l (#PCDATA | a | b | g | j | s | m)*>
 	<!-- left part of p -->
 <!ATTLIST l
     c CDATA #IMPLIED
@@ -126,6 +126,9 @@
 
 <!ELEMENT b EMPTY>
 	<!-- blank chars block mark -->
+
+<!ELEMENT m EMPTY>
+	<!-- mark morpheme boundary (left side only) -->
 
 <!ELEMENT ig (#PCDATA | a | b | j | s)*>
 	<!-- 'group identity' - equivalent to <p> where <r> contains <g>, whose contents are the same as those of <l> -->
