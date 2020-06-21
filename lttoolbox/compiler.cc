@@ -973,6 +973,7 @@ Compiler::setKeepBoundaries(bool keep)
 {
   keep_boundaries = keep;
 }
+
 void
 Compiler::setVerbose(bool verbosity)
 {

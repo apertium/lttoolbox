@@ -120,6 +120,14 @@ Expander::readString(wstring &result, wstring const &name)
     requireEmptyError(name);
     result += L' ';
   }
+  else if(name == Compiler::COMPILER_M_ELEM)
+  {
+    requireEmptyError(name);
+    if(keep_boundaries)
+    {
+      result += L'>';
+    }
+  }
   else if(name == Compiler::COMPILER_JOIN_ELEM)
   {
     requireEmptyError(name);
@@ -659,3 +667,10 @@ Expander::setVariantRightValue(string const &v)
 {
   variant_right = XMLParseUtil::stows(v);
 }
+
+void
+Expander::setKeepBoundaries(bool keep)
+{
+  keep_boundaries = keep;
+}
+
