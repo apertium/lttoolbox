@@ -101,7 +101,7 @@ attlist.re &= empty
 p = element p { attlist.p, l, r }
 attlist.p &= empty
 # pair of strings
-l = element l { attlist.l, (text | a | b | g | j | s)* }
+l = element l { attlist.l, (text | a | b | g | j | s | m)* }
 attlist.l &= empty
 # left part of p
 r = element r { attlist.r, (text | a | b | g | j | s)* }
@@ -113,6 +113,9 @@ attlist.a &= empty
 b = element b { attlist.b, empty }
 attlist.b &= empty
 # blank chars block mark
+m = element m { attlist.m, empty }
+attlist.m &= empty
+# morpheme boundary mark
 g = element g { attlist.g, (text | a | b | j | s)* }
 # mark special groups in lemmas
 attlist.g &= attribute i { text }?

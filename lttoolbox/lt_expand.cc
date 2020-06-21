@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
 {
   FILE *input = NULL, *output = NULL;
   Expander e;
+  e.setKeepBoundaries(false);
 
 #if HAVE_GETOPT_LONG
   int option_index=0;
@@ -53,6 +54,7 @@ int main(int argc, char *argv[])
 #if HAVE_GETOPT_LONG
     static struct option long_options[] =
     {
+      {"keep-boundaries", no_argument, 0, 'm'},
       {"alt",       required_argument, 0, 'a'},
       {"var",       required_argument, 0, 'v'},
       {"var-left",  required_argument, 0, 'l'},
@@ -61,9 +63,9 @@ int main(int argc, char *argv[])
       {0, 0, 0, 0}
     };
 
-    int cnt=getopt_long(argc, argv, "a:v:l:r:h", long_options, &option_index);
+    int cnt=getopt_long(argc, argv, "a:v:l:r:mh", long_options, &option_index);
 #else
-    int cnt=getopt(argc, argv, "a:v:l:r:h");
+    int cnt=getopt(argc, argv, "a:v:l:r:mh");
 #endif
     if (cnt==-1)
       break;
@@ -80,6 +82,10 @@ int main(int argc, char *argv[])
 
       case 'l':
         e.setVariantLeftValue(optarg);
+        break;
+
+      case 'm':
+        e.setKeepBoundaries(true);
         break;
 
       case 'r':

@@ -108,6 +108,12 @@ private:
   double default_weight;
 
   /**
+   * Maintain morpheme boundaries 
+   */
+  bool keep_boundaries;
+
+
+  /**
    * Identifier of all the symbols during the compilation
    */
   Alphabet alphabet;
@@ -303,6 +309,7 @@ public:
   LTTOOLBOX_IMPORTS static wstring const COMPILER_LEFT_ELEM;
   LTTOOLBOX_IMPORTS static wstring const COMPILER_RIGHT_ELEM;
   LTTOOLBOX_IMPORTS static wstring const COMPILER_S_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_M_ELEM;
   LTTOOLBOX_IMPORTS static wstring const COMPILER_REGEXP_ELEM;
   LTTOOLBOX_IMPORTS static wstring const COMPILER_SECTION_ELEM;
   LTTOOLBOX_IMPORTS static wstring const COMPILER_ID_ATTR;
@@ -348,6 +355,11 @@ public:
    * @param fd the stream where write the result
    */
   void write(FILE *fd);
+
+  /**
+   * Set keep morpheme boundaries
+   */
+  void setKeepBoundaries(bool keep_boundaries = false);
 
   /**
    * Set verbose output

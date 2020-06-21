@@ -42,7 +42,8 @@ void endProgram(char *name)
   if(name != NULL)
   {
     cout << basename(name) << " v" << PACKAGE_VERSION <<": build a letter transducer from a dictionary" << endl;
-    cout << "USAGE: " << basename(name) << " [-avh] lr | rl dictionary_file output_file [acx_file]" << endl;
+    cout << "USAGE: " << basename(name) << " [-mavh] lr | rl dictionary_file output_file [acx_file]" << endl;
+    cout << "  -m:     keep morpheme boundaries" << endl;
     cout << "  -v:     set language variant" << endl;
     cout << "  -a:     set alternative (monodix)" << endl;
     cout << "  -l:     set left language variant (bidix)" << endl;
@@ -60,6 +61,7 @@ int main(int argc, char *argv[])
   char ttype = 'x';
   Compiler c;
   AttCompiler a;
+  c.setKeepBoundaries(false);
   c.setVerbose(false);
 
 #if HAVE_GETOPT_LONG
@@ -77,14 +79,15 @@ int main(int argc, char *argv[])
       {"var",       required_argument, 0, 'v'},
       {"var-left",  required_argument, 0, 'l'},
       {"var-right", required_argument, 0, 'r'},
+      {"keep-boundaries",      no_argument,       0, 'm'},
       {"help",      no_argument,       0, 'h'},
       {"verbose",   no_argument,       0, 'V'},
       {0, 0, 0, 0}
     };
 
-    int cnt=getopt_long(argc, argv, "a:v:l:r:hV", long_options, &option_index);
+    int cnt=getopt_long(argc, argv, "a:v:l:r:mhV", long_options, &option_index);
 #else
-    int cnt=getopt(argc, argv, "a:v:l:r:hV");
+    int cnt=getopt(argc, argv, "a:v:l:r:mhV");
 #endif
     if (cnt==-1)
       break;
@@ -107,6 +110,10 @@ int main(int argc, char *argv[])
       case 'r':
         vr = optarg;
         c.setVariantRightValue(vr);
+        break;
+
+      case 'm':
+        c.setKeepBoundaries(true);
         break;
 
       case 'V':

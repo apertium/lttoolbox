@@ -1,0 +1,32 @@
+<dictionary>
+<alphabet></alphabet>
+<sdefs>
+  <sdef n="n"/><sdef n="sg"/><sdef n="pl"/>
+</sdefs>
+<pardefs>
+  <pardef n="wol/f__n">
+    <e><p><l>f</l><r>f<s n="n"/><s n="sg"/></r></p></e>
+    <e><p><l>v<m/>es</l><r>f<s n="n"/><s n="pl"/></r></p></e>
+  </pardef>
+  <pardef n="church__n">
+    <e><p><l></l><r><s n="n"/><s n="sg"/></r></p></e>
+    <e><p><l><m/>es</l><r><s n="n"/><s n="pl"/></r></p></e>
+  </pardef>
+  <pardef n="cat__n">
+    <e><p><l></l><r><s n="n"/><s n="sg"/></r></p></e>
+    <e><p><l><m/>s</l><r><s n="n"/><s n="pl"/></r></p></e>
+  </pardef>
+  <pardef n="ax/is__n">
+    <e><p><l><m/>is</l><r>is<s n="n"/><s n="sg"/></r></p></e>
+    <e><p><l><m/>es</l><r>is<s n="n"/><s n="pl"/></r></p></e>
+  </pardef>
+</pardefs>
+<section id="main" type="standard">
+  <e lm="cat"><i>cat</i><par n="cat__n"/></e>
+  <e lm="wolf"><i>wol</i><par n="wol/f__n"/></e>
+  <e lm="church"><i>church</i><par n="church__n"/></e>
+  <e lm="bat"><i>bat</i><par n="cat__n"/></e>
+  <e lm="rat"><i>rat</i><par n="cat__n"/></e>
+  <e lm="axis"><i>ax</i><par n="ax/is__n"/></e>
+</section>
+</dictionary>

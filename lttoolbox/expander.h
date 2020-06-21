@@ -72,6 +72,11 @@ private:
   wstring direction;
 
   /**
+   * Do we print boundaries or not?
+   */
+  bool keep_boundaries;
+
+  /**
    * Paradigms
    */
   map<wstring, EntList, Ltstr> paradigm;
@@ -236,6 +241,13 @@ public:
    * @param v the value
    */
    void setVariantRightValue(string const &v);
-};
+
+  /**
+   * Set if we are going to keep morpheme boundaries
+   * @param keep true, false
+   */
+   void setKeepBoundaries(bool keep_boundaries = false);
+
+}; 
 
 #endif

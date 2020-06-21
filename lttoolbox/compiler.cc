@@ -44,6 +44,7 @@ wstring const Compiler::COMPILER_PAIR_ELEM          = L"p";
 wstring const Compiler::COMPILER_LEFT_ELEM          = L"l";
 wstring const Compiler::COMPILER_RIGHT_ELEM         = L"r";
 wstring const Compiler::COMPILER_S_ELEM             = L"s";
+wstring const Compiler::COMPILER_M_ELEM             = L"m";
 wstring const Compiler::COMPILER_REGEXP_ELEM        = L"re";
 wstring const Compiler::COMPILER_SECTION_ELEM       = L"section";
 wstring const Compiler::COMPILER_ID_ATTR            = L"id";
@@ -318,6 +319,14 @@ Compiler::readString(list<int> &result, wstring const &name)
     for(unsigned int i = 0, limit = value.size(); i < limit; i++)
     {
       result.push_back(static_cast<int>(value[i]));
+    }
+  }
+  else if(name == COMPILER_M_ELEM)
+  {
+    requireEmptyError(name);
+    if(keep_boundaries) 
+    {
+      result.push_back(static_cast<int>(L'>'));
     }
   }
   else if(name == COMPILER_BLANK_ELEM)
@@ -957,6 +966,12 @@ void
 Compiler::setVariantRightValue(string const &v)
 {
   variant_right = XMLParseUtil::stows(v);
+}
+
+void
+Compiler::setKeepBoundaries(bool keep)
+{
+  keep_boundaries = keep;
 }
 
 void
