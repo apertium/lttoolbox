@@ -96,7 +96,7 @@ PatternList::endSequence()
     exit(EXIT_FAILURE);
   }
   sequence = false;
-  
+
   for(list<vector<int> >::iterator it = sequence_data.begin(),
       limit = sequence_data.end();
       it != limit; it++)
@@ -137,7 +137,7 @@ PatternList::insertOutOfSequence(wstring const &lemma, wstring const &tags,
     for(unsigned int i = 0, limit = tagCount(tags); i < limit; i++)
     {
       wstring tag = L"<" + tagAt(tags, i) + L">";
-      
+
       if(tag == L"<*>")
       {
         result.push_back(alphabet(ANY_TAG));
@@ -152,7 +152,7 @@ PatternList::insertOutOfSequence(wstring const &lemma, wstring const &tags,
 }
 
 void
-PatternList::insertIntoSequence(int const id, wstring const &lemma, 
+PatternList::insertIntoSequence(int const id, wstring const &lemma,
 				wstring const &tags)
 {
   sequence_id = id;
@@ -370,7 +370,7 @@ PatternList::write(FILE *output)
 
   Compression::multibyte_write(1, output);
   Compression::wstring_write(tagger_name, output);
-  transducer.write(output, alphabet.size(), false);
+  transducer.write(output, alphabet.size());
 
   Compression::multibyte_write(final_type.size(), output);
 
@@ -392,7 +392,7 @@ PatternList::read(FILE *input)
   if(Compression::multibyte_read(input) == 1)
   {
     wstring mystr = Compression::wstring_read(input);
-    transducer.read(input, alphabet.size(), false);
+    transducer.read(input, alphabet.size());
 
     int finalsize = Compression::multibyte_read(input);
     for(; finalsize != 0; finalsize--)

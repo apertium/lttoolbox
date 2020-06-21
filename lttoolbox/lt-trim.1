@@ -1,65 +1,113 @@
-.TH lt-trim 1 2014-02-07 "" ""
-.SH NAME
-lt-trim \- This application is part of the lexical processing modules
-and tools (
-.B lttoolbox
-)
-.PP
-This tool is part of the apertium machine translation
-architecture: \fBhttp://www.apertium.org\fR.
-.SH SYNOPSIS
-.B lt-trim
-analyser_binary bidix_binary trimmed_analyser_binary
-.PP
-.SH DESCRIPTION
-.BR lt-trim
-is the application responsible for trimming compiled dictionaries. The
-analyses (right-side when compiling lr) of analyser_binary are trimmed
+.Dd February 7, 2014
+.Dt LT-TRIM 1
+.Os Apertium
+.Sh NAME
+.Nm lt-trim
+.Nd compiled dictionary trimmer for Apertium
+.Sh SYNOPSIS
+.Nm lt-trim
+.Ar analyser_binary
+.Ar bidix_binary
+.Ar trimmed_analyser_binary
+.Sh DESCRIPTION
+.Nm lt-trim
+is the application responsible for trimming compiled dictionaries.
+The analyses (right-side when compiling lr) of analyser_binary are trimmed
 to the input side of bidix_binary (left-side when compiling lr,
 right-side when compiling rl), such that only analyses which would
-pass through `lt-proc \-b bidix_binary' are kept.
-
-\fBWarning: this program is experimental!\fR It has been tested, but
-not deployed extensively yet.
-
-Both compund tags (`<compound-only-L>', `<compound-R>') and join
-elements (`<j/>' in XML, `+' in the stream) and the group element
-(`<g/>' in XML, `#' in the stream) should be handled correctly, even
-combinations of + followed by # in monodix are handled.
-
-Some minor caveats: If you have the capitalised lemma "Foo" in the
-monodix, but "foo" in the bidix, an analysis "^Foo<tag>$" would pass
-through bidix when doing lt-proc \-b, but will not make it through
-trimming. Make sure your lemmas have the same capitalisation in the
-different dictionaries. Also, you should not have literal `+' or `#'
-in your lemmas. Since lt-comp doesn't escape these, lt-trim cannot
-know that they are different from `<j/>' or `<g/>', and you may get
-@-marked output this way. You can analyse `+' or `#' by having the
-literal symbol in the `<l>' part and some other string (e.g. "plus")
-in the `<r>'.
-
-You should not trim a generator unless you have a \fBvery\fR simple
-translator pipeline, since the output of bidix seldom goes unchanged
-through transfer.
-.PP
-.SH FILES
-.B analyser_binary
+pass through
+.So
+.Xr lt-proc 1
+.Fl b Cm bidix_binary
+.Sc
+are kept.
+.Pp
+.Sy Warning: this program is experimental!
+It has been tested, but not deployed extensively yet.
+.Pp
+Both compound tags
+.Po
+.Dq <compound-only-L> ,
+.Dq <compound-R>
+.Pc
+and join elements
+.Po
+.Dq <j/>
+in XML,
+.Dq +
+in the stream
+.Pc
+and the group element
+.Po
+.Dq <g/>
+in XML,
+.Dq #
+in the stream
+.Pc
+should be handled correctly,
+even combinations of + followed by # in monodix are handled.
+.Pp
+Some minor caveats: If you have the capitalised lemma
+.Dq Foo
+in the monodix, but
+.Dq foo
+in the bidix, an analysis
+.Dq \(a^Foo<tag>$
+would pass through bidix when doing
+.Xr lt-proc 1
+.Fl b ,
+but will not make it through trimming.
+Make sure your lemmas have the same capitalisation in the
+different dictionaries.
+Also, you should not have literal
+.Ql +
+or
+.Ql #
+in your lemmas.
+Since
+.Xr lt-comp 1
+doesn't escape these,
+.Nm
+cannot know that they are different from
+.Dq <j/>
+or
+.Dq <g/> ,
+and you may get @-marked output this way.
+You can analyse
+.Ql +
+or
+.Ql #
+by having the literal symbol in the
+.Dq <l>
+part and some other string (e.g.,
+.Dq plus )
+in the
+.Dq <r> .
+.Pp
+You should not trim a generator unless you have a
+.Em very
+simple translator pipeline,
+since the output of bidix seldom goes unchanged through transfer.
+.Sh FILES
+.Bl -tag -width Ds
+.It Ar analyser_binary
 The untrimmed analyser dictionary (a finite state transducer).
-.PP
-.B bidix_binary
+.It Ar bidix_binary
 The dictionary to use as trimmer (a finite state transducer).
-.PP
-.B trimmed_analyser_binary
+.It Ar trimmed_analyser_binary
 The trimmed analyser dictionary (a finite state transducer).
-
-.SH SEE ALSO
-.I lt-comp\fR(1),
-.I lt-proc\fR(1),
-.I lt-print\fR(1),
-.I lt-expand\fR(1),
-.I apertium-tagger\fR(1),
-.I apertium\fR(1).
-.SH BUGS
-Lots of...lurking in the dark and waiting for you!
-.SH AUTHOR
-(c) 2013--2014 Universitat d'Alacant / Universidad de Alicante.
+.El
+.Sh SEE ALSO
+.Xr apertium 1 ,
+.Xr apertium-tagger 1 ,
+.Xr lt-comp 1 ,
+.Xr lt-expand 1 ,
+.Xr lt-print 1 ,
+.Xr lt-proc 1
+.Sh AUTHOR
+Copyright \(co 2005, 2006 Universitat d'Alacant / Universidad de Alicante.
+This is free software.
+You may redistribute copies of it under the terms of
+.Lk https://www.gnu.org/licenses/gpl.html the GNU General Public License .
+.Sh BUGS
+Many... lurking in the dark and waiting for you!

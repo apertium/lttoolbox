@@ -32,7 +32,7 @@
 using namespace std;
 
 wstring const TMXCompiler::TMX_COMPILER_TMX_ELEM     = L"tmx";
-wstring const TMXCompiler::TMX_COMPILER_HEADER_ELEM  = L"header"; 
+wstring const TMXCompiler::TMX_COMPILER_HEADER_ELEM  = L"header";
 wstring const TMXCompiler::TMX_COMPILER_BODY_ELEM    = L"body";
 wstring const TMXCompiler::TMX_COMPILER_TU_ELEM      = L"tu";
 wstring const TMXCompiler::TMX_COMPILER_TUV_ELEM     = L"tuv";
@@ -98,17 +98,17 @@ TMXCompiler::requireEmptyError(wstring const &name)
   }
 }
 
-bool 
+bool
 TMXCompiler::allBlanks()
 {
   bool flag = true;
   wstring text = XMLParseUtil::towstring(xmlTextReaderConstValue(reader));
-  
-  for(unsigned int i = 0, limit = text.size(); i < limit; i++)
+
+  for(auto c : text)
   {
-    flag = flag && iswspace(text[i]);
+    flag = flag && iswspace(c);
   }
-  
+
   return flag;
 }
 
@@ -121,12 +121,12 @@ TMXCompiler::skipBlanks(wstring &name)
     {
       if(!allBlanks())
       {
-        wcerr << "Error (" << xmlTextReaderGetParserLineNumber(reader); 
+        wcerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
         wcerr << "): Invalid construction." << endl;
         exit(EXIT_FAILURE);
       }
     }
-    
+
     xmlTextReaderRead(reader);
     name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
   }
@@ -137,7 +137,7 @@ TMXCompiler::skip(wstring &name, wstring const &elem)
 {
   xmlTextReaderRead(reader);
   name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
-  
+
   while(name == L"#text" || name == L"#comment")
   {
     if(name != L"#comment")
@@ -150,22 +150,22 @@ TMXCompiler::skip(wstring &name, wstring const &elem)
       }
     }
     xmlTextReaderRead(reader);
-    name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));  
-  }    
-    
+    name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+  }
+
   if(name != elem)
   {
     wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
     wcerr << L"): Expected '<" << elem << L">'." << endl;
     exit(EXIT_FAILURE);
-  }  
+  }
 }
 
 wstring
 TMXCompiler::attrib(wstring const &name)
 {
   return XMLParseUtil::attrib(reader, name);
-} 
+}
 
 void
 TMXCompiler::requireAttribute(wstring const &value, wstring const &attrname,
@@ -173,12 +173,12 @@ TMXCompiler::requireAttribute(wstring const &value, wstring const &attrname,
 {
   if(value == L"")
   {
-    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);  
+    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
     wcerr << L"): '<" << elemname;
     wcerr << L"' element must specify non-void '";
     wcerr << attrname << L"' attribute." << endl;
     exit(EXIT_FAILURE);
-  }  
+  }
 }
 
 wstring
@@ -196,12 +196,12 @@ TMXCompiler::insertTU(vector<int> const &origin, vector<int> const &meta)
   {
     return;
   }
-  
+
   if(origin[0] == alphabet(L"<b>") || meta[0] == alphabet(L"<b>"))
   {
     return;
   }
-  
+
   if(origin.size() != 0 && meta.size() != 0)
   {
     int source = transducer.getInitial();
@@ -230,7 +230,7 @@ void
 TMXCompiler::split(vector<int> const &v, vector<vector<int> > &sv, int const symbol) const
 {
   sv.clear();
-  
+
   for(unsigned int i = 0, limit = v.size(), j = 0; i != limit; i++)
   {
     if(sv.size() == j)
@@ -260,10 +260,10 @@ TMXCompiler::join(vector<vector<int> > const &v, int const s) const
     }
     if(i != limit - 1)
     {
-      result.push_back(s);  
+      result.push_back(s);
     }
   }
-  
+
   return result;
 }
 
@@ -272,14 +272,14 @@ TMXCompiler::align_blanks(vector<int> &o, vector<int> &m)
 {
   vector<unsigned int> puntos;
   vector<int> resultado_o, resultado_m;
-  
+
   int const symbol = alphabet(L"<b>");
-  
+
   vector<vector<int> > so, sm;
-  
+
   split(o, so, symbol);
   split(m, sm, symbol);
-  
+
   if(so.size() == sm.size())
   {
     for(unsigned int i = 0, limit = sm.size(); i != limit; i++)
@@ -300,15 +300,15 @@ TMXCompiler::align_blanks(vector<int> &o, vector<int> &m)
       {
         sm[i].push_back(0);
       }*/
-    } 
+    }
     o = join(so, L' ');
     m = join(sm, L')');
   }
   else
   {
-    for(unsigned int i = 0, limit = so.size(); i != limit; i++)
+    for(auto& s : so)
     {
-      trim(so[i]);
+      trim(s);
     }
     for(unsigned int i = 0, limit = sm.size(); i != limit; i++)
     {
@@ -332,7 +332,7 @@ TMXCompiler::procTU()
   vector<int> origin;
   vector<int> meta;
   vector<int> foo;
-  
+
   while(name != TMX_COMPILER_TU_ELEM || type != XML_READER_TYPE_END_ELEMENT)
   {
     if(name == TMX_COMPILER_TUV_ELEM && type != XML_READER_TYPE_END_ELEMENT)
@@ -342,7 +342,7 @@ TMXCompiler::procTU()
       {
         l = attrib(TMX_COMPILER_LANG_ATTR);
       }
-      
+
       vector<int> *ref;
       if(l == meta_language)
       {
@@ -351,18 +351,18 @@ TMXCompiler::procTU()
       else if(l == origin_language)
       {
         ref = &origin;
-      }   
+      }
       else
       {
         ref = &foo;
       }
-      
+
       while(name != TMX_COMPILER_TUV_ELEM || type != XML_READER_TYPE_END_ELEMENT)
       {
         xmlTextReaderRead(reader);
         name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
         type = xmlTextReaderNodeType(reader);
-        
+
         if(name == L"#text")
         {
           wstring l = XMLParseUtil::towstring(xmlTextReaderConstValue(reader));
@@ -384,7 +384,7 @@ TMXCompiler::procTU()
     name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
     type = xmlTextReaderNodeType(reader);
   }
-  
+
   trim(origin);
   trim(meta);
 //  wcout << L"DESPUES DE TRIM\n";
@@ -408,7 +408,7 @@ TMXCompiler::procNode()
   xmlChar const *xname = xmlTextReaderConstName(reader);
   wstring name = XMLParseUtil::towstring(xname);
 
-  // HACER: optimizar el orden de ejecución de esta ristra de "ifs"
+  // HACER: optimizar el orden de ejecuciÃ³n de esta ristra de "ifs"
 
   if(name == L"#text")
   {
@@ -446,19 +446,23 @@ TMXCompiler::procNode()
   }
 }
 
-void 
+void
 TMXCompiler::write(FILE *output)
 {
+  fwrite(HEADER_LTTOOLBOX, 1, 4, output);
+  uint64_t features = 0;
+  write_le(output, features);
+
   // letters (empty to keep the file format)
   Compression::wstring_write(L"", output);
-  
+
   // symbols
   alphabet.write(output);
-  
+
   // transducers
   Compression::multibyte_write(1, output); // keeping file format
   Compression::wstring_write(L"", output); // keeping file format
-  transducer.write(output, 0, false);
+  transducer.write(output);
 
   wcout << origin_language << L"->" << meta_language << L" ";
   wcout << transducer.size() << L" " << transducer.numberOfTransitions();
@@ -479,18 +483,18 @@ TMXCompiler::trim(vector<int> &v) const
       break;
     }
   }
-  
+
   bool principio = true;
   vector<int> aux;
-  for(unsigned int i = 0, limit = v.size(); i < limit; i++)
+  for(auto c : v)
   {
-    if(!iswspace(v[i]) || !principio)
+    if(!iswspace(c) || !principio)
     {
       principio = false;
-      aux.push_back(v[i]);
-    }      
+      aux.push_back(c);
+    }
   }
-  
+
   v = aux;
 }
 
@@ -515,9 +519,9 @@ TMXCompiler::align(vector<int> &origin, vector<int> &meta)
     else
     {
       modified_origin.push_back(origin[i]);
-    }  
+    }
   }
-    
+
   // compile information from meta
   for(int i = 0, limit = meta.size(); i != limit; i++)
   {
@@ -548,13 +552,13 @@ TMXCompiler::align(vector<int> &origin, vector<int> &meta)
           }
         }
       }
-      
+
       if(!tocado)
       {
         if((unsigned int) i >= nl)
         {
           return;
-        }          
+        }
 
         for(unsigned int j = i; j < nl; i++, j++)
         {
@@ -562,15 +566,15 @@ TMXCompiler::align(vector<int> &origin, vector<int> &meta)
         }
         i--;
       }
-    }  
+    }
     else
     {
       modified_meta.push_back(meta[i]);
     }
   }
-  
+
   origin = modified_origin;
-  meta = modified_meta;  
+  meta = modified_meta;
 }
 
 unsigned int
@@ -585,7 +589,7 @@ TMXCompiler::numberLength(vector<int> &v, unsigned int const position) const
         return 0;
       }
       else
-      {   
+      {
         while(i != position)
         {
           i--;
@@ -593,13 +597,13 @@ TMXCompiler::numberLength(vector<int> &v, unsigned int const position) const
           {
             return i - position + 1;
           }
-        }  
-      }    
+        }
+      }
     }
   }
 
   unsigned int i = v.size();
-  
+
   while(i != position)
   {
     i--;
@@ -608,7 +612,7 @@ TMXCompiler::numberLength(vector<int> &v, unsigned int const position) const
       return i - position + 1;
     }
   }
-  
+
   return 0;
 }
 
@@ -629,7 +633,7 @@ TMXCompiler::vectorcmp(vector<int> const &orig, unsigned int const begin_orig,
   return true;
 }
 
-void 
+void
 TMXCompiler::printvector(vector<int> const &v, wostream &os)
 {
   for(unsigned int i = 0, limit = v.size(); i != limit; i++)
@@ -645,20 +649,19 @@ TMXCompiler::printvector(vector<int> const &v, wostream &os)
     else
     {
       os << v[i];
-    }      
+    }
   }
   os << endl;
 }
 
-void 
+void
 TMXCompiler::setOriginLanguageCode(wstring const &code)
 {
   // nada
 }
 
-void 
+void
 TMXCompiler::setMetaLanguageCode(wstring const &code)
 {
   // nada
 }
-

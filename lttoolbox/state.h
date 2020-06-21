@@ -49,6 +49,13 @@ private:
     bool dirty;
 
     TNodeState(Node * const &w, vector<pair<int, double>> * const &s, bool const &d): where(w), sequence(s), dirty(d){}
+
+    TNodeState(const TNodeState& other)
+      : where(other.where)
+      , sequence(other.sequence)
+      , dirty(other.dirty)
+    {}
+
     TNodeState & operator=(TNodeState const &other)
     {
       where = other.where;
@@ -226,7 +233,7 @@ public:
    * from the final nodes of the state
    * @param finals the set of final nodes
    * @param a the alphabet to decode strings
-   * @param escaped_chars the set of chars to be preceded with one 
+   * @param escaped_chars the set of chars to be preceded with one
    *                      backslash
    * @param uppercase true if the word is uppercase
    * @param firstupper true if the first letter of a word is uppercase
@@ -266,7 +273,7 @@ public:
    * Same as previous one, but  the output is adapted to the LRX system
    * @param finals the set of final nodes
    * @param a the alphabet to decode strings
-   * @param escaped_chars the set of chars to be preceded with one 
+   * @param escaped_chars the set of chars to be preceded with one
    *                      backslash
    * @param uppercase true if the word is uppercase
    * @param firstupper true if the first letter of a word is uppercase

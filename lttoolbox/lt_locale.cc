@@ -28,12 +28,19 @@ using namespace std;
 void
 LtLocale::tryToSetLocale()
 {
+  try {
+    locale::global(locale(locale::classic(), "", locale::ctype));
+  }
+  catch (...) {
+    // Nothing
+  }
+
 #if !defined(__CYGWIN__) && !defined (__MINGW32__)
   if(setlocale(LC_CTYPE, "") != NULL)
   {
     return;
   }
- 
+
   wcerr << "Warning: unsupported locale, fallback to \"C\"" << endl;
 
   setlocale(LC_ALL, "C");

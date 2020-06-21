@@ -40,7 +40,7 @@ EntryToken::operator =(EntryToken const &e)
     destroy();
     copy(e);
   }
- 
+
   return *this;
 }
 
@@ -48,11 +48,12 @@ void
 EntryToken::copy(EntryToken const &e)
 {
   type = e.type;
+  weight = e.weight;
   leftSide = e.leftSide;
   rightSide = e.rightSide;
   parName = e.parName;
   myregexp = e.myregexp;
-}  
+}
 
 void
 EntryToken::destroy()
@@ -67,8 +68,9 @@ EntryToken::setParadigm(wstring const &np)
 }
 
 void
-EntryToken::setSingleTransduction(list<int> const &pi, list<int> const &pd)
+EntryToken::setSingleTransduction(list<int> const &pi, list<int> const &pd, double const ew)
 {
+  weight = ew;
   leftSide = pi;
   rightSide = pd;
   type = single_transduction;
@@ -111,7 +113,7 @@ EntryToken::left() const
   return leftSide;
 }
 
-list<int> const & 
+list<int> const &
 EntryToken::right() const
 {
   return rightSide;
@@ -121,4 +123,10 @@ wstring const &
 EntryToken::regExp() const
 {
   return myregexp;
+}
+
+double const &
+EntryToken::entryWeight() const
+{
+  return weight;
 }

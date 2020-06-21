@@ -26,7 +26,7 @@
 #include <cwchar>
 #include <cwctype>
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_MSC_VER)
 #include <utf8_fwrap.h>
 #endif
 
@@ -52,7 +52,7 @@ Alphabet &
 Alphabet::operator =(Alphabet const &a)
 {
   if(this != &a)
-  { 
+  {
     destroy();
     copy(a);
   }
@@ -64,7 +64,7 @@ Alphabet::destroy()
 {
 }
 
-void 
+void
 Alphabet::copy(Alphabet const &a)
 {
   slexic = a.slexic;
@@ -87,14 +87,14 @@ Alphabet::includeSymbol(wstring const &s)
 int
 Alphabet::operator()(int const c1, int const c2)
 {
-  pair<int, int> tmp = pair<int, int>(c1, c2);
+  auto tmp = make_pair(c1, c2);
   if(spair.find(tmp) == spair.end())
   {
     int spair_size = spair.size();
     spair[tmp] = spair_size;
     spairinv.push_back(tmp);
   }
-  
+
   return spair[tmp];
 }
 
@@ -107,7 +107,7 @@ Alphabet::operator()(wstring const &s)
 int
 Alphabet::operator()(wstring const &s) const
 {
-  map<wstring, int, Ltstr>::const_iterator it = slexic.find(s);
+  auto it = slexic.find(s);
   if (it == slexic.end()) {
     return -1;
   }
@@ -153,7 +153,7 @@ Alphabet::read(FILE *input)
   Alphabet a_new;
   a_new.spairinv.clear();
   a_new.spair.clear();
-  
+
   // Reading of taglist
   int tam = Compression::multibyte_read(input);
   map<int, string> tmp;
@@ -162,7 +162,7 @@ Alphabet::read(FILE *input)
     tam--;
     wstring mytag = L"<" + Compression::wstring_read(input) + L">";
     a_new.slexicinv.push_back(mytag);
-    a_new.slexic[mytag]= -a_new.slexicinv.size();
+    a_new.slexic[mytag]= -a_new.slexicinv.size(); // ToDo: This does not turn the result negative due to unsigned semantics
   }
 
   // Reading of pairlist
@@ -198,7 +198,7 @@ Alphabet::deserialise(std::istream &serialised)
   spair.clear();
   slexicinv = Deserialiser<vector<wstring> >::deserialise(serialised);
   for (size_t i = 0; i < slexicinv.size(); i++) {
-    slexic[slexicinv[i]] = -i - 1;
+    slexic[slexicinv[i]] = -i - 1; // ToDo: This does not turn the result negative due to unsigned semantics
   }
   spairinv = Deserialiser<vector<pair<int, int> > >::deserialise(serialised);
   for (size_t i = 0; i < slexicinv.size(); i++) {
@@ -226,7 +226,7 @@ Alphabet::getSymbol(wstring &result, int const symbol, bool uppercase) const
   {
     return;
   }
-  
+
   if(!uppercase)
   {
     if(symbol >= 0)
@@ -271,43 +271,37 @@ Alphabet::createLoopbackSymbols(set<int> &symbols, Alphabet &basis, Side s, bool
   // Non-tag letters get the same int in spairinv across alphabets,
   // but tags may differ, so do those separately afterwards.
   set<int> tags;
-  for(vector<pair<int, int> >::iterator it = basis.spairinv.begin(),
-                                        limit = basis.spairinv.end();
-      it != limit;
-      it++)
+  for(auto& it : basis.spairinv)
   {
     if(s == left) {
-      if(basis.isTag(it->first)) 
+      if(basis.isTag(it.first))
       {
-        tags.insert(it->first);
+        tags.insert(it.first);
       }
       else if(nonTagsToo)
       {
-        symbols.insert(operator()(it->first, it->first));
+        symbols.insert(operator()(it.first, it.first));
       }
     }
     else {
-      if(basis.isTag(it->second)) 
+      if(basis.isTag(it.second))
       {
-        tags.insert(it->second);
+        tags.insert(it.second);
       }
       else if(nonTagsToo)
       {
-        symbols.insert(operator()(it->second, it->second));
+        symbols.insert(operator()(it.second, it.second));
       }
     }
   }
-  for(map<wstring, int, Ltstr>::iterator it = basis.slexic.begin(),
-                                         limit = basis.slexic.end();
-      it != limit;
-      it++)
+  for(auto& it : basis.slexic)
   {
     // Only include tags that were actually seen on the correct side
-    if(tags.find(it->second) != tags.end())
+    if(tags.find(it.second) != tags.end())
     {
-      includeSymbol(it->first);
-      symbols.insert(operator()(operator()(it->first),
-                                operator()(it->first)));
+      includeSymbol(it.first);
+      symbols.insert(operator()(operator()(it.first),
+                                operator()(it.first)));
     }
   }
 }

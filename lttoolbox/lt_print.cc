@@ -16,7 +16,6 @@
  */
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
-#include <lttoolbox/lttoolbox_config.h>
 
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/lt_locale.h>
@@ -25,6 +24,12 @@
 #include <iostream>
 #include <libgen.h>
 #include <string>
+#include <getopt.h>
+
+#ifdef _MSC_VER
+#include <io.h>
+#include <fcntl.h>
+#endif
 
 using namespace std;
 
@@ -33,7 +38,9 @@ void endProgram(char *name)
   if(name != NULL)
   {
     cout << basename(name) << " v" << PACKAGE_VERSION <<": dump a transducer to text in ATT format" << endl;
-    cout << "USAGE: " << basename(name) << " bin_file " << endl;
+    cout << "USAGE: " << basename(name) << " [-Hh] bin_file [output_file] " << endl;
+    cout << "    -H, --hfst:     use HFST-compatible character escapes" << endl;
+    cout << "    -h, --help:     print this message and exit" << endl;
   }
   exit(EXIT_FAILURE);
 }
@@ -41,25 +48,104 @@ void endProgram(char *name)
 
 int main(int argc, char *argv[])
 {
-  if(argc != 2)
-  {
-    endProgram(argv[0]);
-  }
+  bool hfst = false;
+  FILE* input = NULL;
+  FILE* output = stdout;
 
   LtLocale::tryToSetLocale();
 
+#ifdef _MSC_VER
+  _setmode(_fileno(output), _O_U8TEXT);
+#endif
 
-  FILE *input = fopen(argv[1], "r");
+#if HAVE_GETOPT_LONG
+  int option_index=0;
+#endif
+
+  while (true) {
+#if HAVE_GETOPT_LONG
+    static struct option long_options[] =
+    {
+      {"hfst",      no_argument, 0, 'H'},
+      {"help",      no_argument, 0, 'h'},
+      {0, 0, 0, 0}
+    };
+
+    int cnt=getopt_long(argc, argv, "Hh", long_options, &option_index);
+#else
+    int cnt=getopt(argc, argv, "Hh");
+#endif
+    if (cnt==-1)
+      break;
+
+    switch (cnt)
+    {
+      case 'H':
+        hfst = true;
+        break;
+
+      case 'h':
+      default:
+        endProgram(argv[0]);
+        break;
+    }
+  }
+
+  string infile;
+  string outfile;
+  switch(argc - optind)
+  {
+    case 1:
+      infile = argv[argc-1];
+      break;
+
+    case 2:
+      infile = argv[argc-2];
+      outfile = argv[argc-1];
+      break;
+
+    default:
+      endProgram(argv[0]);
+      break;
+  }
+
+  input = fopen(infile.c_str(), "rb");
   if(!input)
   {
-    wcerr << "Error: Cannot open file '" << argv[1] << "'." << endl;
+    cerr << "Error: Cannot open file '" << infile << "' for reading." << endl;
     exit(EXIT_FAILURE);
+  }
+
+  if(outfile != "")
+  {
+    output = fopen(outfile.c_str(), "wb");
+    if(!output)
+    {
+      cerr << "Error: Cannot open file '" << outfile << "' for writing." << endl;
+      exit(EXIT_FAILURE);
+    }
   }
 
   Alphabet alphabet;
   set<wchar_t> alphabetic_chars;
 
   map<wstring, Transducer> transducers;
+
+  fpos_t pos;
+  if (fgetpos(input, &pos) == 0) {
+      char header[4]{};
+      fread(header, 1, 4, input);
+      if (strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
+          auto features = read_le<uint64_t>(input);
+          if (features >= LTF_UNKNOWN) {
+              throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
+          }
+      }
+      else {
+          // Old binary format
+          fsetpos(input, &pos);
+      }
+  }
 
   // letters
   int len = Compression::multibyte_read(input);
@@ -83,27 +169,30 @@ int main(int argc, char *argv[])
       name += static_cast<wchar_t>(Compression::multibyte_read(input));
       len2--;
     }
-    transducers[name].read(input, 0, true);
+    transducers[name].read(input);
 
     len--;
   }
 
   /////////////////////
 
-  FILE *output = stdout;
   map<wstring, Transducer>::iterator penum = transducers.end();
   penum--;
   for(map<wstring, Transducer>::iterator it = transducers.begin(); it != transducers.end(); it++)
   {
     it->second.joinFinals();
-    it->second.show(alphabet, output);
+    it->second.show(alphabet, output, 0, hfst);
     if(it != penum)
     {
-      fwprintf(output, L"--\n", it->first.c_str());
+      fwprintf(output, L"--\n", it->first.c_str()); // ToDo: Was %ls meant to go somewhere here?
     }
   }
 
   fclose(input);
+  if(output != stdout)
+  {
+    fclose(output);
+  }
 
   return 0;
 }

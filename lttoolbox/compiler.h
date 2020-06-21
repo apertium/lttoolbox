@@ -28,6 +28,16 @@
 #include <set>
 #include <libxml/xmlreader.h>
 
+#ifdef _MSC_VER
+  #if !defined(LTTOOLBOX_EXPORTS)
+    #define LTTOOLBOX_IMPORTS __declspec(dllimport)
+  #else
+    #define LTTOOLBOX_IMPORTS
+  #endif
+#else
+  #define LTTOOLBOX_IMPORTS
+#endif
+
 using namespace std;
 
 /**
@@ -40,7 +50,7 @@ private:
    * The libxml2's XML reader
    */
   xmlTextReaderPtr reader;
-  
+
   /**
    * The alt value
    */
@@ -50,38 +60,38 @@ private:
    * The variant value (monodix)
    */
   wstring variant;
-  
+
   /**
    * The variant value (left side of bidix)
    */
   wstring variant_left;
-  
+
   /**
    * The variant value (right side of bidix)
    */
   wstring variant_right;
-    
+
   /**
    * The paradigm being compiled
    */
   wstring current_paradigm;
-  
+
   /**
    * The dictionary section being compiled
    */
   wstring current_section;
-  
+
   /**
    * The direction of the compilation, 'lr' (left-to-right) or 'rl'
    * (right-to-left)
    */
   wstring direction;
-  
+
   /**
    * List of characters to be considered alphabetic
    */
   wstring letters;
-  
+
   /**
    * Set verbose mode: warnings which may or may not be correct
    */
@@ -100,23 +110,23 @@ private:
   /**
    * Identifier of all the symbols during the compilation
    */
-  Alphabet alphabet;  
-  
+  Alphabet alphabet;
+
   /**
    * List of named transducers-paradigms
    */
   map<wstring, Transducer, Ltstr> paradigms;
-  
+
   /**
    * List of named dictionary sections
    */
   map<wstring, Transducer, Ltstr> sections;
-  
+
   /**
    * List of named prefix copy of a paradigm
    */
   map<wstring, map<wstring, int, Ltstr>, Ltstr> prefix_paradigms;
-  
+
   /**
    * List of named suffix copy of a paradigm
    */
@@ -131,13 +141,13 @@ private:
    * Mapping of aliases of characters specified in ACX files
    */
   map<int, set<int> > acx_map;
-  
+
   /**
    * Original char being mapped
    */
-  int acx_current_char; 
+  int acx_current_char;
 
-  /*    
+  /*
   static string range(char const a, char const b);
   string readAlphabet();
   */
@@ -159,7 +169,7 @@ private:
   void procAlphabet();
 
   /**
-   * Parse the &lt;sdef&lt; element
+   * Parse the &lt;sdef&gt; element
    */
   void procSDef();
 
@@ -167,7 +177,7 @@ private:
    * Parse the &lt;pardef&gt; element
    */
   void procParDef();
-  
+
   /**
    * Parse the &lt;e&gt; element
    */
@@ -201,18 +211,18 @@ private:
    * @return the last state of the inserted transduction
    */
   int matchTransduction(list<int> const &lp, list<int> const &rp,
-			    int state, Transducer &t);
+                        int state, Transducer &t, double const &entry_weight);
   /**
-   * Parse the &lt;p&lt; element
+   * Parse the &lt;p&gt; element
    * @return a list of tokens from the dictionary's entry
    */
-  EntryToken procTransduction();
+  EntryToken procTransduction(wstring const &wsweight);
 
   /**
-   * Parse the &lt;i&lt; element
+   * Parse the &lt;i&gt; element
    * @return a list of tokens from the dictionary's entry
    */
-  EntryToken procIdentity(bool ig = false);
+  EntryToken procIdentity(wstring const &wsweight, bool ig = false);
 
   /**
    * Parse the &lt;par&gt; element
@@ -246,13 +256,13 @@ private:
    * @param name the name of the node
    */
   void skipBlanks(wstring &name);
-  
-  
+
+
   void readString(list<int> &result, wstring const &name);
-  
+
   /**
    * Force an element to be empty, and check for it
-   * @param name the element 
+   * @param name the element
    */
   void requireEmptyError(wstring const &name);
 
@@ -277,40 +287,40 @@ public:
    * Constants to represent the element and the attributes of
    * dictionaries
    */
-  static wstring const COMPILER_DICTIONARY_ELEM;
-  static wstring const COMPILER_ALPHABET_ELEM;
-  static wstring const COMPILER_SDEFS_ELEM;
-  static wstring const COMPILER_SDEF_ELEM;
-  static wstring const COMPILER_N_ATTR;
-  static wstring const COMPILER_WEIGHT_ATTR;
-  static wstring const COMPILER_PARDEFS_ELEM;
-  static wstring const COMPILER_PARDEF_ELEM;
-  static wstring const COMPILER_PAR_ELEM;
-  static wstring const COMPILER_ENTRY_ELEM;
-  static wstring const COMPILER_RESTRICTION_ATTR;
-  static wstring const COMPILER_RESTRICTION_LR_VAL;
-  static wstring const COMPILER_RESTRICTION_RL_VAL;
-  static wstring const COMPILER_PAIR_ELEM;
-  static wstring const COMPILER_LEFT_ELEM;
-  static wstring const COMPILER_RIGHT_ELEM;
-  static wstring const COMPILER_S_ELEM;
-  static wstring const COMPILER_REGEXP_ELEM;
-  static wstring const COMPILER_SECTION_ELEM;
-  static wstring const COMPILER_ID_ATTR;
-  static wstring const COMPILER_TYPE_ATTR;
-  static wstring const COMPILER_IDENTITY_ELEM;
-  static wstring const COMPILER_IDENTITYGROUP_ELEM;
-  static wstring const COMPILER_JOIN_ELEM;
-  static wstring const COMPILER_BLANK_ELEM;
-  static wstring const COMPILER_POSTGENERATOR_ELEM;
-  static wstring const COMPILER_GROUP_ELEM;
-  static wstring const COMPILER_LEMMA_ATTR;
-  static wstring const COMPILER_IGNORE_ATTR;
-  static wstring const COMPILER_IGNORE_YES_VAL;
-  static wstring const COMPILER_ALT_ATTR;
-  static wstring const COMPILER_V_ATTR;
-  static wstring const COMPILER_VL_ATTR;
-  static wstring const COMPILER_VR_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_DICTIONARY_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_ALPHABET_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_SDEFS_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_SDEF_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_N_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_PARDEFS_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_PARDEF_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_PAR_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_ENTRY_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_RESTRICTION_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_RESTRICTION_LR_VAL;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_RESTRICTION_RL_VAL;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_PAIR_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_LEFT_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_RIGHT_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_S_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_REGEXP_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_SECTION_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_ID_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_TYPE_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_IDENTITY_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_IDENTITYGROUP_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_JOIN_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_BLANK_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_POSTGENERATOR_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_GROUP_ELEM;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_LEMMA_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_IGNORE_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_IGNORE_YES_VAL;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_ALT_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_V_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_VL_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_VR_ATTR;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_WEIGHT_ATTR;
 
   /**
    * Constructor
@@ -332,9 +342,9 @@ public:
    */
   void parseACX(string const &file, wstring const &dir);
 
-  
+
   /**
-   * Write the result of compilation 
+   * Write the result of compilation
    * @param fd the stream where write the result
    */
   void write(FILE *fd);

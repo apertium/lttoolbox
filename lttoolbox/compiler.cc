@@ -21,6 +21,7 @@
 #include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/string_to_wostream.h>
 
+#include <string>
 #include <cstdlib>
 #include <iostream>
 #include <libxml/encoding.h>
@@ -32,7 +33,6 @@ wstring const Compiler::COMPILER_ALPHABET_ELEM      = L"alphabet";
 wstring const Compiler::COMPILER_SDEFS_ELEM         = L"sdefs";
 wstring const Compiler::COMPILER_SDEF_ELEM          = L"sdef";
 wstring const Compiler::COMPILER_N_ATTR             = L"n";
-wstring const Compiler::COMPILER_WEIGHT_ATTR        = L"w";
 wstring const Compiler::COMPILER_PARDEFS_ELEM       = L"pardefs";
 wstring const Compiler::COMPILER_PARDEF_ELEM        = L"pardef";
 wstring const Compiler::COMPILER_PAR_ELEM           = L"par";
@@ -61,6 +61,7 @@ wstring const Compiler::COMPILER_ALT_ATTR           = L"alt";
 wstring const Compiler::COMPILER_V_ATTR             = L"v";
 wstring const Compiler::COMPILER_VL_ATTR            = L"vl";
 wstring const Compiler::COMPILER_VR_ATTR            = L"vr";
+wstring const Compiler::COMPILER_WEIGHT_ATTR        = L"w";
 
 Compiler::Compiler() :
 reader(0),
@@ -123,11 +124,9 @@ Compiler::parse(string const &file, wstring const &dir)
 
 
   // Minimize transducers
-  for(map<wstring, Transducer, Ltstr>::iterator it = sections.begin(),
-                                               limit = sections.end(); 
-      it != limit; it++)
+  for(auto& it : sections)
   {
-    (it->second).minimize();
+    it.second.minimize();
   }
 }
 
@@ -194,9 +193,10 @@ Compiler::procParDef()
 }
 
 int
-Compiler::matchTransduction(list<int> const &pi, 
-                           list<int> const &pd, 
-                           int state, Transducer &t)
+Compiler::matchTransduction(list<int> const &pi,
+                           list<int> const &pd,
+                           int state, Transducer &t,
+                           double const &entry_weight)
 {
   list<int>::const_iterator left, right, limleft, limright;
 
@@ -228,9 +228,9 @@ Compiler::matchTransduction(list<int> const &pi,
     while(true)
     {
       int tag;
-      
+
       acx_map_ptr = acx_map.end();
-      
+
       if(left == limleft && right == limright)
       {
         break;
@@ -256,14 +256,24 @@ Compiler::matchTransduction(list<int> const &pi,
         right++;
       }
 
-      int new_state = t.insertSingleTransduction(tag, state, default_weight);
-      
+      double weight_value;
+
+      if(left == limleft && right == limright)
+      {
+        weight_value = entry_weight;
+      }
+      else
+      {
+        weight_value = default_weight;
+      }
+
+      int new_state = t.insertSingleTransduction(tag, state, weight_value);
+
       if(acx_map_ptr != acx_map.end())
       {
-        for(set<int>::iterator it = acx_map_ptr->second.begin(); 
-            it != acx_map_ptr->second.end(); it++)
-        { 
-          t.linkStates(state, new_state, alphabet(*it ,rsymbol), default_weight);
+        for(auto& it : acx_map_ptr->second)
+        {
+          t.linkStates(state, new_state, alphabet(it ,rsymbol), weight_value);
         }
       }
       state = new_state;
@@ -285,21 +295,21 @@ Compiler::requireEmptyError(wstring const &name)
   }
 }
 
-bool 
+bool
 Compiler::allBlanks()
 {
   bool flag = true;
   wstring text = XMLParseUtil::towstring(xmlTextReaderConstValue(reader));
-  
-  for(unsigned int i = 0, limit = text.size(); i < limit; i++)
+
+  for(auto c : text)
   {
-    flag = flag && iswspace(text[i]);
+    flag = flag && iswspace(c);
   }
-  
+
   return flag;
 }
 
-void 
+void
 Compiler::readString(list<int> &result, wstring const &name)
 {
   if(name == L"#text")
@@ -365,12 +375,12 @@ Compiler::skipBlanks(wstring &name)
     {
       if(!allBlanks())
       {
-        wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader); 
+        wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
         wcerr << L"): Invalid construction." << endl;
         exit(EXIT_FAILURE);
       }
     }
-    
+
     xmlTextReaderRead(reader);
     name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
   }
@@ -406,7 +416,7 @@ Compiler::skip(wstring &name, wstring const &elem, bool open)
       }
     }
     xmlTextReaderRead(reader);
-    name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));  
+    name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
   }
 
   if(name != elem)
@@ -418,9 +428,10 @@ Compiler::skip(wstring &name, wstring const &elem, bool open)
 }
 
 EntryToken
-Compiler::procIdentity(bool ig)
+Compiler::procIdentity(wstring const &wsweight, bool ig)
 {
   list<int> both_sides;
+  double entry_weight = stod(wsweight);
 
   if(!xmlTextReaderIsEmptyElement(reader))
   {
@@ -438,33 +449,34 @@ Compiler::procIdentity(bool ig)
     }
   }
 
-  if(verbose && first_element && (both_sides.front() == (int)L' ')) 
+  if(verbose && first_element && (both_sides.front() == (int)L' '))
   {
     wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << L"): Entry begins with space." << endl; 
+    wcerr << L"): Entry begins with space." << endl;
   }
-  first_element = false; 
+  first_element = false;
   EntryToken e;
   if(ig)
   {
     list<int> right;
     right.push_back(static_cast<int>(L'#'));
     right.insert(right.end(), both_sides.begin(), both_sides.end());
-    e.setSingleTransduction(both_sides, right);
+    e.setSingleTransduction(both_sides, right, entry_weight);
   }
   else
   {
-    e.setSingleTransduction(both_sides, both_sides);
+    e.setSingleTransduction(both_sides, both_sides, entry_weight);
   }
   return e;
 }
 
 EntryToken
-Compiler::procTransduction()
+Compiler::procTransduction(wstring const &wsweight)
 {
   list<int> lhs, rhs;
+  double entry_weight = stod(wsweight);
   wstring name;
-  
+
   skip(name, COMPILER_LEFT_ELEM);
 
   if(!xmlTextReaderIsEmptyElement(reader))
@@ -482,13 +494,13 @@ Compiler::procTransduction()
     }
   }
 
-  if(verbose && first_element && (lhs.front() == (int)L' ')) 
+  if(verbose && first_element && (lhs.front() == (int)L' '))
   {
     wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
     wcerr << L"): Entry begins with space." << endl;
   }
   first_element = false;
- 
+
   skip(name, COMPILER_RIGHT_ELEM);
 
   if(!xmlTextReaderIsEmptyElement(reader))
@@ -503,13 +515,13 @@ Compiler::procTransduction()
         break;
       }
       readString(rhs, name);
-    }    
+    }
   }
 
   skip(name, COMPILER_PAIR_ELEM, false);
-  
+
   EntryToken e;
-  e.setSingleTransduction(lhs, rhs);
+  e.setSingleTransduction(lhs, rhs, entry_weight);
   return e;
 }
 
@@ -517,7 +529,7 @@ wstring
 Compiler::attrib(wstring const &name)
 {
   return XMLParseUtil::attrib(reader, name);
-} 
+}
 
 EntryToken
 Compiler::procPar()
@@ -551,23 +563,23 @@ Compiler::insertEntryTokens(vector<EntryToken> const &elements)
     // compilation of paradigms
     Transducer &t = paradigms[current_paradigm];
     int e = t.getInitial();
-    
-    for(unsigned int i = 0, limit = elements.size(); i < limit; i++)
+
+    for(auto& element : elements)
     {
-      if(elements[i].isParadigm())
+      if(element.isParadigm())
       {
-        e = t.insertTransducer(e, paradigms[elements[i].paradigmName()]);
+        e = t.insertTransducer(e, paradigms[element.paradigmName()]);
       }
-      else if(elements[i].isSingleTransduction())
+      else if(element.isSingleTransduction())
       {
-        e = matchTransduction(elements[i].left(), 
-                                  elements[i].right(), e, t);
+        e = matchTransduction(element.left(),
+                              element.right(), e, t, element.entryWeight());
       }
-      else if(elements[i].isRegexp())
+      else if(element.isRegexp())
       {
         RegexpCompiler analyzer;
         analyzer.initialize(&alphabet);
-        analyzer.compile(elements[i].regExp());
+        analyzer.compile(element.regExp());
         e = t.insertTransducer(e, analyzer.getTransducer(), alphabet(0,0));
       }
       else
@@ -586,7 +598,7 @@ Compiler::insertEntryTokens(vector<EntryToken> const &elements)
     Transducer &t = sections[current_section];
     int e = t.getInitial();
 
-    for(unsigned int i = 0, limit = elements.size(); i < limit; i++)
+    for(size_t i = 0, limit = elements.size(); i < limit; i++)
     {
       if(elements[i].isParadigm())
       {
@@ -595,12 +607,12 @@ Compiler::insertEntryTokens(vector<EntryToken> const &elements)
           // suffix paradigm
           if(suffix_paradigms[current_section].find(elements[i].paradigmName()) != suffix_paradigms[current_section].end())
           {
-            t.linkStates(e, suffix_paradigms[current_section][elements[i].paradigmName()], 0, default_weight);
+            t.linkStates(e, suffix_paradigms[current_section][elements[i].paradigmName()], 0, elements[i].entryWeight());
             e = postsuffix_paradigms[current_section][elements[i].paradigmName()];
           }
           else
           {
-            e = t.insertNewSingleTransduction(alphabet(0, 0), e, default_weight);
+            e = t.insertNewSingleTransduction(alphabet(0, 0), e, elements[i].entryWeight());
             suffix_paradigms[current_section][elements[i].paradigmName()] = e;
             e = t.insertTransducer(e, paradigms[elements[i].paradigmName()]);
             postsuffix_paradigms[current_section][elements[i].paradigmName()] = e;
@@ -634,7 +646,7 @@ Compiler::insertEntryTokens(vector<EntryToken> const &elements)
       }
       else
       {
-        e = matchTransduction(elements[i].left(), elements[i].right(), e, t);
+        e = matchTransduction(elements[i].left(), elements[i].right(), e, t, elements[i].entryWeight());
       }
     }
     t.setFinal(e, default_weight);
@@ -648,12 +660,12 @@ Compiler::requireAttribute(wstring const &value, wstring const &attrname,
 {
   if(value == L"")
   {
-    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);  
+    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
     wcerr << L"): '<" << elemname;
     wcerr << L"' element must specify non-void '";
     wcerr << attrname << L"' attribute." << endl;
     exit(EXIT_FAILURE);
-  }  
+  }
 }
 
 
@@ -668,7 +680,7 @@ Compiler::procSection()
     wstring const &type = attrib(COMPILER_TYPE_ATTR);
     requireAttribute(id, COMPILER_ID_ATTR, COMPILER_SECTION_ELEM);
     requireAttribute(type, COMPILER_TYPE_ATTR, COMPILER_SECTION_ELEM);
-    
+
     current_section = id;
     current_section += L"@";
     current_section.append(type);
@@ -682,15 +694,16 @@ Compiler::procSection()
 void
 Compiler::procEntry()
 {
-  wstring atributo=this->attrib(COMPILER_RESTRICTION_ATTR);
-  wstring ignore = this->attrib(COMPILER_IGNORE_ATTR);
-  wstring altval = this->attrib(COMPILER_ALT_ATTR);
-  wstring varval = this->attrib(COMPILER_V_ATTR);
-  wstring varl   = this->attrib(COMPILER_VL_ATTR);
-  wstring varr   = this->attrib(COMPILER_VR_ATTR);
+  wstring attribute = this->attrib(COMPILER_RESTRICTION_ATTR);
+  wstring ignore    = this->attrib(COMPILER_IGNORE_ATTR);
+  wstring altval    = this->attrib(COMPILER_ALT_ATTR);
+  wstring varval    = this->attrib(COMPILER_V_ATTR);
+  wstring varl      = this->attrib(COMPILER_VL_ATTR);
+  wstring varr      = this->attrib(COMPILER_VR_ATTR);
+  wstring wsweight  = this->attrib(COMPILER_WEIGHT_ATTR);
 
   // if entry is masked by a restriction of direction or an ignore mark
-  if((atributo != L"" && atributo != direction) 
+  if((attribute != L"" && attribute != direction)
    || ignore == COMPILER_IGNORE_YES_VAL
    || (altval != L"" && altval != alt)
    || (direction == COMPILER_RESTRICTION_RL_VAL && varval != L"" && varval != variant)
@@ -707,6 +720,11 @@ Compiler::procEntry()
     }
 
     return;
+  }
+
+  if(wsweight == L"")
+  {
+    wsweight = L"0.0000";
   }
 
   vector<EntryToken> elements;
@@ -730,16 +748,16 @@ Compiler::procEntry()
 
     int type = xmlTextReaderNodeType(reader);
     if(name == COMPILER_PAIR_ELEM)
-    {      
-      elements.push_back(procTransduction());
+    {
+      elements.push_back(procTransduction(wsweight));
     }
     else if(name == COMPILER_IDENTITY_ELEM)
     {
-      elements.push_back(procIdentity(false));
+      elements.push_back(procIdentity(wsweight, false));
     }
     else if(name == COMPILER_IDENTITYGROUP_ELEM)
     {
-      elements.push_back(procIdentity(true));
+      elements.push_back(procIdentity(wsweight, true));
     }
     else if(name == COMPILER_REGEXP_ELEM)
     {
@@ -784,7 +802,7 @@ Compiler::procEntry()
     {
       wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
       wcerr << L"): Invalid inclusion of '<" << name << L">' into '<" << COMPILER_ENTRY_ELEM;
-      wcerr << L">'." << endl; 
+      wcerr << L">'." << endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -890,28 +908,30 @@ Compiler::procRegexp()
   return et;
 }
 
-void 
+void
 Compiler::write(FILE *output)
 {
+  fwrite(HEADER_LTTOOLBOX, 1, 4, output);
+  uint64_t features = 0;
+  write_le(output, features);
+
   // letters
   Compression::wstring_write(letters, output);
-  
+
   // symbols
   alphabet.write(output);
-  
+
   // transducers
   Compression::multibyte_write(sections.size(), output);
 
-  int conta=0;
-  for(map<wstring, Transducer, Ltstr>::iterator it = sections.begin(),
-                                               limit = sections.end(); 
-      it != limit; it++)
+  int count=0;
+  for(auto& it : sections)
   {
-    conta++;
-    wcout << it->first << " " << it->second.size();
-    wcout << " " << it->second.numberOfTransitions() << endl;
-    Compression::wstring_write(it->first, output);
-    it->second.write(output, 0, true);
+    count++;
+    wcout << it.first << " " << it.second.size();
+    wcout << " " << it.second.numberOfTransitions() << endl;
+    Compression::wstring_write(it.first, output);
+    it.second.write(output);
   }
 }
 

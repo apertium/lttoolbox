@@ -1,7 +1,11 @@
 ACLOCAL_AMFLAGS=-I m4
 
-SUBDIRS = $(GENERIC_LIBRARY_NAME)
-DIST_SUBDIRS = $(GENERIC_LIBRARY_NAME)
+SUBDIRS = $(PACKAGE_NAME)
+DIST_SUBDIRS = $(PACKAGE_NAME)
+
+if HAVE_PYTHON_BINDINGS
+SUBDIRS += python
+endif
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = lttoolbox.pc

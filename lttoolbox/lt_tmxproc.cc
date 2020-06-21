@@ -15,7 +15,6 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 #include <lttoolbox/fst_processor.h>
-#include <lttoolbox/lttoolbox_config.h>
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/lt_locale.h>
 
@@ -26,6 +25,7 @@
 
 using namespace std;
 
+[[noreturn]]
 void endProgram(char *name)
 {
   cout << basename(name) << ": process a stream with a letter transducer" << endl;
@@ -51,21 +51,21 @@ int main(int argc, char *argv[])
   switch(argc)
   {
     case 4:
-      output = fopen(argv[3], "w");
+      output = fopen(argv[3], "wb");
       if(!output)
       {
         endProgram(argv[0]);
       }
       // follow
     case 3:
-      input = fopen(argv[2], "r");
+      input = fopen(argv[2], "rb");
       if(!input)
       {
         endProgram(argv[0]);
       }
       // follow
     case 2:
-      aux = fopen(argv[1], "r");
+      aux = fopen(argv[1], "rb");
       if(!aux)
       {
         endProgram(argv[0]);
@@ -78,11 +78,11 @@ int main(int argc, char *argv[])
       break;
   }
 
-  fstp.initTMAnalysis(); 
+  fstp.initTMAnalysis();
   checkValidity(fstp);
   fstp.tm_analysis(input, output);
 
   fclose(input);
-  fclose(output); 
+  fclose(output);
   return EXIT_SUCCESS;
 }

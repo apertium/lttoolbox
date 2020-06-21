@@ -82,7 +82,7 @@ State::copy(State const &s)
   }
 }
 
-int 
+int
 State::size() const
 {
   return state.size();
@@ -204,6 +204,11 @@ State::apply(int const input, int const alt)
     return;
   }
 
+  if(input == alt)
+  {
+    apply(input);
+    return;
+  }
 
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
@@ -316,13 +321,24 @@ State::epsilonClosure()
   }
 }
 
-void 
+void
 State::apply(int const input, int const alt1, int const alt2)
 {
   vector<TNodeState> new_state;
   if(input == 0 || alt1 == 0 || alt2 == 0)
   {
     state = new_state;
+    return;
+  }
+
+  if(input == alt1)
+  {
+    apply(input, alt2);
+    return;
+  }
+  else if(input == alt2)
+  {
+    apply(input, alt1);
     return;
   }
 
@@ -415,6 +431,7 @@ State::apply(int const input, set<int> const alts)
     }
     for(set<int>::iterator sit = alts.begin(); sit != alts.end(); sit++)
     {
+      if(*sit == input) continue;
       it = state[i].where->transitions.find(*sit);
       if(it != state[i].where->transitions.end())
       {
@@ -479,8 +496,8 @@ State::step(int const input, set<int> const alts)
   epsilonClosure();
 }
 
-void 
-State::step_case(wchar_t val, wchar_t val2, bool caseSensitive) 
+void
+State::step_case(wchar_t val, wchar_t val2, bool caseSensitive)
 {
   if (!iswupper(val) || caseSensitive) {
     step(val, val2);
@@ -492,7 +509,7 @@ State::step_case(wchar_t val, wchar_t val2, bool caseSensitive)
 }
 
 
-void 
+void
 State::step_case(wchar_t val, bool caseSensitive)
 {
   if (!iswupper(val) || caseSensitive) {
@@ -513,7 +530,7 @@ State::isFinal(map<Node *, double> const &finals) const
       return true;
     }
   }
-  
+
   return false;
 }
 
@@ -600,6 +617,9 @@ State::filterFinals(map<Node *, double> const &finals,
           cost += ((*(state[i].sequence))[j]).second;
         }
       }
+
+      // Add the weight of the final state
+      cost += (*(finals.find(state[i].where))).second;
       response.push_back(make_pair(result, cost));
     }
   }
@@ -934,7 +954,7 @@ State::restartFinals(const map<Node *, double> &finals, int requiredSymbol, Stat
     TNodeState state_i = state.at(i);
     // A state can be a possible final state and still have transitions
 
-    if(finals.count(state_i.where) > 0) 
+    if(finals.count(state_i.where) > 0)
     {
       bool restart = lastPartHasRequiredSymbol(*(state_i.sequence), requiredSymbol, separationSymbol);
       if(restart)

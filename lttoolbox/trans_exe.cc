@@ -17,7 +17,6 @@
 
 #include <lttoolbox/trans_exe.h>
 #include <lttoolbox/compression.h>
-#include <lttoolbox/lttoolbox_config.h>
 #include <lttoolbox/my_stdio.h>
 
 TransExe::TransExe():
@@ -64,8 +63,27 @@ TransExe::destroy()
 #include <iostream>
 
 void
-TransExe::read(FILE *input, Alphabet const &alphabet, bool read_weights)
+TransExe::read(FILE *input, Alphabet const &alphabet)
 {
+  bool read_weights = false;
+
+  fpos_t pos;
+  if (fgetpos(input, &pos) == 0) {
+      char header[4]{};
+      fread(header, 1, 4, input);
+      if (strncmp(header, HEADER_TRANSDUCER, 4) == 0) {
+          auto features = read_le<uint64_t>(input);
+          if (features >= TDF_UNKNOWN) {
+              throw std::runtime_error("Transducer has features that are unknown to this version of lttoolbox - upgrade!");
+          }
+          read_weights = (features & TDF_WEIGHTS);
+      }
+      else {
+          // Old binary format
+          fsetpos(input, &pos);
+      }
+  }
+
   TransExe &new_t = *this;
   new_t.destroy();
   new_t.initial_id = Compression::multibyte_read(input);
@@ -75,7 +93,6 @@ TransExe::read(FILE *input, Alphabet const &alphabet, bool read_weights)
   double base_weight = default_weight;
 
   map<int, double> myfinals;
-
 
   while(finals_size > 0)
   {
@@ -96,7 +113,7 @@ TransExe::read(FILE *input, Alphabet const &alphabet, bool read_weights)
   int current_state = 0;
   new_t.node_list.resize(number_of_states);
 
-  for(map<int, double>::iterator it = myfinals.begin(), limit = myfinals.end(); 
+  for(map<int, double>::iterator it = myfinals.begin(), limit = myfinals.end();
       it != limit; it++)
   {
     new_t.finals.insert(make_pair(&new_t.node_list[it->first], it->second));
@@ -134,10 +151,9 @@ TransExe::unifyFinals()
 
   Node *newfinal = &node_list[node_list.size()-1];
 
-  for(map<Node *, double>::iterator it = finals.begin(), limit = finals.end();
-      it != limit; it++)
+  for(auto& it : finals)
   {
-    (it->first)->addTransition(0, 0, newfinal, it->second);
+    it.first->addTransition(0, 0, newfinal, it.second);
   }
 
   finals.clear();

@@ -76,6 +76,7 @@
 	v CDATA #IMPLIED
 	vl CDATA #IMPLIED
 	vr CDATA #IMPLIED
+	w CDATA #IMPLIED
 >
 	<!-- r: restriction LR: left-to-right,
 			    RL: right-to-left -->
@@ -89,6 +90,7 @@
 	<!-- v: variant sets (monodix) direction restrictions based on language variant -->
 	<!-- vl: variant left sets direction restrictions based on language variant for language on left of bidix -->
 	<!-- vr: variant right sets direction restrictions based on language variant for language on right of bidix -->
+	<!-- w: entry weight -->
 <!ELEMENT par EMPTY>
 	<!-- reference to paradigm -->
 <!ATTLIST par

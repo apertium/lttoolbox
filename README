@@ -1,36 +1,60 @@
-README FILE OF LTTOOLBOX
+<!-- -*- mode: markdown -*- -->
 
-1. Programs
+lttoolbox
+===============================================================================
 
-    lt-comp     -> compiler, execute without parameters to show the
-                   instructions of use.
+lttoolbox contains finite state tools for lexical processing,
+morphological analysis and generation of words. Analysis is the
+process of splitting a word like `cats` into its lemma `cat` and the
+grammatical information `<n><pl>`. Generation is the opposite process.
 
-    lt-proc     -> processor, works with options -a (lexical analyser, 
-                   default option), -g (lexical generator) and -p 
-                   (lexical post-generator).  Using -h will show all 
-                   flags.
+The three programs main programs are lt-comp, the compiler, lt-proc,
+the processor, and lt-expand, which generates all possible mappings
+between surface forms and lexical forms in the dictionary.
 
-    lt-expand   -> generates all the pairs of transductions of a given
-                   dictionary.  Execute without parameters to show the
-                   instructions of use.
+Executables built by this pacage:
 
-    lt-trim     -> (experimental) trims a compiled analyser to only
-                   contain entries which would pass through a compiled
-                   bidix, creating a new compiled and trimmed analyser.
+* `lt-comp`: compiler, execute without parameters to show usage
+  instructions.
+ 
+* `lt-proc`: processor, typical options are -a (lexical analyser,
+  default option), -g (lexical generator) and -p (lexical
+  post-generator). Using -h will show all flags.
 
-    lt-reweight -> (experimental) utility to assign weights to a
+* `lt-expand`: generates all the pairs of transductions of a given
+  dictionary. Execute without parameters to show the instructions of
+  use.
+
+* `lt-trim`: trims a compiled analyser to only contain entries which
+  would pass through a compiled bidix, creating a new compiled and
+  trimmed analyser.
+
+* `lt-print`: print the arcs of a transducer in [ATT format][3].
+
+* `lt-reweight`: (experimental) utility to assign weights to a
                    compiled transducer based on a corpus.
+                   
+There is also a C++ API that you can link to (see how [apertium][1] or
+[apertium-lex-tools][2] do this).
 
+See http://wiki.apertium.org/wiki/Lttoolbox for usage examples and
+more information.
 
-2. Install
+Installation
+===============================================================================
 
-    a. Requirements:
-        - i686, ppc, SPARC, etc.
-        - g++ >= 2.95
-        - gnu make
-        - libxml2 (last version)
+Requirements:
 
-    b. Building & installing
-        - ./configure
-        - make
-        - make install (o make-install script)
+* g++ >= 2.95
+* GNU make
+* libxml2 >= 2.6.17
+
+Building & installing:
+
+* ./configure
+* make
+* make install
+
+[1]: https://github.com/apertium/apertium
+[2]: https://github.com/apertium/apertium-lex-tools
+[3]: http://wiki.apertium.org/wiki/ATT_format

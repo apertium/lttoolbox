@@ -1,53 +1,23 @@
-#                                               -*- Autoconf -*-
-# Process this file with autoconf to produce a configure script.
-
 AC_PREREQ(2.52)
 
-m4_define([required_libxml_version], [2.6.17])
+m4_define([PKG_VERSION_MAJOR], [3])
+m4_define([PKG_VERSION_MINOR], [5])
+m4_define([PKG_VERSION_PATCH], [2])
 
-AC_INIT([lttoolbox/lttoolbox.h], [3.4.2], [sortiz@users.sourceforge.net])
-AC_CONFIG_HEADER([lttoolbox/lttoolbox_config.h])
+AC_INIT([lttoolbox], [PKG_VERSION_MAJOR.PKG_VERSION_MINOR.PKG_VERSION_PATCH], [apertium-stuff@lists.sourceforge.net], [lttoolbox], [https://wiki.apertium.org/wiki/Lttoolbox])
 
-AC_CANONICAL_SYSTEM
+VERSION=$PACKAGE_VERSION
+VERSION_MAJOR=PKG_VERSION_MAJOR
+VERSION_API=PKG_VERSION_MAJOR.PKG_VERSION_MINOR
+SOVERSION=1:0:0
 
-GENERIC_LIBRARY_NAME=lttoolbox
+AC_SUBST(PACKAGE_NAME)
+AC_SUBST(PACKAGE_VERSION)
+AC_SUBST(VERSION_MAJOR)
+AC_SUBST(VERSION_API)
+AC_SUBST(SOVERSION)
 
-# Release versioning
-GENERIC_MAJOR_VERSION=3
-GENERIC_MINOR_VERSION=4
-GENERIC_MICRO_VERSION=2
-
-# API version (often = GENERIC_MAJOR_VERSION.GENERIC_MINOR_VERSION)
-GENERIC_API_VERSION=$GENERIC_MAJOR_VERSION.$GENERIC_MINOR_VERSION
-AC_SUBST(GENERIC_API_VERSION)
-AC_SUBST(GENERIC_MAJOR_VERSION)
-
-# Shared library versioning
-GENERIC_LIBRARY_VERSION=1:0:0
-#                       | | |
-#                +------+ | +---+
-#                |        |     |
-#             current:revision:age
-#                |        |     |
-#                |        |     +- increment if interfaces have been added
-#                |        |        set to zero if interfaces have been removed
-#                                  or changed
-#                |        +- increment if source code has changed
-#                |           set to zero if current is incremented
-#                +- increment if interfaces have been added, removed or changed
-
-AC_SUBST(GENERIC_LIBRARY_VERSION)
-PACKAGE=$GENERIC_LIBRARY_NAME
-AC_SUBST(GENERIC_LIBRARY_NAME)
-
-GENERIC_VERSION=$GENERIC_MAJOR_VERSION.$GENERIC_MINOR_VERSION.$GENERIC_MICRO_VERSION
-GENERIC_RELEASE=$GENERIC_MAJOR_VERSION.$GENERIC_MINOR_VERSION
-AC_SUBST(GENERIC_RELEASE)
-AC_SUBST(GENERIC_VERSION)
-
-VERSION=$GENERIC_VERSION
-
-AM_INIT_AUTOMAKE($PACKAGE, $VERSION, no-define)
+AM_INIT_AUTOMAKE
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_CANONICAL_HOST
@@ -68,7 +38,7 @@ AC_ARG_ENABLE(profile,
               [CXXFLAGS="-pg -g -Wall"; CFLAGS="-pg -g -Wall"; LDFLAGS="-pg"])
 
 
-PKG_CHECK_MODULES(LTTOOLBOX, [libxml-2.0 >= required_libxml_version])
+PKG_CHECK_MODULES(LTTOOLBOX, [libxml-2.0 >= 2.6.17])
 
 # Check for wide strings
 AC_DEFUN([AC_CXX_WSTRING],[
@@ -114,7 +84,7 @@ AC_CHECK_FUNCS([setlocale strdup getopt_long])
 
 AM_CONDITIONAL([WINDOWS], [test x$version_type = xwindows])
 
-# Checks for highest supported C++ standard
+# Require highest supported C++ standard
 AC_LANG(C++)
 AX_CHECK_COMPILE_FLAG([-std=c++20], [CXXFLAGS="$CXXFLAGS -std=c++20"], [
  AX_CHECK_COMPILE_FLAG([-std=c++2a], [CXXFLAGS="$CXXFLAGS -std=c++2a"], [
@@ -122,7 +92,7 @@ AX_CHECK_COMPILE_FLAG([-std=c++20], [CXXFLAGS="$CXXFLAGS -std=c++20"], [
    AX_CHECK_COMPILE_FLAG([-std=c++1z], [CXXFLAGS="$CXXFLAGS -std=c++1z"], [
     AX_CHECK_COMPILE_FLAG([-std=c++14], [CXXFLAGS="$CXXFLAGS -std=c++14"], [
      AX_CHECK_COMPILE_FLAG([-std=c++1y], [CXXFLAGS="$CXXFLAGS -std=c++1y"], [
-      AX_CHECK_COMPILE_FLAG([-std=c++11], [CXXFLAGS="$CXXFLAGS -std=c++11"], [])
+      AC_MSG_ERROR([Could not enable at least C++1y (C++14) - upgrade your compiler])
      ])
     ])
    ])
@@ -140,6 +110,21 @@ static_assert(!is_same<size_t,uint32_t>::value, "size_t == uint32_t");
 static_assert(!is_same<size_t,uint64_t>::value, "size_t == uint64_t");
    ]])], [AC_DEFINE([SIZET_NOT_CSTDINT], [1], [size_t != (uint32_t, uint64_t)])])
 
-AM_PATH_PYTHON([2], [], [AC_MSG_WARN([Can't run 'make test' without Python installed.])])
+AM_PATH_PYTHON([3.4], [], [AC_MSG_WARN([Can't generate SWIG wrapper or run tests without Python])])
 
-AC_OUTPUT([Makefile lttoolbox.pc lttoolbox/Makefile])
+AC_CONFIG_FILES([python/lttoolbox.i python/setup.py])
+
+AC_ARG_ENABLE([python-bindings],
+              AS_HELP_STRING([--enable-python-bindings],
+                             [build python bindings (default=disabled)]),
+              [enable_python_bindings=$enableval],
+              [enable_python_bindings=no])
+AM_CONDITIONAL([HAVE_PYTHON_BINDINGS], [test x$enable_python_bindings = xyes])
+
+AC_ARG_VAR([PYTHON_INSTALL_PARAMS], [Parameters to pass to the Python 3 module install step])
+if test "x$PYTHON_INSTALL_PARAMS" = "x"
+then
+  PYTHON_INSTALL_PARAMS="--prefix=\$(prefix) --root=\$(DESTDIR)/"
+fi
+
+AC_OUTPUT([Makefile lttoolbox.pc lttoolbox/Makefile python/Makefile])

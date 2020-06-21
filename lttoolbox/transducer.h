@@ -25,6 +25,11 @@
 
 using namespace std;
 
+/**
+  * Default value of weight
+  */
+constexpr double default_weight = 0;
+
 class MatchExe;
 
 /**
@@ -39,11 +44,6 @@ private:
    * Initial state
    */
   int initial;
-
-  /**
-   * Default value of weight
-   */
-  double default_weight;
 
   /**
    * Final state set mapped to its weight walues
@@ -81,6 +81,13 @@ private:
    * Empty transducer
    */
   void destroy();
+
+  /**
+   * Helper function for show()
+   * @param symbol the string to be escaped
+   * @param hfst if true, use HFST-compatible escape sequences
+   */
+  void escapeSymbol(wstring& symbol, bool hfst) const;
 public:
 
   /**
@@ -107,6 +114,12 @@ public:
   Transducer & operator =(Transducer const &t);
 
   /**
+   * Determine whether any weight is non-default
+   * @return bool true or false
+   */
+  bool weighted();
+
+  /**
    * Insertion of a single transduction, creating a new target state
    * if needed
    * @param tag the tag of the transduction being inserted
@@ -114,7 +127,7 @@ public:
    * @param weight the weight value for the new transduction
    * @return the target state
    */
-  int insertSingleTransduction(int const tag, int const source, double const weight);
+  int insertSingleTransduction(int const tag, int const source, double const weight = 0.0000);
 
   /**
    * Insertion of a single transduction, forcing create a new target
@@ -124,7 +137,7 @@ public:
    * @param weight the weight value for the new transduction
    * @return the target state
    */
-  int insertNewSingleTransduction(int const tag, int const source, double const weight);
+  int insertNewSingleTransduction(int const tag, int const source, double const weight = 0.0000);
 
   /**
    * Insertion of a transducer in a given source state, unifying their
@@ -135,7 +148,7 @@ public:
    * @return the new target state
    */
   int insertTransducer(int const source, Transducer &t,
-                      int const epsilon_tag = 0);
+                       int const epsilon_tag = 0);
 
   /**
    * Link two existing states by a transduction
@@ -144,7 +157,7 @@ public:
    * @param tag the tag of the transduction
    * @param weight the weight value for the new transduction
    */
-  void linkStates(int const source, int const target, int const tag, double const weight);
+  void linkStates(int const source, int const target, int const tag, double const weight = 0.0000);
 
   /**
    * Test if the state is a final state
@@ -166,7 +179,7 @@ public:
    * @param weight the weight value for the final state
    * @param value if true, the state is set as final state
    */
-  void setFinal(int const state, double const weight, bool value = true);
+  void setFinal(int const state, double const weight = 0.0000, bool value = true);
 
   /**
    * Returns the initial state of a transducer
@@ -207,8 +220,10 @@ public:
 
   /**
    * Print all the transductions of a transducer in ATT format
+   * @param hfst if true, use HFST-compatible escape characters
    * @param epsilon_tag the tag to take as epsilon
    */
+  void show(Alphabet const &a, FILE *output = stdout, int const epsilon_tag = 0, bool hfst = false) const;
   void show(Alphabet const &a, FILE *output = stdout, int const epsilon_tag = 0) const;
 
   /**
@@ -291,14 +306,14 @@ public:
    * @param output the stream to write to
    * @param decalage offset to sum to the tags
    */
-  void write(FILE *output, int const decalage, bool write_weights);
+  void write(FILE *output, int const decalage = 0);
 
   /**
    * Read method
    * @param input the stream to read from
    * @param decalage offset to sum to the tags
    */
-  void read(FILE *input, int const decalage, bool read_weights);
+  void read(FILE *input, int const decalage = 0);
 
   void serialise(std::ostream &serialised) const;
   void deserialise(std::istream &serialised);

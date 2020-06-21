@@ -30,7 +30,7 @@
 #define fputs_unlocked fputs
 #endif
 
-#if !HAVE_DECL_FGETC_UNLOCKED 
+#if !HAVE_DECL_FGETC_UNLOCKED
 #define fgetc_unlocked fgetc
 #endif
 

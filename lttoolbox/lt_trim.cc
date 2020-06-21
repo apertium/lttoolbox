@@ -16,7 +16,6 @@
  */
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
-#include <lttoolbox/lttoolbox_config.h>
 
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/lt_locale.h>
@@ -44,6 +43,22 @@ read_fst(FILE *bin_file)
 
   std::map<wstring, Transducer> transducers;
 
+  fpos_t pos;
+  if (fgetpos(bin_file, &pos) == 0) {
+      char header[4]{};
+      fread(header, 1, 4, bin_file);
+      if (strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
+          auto features = read_le<uint64_t>(bin_file);
+          if (features >= LTF_UNKNOWN) {
+              throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
+          }
+      }
+      else {
+          // Old binary format
+          fsetpos(bin_file, &pos);
+      }
+  }
+
   // letters
   int len = Compression::multibyte_read(bin_file);
   while(len > 0)
@@ -66,7 +81,7 @@ read_fst(FILE *bin_file)
       name += static_cast<wchar_t>(Compression::multibyte_read(bin_file));
       len2--;
     }
-    transducers[name].read(bin_file, 0, true);
+    transducers[name].read(bin_file);
 
     len--;
   }
@@ -189,7 +204,7 @@ int main(int argc, char *argv[])
   FILE *output = fopen(argv[3], "wb");
   if(!output)
   {
-    wcerr << "Error: Cannot not open file '" << argv[3] << "'." << endl << endl;
+    wcerr << "Error: Cannot open file '" << argv[3] << "'." << endl << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -206,7 +221,7 @@ int main(int argc, char *argv[])
     if(!(it->second.isEmpty()))
     {
       Compression::wstring_write(it->first, output);
-      it->second.write(output, 0, true);
+      it->second.write(output);
     }
   }
 

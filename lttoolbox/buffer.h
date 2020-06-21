@@ -34,23 +34,23 @@ private:
    * Buffer size.
    */
   unsigned int size;
-  
+
   /**
    * Buffer array.
    */
   T *buf;
-   
+
   /**
    * Buffer current position.
    */
   unsigned int currentpos;
-  
+
   /**
    * Last position.
    */
   unsigned int lastpos;
-  
-  
+
+
   void copy(Buffer const &b)
     {
       currentpos = b.currentpos;
@@ -65,7 +65,7 @@ private:
       delete[] buf;
     }
 
-public:  
+public:
 
   /**
    * Constructor
@@ -77,7 +77,7 @@ public:
       {
 	wcerr << "Error: Cannot create empty buffer." << endl;
 	exit(EXIT_FAILURE);
-      }    
+      }
       buf = new T[buf_size];
       size = buf_size;
       currentpos = 0;
@@ -120,7 +120,7 @@ public:
       }
       return *this;
     }
-    
+
   /**
    * Add an element to the buffer.
    * @param value the value.
@@ -136,7 +136,7 @@ public:
       currentpos = lastpos;
       return buf[lastpos - 1];
     }
-  
+
 
   /**
    * Add an element to the buffer and not modify its content, getting the
@@ -173,7 +173,7 @@ public:
 	return last();
       }
     }
-    
+
   /**
    * Get the last element of the buffer.
    * @return last element.
@@ -189,7 +189,7 @@ public:
 	return buf[size-1];
       }
     }
- 
+
   /**
    * Get the current buffer position.
    * @return the position.
@@ -224,7 +224,7 @@ public:
       {
 	return currentpos + size - prevpos;
       }
-    } 
+    }
 
   /**
    * Return the range size between the buffer current position and a
@@ -250,9 +250,9 @@ public:
    */
   bool isEmpty() const
     {
-      return currentpos == lastpos;   
+      return currentpos == lastpos;
     }
-  
+
   /**
    * Gets back 'posback' positions in the buffer.
    * @param posback the amount of position to get back.

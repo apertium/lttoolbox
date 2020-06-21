@@ -38,22 +38,27 @@ private:
    * Type of this token
    */
   Type type;
-  
+
   /**
    * Name of the paradigm (if it is of 'paradigm' 'type')
    */
   wstring parName;
-  
+
+  /**
+   * Weight value for the entry (default_weight if unspecified)
+   */
+  double weight;
+
   /**
    * Left side of transduction (if 'single_transduction')
    */
   list<int> leftSide;
-  
+
   /**
    * Right side of transduction (if 'single_transduction')
    */
   list<int> rightSide;
-  
+
   /**
    * Regular expression (if 'regexp')
    */
@@ -63,7 +68,7 @@ private:
    * copy method
    */
   void copy(EntryToken const &e);
-  
+
   /**
    * destroy method
    */
@@ -74,47 +79,48 @@ public:
    * Non-parametric constructor
    */
   EntryToken();
-  
+
   /**
    * Destructor
    */
   ~EntryToken();
-  
+
   /**
    * Copy constructor
    */
   EntryToken(EntryToken const &e);
-  
+
   /**
    * Operator assignment
    */
   EntryToken & operator = (EntryToken const &e);
-  
+
   /**
    * Sets the name of the paradigm.
    * @param np the paradigm name
    */
   void setParadigm(wstring const &np);
-  
+
   /**
    * Set both parts of a single transduction.
    * @param pi left part
    * @param pd right part
+   * @param ew entry weight
    */
-  void setSingleTransduction(list<int> const &pi, list<int> const &pd);
-  
+  void setSingleTransduction(list<int> const &pi, list<int> const &pd, double const ew = 0);
+
   /**
    * Set regular expression.
    * @param r the regular expression specification.
    */
   void setRegexp(wstring const &r);
-  
+
   /**
    * eTest EntryToken to detect if is a paradigm.
    * @return true if it is a paradigm.
    */
   bool isParadigm() const;
-  
+
   /**
    * Test EntryToken to check if it is a single transduction.
    * @return true if it is a single transduction.
@@ -126,30 +132,36 @@ public:
    * @return true if it is a regular expression.
    */
   bool isRegexp() const;
- 
+
   /**
    * Retrieve the name of the paradigm.
    * @return the name of the paradigm.
    */
   wstring const & paradigmName() const;
-  
+
   /**
    * Retrieve the left part of the paradigm.
    * @return the left part of the paradigm.
    */
   list<int> const & left() const;
-  
+
   /**
    * Retrieve the right part of the paradigm.
    * @return the right part of the paradigm.
    */
   list<int> const & right() const;
-  
+
   /**
    * Retrieve the regular expression specification.
    * @return the regular expression specification.
    */
   wstring const & regExp() const;
+
+  /**
+   * Retrieve the weight value of the entry.
+   * @return the weight value of the entry.
+   */
+  double const & entryWeight() const;
 };
 
 #endif

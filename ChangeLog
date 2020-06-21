@@ -5,7 +5,7 @@ Version 0.2
 
 Version 0.5
 
-* Full intergration of transfer and format modules 
+* Full intergration of transfer and format modules
 
 Version 0.5.2
 
@@ -85,7 +85,7 @@ Version 0.8
 
 Version 0.8.1
 
-* Added support for uppercase first characters of words when post-generation 
+* Added support for uppercase first characters of words when post-generation
   mark is present
 * basename feature added
 

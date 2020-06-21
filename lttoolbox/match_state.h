@@ -27,7 +27,7 @@
 using namespace std;
 
 /**
- * Class to represent the current state of transducer processing 
+ * Class to represent the current state of transducer processing
  */
 class MatchState
 {

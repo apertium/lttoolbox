@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÄÅÆÇÈÉÊËÍÑÒÓÔÕÖØÙÚÜČĐŊŠŦŽabcdefghijklmnopqrstuvwxyzàáâäåæçèéêëíñòóôõöøùúüčđŋšŧž­-</alphabet>
+  <sdefs>
+    <sdef n="vblex"/>
+    <sdef n="inf"/>
+    <sdef n="pr"/>
+    <sdef n="prn"/>
+    <sdef n="np"/>
+    <sdef n="sent"/>
+  </sdefs>
+  <pardefs>
+  </pardefs>
+
+  <section id="main" type="standard">
+    <e><p><l>legge</l> <r>legge<s n="vblex"/><s n="inf"/></r></p></e>
+    <e><p><l>legge<b/>opp<b/>til</l> <r>legge<g><b/>opp<b/>til<s n="vblex"/><s n="inf"/></g></r></p></e>
+    <e><p><l>opp</l> <r>opp<s n="pr"/></r></p></e>
+
+    <e><p><l>legge<b/>seg<b/>opp<b/>til</l> <r>legge<g><b/>seg<b/>opp<b/>til<s n="vblex"/><s n="inf"/></g></r></p></e>
+    <e><p><l>seg</l> <r>seg<s n="prn"/></r></p></e>
+
+    <e><p><l>St.<b/>Petersburg</l> <r>St.<b/>Petersburg<s n="np"/></r></p></e>
+    <e><p><l>X<b/>y</l> <r>X<b/>y<s n="np"/></r></p></e>
+    <e><p><l>F</l> <r>F<s n="np"/></r></p></e>
+    <e><p><l>G</l> <r>G<s n="np"/></r></p></e>
+  </section>
+
+  <section id="final" type="inconditional">
+    <e><p><l>.</l> <r>.<s n="sent"/></r></p></e>
+  </section>
+
+</dictionary>

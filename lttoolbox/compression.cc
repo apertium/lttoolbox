@@ -22,20 +22,20 @@
 #include <limits>
 #include <iostream>
 
-void 
+void
 Compression::writeByte(unsigned char byte, FILE *output)
 {
   if(fwrite_unlocked(&byte, 1, 1, output) != 1)
   {
     wcerr << L"I/O Error writing" << endl;
     exit(EXIT_FAILURE);
-  }  
+  }
 }
 
 unsigned char
 Compression::readByte(FILE *input)
 {
-  unsigned char value;
+  unsigned char value = 0;
   if(fread_unlocked(&value, 1, 1, input) != 1)
   {
 //    Not uncomment this code since
@@ -67,7 +67,7 @@ Compression::multibyte_write(unsigned int value, FILE *output)
     unsigned char low = (unsigned char) value;
     unsigned char middle = (unsigned char) (value >> 8);
     unsigned char up = (unsigned char) (value >> 16);
-    up = up | 0x80; 
+    up = up | 0x80;
     writeByte(up, output);
     writeByte(middle, output);
     writeByte(low, output);
@@ -78,7 +78,7 @@ Compression::multibyte_write(unsigned int value, FILE *output)
     unsigned char middlelow = (unsigned char) (value >> 8);
     unsigned char middleup = (unsigned char) (value >> 16);
     unsigned char up = (unsigned char) (value >> 24);
-    up = up | 0xc0; 
+    up = up | 0xc0;
     writeByte(up, output);
     writeByte(middleup, output);
     writeByte(middlelow, output);
@@ -112,11 +112,11 @@ Compression::multibyte_write(unsigned int value, ostream &output)
     unsigned char low = (unsigned char) value;
     unsigned char middle = (unsigned char) (value >> 8);
     unsigned char up = (unsigned char) (value >> 16);
-    up = up | 0x80; 
+    up = up | 0x80;
     output.write(reinterpret_cast<char *>(&up), sizeof(char));
     output.write(reinterpret_cast<char *>(&middle), sizeof(char));
     output.write(reinterpret_cast<char *>(&low), sizeof(char));
-    
+
   }
   else if(value < 0x40000000)
   {
@@ -124,7 +124,7 @@ Compression::multibyte_write(unsigned int value, ostream &output)
     unsigned char middlelow = (unsigned char) (value >> 8);
     unsigned char middleup = (unsigned char) (value >> 16);
     unsigned char up = (unsigned char) (value >> 24);
-    up = up | 0xc0; 
+    up = up | 0xc0;
 
     output.write(reinterpret_cast<char *>(&up), sizeof(char));
     output.write(reinterpret_cast<char *>(&middleup), sizeof(char));
@@ -188,7 +188,7 @@ Compression::multibyte_read(FILE *input)
     result = (unsigned int) low;
     result = result | aux;
   }
-   
+
   return result;
 }
 
@@ -248,7 +248,7 @@ Compression::multibyte_read(istream &input)
     result = (unsigned int) low;
     result = result | aux;
   }
-   
+
   return result;
 }
 
@@ -257,9 +257,9 @@ void
 Compression::wstring_write(wstring const &str, FILE *output)
 {
   Compression::multibyte_write(str.size(), output);
-  for(unsigned int i = 0, limit = str.size(); i != limit; i++)
+  for(auto c : str)
   {
-    Compression::multibyte_write(static_cast<int>(str[i]), output);
+    Compression::multibyte_write(static_cast<int>(c), output);
   }
 }
 
@@ -281,9 +281,9 @@ void
 Compression::string_write(string const &str, FILE *output)
 {
   Compression::multibyte_write(str.size(), output);
-  for(unsigned int i = 0, limit = str.size(); i != limit; i++)
+  for(auto c : str)
   {
-    Compression::multibyte_write(static_cast<int>(str[i]), output);
+    Compression::multibyte_write(static_cast<int>(c), output);
   }
 }
 
@@ -297,7 +297,7 @@ Compression::string_read(FILE *input)
   {
     retval += static_cast<char>(Compression::multibyte_read(input));
   }
-  
+
   return retval;
 }
 
@@ -307,8 +307,8 @@ Compression::long_multibyte_write(const double& value, FILE *output)
 {
   int exp = 0;
 
-  unsigned int mantissa = static_cast<unsigned int>(0x40000000 * frexp(value, &exp));
-  unsigned int exponent = static_cast<unsigned int>(exp);
+  unsigned int mantissa = static_cast<unsigned int>(static_cast<int>(0x40000000 * frexp(value, &exp)));
+  unsigned int exponent = static_cast<unsigned int>(static_cast<int>(exp));
 
   if(mantissa < 0x04000000)
   {
@@ -344,8 +344,8 @@ Compression::long_multibyte_write(const double& value, ostream &output)
 {
   int exp = 0;
 
-  unsigned int mantissa = static_cast<unsigned int>(0x40000000 * frexp(value, &exp));
-  unsigned int exponent = static_cast<unsigned int>(exp);
+  unsigned int mantissa = static_cast<unsigned int>(static_cast<int>(0x40000000 * frexp(value, &exp)));
+  unsigned int exponent = static_cast<unsigned int>(static_cast<int>(exp));
 
   if(mantissa < 0x04000000)
   {
