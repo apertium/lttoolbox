@@ -56,8 +56,8 @@ lt_tmxproc_LDADD = liblttoolbox$(VERSION_MAJOR).la
 lt_tmxproc_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LTTOOLBOX_LIBS)
 
 lt_reweight_SOURCES = lt_reweight.cc
-lt_reweight_LDADD = liblttoolbox$(GENERIC_MAJOR_VERSION).la
-lt_reweight_LDFLAGS = -llttoolbox$(GENERIC_MAJOR_VERSION) $(LTTOOLBOX_LIBS)
+lt_reweight_LDADD = liblttoolbox$(VERSION_MAJOR).la
+lt_reweight_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LTTOOLBOX_LIBS)
 
 #lt-validate-dictionary: Makefile.am validate-header.sh
 #	@echo "Creating lt-validate-dictionary script"

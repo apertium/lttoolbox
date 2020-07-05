@@ -54,7 +54,8 @@ void endProgram(char *name)
   cout << "  -o, --surf-bilingual:    lexical transfer with surface forms" << endl;
   cout << "  -p, --post-generation:   post-generation" << endl;
   cout << "  -x, --inter-generation:  inter-generation" << endl;
-  cout << "  -s, --sao:               SAO annotation system input processing" << endl;
+// Deprecated:
+//  cout << "  -s, --sao:               SAO annotation system input processing" << endl;
   cout << "  -t, --transliteration:   apply transliteration dictionary" << endl;
   cout << "  -v, --version:           version" << endl;
   cout << "  -z, --null-flush:        flush output on the null character " << endl;
@@ -79,7 +80,8 @@ void endProgram(char *name)
   cout << "  -o:   lexical transfer with surface forms" << endl;
   cout << "  -p:   post-generation" << endl;
   cout << "  -x:   inter-generation" << endl;
-  cout << "  -s:   SAO annotation system input processing" << endl;
+// Deprecated:
+//  cout << "  -s:   SAO annotation system input processing" << endl;
   cout << "  -t:   apply transliteration dictionary" << endl;
   cout << "  -v:   version" << endl;
   cout << "  -z:   flush output on the null character " << endl;
@@ -124,7 +126,8 @@ int main(int argc, char *argv[])
       {"tagged-nm-gen",     0, 0, 'm'},
       {"post-generation",   0, 0, 'p'},
       {"inter-generation",   0, 0, 'x'},
-      {"sao",               0, 0, 's'},
+// Deprecated:
+//      {"sao",               0, 0, 's'},
       {"transliteration",   0, 0, 't'},
       {"null-flush",        0, 0, 'z'},
       {"dictionary-case",   0, 0, 'w'},
@@ -143,9 +146,9 @@ int main(int argc, char *argv[])
   {
 #if HAVE_GETOPT_LONG
     int option_index;
-    int c = getopt_long(argc, argv, "abcegi:r:lmndopxstzwvCIWN:L:h", long_options, &option_index);
+    int c = getopt_long(argc, argv, "abcegi:r:lmndopxtzwvCIWN:L:h", long_options, &option_index);
 #else
-    int c = getopt(argc, argv, "abcegi:r:lmndopxstzwvCIWN:L:h");
+    int c = getopt(argc, argv, "abcegi:r:lmndopxtzwvCIWN:L:h");
 #endif
 
     if(c == -1)
@@ -210,7 +213,6 @@ int main(int argc, char *argv[])
     case 'p':
     case 'x':
     case 't':
-    case 's':
     case 'C':
       if(cmd == 0)
       {
@@ -362,12 +364,14 @@ int main(int argc, char *argv[])
         fstp.intergeneration(input, output);
         break;
 
+/** Deprecated:
+
       case 's':
         fstp.initAnalysis();
         checkValidity(fstp);
         fstp.SAO(input, output);
         break;
-
+*/
       case 't':
         fstp.initPostgeneration();
         checkValidity(fstp);

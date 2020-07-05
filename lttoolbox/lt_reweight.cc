@@ -16,7 +16,7 @@
  */
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
-#include <lttoolbox/lttoolbox_config.h>
+//#include <lttoolbox/lttoolbox_config.h>
 
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/lt_locale.h>
