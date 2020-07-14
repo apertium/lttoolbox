@@ -73,6 +73,14 @@ private:
   void destroy();
 
   /**
+   * Helper functions for the various apply()s to reduce code duplication
+   * @return whether any transitions were made
+   */
+  bool apply_into(vector<TNodeState>* new_state, int const input, int index, bool dirty);
+
+  bool apply_into_override(vector<TNodeState>* new_state, int const input, int const old_sym, int const new_sym, int index, bool dirty);
+
+  /**
    * Make a transition, version for lowercase letters and symbols
    * @param input the input symbol
    */
@@ -109,6 +117,8 @@ private:
    * @param output symbol we want to appear
    */
   void apply_override(int const input, int const old_sym, int const new_sym);
+
+  void apply_override(int const input, int const alt, int const old_sym, int const new_sym);
 
   /**
    * Calculate the epsilon closure over the current state, replacing
@@ -185,6 +195,8 @@ public:
   void step_careful(int const input, int const alt);
 
   void step_override(int const input, int const old_sym, int const new_sym);
+
+  void step_override(int const input, int const alt, int const old_sym, int const new_sym);
 
   /**
    * Init the state with the initial node and empty output
