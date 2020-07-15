@@ -130,5 +130,14 @@ class CatMultipleFstsTransducer(unittest.TestCase, ProcTest):
     inputs = ["cat", "cats"]
     expectedOutputs = ["^cat/cat+n/cat+v$", "^cats/cat+n+<pl>$"]
 
+class WordboundBlankAnalysisTest(unittest.TestCase, ProcTest):
+    procdix = "data/wordbound-blank.dix"
+    inputs          = ["x  [[t:i:123456]]opp.",
+                        "[[t:b:456123; t:i:90hfbn]]legge  [[t:s:xyz789]]opp  opp [[t:b:abc124]]x opp.",
+                       ]
+    expectedOutputs = ["^x/*x$  [[t:i:123456]]^opp/opp<pr>$^./.<sent>$",
+                        "[[t:b:456123; t:i:90hfbn]]^legge/legge<vblex><inf>$  [[t:s:xyz789]]^opp/opp<pr>$  ^opp/opp<pr>$ [[t:b:abc124]]^x/*x$ ^opp/opp<pr>$^./.<sent>$",
+                       ]
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *

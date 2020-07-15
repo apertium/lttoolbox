@@ -238,6 +238,42 @@ FSTProcessor::readFullBlock(FILE *input, wchar_t const delim1, wchar_t const del
   return result;
 }
 
+wstring
+FSTProcessor::readWblank(FILE *input)
+{
+  wstring result = L"";
+  result += L"[[";
+  wchar_t c;
+
+  while(!feof(input))
+  {
+    c = static_cast<wchar_t>(fgetwc_unlocked(input));
+    result += c;
+
+    if(c == L'\\')
+    {
+      result += static_cast<wchar_t>(readEscaped(input));
+    }
+    else if(c == L']')
+    {
+      c = static_cast<wchar_t>(fgetwc_unlocked(input));
+      result += c;
+      
+      if(c == L']')
+      {
+        break;
+      }
+    }
+  }
+
+  if(c != L']')
+  {
+    streamError();
+  }
+
+  return result;
+}
+
 int
 FSTProcessor::readAnalysis(FILE *input)
 {
@@ -269,7 +305,18 @@ FSTProcessor::readAnalysis(FILE *input)
         return altval;
 
       case L'[':
-        blankqueue.push(readFullBlock(input, L'[', L']'));
+        val = static_cast<wchar_t>(fgetwc_unlocked(input));
+        
+        if(val == L'[')
+        {
+          blankqueue.push(readWblank(input));
+        }
+        else
+        {
+          ungetc(val, input);
+          blankqueue.push(readFullBlock(input, L'[', L']'));
+        }
+        
         input_buffer.add(static_cast<int>(L' '));
         return static_cast<int>(L' ');
 
@@ -320,7 +367,18 @@ FSTProcessor::readTMAnalysis(FILE *input)
         return altval;
 
       case L'[':
-        blankqueue.push(readFullBlock(input, L'[', L']'));
+        val = static_cast<wchar_t>(fgetwc_unlocked(input));
+        
+        if(val == L'[')
+        {
+          blankqueue.push(readWblank(input));
+        }
+        else
+        {
+          ungetc(val, input);
+          blankqueue.push(readFullBlock(input, L'[', L']'));
+        }
+        
         input_buffer.add(static_cast<int>(L' '));
         isLastBlankTM = true;
         return static_cast<int>(L' ');
@@ -389,7 +447,18 @@ FSTProcessor::readPostgeneration(FILE *input)
       return altval;
 
     case L'[':
-      blankqueue.push(readFullBlock(input, L'[', L']'));
+      val = static_cast<wchar_t>(fgetwc_unlocked(input));
+      
+      if(val == L'[')
+      {
+        blankqueue.push(readWblank(input));
+      }
+      else
+      {
+        ungetc(val, input);
+        blankqueue.push(readFullBlock(input, L'[', L']'));
+      }
+      
       input_buffer.add(static_cast<int>(L' '));
       return static_cast<int>(L' ');
 
@@ -517,76 +586,31 @@ FSTProcessor::readGeneration(FILE *input, FILE *output)
     wstring cad = L"";
     cad += static_cast<wchar_t>(val);
       
-    bool isSecondaryTag = false;
-      
     while((val = fgetwc_unlocked(input)) != L'>')
     {
       if(feof(input))
       {
         streamError();
       }
-      if(val == L':')
-      {
-        isSecondaryTag = true;
-        break;
-      }
       cad += static_cast<wchar_t>(val);
     }
     cad += static_cast<wchar_t>(val);
     
-    if(isSecondaryTag)
-    {
-      while(true)
-      {
-        val = fgetwc_unlocked(input);
-          
-        if(feof(input))
-        {
-          streamError();
-        }
-        
-        if(val == L'\\')
-        {
-          val = fgetwc_unlocked(input);
-          continue;
-        }
-        
-        if(isSecondaryTag)
-        {
-          if(val == L'>')
-          {
-            isSecondaryTag = false;
-          }
-        }
-        else
-        {
-          if(val == L'<')
-          {
-            isSecondaryTag = true;
-          }
-          else if(val == L'$')
-          {
-              break;
-          }
-          else
-          {
-            return static_cast<int>(val);
-          }
-        }
-      }
-        
-      outOfWord = true;
-      return static_cast<int>(L'$');
-    }
-    else
-    {
-      return alphabet(cad);
-    }
-    
+    return alphabet(cad);
   }
   else if(val == L'[')
   {
-    fputws_unlocked(readFullBlock(input, L'[', L']').c_str(), output);
+    val = fgetwc_unlocked(input);
+    if(val == L'[')
+    {
+      fputws_unlocked(readWblank(input).c_str(), output);
+    }
+    else
+    {
+      ungetc(val, input);
+      fputws_unlocked(readFullBlock(input, L'[', L']').c_str(), output);
+    }
+    
     return readGeneration(input, output);
   }
   else
@@ -681,7 +705,17 @@ FSTProcessor::readBilingual(FILE *input, FILE *output)
   }
   else if(val == L'[')
   {
-    fputws_unlocked(readFullBlock(input, L'[', L']').c_str(), output);
+    val = fgetwc_unlocked(input);
+    if(val == L'[')
+    {
+      fputws_unlocked(readWblank(input).c_str(), output);
+    }
+    else
+    {
+      ungetc(val, input);
+      fputws_unlocked(readFullBlock(input, L'[', L']').c_str(), output);
+    }
+    
     return readBilingual(input, output);
   }
 
