@@ -305,7 +305,18 @@ FSTProcessor::readAnalysis(FILE *input)
         return altval;
 
       case L'[':
-        blankqueue.push(readFullBlock(input, L'[', L']'));
+        val = static_cast<wchar_t>(fgetwc_unlocked(input));
+        
+        if(val == L'[')
+        {
+          blankqueue.push(readWblank(input));
+        }
+        else
+        {
+          ungetc(val, input);
+          blankqueue.push(readFullBlock(input, L'[', L']'));
+        }
+        
         input_buffer.add(static_cast<int>(L' '));
         return static_cast<int>(L' ');
 
@@ -356,7 +367,18 @@ FSTProcessor::readTMAnalysis(FILE *input)
         return altval;
 
       case L'[':
-        blankqueue.push(readFullBlock(input, L'[', L']'));
+        val = static_cast<wchar_t>(fgetwc_unlocked(input));
+        
+        if(val == L'[')
+        {
+          blankqueue.push(readWblank(input));
+        }
+        else
+        {
+          ungetc(val, input);
+          blankqueue.push(readFullBlock(input, L'[', L']'));
+        }
+        
         input_buffer.add(static_cast<int>(L' '));
         isLastBlankTM = true;
         return static_cast<int>(L' ');
@@ -425,7 +447,18 @@ FSTProcessor::readPostgeneration(FILE *input)
       return altval;
 
     case L'[':
-      blankqueue.push(readFullBlock(input, L'[', L']'));
+      val = static_cast<wchar_t>(fgetwc_unlocked(input));
+      
+      if(val == L'[')
+      {
+        blankqueue.push(readWblank(input));
+      }
+      else
+      {
+        ungetc(val, input);
+        blankqueue.push(readFullBlock(input, L'[', L']'));
+      }
+      
       input_buffer.add(static_cast<int>(L' '));
       return static_cast<int>(L' ');
 
