@@ -238,6 +238,42 @@ FSTProcessor::readFullBlock(FILE *input, wchar_t const delim1, wchar_t const del
   return result;
 }
 
+wstring
+FSTProcessor::readWblank(FILE *input)
+{
+  wstring result = L"";
+  result += L"[[";
+  wchar_t c;
+
+  while(!feof(input))
+  {
+    c = static_cast<wchar_t>(fgetwc_unlocked(input));
+    result += c;
+
+    if(c == L'\\')
+    {
+      result += static_cast<wchar_t>(readEscaped(input));
+    }
+    else if(c == L']')
+    {
+      c = static_cast<wchar_t>(fgetwc_unlocked(input));
+      result += c;
+      
+      if(c == L']')
+      {
+        break;
+      }
+    }
+  }
+
+  if(c != L']')
+  {
+    streamError();
+  }
+
+  return result;
+}
+
 int
 FSTProcessor::readAnalysis(FILE *input)
 {
@@ -531,7 +567,17 @@ FSTProcessor::readGeneration(FILE *input, FILE *output)
   }
   else if(val == L'[')
   {
-    fputws_unlocked(readFullBlock(input, L'[', L']').c_str(), output);
+    val = fgetwc_unlocked(input);
+    if(val == L'[')
+    {
+      fputws_unlocked(readWblank(input).c_str(), output);
+    }
+    else
+    {
+      ungetc(val, input);
+      fputws_unlocked(readFullBlock(input, L'[', L']').c_str(), output);
+    }
+    
     return readGeneration(input, output);
   }
   else

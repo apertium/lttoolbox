@@ -251,6 +251,12 @@ private:
    * @param delim1 the delimiter of the end of the sequence
    */
   wstring readFullBlock(FILE *input, wchar_t const delim1, wchar_t const delim2);
+  
+  /**
+   * Reads a wordbound blank from the stream input
+   * @param input the stream being read
+   */
+  wstring readWblank(FILE *input);
 
   /**
    * Returns true if the character code is identified as alphabetic
