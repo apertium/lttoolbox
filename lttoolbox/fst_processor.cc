@@ -672,7 +672,17 @@ FSTProcessor::readBilingual(FILE *input, FILE *output)
   }
   else if(val == L'[')
   {
-    fputws_unlocked(readFullBlock(input, L'[', L']').c_str(), output);
+    val = fgetwc_unlocked(input);
+    if(val == L'[')
+    {
+      fputws_unlocked(readWblank(input).c_str(), output);
+    }
+    else
+    {
+      ungetc(val, input);
+      fputws_unlocked(readFullBlock(input, L'[', L']').c_str(), output);
+    }
+    
     return readBilingual(input, output);
   }
 
