@@ -58,6 +58,8 @@
 #define fputws_unlocked fputws
 #endif
 
-
+#if !HAVE_DECL_UNGETWC_UNLOCKED
+#define ungetwc_unlocked ungetwc
+#endif
 
 #endif
