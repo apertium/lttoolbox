@@ -104,6 +104,11 @@ private:
   queue<wstring> blankqueue;
 
   /**
+   * Queue of wordbound blanks, used in reading methods
+   */
+  queue<wstring> wblankqueue;
+  
+  /**
    * Set of characters being considered alphabetics
    */
   set<wchar_t> alphabetic_chars;
@@ -226,6 +231,21 @@ private:
    * Output no more than 'N' number of weighted analyses
    */
   int maxAnalyses;
+  
+  /**
+   * True if a wblank block ([[..]]xyz[[/]]) was just read
+   */
+  bool is_wblank;
+  
+  /**
+   * True if skip_mode is false and need to collect wblanks
+   */
+  bool collect_wblanks;
+  
+  /**
+   * True if a wblank has been processed for postgen and we need an ending wblank
+   */
+  bool need_end_wblank;
 
   /**
    * Output no more than 'N' best weight classes
@@ -257,6 +277,14 @@ private:
    * @param input the stream being read
    */
   wstring readWblank(FILE *input);
+  
+  /**
+   * Reads a wordbound blank (opening blank to closing blank) from the stream input -> [[...]]xyz[[/]]
+   * @param input the stream being read
+   * @param output the stream to write on
+   * @return true if the word enclosed by the wordbound blank has a ~ for postgeneration activation
+   */
+  bool wblankPostGen(FILE *input, FILE *output);
 
   /**
    * Returns true if the character code is identified as alphabetic
@@ -282,6 +310,7 @@ private:
   /**
    * Read text from stream (decomposition version)
    * @param input the stream to read
+   * @param output the stream to write on
    * @return the next symbol in the stream
    */
   int readDecomposition(FILE *input, FILE *output);
@@ -289,13 +318,15 @@ private:
   /**
    * Read text from stream (postgeneration version)
    * @param input the stream to read
+   * @param output the stream to write on
    * @return the next symbol in the stream
    */
-  int readPostgeneration(FILE *input);
+  int readPostgeneration(FILE *input, FILE *output);
 
   /**
    * Read text from stream (generation version)
    * @param input the stream to read
+   * @param output the stream being written to
    * @return the next symbol in the stream
    */
   int readGeneration(FILE *input, FILE *output);
@@ -303,6 +334,7 @@ private:
   /**
    * Read text from stream (biltrans version)
    * @param input the stream to read
+   * @param output the stream to write on
    * @return the queue of 0-symbols, and the next symbol in the stream
    */
   pair<wstring, int> readBilingual(FILE *input, FILE *output);
@@ -319,6 +351,18 @@ private:
    * @param output stream to write blanks
    */
   void flushBlanks(FILE *output);
+  
+  /**
+   * Flush all the wordbound blanks remaining in the current process
+   * @param output stream to write blanks
+   */
+  void flushWblanks(FILE *output);
+  
+  /**
+   * Combine wordbound blanks in the queue and return them
+   * @return final wblank string
+  */
+  wstring combineWblanks();
 
   /**
    * Calculate the initial state of parsing

@@ -274,6 +274,61 @@ FSTProcessor::readWblank(FILE *input)
   return result;
 }
 
+bool
+FSTProcessor::wblankPostGen(FILE *input, FILE *output)
+{
+  wstring result = L"";
+  result += L"[[";
+  wchar_t c = 0;
+
+  while(!feof(input))
+  {
+    c = static_cast<wchar_t>(fgetwc_unlocked(input));
+    result += c;
+
+    if(c == L'\\')
+    {
+      result += c;
+      result += static_cast<wchar_t>(fgetwc_unlocked(input));
+    }
+    else if(c == L']')
+    {
+      c = static_cast<wchar_t>(fgetwc_unlocked(input));
+      result += c;
+
+      if(c == L']')
+      {
+        int resultlen = result.length();
+        if(result[resultlen-5] == '[' && result[resultlen-4] == '[' && result[resultlen-3] == '/') //ending blank [[/]]
+        {
+          fputws(result.c_str(), output);
+          break;
+        }
+        else
+        {
+          c = static_cast<wchar_t>(fgetwc_unlocked(input));
+          if(c == L'~')
+          {
+            wblankqueue.push(result);
+            return true;
+          }
+          else
+          {
+            result += c;
+          }
+        }
+      }
+    }
+  }
+
+  if(c != L']')
+  {
+    streamError();
+  }
+  
+  return false;
+}
+
 int
 FSTProcessor::readAnalysis(FILE *input)
 {
@@ -425,7 +480,7 @@ FSTProcessor::readTMAnalysis(FILE *input)
 }
 
 int
-FSTProcessor::readPostgeneration(FILE *input)
+FSTProcessor::readPostgeneration(FILE *input, FILE *output)
 {
   if(!input_buffer.isEmpty())
   {
@@ -434,6 +489,7 @@ FSTProcessor::readPostgeneration(FILE *input)
 
   wchar_t val = static_cast<wchar_t>(fgetwc_unlocked(input));
   int altval = 0;
+  is_wblank = false;
   if(feof(input))
   {
     return 0;
@@ -451,16 +507,30 @@ FSTProcessor::readPostgeneration(FILE *input)
 
       if(val == L'[')
       {
-        blankqueue.push(readWblank(input));
+        if(collect_wblanks)
+        {
+          wblankqueue.push(readWblank(input));
+          is_wblank = true;
+          return static_cast<int>(L' ');
+        }
+        else if(wblankPostGen(input, output))
+        {
+          return static_cast<int>(L'~');
+        }
+        else
+        {
+          is_wblank = true;
+          return static_cast<int>(L' ');
+        }
       }
       else
       {
         ungetwc_unlocked(val, input);
         blankqueue.push(readFullBlock(input, L'[', L']'));
+        
+        input_buffer.add(static_cast<int>(L' '));
+        return static_cast<int>(L' ');
       }
-
-      input_buffer.add(static_cast<int>(L' '));
-      return static_cast<int>(L' ');
 
     case L'\\':
       val = static_cast<wchar_t>(fgetwc_unlocked(input));
@@ -730,6 +800,58 @@ FSTProcessor::flushBlanks(FILE *output)
     fputws_unlocked(blankqueue.front().c_str(), output);
     blankqueue.pop();
   }
+}
+
+void
+FSTProcessor::flushWblanks(FILE *output)
+{
+  for(size_t i = wblankqueue.size(); i > 0; i--)
+  {
+    fputws_unlocked(wblankqueue.front().c_str(), output);
+    wblankqueue.pop();
+  }
+}
+
+wstring
+FSTProcessor::combineWblanks()
+{
+  wstring final_wblank;
+  wstring last_wblank = L"";
+  
+  for(size_t i = wblankqueue.size(); i > 0; i--)
+  {
+    if(final_wblank.empty())
+    {
+      final_wblank += L"[[";
+    }
+    if(wblankqueue.front().compare(L"[[/]]") == 0)
+    {
+      if(final_wblank.length() > 2)
+      {
+        final_wblank += L"; ";
+      }
+      final_wblank += last_wblank.substr(2,last_wblank.length()-4); //add wblank without brackets [[..]]
+      last_wblank.clear();
+    }
+    else
+    {
+      last_wblank = wblankqueue.front();
+    }
+    wblankqueue.pop();
+  }
+
+  if(!last_wblank.empty())
+  {
+    wblankqueue.push(last_wblank);
+  }
+  
+  if(!final_wblank.empty())
+  {
+    final_wblank += L"]]";
+    need_end_wblank = true;
+  }
+  
+  return final_wblank;
 }
 
 void
@@ -2093,20 +2215,27 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
   }
 
   bool skip_mode = true;
+  collect_wblanks = false;
+  need_end_wblank = false;
   State current_state = initial_state;
   wstring lf = L"";
   wstring sf = L"";
   int last = 0;
   set<wchar_t> empty_escaped_chars;
 
-  while(wchar_t val = readPostgeneration(input))
+  while(wchar_t val = readPostgeneration(input, output))
   {
     if(val == L'~')
     {
       skip_mode = false;
+      collect_wblanks = true;
     }
 
-    if(skip_mode)
+    if(is_wblank && skip_mode)
+    {
+      //do nothing
+    }
+    else if(skip_mode)
     {
       if(iswspace(val))
       {
@@ -2114,6 +2243,7 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
       }
       else
       {
+        flushWblanks(output);
         if(isEscaped(val))
         {
           fputwc_unlocked(L'\\', output);
@@ -2123,6 +2253,11 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
     }
     else
     {
+      if(is_wblank)
+      {
+        continue;
+      }
+      
       // test for final states
       if(current_state.isFinal(all_finals))
       {
@@ -2199,6 +2334,9 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
       }
       else
       {
+        wstring final_wblank = combineWblanks();
+        fputws_unlocked(final_wblank.c_str(), output);
+        
         if(lf == L"")
         {
           unsigned int mark = sf.size();
@@ -2239,11 +2377,18 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
             fputwc_unlocked(val, output);
           }
         }
+        
+        if(need_end_wblank)
+        {
+          fputws_unlocked(L"[[/]]", output);
+          need_end_wblank = false;
+        }
 
         current_state = initial_state;
         lf = L"";
         sf = L"";
         skip_mode = true;
+        collect_wblanks = false;
       }
     }
   }
@@ -2269,7 +2414,7 @@ FSTProcessor::intergeneration(FILE *input, FILE *output)
 
   while (true)
   {
-    wchar_t val = readPostgeneration(input);
+    wchar_t val = readPostgeneration(input, output);
 
     if (val == L'~')
     {
@@ -2414,7 +2559,7 @@ FSTProcessor::transliteration(FILE *input, FILE *output)
   wstring sf = L"";
   int last = 0;
 
-  while(wchar_t val = readPostgeneration(input))
+  while(wchar_t val = readPostgeneration(input, output))
   {
     if(iswpunct(val) || iswspace(val))
     {
