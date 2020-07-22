@@ -139,5 +139,59 @@ class WordboundBlankAnalysisTest(unittest.TestCase, ProcTest):
                         "[[t:b:456123; t:i:90hfbn]]^legge/legge<vblex><inf>$  [[t:s:xyz789]]^opp/opp<pr>$  ^opp/opp<pr>$ [[t:b:abc124]]^x/*x$ ^opp/opp<pr>$^./.<sent>$",
                        ]
 
+class PostgenerationBasicTest(unittest.TestCase, ProcTest):
+    procdix = "data/postgen.dix"
+    procflags = ["-p", "-z"]
+    inputs          = [ "xyz ejemplo ~o ho nombre.",
+                        "xyz ~le la pelota.",
+                        "El perro ~de el amigo.",
+                        "abc ~les testword"]
+    expectedOutputs = [ "xyz ejemplo u ho nombre.",
+                        "xyz se la pelota.", 
+                        "El perro del amigo.", 
+                        "abc le pe test testword"]
+
+class PostgenerationWordboundBlankTest(unittest.TestCase, ProcTest):
+    procdix = "data/postgen.dix"
+    procflags = ["-p", "-z"]
+    inputs          = [ "xyz ejemplo [[t:i:123456]]~o[[/]] [[t:b:abc123; t:i:123456]]ho[[/]] [[t:b:iopmnb]]nombre[[/]].",
+                        "xyz ejemplo [[t:b:poim230]]~o[[/]] ho [[t:i:mnbj203]]nombre[[/]].",
+                        "xyz ejemplo ~o [[t:b:abc123; t:i:123456]]ho[[/]] [[t:b:iopmnb]]nombre[[/]].",
+                        "xyz ejemplo ~o [[t:b:abc123; t:i:123456]]ho[[/]] ~le la [[t:b:iopmnb]]nombre[[/]].",
+                        "xyz ejemplo [[t:i:1235gb]]~o[[/]] [[t:b:abc123; t:i:123456]]ho[[/]] [[t:b:i4x56fb]]~le[[/]] la nombre.",
+                        "xyz [[t:i:123456]]~le[[/]] [[t:b:123gfv]]la[[/]] pelota.",
+                        "xyz ~le [[t:b:123gfv]]la[[/]] pelota.",
+                        "xyz ejemplo ~o [[t:b:abc123; t:i:123456]]ho[[/]] ~le [[t:b:io1245b]]la[[/]] [[t:b:iopmnb]]nombre[[/]].",
+                        "[[t:b:Z9eiLA]]El[[/]] [[t:s:8AjRFw]]perro[[/]] [[t:i:4_tPUA]]~de[[/]] [[t:b:Z9eiLA]]el[[/]] [[t:i:wSM6RQ]]amigo[[/]][]",
+                        "[[t:b:h5lVhA]]El[[/]] [[t:b:Z9eiLA; t:i:4_tPUA]]perro[[/]] [[t:b:Z9eiLA; t:i:4_tPUA]]~de[[/]] [[t:b:Z9eiLA]]el[[/]] [[t:i:npAFwg]]amigo[[/]][]",
+                        "[[t:b:Z9eiLA]]El[[/]] [[t:s:8AjRFw]]perro[[/]] [[t:i:4_tPUA]]~de[[/]] el [[t:i:wSM6RQ]]amigo[[/]][]",
+                        "[[t:b:Z9eiLA]]El[[/]] [[t:s:8AjRFw]]perro[[/]] ~de [[t:b:Z9eiLA]]el[[/]] [[t:i:wSM6RQ]]amigo[[/]][]",
+                        "[[t:b:Z9eiLA]]El[[/]] [[t:s:8AjRFw]]perro[[/]] ~de el [[t:i:wSM6RQ]]amigo[[/]][]",
+                        "[[t:b:Z9eiLA]]abc[[/]] [[t:i:123456]]~les[[/]] [[t:b:abc123; t:i:123456]]testword[[/]]",
+                        "[[t:b:Z9eiLA]]abc[[/]] ~les [[t:b:abc123; t:i:123456]]testword[[/]]",
+                        "[[t:b:Z9eiLA]]abc[[/]] [[t:i:123456]]~les[[/]] [[t:i:4_tPUA]]~de[[/]] [[t:b:Z9eiLA]]el[[/]] [[t:i:wSM6RQ]]testword[[/]]",
+                        "[[t:b:Z9eiLA]]abc[[/]] [[t:i:123456]]~les pes[[/]] [[t:i:4_tPUA]]~de[[/]] [[t:b:Z9eiLA]]el[[/]] [[t:i:wSM6RQ]]testword[[/]]",
+                        "[[t:b:Z9eiLA]]abc[[/]] [[t:i:123456]]~les[[/]] [[t:b:12bsa23]]pes[[/]] [[t:i:4_tPUA]]~de[[/]] [[t:b:Z9eiLA]]el[[/]] [[t:i:wSM6RQ]]testword[[/]]",
+                        "[[t:b:Z9eiLA]]abc[[/]] ~les [[t:b:12bsa23]]pes[[/]] [[t:i:4_tPUA]]~de[[/]] [[t:b:Z9eiLA]]el[[/]] [[t:i:wSM6RQ]]testword[[/]]"]
+
+    expectedOutputs = [ "xyz ejemplo [[t:i:123456; t:b:abc123; t:i:123456]]u ho[[/]] [[t:b:iopmnb]]nombre[[/]].",
+                        "xyz ejemplo [[t:b:poim230]]u ho[[/]] [[t:i:mnbj203]]nombre[[/]].",
+                        "xyz ejemplo [[t:b:abc123; t:i:123456]]u ho[[/]] [[t:b:iopmnb]]nombre[[/]].",
+                        "xyz ejemplo [[t:b:abc123; t:i:123456]]u ho[[/]] se la [[t:b:iopmnb]]nombre[[/]].",
+                        "xyz ejemplo [[t:i:1235gb; t:b:abc123; t:i:123456]]u ho[[/]] [[t:b:i4x56fb]]se la[[/]] nombre.",
+                        "xyz [[t:i:123456; t:b:123gfv]]se la[[/]] pelota.",
+                        "xyz [[t:b:123gfv]]se la[[/]] pelota.",
+                        "xyz ejemplo [[t:b:abc123; t:i:123456]]u ho[[/]] [[t:b:io1245b]]se la[[/]] [[t:b:iopmnb]]nombre[[/]].",
+                        "[[t:b:Z9eiLA]]El[[/]] [[t:s:8AjRFw]]perro[[/]] [[t:i:4_tPUA; t:b:Z9eiLA]]del[[/]] [[t:i:wSM6RQ]]amigo[[/]][]",
+                        "[[t:b:h5lVhA]]El[[/]] [[t:b:Z9eiLA; t:i:4_tPUA]]perro[[/]] [[t:b:Z9eiLA; t:i:4_tPUA; t:b:Z9eiLA]]del[[/]] [[t:i:npAFwg]]amigo[[/]][]",
+                        "[[t:b:Z9eiLA]]El[[/]] [[t:s:8AjRFw]]perro[[/]] [[t:i:4_tPUA]]del[[/]] [[t:i:wSM6RQ]]amigo[[/]][]",
+                        "[[t:b:Z9eiLA]]El[[/]] [[t:s:8AjRFw]]perro[[/]] [[t:b:Z9eiLA]]del[[/]] [[t:i:wSM6RQ]]amigo[[/]][]",
+                        "[[t:b:Z9eiLA]]El[[/]] [[t:s:8AjRFw]]perro[[/]] del [[t:i:wSM6RQ]]amigo[[/]][]",
+                        "[[t:b:Z9eiLA]]abc[[/]] [[t:i:123456]]le pe test[[/]] [[t:b:abc123; t:i:123456]]testword[[/]]",
+                        "[[t:b:Z9eiLA]]abc[[/]] le pe test [[t:b:abc123; t:i:123456]]testword[[/]]",
+                        "[[t:b:Z9eiLA]]abc[[/]] [[t:i:123456]]le pe test[[/]] [[t:i:4_tPUA; t:b:Z9eiLA]]del[[/]] [[t:i:wSM6RQ]]testword[[/]]",
+                        "[[t:b:Z9eiLA]]abc[[/]] [[t:i:123456]]les pes test[[/]] [[t:i:4_tPUA; t:b:Z9eiLA]]del[[/]] [[t:i:wSM6RQ]]testword[[/]]",
+                        "[[t:b:Z9eiLA]]abc[[/]] [[t:i:123456; t:b:12bsa23]]les pes test[[/]] [[t:i:4_tPUA; t:b:Z9eiLA]]del[[/]] [[t:i:wSM6RQ]]testword[[/]]",
+                        "[[t:b:Z9eiLA]]abc[[/]] [[t:b:12bsa23]]les pes test[[/]] [[t:i:4_tPUA; t:b:Z9eiLA]]del[[/]] [[t:i:wSM6RQ]]testword[[/]]"]
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *
