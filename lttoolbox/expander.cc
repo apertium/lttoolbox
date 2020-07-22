@@ -113,6 +113,13 @@ Expander::readString(wstring &result, wstring const &name)
   if(name == L"#text")
   {
     wstring value = XMLParseUtil::towstring(xmlTextReaderConstValue(reader));
+    wstring escaped = L"^$/<>{}\\*@#+~:";
+    for(size_t i = value.size()-1; i > 0; i--)
+    {
+      if(escaped.find(value[i]) != wstring::npos) {
+        value.insert(value.begin()+i, L'\\');
+      }
+    }
     result.append(value);
   }
   else if(name == Compiler::COMPILER_BLANK_ELEM)

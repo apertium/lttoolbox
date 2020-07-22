@@ -42,12 +42,20 @@ void endProgram(char *name)
   if(name != NULL)
   {
     cout << basename(name) << " v" << PACKAGE_VERSION <<": build a letter transducer from a dictionary" << endl;
-    cout << "USAGE: " << basename(name) << " [-mavh] lr | rl dictionary_file output_file [acx_file]" << endl;
+    cout << "USAGE: " << basename(name) << " [-mavhlr] lr | rl dictionary_file output_file [acx_file]" << endl;
+#if HAVE_GETOPT_LONG
+    cout << "  -m, --keep-boundaries:     keep morpheme boundaries" << endl;
+    cout << "  -v, --var:                 set language variant" << endl;
+    cout << "  -a, --alt:                 set alternative (monodix)" << endl;
+    cout << "  -l, --var-left:            set left language variant (bidix)" << endl;
+    cout << "  -r, --var-right:           set right language variant (bidix)" << endl;
+#else
     cout << "  -m:     keep morpheme boundaries" << endl;
     cout << "  -v:     set language variant" << endl;
     cout << "  -a:     set alternative (monodix)" << endl;
     cout << "  -l:     set left language variant (bidix)" << endl;
     cout << "  -r:     set right language variant (bidix)" << endl;
+#endif
     cout << "Modes:" << endl;
     cout << "  lr:     left-to-right compilation" << endl;
     cout << "  rl:     right-to-left compilation" << endl;

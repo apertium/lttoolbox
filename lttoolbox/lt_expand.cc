@@ -35,7 +35,20 @@ void endProgram(char *name)
   if(name != NULL)
   {
     cout << basename(name) << " v" << PACKAGE_VERSION <<": expand the contents of a dictionary file" << endl;
-    cout << "USAGE: " << basename(name) << " [-avlrh] dictionary_file [output_file]" << endl;
+    cout << "USAGE: " << basename(name) << " [-mavlrh] dictionary_file [output_file]" << endl;
+#if HAVE_GETOPT_LONG
+    cout << "  -m, --keep-boundaries:     keep morpheme boundaries" << endl;
+    cout << "  -v, --var:                 set language variant" << endl;
+    cout << "  -a, --alt:                 set alternative (monodix)" << endl;
+    cout << "  -l, --var-left:            set left language variant (bidix)" << endl;
+    cout << "  -r, --var-right:           set right language variant (bidix)" << endl;
+#else
+    cout << "  -m:     keep morpheme boundaries" << endl;
+    cout << "  -v:     set language variant" << endl;
+    cout << "  -a:     set alternative (monodix)" << endl;
+    cout << "  -l:     set left language variant (bidix)" << endl;
+    cout << "  -r:     set right language variant (bidix)" << endl;
+#endif
   }
   exit(EXIT_FAILURE);
 }
