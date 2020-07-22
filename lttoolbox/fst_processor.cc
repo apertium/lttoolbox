@@ -298,7 +298,7 @@ FSTProcessor::wblankPostGen(FILE *input, FILE *output)
 
       if(c == L']')
       {
-        int resultlen = result.length();
+        int resultlen = result.size();
         if(result[resultlen-5] == '[' && result[resultlen-4] == '[' && result[resultlen-3] == '/') //ending blank [[/]]
         {
           fputws(result.c_str(), output);
@@ -805,7 +805,7 @@ FSTProcessor::flushBlanks(FILE *output)
 void
 FSTProcessor::flushWblanks(FILE *output)
 {
-  for(size_t i = wblankqueue.size(); i > 0; i--)
+  while(wblankqueue.size() > 0)
   {
     fputws_unlocked(wblankqueue.front().c_str(), output);
     wblankqueue.pop();
@@ -818,7 +818,7 @@ FSTProcessor::combineWblanks()
   wstring final_wblank;
   wstring last_wblank = L"";
   
-  for(size_t i = wblankqueue.size(); i > 0; i--)
+  while(wblankqueue.size() > 0)
   {
     if(wblankqueue.front().compare(L"[[/]]") == 0)
     {
@@ -826,12 +826,12 @@ FSTProcessor::combineWblanks()
       {
         final_wblank += L"[[";
       }
-      else if(final_wblank.length() > 2)
+      else if(final_wblank.size() > 2)
       {
         final_wblank += L"; ";
       }
       
-      final_wblank += last_wblank.substr(2,last_wblank.length()-4); //add wblank without brackets [[..]]
+      final_wblank += last_wblank.substr(2,last_wblank.size()-4); //add wblank without brackets [[..]]
       last_wblank.clear();
     }
     else
