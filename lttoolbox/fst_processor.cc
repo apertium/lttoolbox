@@ -820,16 +820,17 @@ FSTProcessor::combineWblanks()
   
   for(size_t i = wblankqueue.size(); i > 0; i--)
   {
-    if(final_wblank.empty())
-    {
-      final_wblank += L"[[";
-    }
     if(wblankqueue.front().compare(L"[[/]]") == 0)
     {
-      if(final_wblank.length() > 2)
+      if(final_wblank.empty())
+      {
+        final_wblank += L"[[";
+      }
+      else if(final_wblank.length() > 2)
       {
         final_wblank += L"; ";
       }
+      
       final_wblank += last_wblank.substr(2,last_wblank.length()-4); //add wblank without brackets [[..]]
       last_wblank.clear();
     }
@@ -2239,17 +2240,29 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
     {
       if(iswspace(val))
       {
+        if(need_end_wblank)
+        {
+          fputws_unlocked(L"[[/]]", output);
+          need_end_wblank = false;
+        }
+        
         printSpace(val, output);
       }
       else
       {
-        flushWblanks(output);
         if(isEscaped(val))
         {
           fputwc_unlocked(L'\\', output);
         }
         fputwc_unlocked(val, output);
+        
+        if(need_end_wblank)
+        {
+          fputws_unlocked(L"[[/]]", output);
+          need_end_wblank = false;
+        }
       }
+      flushWblanks(output);
     }
     else
     {
@@ -2378,12 +2391,6 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
           }
         }
         
-        if(need_end_wblank)
-        {
-          fputws_unlocked(L"[[/]]", output);
-          need_end_wblank = false;
-        }
-
         current_state = initial_state;
         lf = L"";
         sf = L"";
