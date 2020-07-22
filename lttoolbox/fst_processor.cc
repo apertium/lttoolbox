@@ -2250,6 +2250,11 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
       }
       else
       {
+        if(!need_end_wblank)
+        {
+          flushWblanks(output);
+        }
+        
         if(isEscaped(val))
         {
           fputwc_unlocked(L'\\', output);
@@ -2262,7 +2267,6 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
           need_end_wblank = false;
         }
       }
-      flushWblanks(output);
     }
     else
     {
