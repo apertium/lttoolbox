@@ -107,7 +107,7 @@ private:
    * Queue of wordbound blanks, used in reading methods
    */
   queue<wstring> wblankqueue;
-  
+
   /**
    * Set of characters being considered alphabetics
    */
@@ -231,17 +231,17 @@ private:
    * Output no more than 'N' number of weighted analyses
    */
   int maxAnalyses;
-  
+
   /**
    * True if a wblank block ([[..]]xyz[[/]]) was just read
    */
   bool is_wblank;
-  
+
   /**
    * True if skip_mode is false and need to collect wblanks
    */
   bool collect_wblanks;
-  
+
   /**
    * True if a wblank has been processed for postgen and we need an ending wblank
    */
@@ -271,13 +271,13 @@ private:
    * @param delim1 the delimiter of the end of the sequence
    */
   wstring readFullBlock(FILE *input, wchar_t const delim1, wchar_t const delim2);
-  
+
   /**
    * Reads a wordbound blank from the stream input
    * @param input the stream being read
    */
   wstring readWblank(FILE *input);
-  
+
   /**
    * Reads a wordbound blank (opening blank to closing blank) from the stream input -> [[...]]xyz[[/]]
    * @param input the stream being read
@@ -351,13 +351,13 @@ private:
    * @param output stream to write blanks
    */
   void flushBlanks(FILE *output);
-  
+
   /**
    * Flush all the wordbound blanks remaining in the current process
    * @param output stream to write blanks
    */
   void flushWblanks(FILE *output);
-  
+
   /**
    * Combine wordbound blanks in the queue and return them
    * @return final wblank string

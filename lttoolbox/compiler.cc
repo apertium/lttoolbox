@@ -324,7 +324,7 @@ Compiler::readString(list<int> &result, wstring const &name)
   else if(name == COMPILER_M_ELEM)
   {
     requireEmptyError(name);
-    if(keep_boundaries) 
+    if(keep_boundaries)
     {
       result.push_back(static_cast<int>(L'>'));
     }

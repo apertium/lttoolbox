@@ -248,6 +248,6 @@ public:
    */
    void setKeepBoundaries(bool keep_boundaries = false);
 
-}; 
+};
 
 #endif

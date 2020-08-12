@@ -108,7 +108,7 @@ private:
   double default_weight;
 
   /**
-   * Maintain morpheme boundaries 
+   * Maintain morpheme boundaries
    */
   bool keep_boundaries;
 
