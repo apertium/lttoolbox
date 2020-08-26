@@ -193,5 +193,13 @@ class PostgenerationWordboundBlankTest(unittest.TestCase, ProcTest):
                         "[[t:b:Z9eiLA]]abc[[/]] [[t:i:123456]]les pes test[[/]] [[t:i:4_tPUA; t:b:Z9eiLA]]del[[/]] [[t:i:wSM6RQ]]testword[[/]]",
                         "[[t:b:Z9eiLA]]abc[[/]] [[t:i:123456; t:b:12bsa23]]les pes test[[/]] [[t:i:4_tPUA; t:b:Z9eiLA]]del[[/]] [[t:i:wSM6RQ]]testword[[/]]",
                         "[[t:b:Z9eiLA]]abc[[/]] [[t:b:12bsa23]]les pes test[[/]] [[t:i:4_tPUA; t:b:Z9eiLA]]del[[/]] [[t:i:wSM6RQ]]testword[[/]]"]
+
+class PostgenerationWordboundBlankEscapingTest(unittest.TestCase, ProcTest):
+    procdix = "data/postgen.dix"
+    procflags = ["-p", "-z"]
+    inputs          = [ "Systran ([[t:a:PJD9GA]]http:\/\/www.systran.de\/[[/]]).[] Systran (http:\/\/www.systran.de\/).[]"]
+
+    expectedOutputs = [ "Systran ([[t:a:PJD9GA]]http:\/\/www.systran.de\/[[/]]).[] Systran (http:\/\/www.systran.de\/).[]" ]
+    
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *

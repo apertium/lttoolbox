@@ -288,8 +288,7 @@ FSTProcessor::wblankPostGen(FILE *input, FILE *output)
 
     if(c == L'\\')
     {
-      result += c;
-      result += static_cast<wchar_t>(fgetwc_unlocked(input));
+      result += static_cast<wchar_t>(readEscaped(input));
     }
     else if(c == L']')
     {
