@@ -199,7 +199,14 @@ class PostgenerationWordboundBlankEscapingTest(unittest.TestCase, ProcTest):
     procflags = ["-p", "-z"]
     inputs          = [ "Systran ([[t:a:PJD9GA]]http:\/\/www.systran.de\/[[/]]).[] Systran (http:\/\/www.systran.de\/).[]"]
 
-    expectedOutputs = [ "Systran ([[t:a:PJD9GA]]http:\/\/www.systran.de\/[[/]]).[] Systran (http:\/\/www.systran.de\/).[]" ]
-    
+    expectedOutputs = [ "Systran ([[t:a:PJD9GA]]http:\/\/www.systran.de\/[[/]]).[] Systran (http:\/\/www.systran.de\/).[]"]
+
+class PostgenerationWordboundBlankNoRuleMatchTest(unittest.TestCase, ProcTest):
+    procdix = "data/postgen.dix"
+    procflags = ["-p", "-z"]
+    inputs          = [ "[[t:span:HIIiRQ]]Complacer[[/]] [[t:span01:HIIiRQ]]~le[[/]] [[t:span02:HIIiRQ]]ayuda[[/]] [[11t:span:HIIiRQ; t:a:_IOHRg]]mejora[[/]] [[22t:span:HIIiRQ; t:a:_IOHRg]]~la[[/]] [[33t:span:HIIiRQ; t:a:_IOHRg]]prenda[[/]]"]
+
+    expectedOutputs = [ "[[t:span:HIIiRQ]]Complacer[[/]] [[t:span01:HIIiRQ]]le[[/]] [[t:span02:HIIiRQ]]ayuda[[/]] [[11t:span:HIIiRQ; t:a:_IOHRg]]mejora[[/]] [[22t:span:HIIiRQ; t:a:_IOHRg]]la[[/]] [[33t:span:HIIiRQ; t:a:_IOHRg]]prenda[[/]]"]
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *

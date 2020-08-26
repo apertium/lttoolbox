@@ -2344,6 +2344,8 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
         if(lf == L"")
         {
           unsigned int mark = sf.size();
+          unsigned int space_index = sf.size();
+          
           for(unsigned int i = 1, limit = sf.size(); i < limit; i++)
           {
             if(sf[i] == L'~')
@@ -2351,8 +2353,36 @@ FSTProcessor::postgeneration(FILE *input, FILE *output)
               mark = i;
               break;
             }
+            else if(sf[i] == L' ')
+            {
+              space_index = i;
+            }
           }
-          fputws_unlocked(sf.substr(1, mark-1).c_str(), output);
+          
+          if(space_index != sf.size())
+          {
+            fputws_unlocked(sf.substr(1, space_index-1).c_str(), output);
+            
+            if(need_end_wblank)
+            {
+              fputws_unlocked(L"[[/]]", output);
+              need_end_wblank = false;
+              fputwc_unlocked(sf[space_index], output);
+              flushWblanks(output);
+            }
+            else
+            {
+              fputwc_unlocked(sf[space_index], output);
+            }
+            
+            fputws_unlocked(sf.substr(space_index+1, mark-space_index-1).c_str(), output);
+          }
+          else
+          {
+            flushWblanks(output);
+            fputws_unlocked(sf.substr(1, mark-1).c_str(), output);
+          }
+          
           if(mark == sf.size())
           {
             input_buffer.back(1);
