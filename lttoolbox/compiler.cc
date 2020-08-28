@@ -129,8 +129,29 @@ Compiler::parse(string const &file, wstring const &dir)
   {
     it.second.minimize();
   }
+
+  if (!valid(dir)) {
+    exit(EXIT_FAILURE);
+  }
 }
 
+bool
+Compiler::valid(wstring const& dir) const
+{
+  for (auto &section : sections) {
+    auto &fst = section.second;
+    set<int> initialClosure = fst.closure(fst.getInitial(), alphabet.getLeftEpsilons());
+    auto finals = fst.getFinals();
+    for(const auto i : initialClosure) {
+      if (finals.count(i)) {
+        const wstring side = dir == COMPILER_RESTRICTION_RL_VAL ? L"right" : L"left";
+        wcerr << L"Error: Invalid dictionary (hint: the " << side << " side of an entry is empty)" << endl;
+        return false;
+      }
+    }
+  }
+  return true;
+}
 
 void
 Compiler::procAlphabet()

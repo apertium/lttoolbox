@@ -7,6 +7,7 @@ from tempfile import mkdtemp
 from shutil import rmtree
 from basictest import BasicTest
 
+
 class ProcTest(BasicTest):
     """See lt_proc test for how to use this. Override runTest if you don't
     want to use NUL flushing."""
@@ -17,18 +18,25 @@ class ProcTest(BasicTest):
     inputs = itertools.repeat("")
     expectedOutputs = itertools.repeat("")
     expectedRetCodeFail = False
+    expectedCompRetCodeFail = False
 
     def compileTest(self, tmpd):
-        self.assertEqual(0, call([os.environ['LTTOOLBOX_PATH']+"/lt-comp",
-                                  self.procdir,
-                                  self.procdix,
-                                  tmpd+"/compiled.bin"],
-                                 stdout=PIPE))
+        retCode = call([os.environ['LTTOOLBOX_PATH']+"/lt-comp",
+                        self.procdir,
+                        self.procdix,
+                        tmpd+"/compiled.bin"],
+                       stdout=PIPE)
+        if self.expectedCompRetCodeFail:
+            self.assertNotEqual(retCode, 0)
+        else:
+            self.assertEqual(retCode, 0)
+        return retCode == 0
 
     def runTest(self):
         tmpd = mkdtemp()
         try:
-            self.compileTest(tmpd)
+            if not self.compileTest(tmpd):
+                return
             self.proc = Popen([os.environ['LTTOOLBOX_PATH']+"/lt-proc"] + self.procflags + [tmpd+"/compiled.bin"],
                               stdin=PIPE,
                               stdout=PIPE,

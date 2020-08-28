@@ -175,6 +175,8 @@ public:
    */
   pair<int, int> const & decode(int const code) const;
 
+  set<int> getLeftEpsilons() const;
+
   enum Side
   {
     left,

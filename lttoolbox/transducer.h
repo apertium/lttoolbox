@@ -53,7 +53,7 @@ private:
 
   /**
    * Transitions of the transducer
-   * Schema: (souurce state, tag, target state, weight)
+   * Schema: (source state, tag, target state, weight)
    */
   map<int, multimap<int, pair<int, double> > > transitions;
 
@@ -88,6 +88,7 @@ private:
    * @param hfst if true, use HFST-compatible escape sequences
    */
   void escapeSymbol(wstring& symbol, bool hfst) const;
+
 public:
 
   /**
@@ -193,7 +194,15 @@ public:
    * @param epsilon_tag the tag to take as epsilon
    * @return the epsilon-connected states
    */
-  set<int> closure(int const state, int const epsilon_tag = 0);
+  set<int> closure(int const state, int const epsilon_tag = 0) const;
+
+  /**
+   * Returns the epsilon closure of a given state
+   * @param state the state
+   * @param epsilon_tags the tags to treat as epsilon
+   * @return the epsilon-connected states
+   */
+  set<int> closure(int const state, set<int> const &epsilon_tags) const;
 
   /**
    * Join all finals in one using epsilon transductions

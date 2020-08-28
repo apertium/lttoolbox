@@ -204,25 +204,30 @@ Transducer::getInitial() const
 }
 
 set<int>
-Transducer::closure(int const state, int const epsilon_tag)
+Transducer::closure(int const state, int const epsilon_tag) const
+{
+  return closure(state, set<int>({epsilon_tag}));
+}
+
+set<int>
+Transducer::closure(int const state, set<int> const &epsilon_tags) const
 {
   set<int> nonvisited, result;
 
   nonvisited.insert(state);
   result.insert(state);
 
-  while(nonvisited.size() > 0)
-  {
+  while (nonvisited.size() > 0) {
     int auxest = *nonvisited.begin();
-    auto range = transitions[auxest].equal_range(epsilon_tag);
-    while(range.first != range.second)
-    {
-      if(result.find(range.first->second.first) == result.end())
-      {
-        result.insert(range.first->second.first);
-        nonvisited.insert(range.first->second.first);
+    for (const int epsilon_tag : epsilon_tags) {
+      auto range = transitions.at(auxest).equal_range(epsilon_tag);
+      while (range.first != range.second) {
+        if (result.find(range.first->second.first) == result.end()) {
+          result.insert(range.first->second.first);
+          nonvisited.insert(range.first->second.first);
+        }
+        range.first++;
       }
-      range.first++;
     }
     nonvisited.erase(auxest);
   }

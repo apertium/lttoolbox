@@ -260,6 +260,17 @@ Alphabet::decode(int const code) const
   return spairinv[code];
 }
 
+set<int>
+Alphabet::getLeftEpsilons() const {
+  set<int> eps;
+  for(const auto& sp: spair) {  // [(l, r) : tag]
+    if(sp.first.first == 0) {
+      eps.insert(sp.second);
+    }
+  }
+  return eps;
+}
+
 void Alphabet::setSymbol(int symbol, wstring newSymbolString) {
   //Should be a special character!
   if (symbol < 0) slexicinv[-symbol-1] = newSymbolString;

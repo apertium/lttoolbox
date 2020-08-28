@@ -287,6 +287,8 @@ private:
    */
   bool allBlanks();
 
+  bool valid(wstring const& dir) const;
+
 public:
 
   /*
