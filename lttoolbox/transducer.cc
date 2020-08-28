@@ -220,13 +220,17 @@ Transducer::closure(int const state, set<int> const &epsilon_tags) const
   while (nonvisited.size() > 0) {
     int auxest = *nonvisited.begin();
     for (const int epsilon_tag : epsilon_tags) {
-      auto range = transitions.at(auxest).equal_range(epsilon_tag);
-      while (range.first != range.second) {
-        if (result.find(range.first->second.first) == result.end()) {
-          result.insert(range.first->second.first);
-          nonvisited.insert(range.first->second.first);
+      try {
+        auto range = transitions.at(auxest).equal_range(epsilon_tag);
+        while (range.first != range.second) {
+          if (result.find(range.first->second.first) == result.end()) {
+            result.insert(range.first->second.first);
+            nonvisited.insert(range.first->second.first);
+          }
+          range.first++;
         }
-        range.first++;
+      } catch (out_of_range const &e) {
+        // No transition from any of the epsilon_tags – this is fine
       }
     }
     nonvisited.erase(auxest);

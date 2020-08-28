@@ -261,10 +261,10 @@ Alphabet::decode(int const code) const
 }
 
 set<int>
-Alphabet::getLeftEpsilons() const {
+Alphabet::symbolsWhereLeftIs(wchar_t l) const {
   set<int> eps;
   for(const auto& sp: spair) {  // [(l, r) : tag]
-    if(sp.first.first == 0) {
+    if(sp.first.first == l) {
       eps.insert(sp.second);
     }
   }

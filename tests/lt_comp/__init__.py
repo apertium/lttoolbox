@@ -17,3 +17,14 @@ class CompEmptyRhsShouldError(unittest.TestCase, ProcTest):
     procdir = "rl"
     procdix = "data/rhs-empty-mono.dix"
     expectedCompRetCodeFail = True
+
+
+class CompLhsInitialSpaceShouldError(unittest.TestCase, ProcTest):
+    procdix = "data/lhs-ws-mono.dix"
+    expectedCompRetCodeFail = True
+
+
+class CompRhsInitialSpaceShouldError(unittest.TestCase, ProcTest):
+    procdix = "data/rhs-ws-mono.dix"
+    procdir = "rl"
+    expectedCompRetCodeFail = True

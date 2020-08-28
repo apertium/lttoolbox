@@ -175,7 +175,10 @@ public:
    */
   pair<int, int> const & decode(int const code) const;
 
-  set<int> getLeftEpsilons() const;
+  /**
+   * Get all symbols where the left-hand side of the symbol-pair is l.
+   */
+  set<int> symbolsWhereLeftIs(wchar_t l) const;
 
   enum Side
   {

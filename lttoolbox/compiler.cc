@@ -138,14 +138,20 @@ Compiler::parse(string const &file, wstring const &dir)
 bool
 Compiler::valid(wstring const& dir) const
 {
+  const wstring side = dir == COMPILER_RESTRICTION_RL_VAL ? L"right" : L"left";
+  const set<int> epsilonSymbols = alphabet.symbolsWhereLeftIs(0);
+  const set<int> spaceSymbols = alphabet.symbolsWhereLeftIs(L' ');
   for (auto &section : sections) {
     auto &fst = section.second;
-    set<int> initialClosure = fst.closure(fst.getInitial(), alphabet.getLeftEpsilons());
     auto finals = fst.getFinals();
-    for(const auto i : initialClosure) {
+    auto initial = fst.getInitial();
+    for(const auto i : fst.closure(initial, epsilonSymbols)) {
       if (finals.count(i)) {
-        const wstring side = dir == COMPILER_RESTRICTION_RL_VAL ? L"right" : L"left";
         wcerr << L"Error: Invalid dictionary (hint: the " << side << " side of an entry is empty)" << endl;
+        return false;
+      }
+      if(fst.closure(i, spaceSymbols).size() > 1) { // >1 since closure always includes self
+        wcerr << L"Error: Invalid dictionary (hint: entry on the " << side << " beginning with whitespace)" << endl;
         return false;
       }
     }
