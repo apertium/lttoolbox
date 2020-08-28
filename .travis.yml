@@ -12,8 +12,7 @@ script:
   - $CXX --version
   - autoreconf -fvi
   - ./configure
-  - make -j4 V=1 VERBOSE=1
-  - make test
+  - make -j4 V=1 VERBOSE=1 && make test
 notifications:
   irc:
     channels:
