@@ -1498,8 +1498,10 @@ FSTProcessor::analysis(FILE *input, FILE *output)
   bool firstupper = false, uppercase = false;
   map<int, set<int> >::iterator rcx_map_ptr;
 
-  while(wchar_t val = readAnalysis(input))
+  wchar_t val;
+  do
   {
+    val = readAnalysis(input);
     // test for final states
     if(current_state.isFinal(all_finals))
     {
@@ -1627,7 +1629,10 @@ FSTProcessor::analysis(FILE *input, FILE *output)
 
     if(current_state.size() != 0)
     {
-      alphabet.getSymbol(sf, val);
+      if(val)
+      {
+        alphabet.getSymbol(sf, val);
+      }
     }
     else
     {
@@ -1651,7 +1656,10 @@ FSTProcessor::analysis(FILE *input, FILE *output)
           {
             fputwc_unlocked(L'\\', output);
           }
-          fputwc_unlocked(val, output);
+          if(val)
+          {
+            fputwc_unlocked(val, output);
+          }
         }
       }
       else if(last_postblank)
@@ -1780,6 +1788,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
       last_preblank = false;
     }
   }
+  while(val);
 
   // print remaining blanks
   flushBlanks(output);
