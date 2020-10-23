@@ -1780,7 +1780,9 @@ FSTProcessor::analysis(FILE *input, FILE *output)
         input_buffer.back(1);
       }
       if(val == 0) {
-        input_buffer.setPos(last+1);
+        if(!input_buffer.isEmpty()) {
+          input_buffer.setPos(last+1);
+        }
       }
 
       current_state = initial_state;
