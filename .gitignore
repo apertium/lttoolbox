@@ -79,3 +79,4 @@
 /python/build*
 *.egg-info/
 *.egg
+**/.mypy_cache/

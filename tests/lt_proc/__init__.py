@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import sys
-import unittest
 from proctest import ProcTest
 
-class ValidInput(unittest.TestCase, ProcTest):
+from typing import List
+
+
+class ValidInput(ProcTest):
     inputs = ["ab",
               "ABC jg",
               "y n"]
@@ -13,86 +14,86 @@ class ValidInput(unittest.TestCase, ProcTest):
                        "^ABC/AB<n><def>$ ^jg/j<pr>+g<n>$",
                        "^y/y<n><ind>$ ^n/n<n><ind>$"]
 
-class BiprocSkipTags(unittest.TestCase, ProcTest):
+class BiprocSkipTags(ProcTest):
     procdix = "data/biproc-skips-tags-mono.dix"
     procflags = ["-b", "-z"]
     inputs = ["^vihki<KEPT><MATCHSOFAR><STILLMATCHING><SOMEHOWKEPT1><@SOMEHOWKEPT2>$"]
     expectedOutputs = ["^vihki<KEPT><MATCHSOFAR><STILLMATCHING><SOMEHOWKEPT1><@SOMEHOWKEPT2>/vihki<KEPT><MATCHSOFAR><STILLMATCHING><SOMEHOWKEPT1><@SOMEHOWKEPT2>$"]
 
-class WeightedTransducer(unittest.TestCase, ProcTest):
+class WeightedTransducer(ProcTest):
     procdix = "data/walk-weight.att"
     inputs = ["walk",
               "walks"]
     expectedOutputs = ["^walk/*walk$",
                        "^walks/*walks$"]
 
-class WeightedCatTransducer(unittest.TestCase, ProcTest):
+class WeightedCatTransducer(ProcTest):
     procdix = "data/cat-weight.att"
     inputs = ["cat"]
     expectedOutputs = ["^cat/cat+n/cat+v$"]
 
-class WeightedCatInitialTransducer(unittest.TestCase, ProcTest):
+class WeightedCatInitialTransducer(ProcTest):
     procdix = "data/cat-weight-initial.att"
     inputs = ["cat"]
     expectedOutputs = ["^cat/cat$"]
 
-class WeightedCatMiddleTransducer(unittest.TestCase, ProcTest):
+class WeightedCatMiddleTransducer(ProcTest):
     procdix = "data/cat-weight-middle.att"
     inputs = ["cat"]
     expectedOutputs = ["^cat/cat$"]
 
-class WeightedCatFinalTransducer(unittest.TestCase, ProcTest):
+class WeightedCatFinalTransducer(ProcTest):
     procdix = "data/cat-weight-final.att"
     inputs = ["cat"]
     expectedOutputs = ["^cat/cat$"]
 
-class WeightedCatHeavyTransducer(unittest.TestCase, ProcTest):
+class WeightedCatHeavyTransducer(ProcTest):
     procdix = "data/cat-weight-heavy.att"
     inputs = ["cat"]
     expectedOutputs = ["^cat/cat$"]
 
-class WeightedCatNegativeTransducer(unittest.TestCase, ProcTest):
+class WeightedCatNegativeTransducer(ProcTest):
     procdix = "data/cat-weight-negative.att"
     inputs = ["cat"]
     expectedOutputs = ["^cat/cat+n/cat+v$"]
 
-class PrintWeights(unittest.TestCase, ProcTest):
+class PrintWeights(ProcTest):
     procdix = "data/cat-weight.att"
     procflags = ["-W"]
     inputs = ["cat"]
     expectedOutputs = ["^cat/cat+n<W:11.528235>/cat+v<W:12.559967>$"]
 
-class PrintWeightsNegative(unittest.TestCase, ProcTest):
+class PrintWeightsNegative(ProcTest):
     procdix = "data/cat-weight-negative.att"
     procflags = ["-W"]
     inputs = ["cat"]
     expectedOutputs = ["^cat/cat+n<W:8.828133>/cat+v<W:9.859865>$"]
 
-class PrintNAnalyses(unittest.TestCase, ProcTest):
+class PrintNAnalyses(ProcTest):
     procdix = "data/cat-weight.att"
     procflags = ["-N 1"]
     inputs = ["cat"]
     expectedOutputs = ["^cat/cat+n$"]
 
-class LemmaEntryWeights(unittest.TestCase, ProcTest):
+class LemmaEntryWeights(ProcTest):
     procdix = "data/lemma-entry-weights.dix"
     procflags = ["-W"]
     inputs = ["walk"]
     expectedOutputs = ["^walk/walk<n><W:0.100000>/walk<vblex><W:0.900000>$"]
 
-class AllEntryWeights(unittest.TestCase, ProcTest):
+class AllEntryWeights(ProcTest):
     procdix = "data/entry-weights.dix"
     procflags = ["-W"]
     inputs = ["nanow"]
     expectedOutputs = ["^nanow/nan<n><ma><du><gen><W:32.120000>/nan<n><ma><du><acc><W:34.120000>/nan<n><ma><pl><gen><W:39.120000>/nan<n><ma><pl><acc><W:41.120000>$"]
 
-class Intergeneration(unittest.TestCase, ProcTest):
+class Intergeneration(ProcTest):
     procdix = "data/intergen.dix"
     procflags = ["-x"]
     inputs = ["la dona ~dóna tot"]
     expectedOutputs = ["la dona dona tot"]
 
-class GardenPathMwe(unittest.TestCase, ProcTest):
+class GardenPathMwe(ProcTest):
     procdix = "data/gardenpath-mwe.dix"
     inputs          = ["x[ <br/> ]opp.",
                         "legge opp[<br/>]x.",
@@ -109,7 +110,7 @@ class GardenPathMwe(unittest.TestCase, ProcTest):
                         "^legge/legge<vblex><inf>$[][\n]^L/*L$[<\/p>\n]",
                        ]
 
-class GardenPathMweNewlines(unittest.TestCase, ProcTest):
+class GardenPathMweNewlines(ProcTest):
     procdix = "data/gardenpath-mwe.dix"
     inputs          = ["""St.[
 ]Petersburg[
@@ -125,12 +126,12 @@ class GardenPathMweNewlines(unittest.TestCase, ProcTest):
 ]"""
                        ]
 
-class CatMultipleFstsTransducer(unittest.TestCase, ProcTest):
+class CatMultipleFstsTransducer(ProcTest):
     procdix = "data/cat-multiple-fst.att"
     inputs = ["cat", "cats"]
     expectedOutputs = ["^cat/cat+n/cat+v$", "^cats/cat+n+<pl>$"]
 
-class WordboundBlankAnalysisTest(unittest.TestCase, ProcTest):
+class WordboundBlankAnalysisTest(ProcTest):
     procdix = "data/wordbound-blank.dix"
     inputs          = ["x  [[t:i:123456]]opp.",
                         "[[t:b:456123; t:i:90hfbn]]legge  [[t:s:xyz789]]opp  opp [[t:b:abc124]]x opp.",
@@ -139,7 +140,7 @@ class WordboundBlankAnalysisTest(unittest.TestCase, ProcTest):
                         "[[t:b:456123; t:i:90hfbn]]^legge/legge<vblex><inf>$  [[t:s:xyz789]]^opp/opp<pr>$  ^opp/opp<pr>$ [[t:b:abc124]]^x/*x$ ^opp/opp<pr>$^./.<sent>$",
                        ]
 
-class PostgenerationBasicTest(unittest.TestCase, ProcTest):
+class PostgenerationBasicTest(ProcTest):
     procdix = "data/postgen.dix"
     procflags = ["-p", "-z"]
     inputs          = [ "xyz ejemplo ~o ho nombre.",
@@ -151,7 +152,7 @@ class PostgenerationBasicTest(unittest.TestCase, ProcTest):
                         "El perro del amigo.", 
                         "abc le pe test testword"]
 
-class PostgenerationWordboundBlankTest(unittest.TestCase, ProcTest):
+class PostgenerationWordboundBlankTest(ProcTest):
     procdix = "data/postgen.dix"
     procflags = ["-p", "-z"]
     inputs          = [ "xyz ejemplo [[t:i:123456]]~o[[/]] [[t:b:abc123; t:i:123456]]ho[[/]] [[t:b:iopmnb]]nombre[[/]].",
@@ -194,19 +195,23 @@ class PostgenerationWordboundBlankTest(unittest.TestCase, ProcTest):
                         "[[t:b:Z9eiLA]]abc[[/]] [[t:i:123456; t:b:12bsa23]]les pes test[[/]] [[t:i:4_tPUA; t:b:Z9eiLA]]del[[/]] [[t:i:wSM6RQ]]testword[[/]]",
                         "[[t:b:Z9eiLA]]abc[[/]] [[t:b:12bsa23]]les pes test[[/]] [[t:i:4_tPUA; t:b:Z9eiLA]]del[[/]] [[t:i:wSM6RQ]]testword[[/]]"]
 
-class PostgenerationWordboundBlankEscapingTest(unittest.TestCase, ProcTest):
+
+class PostgenerationWordboundBlankEscapingTest(ProcTest):
     procdix = "data/postgen.dix"
     procflags = ["-p", "-z"]
     inputs          = [ "Systran ([[t:a:PJD9GA]]http:\/\/www.systran.de\/[[/]]).[] Systran (http:\/\/www.systran.de\/).[]"]
 
     expectedOutputs = [ "Systran ([[t:a:PJD9GA]]http:\/\/www.systran.de\/[[/]]).[] Systran (http:\/\/www.systran.de\/).[]"]
 
-class PostgenerationWordboundBlankNoRuleMatchTest(unittest.TestCase, ProcTest):
+
+class PostgenerationWordboundBlankNoRuleMatchTest(ProcTest):
     procdix = "data/postgen.dix"
     procflags = ["-p", "-z"]
     inputs          = [ "[[t:span:HIIiRQ]]Complacer[[/]] [[t:span01:HIIiRQ]]~le[[/]] [[t:span02:HIIiRQ]]ayuda[[/]] [[11t:span:HIIiRQ; t:a:_IOHRg]]mejora[[/]] [[22t:span:HIIiRQ; t:a:_IOHRg]]~la[[/]] [[33t:span:HIIiRQ; t:a:_IOHRg]]prenda[[/]]"]
 
     expectedOutputs = [ "[[t:span:HIIiRQ]]Complacer[[/]] [[t:span01:HIIiRQ]]le[[/]] [[t:span02:HIIiRQ]]ayuda[[/]] [[11t:span:HIIiRQ; t:a:_IOHRg]]mejora[[/]] [[22t:span:HIIiRQ; t:a:_IOHRg]]la[[/]] [[33t:span:HIIiRQ; t:a:_IOHRg]]prenda[[/]]"]
+
+
 
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *
