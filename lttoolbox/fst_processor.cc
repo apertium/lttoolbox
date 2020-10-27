@@ -340,6 +340,7 @@ FSTProcessor::readAnalysis(FILE *input)
   int altval = 0;
   if(feof(input))
   {
+    input_buffer.add(0);        // so it's treated like the NUL byte
     return 0;
   }
 
@@ -1629,7 +1630,7 @@ FSTProcessor::analysis(FILE *input, FILE *output)
 
     if(current_state.size() != 0)
     {
-      if(val)
+      if(val != 0)
       {
         alphabet.getSymbol(sf, val);
       }

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet/>
+  <sdefs>
+    <sdef n="adj"/>
+    <sdef n="sent"/>
+  </sdefs>
+  <pardefs>
+    <pardef n="somepardef">
+      <e>       <p><l>foo</l><r>bar</r></p></e>
+    </pardef>
+  </pardefs>
+
+  <section id="final" type="inconditional">
+    <e>       <i>.<b/>y</i>   <p><l></l><r><s n="adj"/></r></p></e>
+    <e>       <i>.xx</i>   <p><l></l><r><s n="adj"/></r></p></e>
+    <e>       <i>.</i>        <p><l></l><r><s n="sent"/></r></p></e>
+  </section>
+
+</dictionary>

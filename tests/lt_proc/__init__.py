@@ -212,6 +212,13 @@ class PostgenerationWordboundBlankNoRuleMatchTest(ProcTest):
     expectedOutputs = [ "[[t:span:HIIiRQ]]Complacer[[/]] [[t:span01:HIIiRQ]]le[[/]] [[t:span02:HIIiRQ]]ayuda[[/]] [[11t:span:HIIiRQ; t:a:_IOHRg]]mejora[[/]] [[22t:span:HIIiRQ; t:a:_IOHRg]]la[[/]] [[33t:span:HIIiRQ; t:a:_IOHRg]]prenda[[/]]"]
 
 
+class SpaceAtEOF(ProcTest):
+    procdix = "data/space-eof-incond.dix"
+    inputs          = ['. ']
+    expectedOutputs = ['^./.<sent>$ ']
+    procflags = []              # type: List[str]
+    flushing = False
+
 
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *
