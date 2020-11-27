@@ -14,7 +14,7 @@ cc_sources = alphabet.cc att_compiler.cc compiler.cc compression.cc entry_token.
 library_includedir = $(includedir)/$(PACKAGE_NAME)-$(VERSION_API)/$(PACKAGE_NAME)
 library_include_HEADERS = $(h_sources)
 
-bin_PROGRAMS = lt-comp lt-proc lt-expand lt-tmxcomp lt-tmxproc lt-print lt-trim
+bin_PROGRAMS = lt-comp lt-proc lt-expand lt-tmxcomp lt-tmxproc lt-print lt-trim lt-reweight
 instdir = lttoolbox
 
 lib_LTLIBRARIES= liblttoolbox3.la
@@ -55,6 +55,10 @@ lt_tmxproc_SOURCES = lt_tmxproc.cc
 lt_tmxproc_LDADD = liblttoolbox$(VERSION_MAJOR).la
 lt_tmxproc_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LTTOOLBOX_LIBS)
 
+lt_reweight_SOURCES = lt_reweight.cc
+lt_reweight_LDADD = liblttoolbox$(VERSION_MAJOR).la
+lt_reweight_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LTTOOLBOX_LIBS)
+
 #lt-validate-dictionary: Makefile.am validate-header.sh
 #	@echo "Creating lt-validate-dictionary script"
 #	@echo "#!$(BASH)" > $@
@@ -65,7 +69,7 @@ lt_tmxproc_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LTTOOLBOX_LIBS)
 
 
 
-man_MANS = lt-comp.1 lt-expand.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1 lt-print.1 lt-trim.1
+man_MANS = lt-comp.1 lt-expand.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1 lt-print.1 lt-trim.1 lt-reweight.1
 
 INCLUDES = -I$(top_srcdir) $(LTTOOLBOX_CFLAGS)
 if WINDOWS

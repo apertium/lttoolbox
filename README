@@ -16,7 +16,7 @@ Executables built by this pacage:
 
 * `lt-comp`: compiler, execute without parameters to show usage
   instructions.
-
+ 
 * `lt-proc`: processor, typical options are -a (lexical analyser,
   default option), -g (lexical generator) and -p (lexical
   post-generator). Using -h will show all flags.
@@ -31,6 +31,9 @@ Executables built by this pacage:
 
 * `lt-print`: print the arcs of a transducer in [ATT format][3].
 
+* `lt-reweight`: (experimental) utility to assign weights to a
+                   compiled transducer based on a corpus.
+                   
 There is also a C++ API that you can link to (see how [apertium][1] or
 [apertium-lex-tools][2] do this).
 
