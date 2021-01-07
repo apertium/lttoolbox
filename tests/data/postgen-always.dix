@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet/>
+  <sdefs>
+    <sdef n="test"/>
+  </sdefs>
+
+  <pardefs>
+    
+    <pardef n="el">
+
+      <e>
+        <p>
+          <l>el<b/></l>
+          <r>l<b/></r>
+        </p>
+      </e>
+      <e>
+        <p>
+          <l>el</l>
+          <r>l</r>
+        </p>
+      </e>
+    </pardef>
+
+   <pardef n="le">
+      <e>
+        <p>
+          <l>la<b/></l>
+          <r>se<b/>la<b/></r>
+        </p>
+      </e>
+      <e>
+        <p>
+          <l>las<b/></l>
+          <r>se<b/>las<b/></r>
+        </p>
+      </e>
+      <e>
+        <p>
+          <l>lo<b/></l>
+          <r>se<b/>lo<b/></r>
+        </p>
+      </e>
+      <e>
+        <p>
+          <l>los<b/></l>
+          <r>se<b/>los<b/></r>
+        </p>
+      </e>
+    </pardef>
+
+
+  </pardefs>
+
+  <section id="main" type="standard">
+
+     <e>
+        <p>
+          <l>de<b/></l>
+          <r>de</r>
+        </p>
+        <par n="el"/>
+      </e>
+
+      <e>
+        <p>
+          <l>o<b/>ho</l>
+          <r>u<b/>ho</r>
+        </p>
+      </e>
+
+      <e>
+        <p>
+          <l>le<b/></l>
+          <r/>
+        </p>
+        <par n="le"/>
+      </e>
+
+      <e>
+        <p>
+          <l>les<b/></l>
+          <r>le<b/>pe<b/>test<b/></r>
+        </p>
+      </e>
+
+      <e>
+        <p>
+          <l>les<b/>pes<b/></l>
+          <r>les<b/>pes<b/>test<b/></r>
+        </p>
+      </e>
+
+  </section>
+
+</dictionary>
+
