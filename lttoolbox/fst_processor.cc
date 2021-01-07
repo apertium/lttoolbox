@@ -1852,6 +1852,22 @@ FSTProcessor::postgeneration_wrapper_null_flush(FILE *input, FILE *output)
 }
 
 void
+FSTProcessor::postgenerateThemAll_wrapper_null_flush(FILE *input, FILE *output)
+{
+  setNullFlush(false);
+  while(!feof(input))
+  {
+    postgenerateThemAll(input, output);
+    fputwc_unlocked(L'\0', output);
+    int code = fflush(output);
+    if(code != 0)
+    {
+        wcerr << L"Could not flush output " << errno << endl;
+    }
+  }
+}
+
+void
 FSTProcessor::intergeneration_wrapper_null_flush(FILE *input, FILE *output)
 {
   setNullFlush(false);
@@ -2588,6 +2604,257 @@ FSTProcessor::intergeneration(FILE *input, FILE *output)
   // print remaining blanks
   flushBlanks(output);
 }
+
+void
+FSTProcessor::postgenerateThemAll(FILE *input, FILE *output)
+{
+  if(getNullFlush())
+  {
+    postgenerateThemAll_wrapper_null_flush(input, output);
+  }
+
+  bool skip_mode = true;
+  collect_wblanks = false;
+  need_end_wblank = false;
+  State current_state = initial_state;
+  wstring lf = L"";
+  wstring sf = L"";
+  int last = 0;
+  set<wchar_t> empty_escaped_chars;
+
+  while(wchar_t val = readPostgeneration(input, output))
+  {
+    {
+      State wum = initial_state;
+      wum.step(val);
+      if (wum.size() != 0) // wake up!
+      {
+        skip_mode = false;
+        collect_wblanks = true;
+      }
+    }
+
+    if(is_wblank && skip_mode)
+    {
+      //do nothing
+    }
+    else if(skip_mode)
+    {
+      if(iswspace(val))
+      {
+        if(need_end_wblank)
+        {
+          fputws_unlocked(L"[[/]]", output);
+          need_end_wblank = false;
+        }
+
+        printSpace(val, output);
+      }
+      else
+      {
+        if(!need_end_wblank)
+        {
+          flushWblanks(output);
+        }
+
+        if(isEscaped(val))
+        {
+          fputwc_unlocked(L'\\', output);
+        }
+        fputwc_unlocked(val, output);
+
+        if(need_end_wblank)
+        {
+          fputws_unlocked(L"[[/]]", output);
+          need_end_wblank = false;
+        }
+      }
+    }
+    else
+    {
+      if(is_wblank)
+      {
+        continue;
+      }
+
+      // test for final states
+      if(current_state.isFinal(all_finals))
+      {
+        bool firstupper = iswupper(sf[1]);
+        bool uppercase = sf.size() > 1 && firstupper && iswupper(sf[2]);
+        lf = current_state.filterFinals(all_finals, alphabet,
+                                        empty_escaped_chars,
+                                        displayWeightsMode, maxAnalyses, maxWeightClasses,
+                                        uppercase, firstupper, 0);
+
+        // case of the beggining of the next word
+
+        wstring mybuf = L"";
+        for(size_t i = sf.size(); i > 0; --i)
+        {
+          if(!isalpha(sf[i-1]))
+          {
+            break;
+          }
+          else
+          {
+            mybuf = sf[i-1] + mybuf;
+          }
+        }
+
+        if(mybuf.size() > 0)
+        {
+          bool myfirstupper = iswupper(mybuf[0]);
+          bool myuppercase = mybuf.size() > 1 && iswupper(mybuf[1]);
+
+          for(size_t i = lf.size(); i > 0; --i)
+          {
+            if(!isalpha(lf[i-1]))
+            {
+              if(myfirstupper && i != lf.size())
+              {
+                lf[i] = towupper(lf[i]);
+              }
+              else
+              {
+                lf[i] = towlower(lf[i]);
+              }
+              break;
+            }
+            else
+            {
+              if(myuppercase)
+              {
+                lf[i-1] = towupper(lf[i-1]);
+              }
+              else
+              {
+                lf[i-1] = towlower(lf[i-1]);
+              }
+            }
+          }
+        }
+
+        last = input_buffer.getPos();
+      }
+
+      // std::cerr << "\033[1;32mstep val=" << (char)val << "\033[0m" << "\t";
+      // std::cerr << "\033[1;35msf.size()=" << sf.size() << "\033[0m" << "\t";
+      // std::cerr << "\033[1;35mlf.size()=" << lf.size() << "\033[0m" << "\t";
+      // std::cerr << "\033[0;35mcurrent_state.size()=" << current_state.size() << ", step: \033[0m";
+      if(!iswupper(val) || caseSensitive)
+      {
+        current_state.step(val);
+      }
+      else
+      {
+        current_state.step(val, towlower(val));
+      }
+      // std::cerr << "\033[1;35mcurrent_state.size()=" << current_state.size() << "\033[0m" << std::endl;
+
+      alphabet.getSymbol(sf, val);
+      if(current_state.size() != 0)
+      {
+        // alphabet.getSymbol(sf, val);
+      }
+      else
+      {
+        wstring final_wblank = combineWblanks();
+        // std::cerr << "\033[1;34mWB" << "\033[0m "  ;
+        fputws_unlocked(final_wblank.c_str(), output);
+
+        if(lf == L"")     // NO ANALYSIS – JUST OUTPUT WHAT WE READ WHILE MATCHING
+        {
+          unsigned int mark = sf.size();
+          unsigned int space_index = sf.size();
+          // std::cerr << "\033[1;33msince lf.size()=" << lf.size() << "\033[0m ";
+          // std::cerr << "\033[1;33m(sf.size()=" << sf.size() << ")\033[0m ";
+          
+          for(unsigned int i = 1, limit = sf.size(); i < limit; i++)
+          {
+            if(sf[i] == L'~')
+            {
+              mark = i;
+              break;
+            }
+            else if(sf[i] == L' ')
+            {
+              space_index = i;
+            }
+          }
+          // std::cerr << "\033[1;35mmark=" << mark << "\033[0m ";
+          // std::cerr << "\033[1;35mspace_index=" << space_index << "\033[0m" << std::endl;
+          
+          if(false && space_index != sf.size())
+          {
+            // std::cerr << " \033[1;34mSPACE_INDEX" << "\033[0m " << std::endl;
+            fputws_unlocked(sf.substr(0, space_index).c_str(), output);
+            if(need_end_wblank)
+            {
+              fputws_unlocked(L"[[/]]", output);
+              need_end_wblank = false;
+              fputwc_unlocked(sf[space_index], output);
+              flushWblanks(output);
+            }
+            else
+            {
+              fputwc_unlocked(sf[space_index], output);
+            }
+            fputws_unlocked(sf.substr(space_index+1, mark-space_index-1).c_str(), output);
+          }
+          else
+          {
+            // std::cerr << "\033[1;34mNOSPACEINDEX" << sf.size() << "\033[0m " << std::endl;
+            flushWblanks(output);
+            fputws_unlocked(sf.substr(0, sf.size()-1).c_str(), output);
+            // std::cerr << "\033[0;34m/NOSPACEINDEX\033[0m";
+          }
+          
+          if(sf.size() > 1 && mark == sf.size())
+          {
+            input_buffer.back(1);
+          }
+          else
+          {
+            input_buffer.back(sf.size()-mark);
+          }
+        }
+        else
+        {
+          // std::cerr << "\033[1;34mELSE" << "\033[0m " ;
+          // std::cerr << "\033[1;34mlf.size()=\t" << lf.size() << "\033[0m" << std::endl;
+          fputws_unlocked(lf.substr(1,lf.size()-3).c_str(), output);
+          input_buffer.setPos(last);
+          input_buffer.back(2);
+          val = lf[lf.size()-2];
+          if(iswspace(val))
+          {
+            printSpace(val, output);
+          }
+          else
+          {
+            if(isEscaped(val))
+            {
+              fputwc_unlocked(L'\\', output);
+            }
+            fputwc_unlocked(val, output);
+          }
+        }
+
+        current_state = initial_state;
+        lf = L"";
+        sf = L"";
+        skip_mode = true;
+        collect_wblanks = false;
+      }
+    }
+  }
+
+  // print remaining blanks
+  flushBlanks(output);
+}
+
+
 
 void
 FSTProcessor::transliteration(FILE *input, FILE *output)
