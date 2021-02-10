@@ -28,3 +28,13 @@ class CompRhsInitialSpaceShouldError(ProcTest):
     procdix = "data/rhs-ws-mono.dix"
     procdir = "rl"
     expectedCompRetCodeFail = True
+
+
+class CompAttEpsilonLoopShouldError(ProcTest):
+    procdix = "data/cat-epsilon-loop.att"
+    expectedCompRetCodeFail = True
+
+class CompAttEpsilonToFinalShouldError(ProcTest):
+    procdix = "data/cat-epsilon-to-final.att"
+    expectedCompRetCodeFail = True
+

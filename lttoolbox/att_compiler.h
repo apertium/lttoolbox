@@ -88,24 +88,6 @@ public:
                            set<int>& visited) ;
 
   /**
-   * Classifies the edges of the transducer graphs recursively. It works like
-   * this:
-   * - the type of the starting state is BOTH (already set)
-   * - in case of an epsilon move, the type of the target state is the same as
-   *   that of the source
-   * - the first non-epsilon transition determines the type of the whole path
-   * - it is also the time from which we begin filling the @p visited set.
-   *
-   * @param from the id of the source state.
-   * @param visited the ids of states visited by this path.
-   * @param path are we in a path?
-   */
-  void classify(int from, map<int, TransducerType>& visited, bool path,
-                TransducerType type) ;
-
-
-
-  /**
    * Reads the AT&T format file @p file_name. The transducer and the alphabet
    * are both cleared before reading the new file.
    */
@@ -189,6 +171,15 @@ private:
    *
    */
   bool is_word_punct(wchar_t symbol);
+
+  /**
+   * Determines initial type of single transition
+   *
+   */
+  void classify_single_transition(Transduction& t);
+
+  void classify_forwards();
+  TransducerType classify_backwards(int state, set<int>& path);
 
   /**
    * Converts symbols like @0@ to epsilon, @_SPACE_@ to space, etc.
