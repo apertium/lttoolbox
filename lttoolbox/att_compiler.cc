@@ -21,6 +21,7 @@
 #include <lttoolbox/compression.h>
 #include <lttoolbox/string_to_wostream.h>
 #include <algorithm>
+#include <stack>
 
 using namespace std;
 
@@ -240,14 +241,16 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
         weight = default_weight;
       }
       source->transductions.push_back(Transduction(to, upper, lower, tag, weight));
+      classify_single_transition(source->transductions.back());
 
       get_node(to);
     }
   }
 
   /* Classify the nodes of the graph. */
-  map<int, TransducerType> classified;
-  classify(starting_state, classified, false, BOTH);
+  classify_forwards();
+  set<int> path;
+  classify_backwards(starting_state, path);
 
   infile.close();
 }
@@ -347,63 +350,79 @@ AttCompiler::_extract_transducer(TransducerType type, int from,
   }  // for
 }
 
+void
+AttCompiler::classify_single_transition(Transduction& t)
+{
+  if (t.upper.length() == 1) {
+    if (letters.find(t.upper[0]) != letters.end()) {
+      t.type |= WORD;
+    }
+    if (iswpunct(t.upper[0])) {
+      t.type |= PUNCT;
+    }
+  }
+}
 
 /**
- * Classifies the edges of the transducer graphs recursively. It works like
- * this:
- * - the type of the starting state is BOTH (already set)
- * - in case of an epsilon move, the type of the target state is the same as
- *   that of the source
- * - the first non-epsilon transition determines the type of the whole path
- * - it is also the time from which we begin filling the @p visited set.
- *
- * @param from the id of the source state.
- * @param visited the ids of states visited by this path.
- * @param path are we in a path?
+ * Propagate edge types forwards.
  */
 void
-AttCompiler::classify(int from, map<int, TransducerType>& visited, bool path,
-                      TransducerType type)
+AttCompiler::classify_forwards()
 {
-  AttNode* source = get_node(from);
-  if (visited.find(from) != visited.end())
-  {
-    if (path && ( (visited[from] & type) == type) )
-    {
-      return;
+  stack<int> todo;
+  set<int> done;
+  todo.push(starting_state);
+  while(!todo.empty()) {
+    int next = todo.top();
+    todo.pop();
+    if(done.find(next) != done.end()) continue;
+    AttNode* n1 = get_node(next);
+    for(auto& t1 : n1->transductions) {
+      AttNode* n2 = get_node(t1.to);
+      for(auto& t2 : n2->transductions) {
+	t2.type |= t1.type;
+      }
+      if(done.find(t1.to) == done.end()) {
+	todo.push(t1.to);
+      }
     }
+    done.insert(next);
   }
-
-  if (path)
-  {
-    visited[from] |= type;
-  }
-
-  for (auto& it : source->transductions)
-  {
-    bool next_path = path;
-    int  next_type = type;
-    bool first_transition = !path && it.upper != L"";
-    if (first_transition)
-    {
-      /* First transition: we now know the type of the path! */
-      bool upper_word  = (it.upper.length() == 1 &&
-                          letters.find(it.upper[0]) != letters.end());
-      bool upper_punct = (it.upper.length() == 1 && iswpunct(it.upper[0]));
-      next_type = UNDECIDED;
-      if (upper_word)  next_type |= WORD;
-      if (upper_punct) next_type |= PUNCT;
-      next_path = true;
-    }
-    else
-    {
-      /* Otherwise (not yet, already): target's type is the same as ours. */
-      next_type = type;
-    }
-    it.type |= next_type;
-    classify(it.to, visited, next_path, next_type);
-  }  // for
 }
+
+/**
+ * Recursively determine edge types of initial epsilon transitions
+ * Also check for epsilon loops or epsilon transitions to final states
+ * @param state the state to examine
+ * @param path the path we took to get here
+ */
+TransducerType
+AttCompiler::classify_backwards(int state, set<int>& path)
+{
+  if(finals.find(state) != finals.end()) {
+    wcerr << L"ERROR: Transducer contains epsilon transition to a final state. Aborting." << endl;
+    exit(EXIT_FAILURE);
+  }
+  AttNode* node = get_node(state);
+  TransducerType type = UNDECIDED;
+  for(auto& t1 : node->transductions) {
+    if(t1.type != UNDECIDED) {
+      type |= t1.type;
+    } else if(path.find(t1.to) != path.end()) {
+      wcerr << L"ERROR: Transducer contains initial epsilon loop. Aborting." << endl;
+      exit(EXIT_FAILURE);
+    } else {
+      path.insert(t1.to);
+      t1.type = classify_backwards(t1.to, path);
+      type |= t1.type;
+      path.erase(t1.to);
+    }
+  }
+  // Note: if type is still UNDECIDED at this point, then we have a dead-end
+  // path, which is fine since it will be discarded by _extract_transducer()
+  return type;
+}
+
 
 /** Writes the transducer to @p file_name in lt binary format. */
 void
