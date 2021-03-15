@@ -120,6 +120,11 @@ Transducer::insertTransducer(int const source, Transducer &t,
 {
   map<int, int> relation;
 
+  if(t.transitions.empty())
+  {
+	return source;
+  }
+
   t.joinFinals(epsilon_tag);
 
   for(auto& it : t.transitions)
