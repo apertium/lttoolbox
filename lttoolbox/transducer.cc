@@ -319,6 +319,11 @@ Transducer::determinize(int const epsilon_tag)
 
   int t = 0;
 
+  set<int> finals_state;
+  for(auto& it2 : finals) {
+	finals_state.insert(it2.first);
+  }
+
   while(size_Q_prime != Q_prime.size())
   {
     size_Q_prime = Q_prime.size();
@@ -326,11 +331,6 @@ Transducer::determinize(int const epsilon_tag)
 
     for(auto& it : R[t])
     {
-      set<int> finals_state;
-      for(auto& it2 : finals)
-      {
-        finals_state.insert(it2.first);
-      }
       if(!isEmptyIntersection(Q_prime[it], finals_state))
       {
         double w = default_weight;
@@ -378,8 +378,8 @@ Transducer::determinize(int const epsilon_tag)
     t = (t+1)%2;
   }
 
-  transitions = transitions_prime;
-  finals = finals_prime;
+  transitions.swap(transitions_prime);
+  finals.swap(finals_prime);
   initial = initial_prime;
 }
 

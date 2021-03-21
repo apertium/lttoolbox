@@ -82,6 +82,11 @@ private:
   wstring current_section;
 
   /**
+   * Whether the current section of paradigm should be minimised
+   */
+  bool current_minimise;
+
+  /**
    * The direction of the compilation, 'lr' (left-to-right) or 'rl'
    * (right-to-left)
    */
@@ -325,6 +330,7 @@ public:
   LTTOOLBOX_IMPORTS static wstring const COMPILER_LEMMA_ATTR;
   LTTOOLBOX_IMPORTS static wstring const COMPILER_IGNORE_ATTR;
   LTTOOLBOX_IMPORTS static wstring const COMPILER_IGNORE_YES_VAL;
+  LTTOOLBOX_IMPORTS static wstring const COMPILER_REGEX_ATTR;
   LTTOOLBOX_IMPORTS static wstring const COMPILER_ALT_ATTR;
   LTTOOLBOX_IMPORTS static wstring const COMPILER_V_ATTR;
   LTTOOLBOX_IMPORTS static wstring const COMPILER_VL_ATTR;

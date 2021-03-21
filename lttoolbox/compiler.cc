@@ -58,6 +58,7 @@ wstring const Compiler::COMPILER_GROUP_ELEM         = L"g";
 wstring const Compiler::COMPILER_LEMMA_ATTR         = L"lm";
 wstring const Compiler::COMPILER_IGNORE_ATTR        = L"i";
 wstring const Compiler::COMPILER_IGNORE_YES_VAL     = L"yes";
+wstring const Compiler::COMPILER_REGEX_ATTR         = L"regex";
 wstring const Compiler::COMPILER_ALT_ATTR           = L"alt";
 wstring const Compiler::COMPILER_V_ATTR             = L"v";
 wstring const Compiler::COMPILER_VL_ATTR            = L"vl";
@@ -127,6 +128,9 @@ Compiler::parse(string const &file, wstring const &dir)
   // Minimize transducers
   for(auto& it : sections)
   {
+	if (it.first.size() > 6 && it.first.substr(it.first.size()-6) == L"@regex") {
+	  continue;
+	}
     it.second.minimize();
   }
 
@@ -208,13 +212,20 @@ Compiler::procParDef()
   if(type != XML_READER_TYPE_END_ELEMENT)
   {
     current_paradigm = attrib(COMPILER_N_ATTR);
+	current_minimise = true;
+	if (attrib(COMPILER_REGEX_ATTR) == L"yes") {
+	  current_minimise = false;
+	}
   }
   else
   {
     if(!paradigms[current_paradigm].isEmpty())
     {
-      paradigms[current_paradigm].minimize();
-      paradigms[current_paradigm].joinFinals();
+	  if (current_minimise) {
+		paradigms[current_paradigm].minimize();
+	  } else {
+		paradigms[current_paradigm].joinFinals();
+	  }
       current_paradigm = L"";
     }
   }

@@ -881,7 +881,8 @@ FSTProcessor::classifyFinals()
       inconditional.insert(it->second.getFinals().begin(),
                            it->second.getFinals().end());
     }
-    else if(endsWith(it->first, L"@standard"))
+    else if(endsWith(it->first, L"@standard") ||
+			endsWith(it->first, L"@regex"))
     {
       standard.insert(it->second.getFinals().begin(),
                       it->second.getFinals().end());
