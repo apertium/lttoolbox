@@ -44,6 +44,7 @@
 	<!-- paradigm definition -->
 <!ATTLIST pardef
 	n CDATA #REQUIRED
+	regex (no|yes) #IMPLIED
 >
 	<!-- n: paradigm name -->
 <!ATTLIST pardef
@@ -56,7 +57,7 @@
 	<!-- dictionary section -->
 <!ATTLIST section
 	id ID #REQUIRED
-	type (standard|inconditional|postblank|preblank) #REQUIRED
+	type (standard|inconditional|postblank|preblank|regex) #REQUIRED
 
 >
 	<!-- id: dictionary section identifier -->

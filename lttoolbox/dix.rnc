@@ -38,7 +38,7 @@ attlist.pardefs &= empty
 # paradigm definition section
 pardef = element pardef { attlist.pardef, e+ }
 # paradigm definition
-attlist.pardef &= attribute n { text }
+attlist.pardef &= attribute n { text }, attribute regex { "no" | "yes" }?
 # n: paradigm name
 attlist.pardef &= attribute c { text }?
 # c: comment about paradigm
@@ -47,7 +47,7 @@ section = element section { attlist.section, e+ }
 attlist.section &=
   attribute id { xsd:ID },
   attribute type {
-    "standard" | "inconditional" | "postblank" | "preblank"
+    "standard" | "inconditional" | "postblank" | "preblank" | "regex"
   }
 # id: dictionary section identifier
 

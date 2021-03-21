@@ -103,6 +103,14 @@
   <!-- paradigm definition -->
   <define name="attlist.pardef" combine="interleave">
     <attribute name="n"/>
+	<optional>
+	  <attribute name="regex">
+		<choice>
+		  <value>no</value>
+		  <value>yes</value>
+		</choice>
+	  </attribute>
+	</optional>
   </define>
   <!-- n: paradigm name -->
   <define name="attlist.pardef" combine="interleave">
@@ -130,6 +138,7 @@
         <value>inconditional</value>
         <value>postblank</value>
         <value>preblank</value>
+		<value>regex</value>
       </choice>
     </attribute>
   </define>
