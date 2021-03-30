@@ -124,7 +124,7 @@ PatternList::insertOutOfSequence(wstring const &lemma, wstring const &tags,
       }
       else
       {
-        result.push_back(int((unsigned char) lemma[i]));
+        result.push_back(int((wchar_t) lemma[i]));
       }
     }
   }
