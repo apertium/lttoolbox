@@ -3013,14 +3013,14 @@ FSTProcessor::biltrans(wstring const &input_word, bool with_delim)
 }
 
 void
-FSTProcessor::bilingual_wrapper_null_flush(FILE *input, FILE *output)
+FSTProcessor::bilingual_wrapper_null_flush(FILE *input, FILE *output, GenerationMode mode)
 {
   setNullFlush(false);
   nullFlushGeneration = true;
 
   while(!feof(input))
   {
-    bilingual(input, output);
+    bilingual(input, output, mode);
     fputwc_unlocked(L'\0', output);
     int code = fflush(output);
     if(code != 0)
@@ -3053,11 +3053,11 @@ FSTProcessor::compose(wstring const &lexforms, wstring const &queue) const
 }
 
 void
-FSTProcessor::bilingual(FILE *input, FILE *output)
+FSTProcessor::bilingual(FILE *input, FILE *output, GenerationMode mode)
 {
   if(getNullFlush())
   {
-    bilingual_wrapper_null_flush(input, output);
+    bilingual_wrapper_null_flush(input, output, mode);
   }
 
   State current_state = initial_state;
@@ -3120,7 +3120,12 @@ FSTProcessor::bilingual(FILE *input, FILE *output)
 
       if(sf[0] == L'*')
       {
-        printWordBilingual(sf, L"/"+sf, output);
+        if (mode == gm_clean) {
+          printWordBilingual(sf, L"/" + sf.substr(1), output);
+        }
+        else {
+          printWordBilingual(sf, L"/" + sf, output);
+        }
       }
       else if(result != L"")
       {

@@ -472,7 +472,7 @@ private:
 
   void analysis_wrapper_null_flush(FILE *input, FILE *output);
   void lsx_wrapper_null_flush(FILE *input, FILE *output);
-  void bilingual_wrapper_null_flush(FILE *input, FILE *output);
+  void bilingual_wrapper_null_flush(FILE *input, FILE *output, GenerationMode mode = gm_unknown);
   void generation_wrapper_null_flush(FILE *input, FILE *output,
                                      GenerationMode mode);
   void postgeneration_wrapper_null_flush(FILE *input, FILE *output);
@@ -507,7 +507,7 @@ public:
   void transliteration(FILE *input = stdin, FILE *output = stdout);
   wstring biltrans(wstring const &input_word, bool with_delim = true);
   wstring biltransfull(wstring const &input_word, bool with_delim = true);
-  void bilingual(FILE *input = stdin, FILE *output = stdout);
+  void bilingual(FILE *input = stdin, FILE *output = stdout, GenerationMode mode = gm_unknown);
   pair<wstring, int> biltransWithQueue(wstring const &input_word, bool with_delim = true);
   wstring biltransWithoutQueue(wstring const &input_word, bool with_delim = true);
   void SAO(FILE *input = stdin, FILE *output = stdout);

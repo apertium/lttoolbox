@@ -139,6 +139,7 @@ int main(int argc, char *argv[])
     };
 #endif
 
+  GenerationMode bilmode = gm_unknown;
   while(true)
   {
 #if HAVE_GETOPT_LONG
@@ -215,6 +216,16 @@ int main(int argc, char *argv[])
       if(cmd == 0)
       {
         cmd = c;
+      }
+      else if(cmd == 'g' && c == 'b') {
+        // "lt-proc -g -b generador.bin" should run biltrans, keeping unknown-marks
+        bilmode = gm_unknown;
+        cmd = 'b';
+      }
+      else if(cmd == 'n' && c == 'b') {
+        // "lt-proc -n -b generador.bin" should run biltrans, stripping unknown-marks
+        bilmode = gm_clean;
+        cmd = 'b';
       }
       else
       {
@@ -378,13 +389,13 @@ int main(int argc, char *argv[])
         fstp.initBiltrans();
         checkValidity(fstp);
         fstp.setBiltransSurfaceForms(true);
-        fstp.bilingual(input, output);
+        fstp.bilingual(input, output, bilmode);
         break;
 
       case 'b':
         fstp.initBiltrans();
         checkValidity(fstp);
-        fstp.bilingual(input, output);
+        fstp.bilingual(input, output, bilmode);
         break;
 
       case 'e':
