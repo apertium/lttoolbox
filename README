@@ -34,11 +34,17 @@ Executables built by this pacage:
 There is also a C++ API that you can link to (see how [apertium][1] or
 [apertium-lex-tools][2] do this).
 
-See http://wiki.apertium.org/wiki/Lttoolbox for usage examples and
+See https://wiki.apertium.org/wiki/Lttoolbox for usage examples and
 more information.
 
 Installation
 ===============================================================================
+
+There are binaries available for Debian, Ubuntu, Fedora, CentOS, OpenSUSE,
+Windows, and macOS. We package both nightly builds and releases.
+See https://wiki.apertium.org/wiki/Installation for more information.
+Only build from source if you either want to change this tool's behavior,
+or are on a platform we don't yet package for.
 
 Requirements:
 
@@ -54,4 +60,4 @@ Building & installing:
 
 [1]: https://github.com/apertium/apertium
 [2]: https://github.com/apertium/apertium-lex-tools
-[3]: http://wiki.apertium.org/wiki/ATT_format
+[3]: https://wiki.apertium.org/wiki/ATT_format
