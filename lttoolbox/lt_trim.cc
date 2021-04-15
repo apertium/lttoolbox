@@ -197,6 +197,8 @@ int main(int argc, char *argv[])
   if(n_transducers == 0)
   {
     wcerr << L"Error: Trimming gave empty transducer!" << endl;
+    wcerr << L"Hint: There are no words in bilingual dictionary that match "
+      L"words in both monolingual dictionaries?" << endl;
     exit(EXIT_FAILURE);
   }
 
