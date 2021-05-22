@@ -65,6 +65,9 @@ fi
 # Checks for libraries.
 AC_CHECK_LIB(xml2, xmlReaderForFile)
 
+# Checks for ICU
+AC_CHECK_ICU(50)
+
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h string.h unistd.h stddef.h])
