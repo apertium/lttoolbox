@@ -38,7 +38,7 @@ AC_ARG_ENABLE(profile,
               [CXXFLAGS="-pg -g -Wall"; CFLAGS="-pg -g -Wall"; LDFLAGS="-pg"])
 
 
-PKG_CHECK_MODULES(LTTOOLBOX, [libxml-2.0 >= 2.6.17])
+PKG_CHECK_MODULES(LIBXML, [libxml-2.0 >= 2.6.17])
 PKG_CHECK_MODULES(ICU, [icu-i18n, icu-io, icu-uc])
 
 # Check for wide strings

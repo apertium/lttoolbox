@@ -27,33 +27,16 @@ lttoolboxlib = $(prefix)/lib
 
 lttoolbox_DATA = dix.dtd dix.rng dix.rnc acx.rng xsd/dix.xsd xsd/acx.xsd
 
+LDADD = liblttoolbox$(VERSION_MAJOR).la
+AM_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LIBXML_LIBS) $(ICU_LIBS)
+
 lt_print_SOURCES = lt_print.cc
-lt_print_LDADD = liblttoolbox$(VERSION_MAJOR).la
-lt_print_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LTTOOLBOX_LIBS)
-
 lt_trim_SOURCES = lt_trim.cc
-lt_trim_LDADD = liblttoolbox$(VERSION_MAJOR).la
-lt_trim_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LTTOOLBOX_LIBS)
-
 lt_comp_SOURCES = lt_comp.cc
-lt_comp_LDADD = liblttoolbox$(VERSION_MAJOR).la
-lt_comp_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LTTOOLBOX_LIBS)
-
 lt_proc_SOURCES = lt_proc.cc
-lt_proc_LDADD = liblttoolbox$(VERSION_MAJOR).la
-lt_proc_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LTTOOLBOX_LIBS)
-
 lt_expand_SOURCES = lt_expand.cc
-lt_expand_LDADD = liblttoolbox$(VERSION_MAJOR).la
-lt_expand_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LTTOOLBOX_LIBS)
-
 lt_tmxcomp_SOURCES = lt_tmxcomp.cc
-lt_tmxcomp_LDADD = liblttoolbox$(VERSION_MAJOR).la
-lt_tmxcomp_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LTTOOLBOX_LIBS)
-
 lt_tmxproc_SOURCES = lt_tmxproc.cc
-lt_tmxproc_LDADD = liblttoolbox$(VERSION_MAJOR).la
-lt_tmxproc_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LTTOOLBOX_LIBS)
 
 #lt-validate-dictionary: Makefile.am validate-header.sh
 #	@echo "Creating lt-validate-dictionary script"
@@ -67,7 +50,7 @@ lt_tmxproc_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LTTOOLBOX_LIBS)
 
 man_MANS = lt-comp.1 lt-expand.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1 lt-print.1 lt-trim.1
 
-INCLUDES = -I$(top_srcdir) $(LTTOOLBOX_CFLAGS)
+INCLUDES = -I$(top_srcdir) $(LIBXML_CFLAGS) $(ICU_CFLAGS)
 if WINDOWS
   INCLUDES += -I$(top_srcdir)/utf8
 endif
