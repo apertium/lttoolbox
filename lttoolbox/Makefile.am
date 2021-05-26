@@ -25,7 +25,7 @@ lttoolboxdir = $(prefix)/share/lttoolbox
 lttoolboxinclude = $(prefix)/include
 lttoolboxlib = $(prefix)/lib
 
-lttoolbox_DATA = dix.dtd dix.rng dix.rnc acx.rng xsd/dix.xsd xsd/acx.xsd nft.nrm
+lttoolbox_DATA = dix.dtd dix.rng dix.rnc acx.rng xsd/dix.xsd xsd/acx.xsd
 
 lt_print_SOURCES = lt_print.cc
 lt_print_LDADD = liblttoolbox$(VERSION_MAJOR).la
@@ -62,6 +62,8 @@ lt_tmxproc_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LTTOOLBOX_LIBS)
 #	@echo "$(XMLLINT) --dtdvalid $(apertiumdir)/dix.dtd --noout \$$FILE1 && exit 0;" >> $@
 #	@echo "exit 1;" >> $@
 #	@chmod a+x $@
+
+
 
 man_MANS = lt-comp.1 lt-expand.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1 lt-print.1 lt-trim.1
 
