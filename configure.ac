@@ -39,6 +39,7 @@ AC_ARG_ENABLE(profile,
 
 
 PKG_CHECK_MODULES(LTTOOLBOX, [libxml-2.0 >= 2.6.17])
+PKG_CHECK_MODULES(ICU, [icu-i18n, icu-io, icu-uc])
 
 # Check for wide strings
 AC_DEFUN([AC_CXX_WSTRING],[
@@ -64,9 +65,6 @@ fi
 
 # Checks for libraries.
 AC_CHECK_LIB(xml2, xmlReaderForFile)
-
-# Checks for ICU
-AC_CHECK_ICU(50)
 
 # Checks for header files.
 AC_HEADER_STDC

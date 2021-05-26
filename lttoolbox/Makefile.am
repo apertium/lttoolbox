@@ -14,7 +14,7 @@ cc_sources = alphabet.cc att_compiler.cc compiler.cc compression.cc entry_token.
 library_includedir = $(includedir)/$(PACKAGE_NAME)-$(VERSION_API)/$(PACKAGE_NAME)
 library_include_HEADERS = $(h_sources)
 
-bin_PROGRAMS = lt-comp lt-proc lt-expand lt-normalize lt-tmxcomp lt-tmxproc lt-print lt-trim
+bin_PROGRAMS = lt-comp lt-proc lt-expand lt-tmxcomp lt-tmxproc lt-print lt-trim
 instdir = lttoolbox
 
 lib_LTLIBRARIES= liblttoolbox3.la
@@ -47,10 +47,6 @@ lt_expand_SOURCES = lt_expand.cc
 lt_expand_LDADD = liblttoolbox$(VERSION_MAJOR).la
 lt_expand_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LTTOOLBOX_LIBS)
 
-lt_normalize_SOURCES = lt_normalize.cc
-lt_normalize_LDADD = liblttoolbox$(VERSION_MAJOR).la
-lt_normalize_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LTTOOLBOX_LIBS) $(ICU_LIBS)
-
 lt_tmxcomp_SOURCES = lt_tmxcomp.cc
 lt_tmxcomp_LDADD = liblttoolbox$(VERSION_MAJOR).la
 lt_tmxcomp_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LTTOOLBOX_LIBS)
@@ -66,9 +62,6 @@ lt_tmxproc_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LTTOOLBOX_LIBS)
 #	@echo "$(XMLLINT) --dtdvalid $(apertiumdir)/dix.dtd --noout \$$FILE1 && exit 0;" >> $@
 #	@echo "exit 1;" >> $@
 #	@chmod a+x $@
-
-nft.nrm: nft_normalization.txt
-	gennorm2 $< -v -o $@
 
 man_MANS = lt-comp.1 lt-expand.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1 lt-print.1 lt-trim.1
 
