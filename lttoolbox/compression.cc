@@ -254,7 +254,7 @@ Compression::multibyte_read(istream &input)
 
 
 void
-Compression::wstring_write(wstring const &str, FILE *output)
+Compression::string_write(UnicodeString const &str, FILE *output)
 {
   Compression::multibyte_write(str.size(), output);
   for(auto c : str)
@@ -264,38 +264,14 @@ Compression::wstring_write(wstring const &str, FILE *output)
 }
 
 wstring
-Compression::wstring_read(FILE *input)
-{
-  wstring retval = L"";
-
-  for(unsigned int i = 0, limit = Compression::multibyte_read(input);
-      i != limit; i++)
-  {
-    retval += static_cast<wchar_t>(Compression::multibyte_read(input));
-  }
-
-  return retval;
-}
-
-void
-Compression::string_write(string const &str, FILE *output)
-{
-  Compression::multibyte_write(str.size(), output);
-  for(auto c : str)
-  {
-    Compression::multibyte_write(static_cast<int>(c), output);
-  }
-}
-
-string
 Compression::string_read(FILE *input)
 {
-  string retval = "";
+  UnicodeString retval = "";
 
   for(unsigned int i = 0, limit = Compression::multibyte_read(input);
       i != limit; i++)
   {
-    retval += static_cast<char>(Compression::multibyte_read(input));
+    retval += static_cast<UChar>(Compression::multibyte_read(input));
   }
 
   return retval;

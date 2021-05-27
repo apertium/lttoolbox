@@ -33,6 +33,8 @@
 #include <type_traits>
 #include <iterator>
 
+#include <unicode/unistr.h>
+
 template <typename DeserialisedType> class Deserialiser;
 
 template <typename value_type>
@@ -109,6 +111,13 @@ Deserialiser<std::basic_string<value_type> >::deserialise(
   }
 
   return SerialisedType_;
+}
+
+template <>
+icu::UnicodeString
+Deserialiser<icu::UnicodeString>::deserialise(std::istream &Stream_) {
+  std::string s = Deserialiser<std::string>::deserialise(Stream_);
+  return icu::UnicodeString::fromUTF8(s);
 }
 
 template <typename first_type, typename second_type>

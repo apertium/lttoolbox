@@ -19,11 +19,12 @@
 
 #include <cstdio>
 #include <cstdint>
-#include <string>
+#include <unicode/unistr.h>
 #include <iostream>
 #include <stdexcept>
 
 using namespace std;
+using namespace icu;
 
 // Global lttoolbox features
 constexpr char HEADER_LTTOOLBOX[4]{'L', 'T', 'T', 'B'};
@@ -175,30 +176,13 @@ public:
   static unsigned int multibyte_read(istream &is);
 
   /**
-   * This method allows to write a wide string to an output stream
-   * using its UCSencoding as integer.
-   * @see wstring_read()
-   * @param str the string to write.
-   * @param output the output stream.
-   */
-  static void wstring_write(wstring const &str, FILE *output);
-
-  /**
-   * This method reads a wide string from the input stream.
-   * @see wstring_write()
-   * @param input the input stream.
-   * @return the wide string read.
-   */
-  static wstring wstring_read(FILE *input);
-
-  /**
    * This method allows to write a plain string to an output stream
    * using its UCSencoding as integer.
    * @see string_read()
    * @param str the string to write.
    * @param output the output stream.
    */
-  static void string_write(string const &str, FILE *output);
+  static void string_write(UnicodeString const &str, FILE *output);
 
   /**
    * This method reads a plain string from the input stream.
@@ -206,7 +190,7 @@ public:
    * @param input the input stream.
    * @return the string read.
    */
-  static string string_read(FILE *input);
+  static UnicodeString string_read(FILE *input);
 
   /**
    * Encodes a double value and writes it into the output stream

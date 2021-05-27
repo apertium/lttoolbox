@@ -30,6 +30,8 @@
 #include <utility>
 #include <vector>
 
+#include <unicode/unistr.h>
+
 namespace {
 template <typename SerialisedType>
 static unsigned char compressedSize(const SerialisedType &SerialisedType_) {
@@ -141,6 +143,13 @@ void Serialiser<std::basic_string<value_type> >::serialise(
        ++SerialisedType_iterator) {
     ::serialise(*SerialisedType_iterator, Output);
   }
+}
+
+template <>
+void Serialiser<icu::UnicodeString>::serialise(const icu::UnicodeString& s,
+                                               std::ostream& Output) {
+  std::string temp;
+  ::serialise(s.toUTF8String(temp), Output);
 }
 
 template <typename first_type, typename second_type>

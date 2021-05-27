@@ -22,17 +22,30 @@
 #include <lttoolbox/string_to_wostream.h>
 #include <algorithm>
 #include <stack>
+#include <unicode/unistr.h>
+#include <unicode/numfmt.h>
 
 using namespace std;
+using namespace icu;
 
 AttCompiler::AttCompiler() :
 starting_state(0),
 default_weight(0.0000)
 {
+  UErrorCode status = U_ZERO_ERROR;
+  int_parser = NumberFormat::createInstance(status);
+  int_parser->setParseIntergerOnly(true);
+  float_parser = NumberFormat::createInstance(status);
+  if (status != U_ZERO_ERROR) {
+    cerr << "Error: unable to set up numeric converter." << endl;
+    exit(EXIT_FAILURE);
+  }
 }
 
 AttCompiler::~AttCompiler()
 {
+  delete int_parser;
+  delete float_parser;
 }
 
 void
@@ -46,26 +59,52 @@ AttCompiler::clear()
   alphabet = Alphabet();
 }
 
+int
+AttCompiler::parse_state(const UnicodeString& s, int line)
+{
+  UErrorCode status = U_ZERO_ERROR;
+  Formattable result;
+  int_parser->parse(s, result, status);
+  if (status != U_ZERO_ERROR) {
+    cerr << "ERROR: Unable to parse state number on line " << line << "." << endl;
+    // TODO: error messages should also print file names
+  }
+  return result.getLong();
+}
+
+double
+AttCompiler::parse_weight(const UnicodeString& s, int line)
+{
+  UErrorCode status = U_ZERO_ERROR;
+  Formattable result;
+  float_parser->parse(s, result, status);
+  if (status != U_ZERO_ERROR) {
+    cerr << "ERROR: Unable to parse state number on line " << line << "." << endl;
+    // TODO: error messages should also print file names
+  }
+  return result.getDouble();
+}
+
 /**
  * Converts symbols like @0@ to epsilon, @_SPACE_@ to space, etc.
  * @todo Are there other special symbols? If so, add them, and maybe use a map
  *       for conversion?
  */
 void
-AttCompiler::convert_hfst(wstring& symbol)
+AttCompiler::convert_hfst(UnicodeString& symbol)
 {
-  if (symbol == L"@0@" || symbol == L"ε")
+  if (symbol == "@0@" || symbol == "ε")
   {
-    symbol = L"";
+    symbol = "";
   }
-  else if (symbol == L"@_SPACE_@")
+  else if (symbol == "@_SPACE_@")
   {
-    symbol = L" ";
+    symbol = " ";
   }
 }
 
 bool
-AttCompiler::is_word_punct(wchar_t symbol)
+AttCompiler::is_word_punct(UChar symbol)
 {
   // https://en.wikipedia.org/wiki/Combining_character#Unicode_ranges
   if((symbol >= 0x0300 && symbol <= 0x036F) // Combining Diacritics
@@ -90,12 +129,12 @@ AttCompiler::is_word_punct(wchar_t symbol)
  *         only) character otherwise.
  */
 int
-AttCompiler::symbol_code(const wstring& symbol)
+AttCompiler::symbol_code(const UnicodeString& symbol)
 {
   if (symbol.length() > 1) {
     alphabet.includeSymbol(symbol);
     return alphabet(symbol);
-  } else if (symbol == L"") {
+  } else if (symbol == "") {
     return 0;
   } else if ((iswpunct(symbol[0]) || iswspace(symbol[0])) && !is_word_punct(symbol[0])) {
     return symbol[0];
@@ -128,77 +167,85 @@ AttCompiler::has_multiple_fsts(string const &file_name)
 }
 
 void
-AttCompiler::parse(string const &file_name, wstring const &dir)
+AttCompiler::parse(UnicodeString const &file_name, UnicodeString const &dir)
 {
   clear();
 
-  wifstream infile(file_name.c_str());  // TODO: error checking
-  vector<wstring> tokens;
-  wstring line;
-  bool first_line_in_fst = true;       // First line -- see below
-  int state_id_offset = 0;
-  int largest_seen_state_id = 0;
-
-  if (has_multiple_fsts(file_name)){
-    wcerr << "Warning: Multiple fsts in '" << file_name << "' will be disjuncted." << endl;
-
-    // Set the starting state to 0 (Epsilon transtions will be added later)
-    starting_state = 0;
-    state_id_offset = 1;
+  UFILE* infile = u_fopen_u(file_name, "r");
+  if (infile == NULL) {
+    cerr << "Error: unable to open '" << file_name << "' for reading." << endl;
   }
+  vector<UnicodeString> tokens;
+  bool first_line_in_fst = true;       // First line -- see below
+  bool multiple_transducers = false;
+  int state_id_offset = 1;
+  int largest_seen_state_id = 0;
+  int line_number = 0;
 
-  while (getline(infile, line))
+  while (!u_feof(infile))
   {
+    lint_number++;
     tokens.clear();
+    tokens.push_back("");
+    do {
+      UChar32 c = u_fgetcx(infile);
+      if (c == '\n') {
+        break;
+      } else if (c == '\t') {
+        tokens.push_back("");
+      } else {
+        tokens.back() += c;
+      }
+    } while (!u_feof(infile));
+
     int from, to;
     wstring upper, lower;
     double weight;
 
-    if (line.length() == 0 && first_line_in_fst)
+    if (tokens[0].length() == 0 && first_line_in_fst)
     {
-      wcerr << "Error: empty file '" << file_name << "'." << endl;
+      cerr << "Error: empty file '" << file_name << "'." << endl;
       exit(EXIT_FAILURE);
     }
-    if (first_line_in_fst && line.find(L"\t") == wstring::npos)
+    if (first_line_in_fst && tokens.size() == 1)
     {
-      wcerr << "Error: invalid format '" << file_name << "'." << endl;
+      cerr << "Error: invalid format in file '" << file_name << "' on line " << line_number << "." << endl;
       exit(EXIT_FAILURE);
     }
 
     /* Empty line. */
-    if (line.length() == 0)
+    if (tokens.size() == 1 && tokens[0].length() == 0)
     {
       continue;
     }
-    split(line, L'\t', tokens);
 
     if (tokens[0].find('-') == 0)
     {
+      if (state_id_offset == 1) {
+        // this is the first split we've seen
+        cerr << "Warning: Multiple fsts in '" << file_name << "' will be disjuncted." << endl;
+        multiple_transducers = true;
+      }
       // Update the offset for the new FST
       state_id_offset = largest_seen_state_id + 1;
       first_line_in_fst = true;
       continue;
     }
 
-    from = stoi(tokens[0]) + state_id_offset;
+    from = parse_state(tokens[0]) + state_id_offset;
     largest_seen_state_id = max(largest_seen_state_id, from);
 
     AttNode* source = get_node(from);
     /* First line: the initial state is of both types. */
     if (first_line_in_fst)
     {
-      // If the file has a single FST - No need for state id mapping
-      if (state_id_offset == 0)
-        starting_state = from;
-      else{
-        AttNode * starting_node = get_node(starting_state);
+      AttNode * starting_node = get_node(starting_state);
 
-        // Add an Epsilon transition from the new starting state
-        starting_node->transductions.push_back(
-          Transduction(from, L"", L"",
-            alphabet(symbol_code(L""), symbol_code(L"")),
-            default_weight));
-      }
+      // Add an Epsilon transition from the new starting state
+      starting_node->transductions.push_back(
+        Transduction(from, L"", L"",
+                     alphabet(symbol_code(L""), symbol_code(L"")),
+                     default_weight));
       first_line_in_fst = false;
     }
 
@@ -207,7 +254,7 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
     {
       if (tokens.size() > 1)
       {
-        weight = stod(tokens[1]);
+        weight = parse_weight(tokens[1]);
       }
       else
       {
@@ -217,9 +264,9 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
     }
     else
     {
-      to = stoi(tokens[1]) + state_id_offset;
+      to = parse_state(tokens[1]) + state_id_offset;
       largest_seen_state_id = max(largest_seen_state_id, to);
-      if(dir == L"RL")
+      if(dir == "RL")
       {
         upper = tokens[3];
         lower = tokens[2];
@@ -247,12 +294,19 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
     }
   }
 
+  if (!multiple_transducers) {
+    starting_state = 1;
+    // if we aren't disjuncting multiple transducers
+    // then we have an extra epsilon transduction at the beginning
+    // so skip it
+  }
+
   /* Classify the nodes of the graph. */
   classify_forwards();
   set<int> path;
   classify_backwards(starting_state, path);
 
-  infile.close();
+  u_fclose(infile);
 }
 
 /** Extracts the sub-transducer made of states of type @p type. */

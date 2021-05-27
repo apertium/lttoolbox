@@ -80,3 +80,5 @@
 *.egg-info/
 *.egg
 **/.mypy_cache/
+
+*~

@@ -28,6 +28,9 @@
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
 
+#include <unicode/numfmt.h>
+#include <unicode/unistr.h>
+
 #include <cstdlib>
 
 #define UNDECIDED 0
@@ -36,24 +39,10 @@
 #define BOTH      3
 
 using namespace std;
+using namespace icu;
 
 /** Bitmask; 1 = WORD, 2 = PUNCT, 3 = BOTH. */
 typedef unsigned int TransducerType;
-
-namespace
-{
-  /** Splits a string into fields. */
-  inline vector<wstring>& split(const wstring& s, wchar_t delim, vector<wstring> &out)
-  {
-      wistringstream ss(s);
-      wstring item;
-      while (getline(ss, item, delim))
-      {
-        out.push_back(item);
-      }
-      return out;
-  }
-};
 
 /**
  * Converts transducers from AT&T text format to lt binary format.
@@ -91,7 +80,7 @@ public:
    * Reads the AT&T format file @p file_name. The transducer and the alphabet
    * are both cleared before reading the new file.
    */
-  void parse(string const &file_name, wstring const &dir);
+  void parse(UnicodeString const &file_name, UnicodeString const &dir);
 
   /** Writes the transducer to @p file_name in lt binary format. */
 
@@ -113,20 +102,20 @@ private:
 
   Alphabet alphabet;
   /** All non-multicharacter symbols. */
-  set<wchar_t> letters;
+  set<UChar> letters;
 
   /** Used in AttNode. */
   struct Transduction
   {
     int            to;
-    wstring        upper;
-    wstring        lower;
+    UnicodeString  upper;
+    UnicodeString  lower;
     int            tag;
     double         weight;
     TransducerType type;
 
-    Transduction(int to, wstring upper, wstring lower, int tag, double weight,
-                 TransducerType type=UNDECIDED) :
+    Transduction(int to, UnicodeString upper, UnicodeString lower, int tag,
+                 double weight, TransducerType type=UNDECIDED) :
       to(to), upper(upper), lower(lower), tag(tag), weight(weight), type(type) {}
   };
 
@@ -170,7 +159,7 @@ private:
    * Returns true for combining diacritics and modifier letters
    *
    */
-  bool is_word_punct(wchar_t symbol);
+  bool is_word_punct(UChar symbol);
 
   /**
    * Determines initial type of single transition
@@ -186,7 +175,7 @@ private:
    * @todo Are there other special symbols? If so, add them, and maybe use a map
    *       for conversion?
    */
-  void convert_hfst(wstring& symbol);
+  void convert_hfst(UnicodeString& symbol);
 
   /**
    * Returns the code of the symbol in the alphabet. Run after convert_hfst has
@@ -197,12 +186,15 @@ private:
    * @return the code of the symbol, if @p symbol is multichar; its first (and
    *         only) character otherwise.
    */
-  int symbol_code(const wstring& symbol);
+  int symbol_code(const UnicodeString& symbol);
 
   /**
-   * Finds whether an at&t file contains multiple FSTs or not
-  */
-  bool has_multiple_fsts(string const &file_name);
+   * Wrappers around ICU number parsing functions
+   */
+  NumberFormat* int_parser;
+  NumberFormat* float_parser;
+  int parse_state(const UnicodeString& s, int line);
+  double parse_weight(const UnicodeString& s, int line);
 };
 
 #endif /* _MYATT_COMPILER_ */
