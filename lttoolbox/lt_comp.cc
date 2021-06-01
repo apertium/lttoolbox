@@ -103,21 +103,21 @@ int main(int argc, char *argv[])
     switch (cnt)
     {
       case 'a':
-        c.setAltValue(optarg);
+        c.setAltValue(to_ustring(optarg));
         break;
 
       case 'v':
-        c.setVariantValue(optarg);
+        c.setVariantValue(to_ustring(optarg));
         break;
 
       case 'l':
         vl = optarg;
-        c.setVariantLeftValue(vl);
+        c.setVariantLeftValue(to_ustring(optarg));
         break;
 
       case 'r':
         vr = optarg;
-        c.setVariantRightValue(vr);
+        c.setVariantRightValue(to_ustring(optarg));
         break;
 
       case 'm':
@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
     if(ttype == 'a')
     {
       LtLocale::tryToSetLocale();
-      a.parse(infile, Compiler::COMPILER_RESTRICTION_LR_VAL);
+      a.parse(infile, false);
     }
     else
     {
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
     if(ttype == 'a')
     {
       LtLocale::tryToSetLocale();
-      a.parse(infile, Compiler::COMPILER_RESTRICTION_RL_VAL);
+      a.parse(infile, true);
     }
     else
     {

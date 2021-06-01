@@ -24,6 +24,7 @@
 #include <vector>
 #include <unicode/unistr.h>
 #include <unicode/ustdio.h>
+#include "ustring.h"
 
 using namespace std;
 using namespace icu;
@@ -39,13 +40,13 @@ private:
    * Symbol-identifier relationship. Only contains <tags>.
    * @see slexicinv
    */
-  map<UnicodeString, int> slexic;
+  map<UString, int> slexic;
 
   /**
    * Identifier-symbol relationship. Only contains <tags>.
    * @see slexic
    */
-  vector<UnicodeString> slexicinv;
+  vector<UString> slexicinv;
 
 
   /**
@@ -90,7 +91,7 @@ public:
   /**
    * Include a symbol into the alphabet.
    */
-  void includeSymbol(UnicodeString const &s);
+  void includeSymbol(UString const &s);
 
   /**
    * Get an unique code for every symbol pair.  This flavour is for
@@ -100,7 +101,7 @@ public:
    * @return code for (c1, c2).
    */
   int operator()(int const c1, int const c2);
-  int operator()(UnicodeString const &s) const;
+  int operator()(UString const &s) const;
 
   /**
    * Gets the individual symbol identifier. Assumes it already exists!
@@ -108,14 +109,14 @@ public:
    * @param s symbol to be identified.
    * @return symbol identifier.
    */
-  int operator()(UnicodeString const &s);
+  int operator()(UString const &s);
 
   /**
    * Check wether the symbol is defined in the alphabet.
    * @param s symbol
    * @return true if defined
    */
-  bool isSymbolDefined(UnicodeString const &s);
+  bool isSymbolDefined(UString const &s);
 
   /**
    * Returns the size of the alphabet (number of symbols).
@@ -151,7 +152,7 @@ public:
    * @param symbol code of the symbol
    * @param uppercase true if we want an uppercase symbol
    */
-  void getSymbol(UnicodeString &result, int const symbol,
+  void getSymbol(UString &result, int const symbol,
 		 bool uppercase = false) const;
 
   /**
@@ -166,7 +167,7 @@ public:
    * @param symbol the code of the symbol to set
    * @param newSymbolString the new string for this symbol
    */
-  void setSymbol(int symbol, UnicodeString newSymbolString);
+  void setSymbol(int symbol, UString newSymbolString);
 
   /**
    * Note: both the symbol int and int-pair are specific to this alphabet instance.

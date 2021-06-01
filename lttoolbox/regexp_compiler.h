@@ -17,6 +17,7 @@
 #ifndef _REGEXP_COMPILER_
 #define _REGEXP_COMPILER_
 
+#include <lttoolbox/ustring.h>
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/transducer.h>
 
@@ -41,7 +42,7 @@ private:
   /**
    * Input string
    */
-  wstring input;
+  UString input;
 
   /**
    * Alphabet to encode symbols
@@ -66,7 +67,7 @@ private:
   /**
    * Post-operator: '+', '?', '*'
    */
-  wstring postop;
+  UString postop;
 
   /**
    * Default value of weight
@@ -200,7 +201,7 @@ public:
    * Function that parses a regular expression and produces a transducer
    * @param er the regular expression
    */
-  void compile(wstring const &er);
+  void compile(UString const &er);
 
   /**
    * Set the decoder of symbols

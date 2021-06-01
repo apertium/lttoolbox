@@ -61,7 +61,7 @@ EntryToken::destroy()
 }
 
 void
-EntryToken::setParadigm(wstring const &np)
+EntryToken::setParadigm(UString const &np)
 {
   parName = np;
   type = paradigm;
@@ -77,7 +77,7 @@ EntryToken::setSingleTransduction(list<int> const &pi, list<int> const &pd, doub
 }
 
 void
-EntryToken::setRegexp(wstring const &r)
+EntryToken::setRegexp(UString const &r)
 {
   myregexp = r;
   type = regexp;
@@ -101,7 +101,7 @@ EntryToken::isRegexp() const
   return type == regexp;
 }
 
-wstring const &
+UString const &
 EntryToken::paradigmName() const
 {
   return parName;
@@ -119,7 +119,7 @@ EntryToken::right() const
   return rightSide;
 }
 
-wstring const &
+UString const &
 EntryToken::regExp() const
 {
   return myregexp;

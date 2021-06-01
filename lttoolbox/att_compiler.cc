@@ -31,22 +31,10 @@ using namespace icu;
 AttCompiler::AttCompiler() :
 starting_state(0),
 default_weight(0.0000)
-{
-  UErrorCode status = U_ZERO_ERROR;
-  int_parser = NumberFormat::createInstance(status);
-  int_parser->setParseIntergerOnly(true);
-  float_parser = NumberFormat::createInstance(status);
-  if (status != U_ZERO_ERROR) {
-    cerr << "Error: unable to set up numeric converter." << endl;
-    exit(EXIT_FAILURE);
-  }
-}
+{}
 
 AttCompiler::~AttCompiler()
-{
-  delete int_parser;
-  delete float_parser;
-}
+{}
 
 void
 AttCompiler::clear()
@@ -59,47 +47,21 @@ AttCompiler::clear()
   alphabet = Alphabet();
 }
 
-int
-AttCompiler::parse_state(const UnicodeString& s, int line)
-{
-  UErrorCode status = U_ZERO_ERROR;
-  Formattable result;
-  int_parser->parse(s, result, status);
-  if (status != U_ZERO_ERROR) {
-    cerr << "ERROR: Unable to parse state number on line " << line << "." << endl;
-    // TODO: error messages should also print file names
-  }
-  return result.getLong();
-}
-
-double
-AttCompiler::parse_weight(const UnicodeString& s, int line)
-{
-  UErrorCode status = U_ZERO_ERROR;
-  Formattable result;
-  float_parser->parse(s, result, status);
-  if (status != U_ZERO_ERROR) {
-    cerr << "ERROR: Unable to parse state number on line " << line << "." << endl;
-    // TODO: error messages should also print file names
-  }
-  return result.getDouble();
-}
-
 /**
  * Converts symbols like @0@ to epsilon, @_SPACE_@ to space, etc.
  * @todo Are there other special symbols? If so, add them, and maybe use a map
  *       for conversion?
  */
 void
-AttCompiler::convert_hfst(UnicodeString& symbol)
+AttCompiler::convert_hfst(UString& symbol)
 {
-  if (symbol == "@0@" || symbol == "ε")
+  if (symbol == (const UChar*)"@0@" || symbol == (const UChar*)"ε")
   {
-    symbol = "";
+    symbol = (const UChar*)"";
   }
-  else if (symbol == "@_SPACE_@")
+  else if (symbol == (const UChar*)"@_SPACE_@")
   {
-    symbol = " ";
+    symbol = (const UChar*)" ";
   }
 }
 
@@ -129,12 +91,12 @@ AttCompiler::is_word_punct(UChar symbol)
  *         only) character otherwise.
  */
 int
-AttCompiler::symbol_code(const UnicodeString& symbol)
+AttCompiler::symbol_code(const UString& symbol)
 {
   if (symbol.length() > 1) {
     alphabet.includeSymbol(symbol);
     return alphabet(symbol);
-  } else if (symbol == "") {
+  } else if (symbol.empty()) {
     return 0;
   } else if ((iswpunct(symbol[0]) || iswspace(symbol[0])) && !is_word_punct(symbol[0])) {
     return symbol[0];
@@ -152,30 +114,16 @@ AttCompiler::symbol_code(const UnicodeString& symbol)
   }
 }
 
-bool
-AttCompiler::has_multiple_fsts(string const &file_name)
-{
-  wifstream infile(file_name.c_str());  // TODO: error checking
-  wstring line;
-
-  while(getline(infile, line)){
-    if (line.find('-') == 0)
-      return true;
-  }
-
-  return false;
-}
-
 void
-AttCompiler::parse(UnicodeString const &file_name, UnicodeString const &dir)
+AttCompiler::parse(string const &file_name, bool read_rl)
 {
   clear();
 
-  UFILE* infile = u_fopen_u(file_name, "r");
+  UFILE* infile = u_fopen(file_name.c_str(), "r", NULL, NULL);
   if (infile == NULL) {
     cerr << "Error: unable to open '" << file_name << "' for reading." << endl;
   }
-  vector<UnicodeString> tokens;
+  vector<UString> tokens;
   bool first_line_in_fst = true;       // First line -- see below
   bool multiple_transducers = false;
   int state_id_offset = 1;
@@ -184,22 +132,22 @@ AttCompiler::parse(UnicodeString const &file_name, UnicodeString const &dir)
 
   while (!u_feof(infile))
   {
-    lint_number++;
+    line_number++;
     tokens.clear();
-    tokens.push_back("");
+    tokens.push_back((UChar*)"");
     do {
       UChar32 c = u_fgetcx(infile);
       if (c == '\n') {
         break;
       } else if (c == '\t') {
-        tokens.push_back("");
+        tokens.push_back((UChar*)"");
       } else {
         tokens.back() += c;
       }
     } while (!u_feof(infile));
 
     int from, to;
-    wstring upper, lower;
+    UString upper, lower;
     double weight;
 
     if (tokens[0].length() == 0 && first_line_in_fst)
@@ -232,7 +180,7 @@ AttCompiler::parse(UnicodeString const &file_name, UnicodeString const &dir)
       continue;
     }
 
-    from = parse_state(tokens[0]) + state_id_offset;
+    from = stoi(tokens[0]) + state_id_offset;
     largest_seen_state_id = max(largest_seen_state_id, from);
 
     AttNode* source = get_node(from);
@@ -243,9 +191,8 @@ AttCompiler::parse(UnicodeString const &file_name, UnicodeString const &dir)
 
       // Add an Epsilon transition from the new starting state
       starting_node->transductions.push_back(
-        Transduction(from, L"", L"",
-                     alphabet(symbol_code(L""), symbol_code(L"")),
-                     default_weight));
+         Transduction(from, (const UChar*)"", (const UChar*)"",
+                      0, default_weight));
       first_line_in_fst = false;
     }
 
@@ -254,7 +201,7 @@ AttCompiler::parse(UnicodeString const &file_name, UnicodeString const &dir)
     {
       if (tokens.size() > 1)
       {
-        weight = parse_weight(tokens[1]);
+        weight = stod(tokens[1]);
       }
       else
       {
@@ -264,9 +211,9 @@ AttCompiler::parse(UnicodeString const &file_name, UnicodeString const &dir)
     }
     else
     {
-      to = parse_state(tokens[1]) + state_id_offset;
+      to = stoi(tokens[1]) + state_id_offset;
       largest_seen_state_id = max(largest_seen_state_id, to);
-      if(dir == "RL")
+      if(read_rl)
       {
         upper = tokens[3];
         lower = tokens[2];
@@ -490,7 +437,7 @@ AttCompiler::write(FILE *output)
   Transducer punct_fst = extract_transducer(PUNCT);
 
   /* Non-multichar symbols. */
-  Compression::wstring_write(wstring(letters.begin(), letters.end()), output);
+  Compression::string_write(UString(letters.begin(), letters.end()), output);
   /* Multichar symbols. */
   alphabet.write(output);
   /* And now the FST. */
@@ -502,12 +449,12 @@ AttCompiler::write(FILE *output)
   {
     Compression::multibyte_write(2, output);
   }
-  Compression::wstring_write(L"main@standard", output);
+  Compression::string_write((const UChar*)"main@standard", output);
   Transducer word_fst = extract_transducer(WORD);
   word_fst.write(output);
   wcout << L"main@standard" << " " << word_fst.size();
   wcout << " " << word_fst.numberOfTransitions() << endl;
-  Compression::wstring_write(L"final@inconditional", output);
+  Compression::string_write((const UChar*)"final@inconditional", output);
   if(punct_fst.numberOfTransitions() != 0)
   {
     punct_fst.write(output);

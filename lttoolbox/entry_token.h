@@ -19,7 +19,7 @@
 
 
 #include <list>
-#include <string>
+#include <lttoolbox/ustring.h>
 
 using namespace std;
 
@@ -42,7 +42,7 @@ private:
   /**
    * Name of the paradigm (if it is of 'paradigm' 'type')
    */
-  wstring parName;
+  UString parName;
 
   /**
    * Weight value for the entry (default_weight if unspecified)
@@ -62,7 +62,7 @@ private:
   /**
    * Regular expression (if 'regexp')
    */
-  wstring myregexp;
+  UString myregexp;
 
   /**
    * copy method
@@ -99,7 +99,7 @@ public:
    * Sets the name of the paradigm.
    * @param np the paradigm name
    */
-  void setParadigm(wstring const &np);
+  void setParadigm(UString const &np);
 
   /**
    * Set both parts of a single transduction.
@@ -113,7 +113,7 @@ public:
    * Set regular expression.
    * @param r the regular expression specification.
    */
-  void setRegexp(wstring const &r);
+  void setRegexp(UString const &r);
 
   /**
    * eTest EntryToken to detect if is a paradigm.
@@ -137,7 +137,7 @@ public:
    * Retrieve the name of the paradigm.
    * @return the name of the paradigm.
    */
-  wstring const & paradigmName() const;
+  UString const & paradigmName() const;
 
   /**
    * Retrieve the left part of the paradigm.
@@ -155,7 +155,7 @@ public:
    * Retrieve the regular expression specification.
    * @return the regular expression specification.
    */
-  wstring const & regExp() const;
+  UString const & regExp() const;
 
   /**
    * Retrieve the weight value of the entry.

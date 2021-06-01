@@ -19,8 +19,7 @@
 
 #include <libxml/encoding.h>
 #include <libxml/xmlreader.h>
-#include <string>
-#include <cwchar>
+#include <lttoolbox/ustring.h>
 
 using namespace std;
 
@@ -29,14 +28,12 @@ class XMLParseUtil
 public:
 
   /* If attrib does not exist (or other error), returns an empty string: */
-  static wstring attrib(xmlTextReaderPtr reader, wstring const &name);
+  static UString attrib(xmlTextReaderPtr reader, UString const &name);
 
   /* If attrib does not exist (or other error), returns fallback: */
-  static wstring attrib(xmlTextReaderPtr reader, wstring const &name, const wstring fallback);
+  static UString attrib(xmlTextReaderPtr reader, UString const &name, const UString fallback);
 
-  static string latin1(xmlChar const * input); // mark for deletion
-  static wstring towstring(xmlChar const * input);
-  static wstring stows(string const &str);
+  static UString toUString(xmlChar const * input);
 };
 
 #endif

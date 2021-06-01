@@ -21,34 +21,23 @@
 
 using namespace std;
 
-wstring
-XMLParseUtil::attrib(xmlTextReaderPtr reader, wstring const &name)
+UString
+XMLParseUtil::attrib(xmlTextReaderPtr reader, UString const &name)
 {
-  string mystr = "";
-  for(int i = 0, limit = name.size(); i != limit; i++)
-  {
-    mystr += static_cast<char>(name[i]);
-  }
-
-  xmlChar *attrname = xmlCharStrdup(mystr.c_str());
+  xmlChar *attrname = xmlCharStrdup(to_char(name));
   xmlChar *myattr = xmlTextReaderGetAttribute(reader, attrname);
-  wstring result = towstring(myattr);
+  UString result = to_ustring(myattr);
   xmlFree(myattr);
   xmlFree(attrname);
   return result;
 }
 
-wstring
-XMLParseUtil::attrib(xmlTextReaderPtr reader, wstring const &name, const wstring fallback)
+UString
+XMLParseUtil::attrib(xmlTextReaderPtr reader, UString const &name, const UString fallback)
 {
-  string mystr = "";
-  for (int i = 0, limit = name.size(); i != limit; i++) {
-    mystr += static_cast<char>(name[i]);
-  }
-
-  xmlChar *attrname = xmlCharStrdup(mystr.c_str());
+  xmlChar *attrname = xmlCharStrdup(to_char(name));
   xmlChar *myattr = xmlTextReaderGetAttribute(reader, attrname);
-  wstring result = XMLParseUtil::towstring(myattr);
+  UString result = to_ustring(myattr);
   xmlFree(myattr);
   xmlFree(attrname);
   if(myattr == NULL) {
@@ -57,89 +46,4 @@ XMLParseUtil::attrib(xmlTextReaderPtr reader, wstring const &name, const wstring
   else {
     return result;
   }
-}
-
-
-string
-XMLParseUtil::latin1(xmlChar const *input)
-{
- if(input == NULL)
-  {
-    return "";
-  }
-
-  int outputlen = xmlStrlen(input) + 1;
-  int inputlen = xmlStrlen(input);
-
-  unsigned char* output = new unsigned char[outputlen];
-
-  if(UTF8Toisolat1(output, &outputlen, input, &inputlen) != 0)
-  {
-  }
-
-  output[outputlen] = 0;
-  string result = reinterpret_cast<char *>(output);
-  delete[] output;
-  return result;
-}
-
-wstring
-XMLParseUtil::towstring(xmlChar const * input)
-{
-  wstring result = L"";
-
-  for(int i = 0, limit = xmlStrlen(input); i != limit; i++)
-  {
-    int val = 0;
-    if(((unsigned char) input[i] & 0x80) == 0x0)
-    {
-      val = static_cast<wchar_t>(input[i]);
-    }
-    else if(((unsigned char) input[i] & 0xE0) == 0xC0)
-    {
-      val = (input[i] & 0x1F) << 6;
-      i++;
-      val += input[i] & 0x7F;
-    }
-    else if(((unsigned char) input[i] & 0xF0) == 0xE0)
-    {
-      val = (input[i] & 0x0F) << 6;
-      i++;
-      val += input[i] & 0x7F;
-      val = val << 6;
-      i++;
-      val += input[i] & 0x7F;
-    }
-    else if(((unsigned char) input[i] & 0xF8) == 0xF0)
-    {
-      val = (input[i] & 0x07) << 6;
-      i++;
-      val += input[i] & 0x7F;
-      val = val << 6;
-      i++;
-      val += input[i] & 0x7F;
-      val = val << 6;
-      i++;
-      val += input[i] & 0x7F;
-    }
-    else
-    {
-      wcerr << L"UTF-8 invalid string" << endl;
-      exit(EXIT_FAILURE);
-    }
-
-    result += static_cast<wchar_t>(val);
-  }
-  return result;
-}
-
-wstring
-XMLParseUtil::stows(string const &str)
-{
-  wchar_t* result = new wchar_t[str.size()+1];
-  size_t retval = mbstowcs(result, str.c_str(), str.size());
-  result[retval] = L'\0';
-  wstring result2 = result;
-  delete[] result;
-  return result2;
 }

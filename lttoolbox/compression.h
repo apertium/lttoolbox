@@ -19,12 +19,11 @@
 
 #include <cstdio>
 #include <cstdint>
-#include <unicode/unistr.h>
 #include <iostream>
 #include <stdexcept>
+#include <lttoolbox/ustring.h>
 
 using namespace std;
-using namespace icu;
 
 // Global lttoolbox features
 constexpr char HEADER_LTTOOLBOX[4]{'L', 'T', 'T', 'B'};
@@ -182,7 +181,7 @@ public:
    * @param str the string to write.
    * @param output the output stream.
    */
-  static void string_write(UnicodeString const &str, FILE *output);
+  static void string_write(UString const &str, FILE *output);
 
   /**
    * This method reads a plain string from the input stream.
@@ -190,7 +189,7 @@ public:
    * @param input the input stream.
    * @return the string read.
    */
-  static UnicodeString string_read(FILE *input);
+  static UString string_read(FILE *input);
 
   /**
    * Encodes a double value and writes it into the output stream

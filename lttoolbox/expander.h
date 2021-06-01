@@ -27,7 +27,7 @@
 
 using namespace std;
 
-typedef list<pair<wstring, wstring> > EntList;
+typedef list<pair<UString, UString> > EntList;
 
 /**
  * An expander of dictionaries
@@ -43,33 +43,33 @@ private:
   /**
    * The alt value
    */
-  wstring alt;
+  UString alt;
 
   /**
    * The variant value (monodix)
    */
-  wstring variant;
+  UString variant;
 
   /**
    * The variant value (left side of bidix)
    */
-  wstring variant_left;
+  UString variant_left;
 
   /**
    * The variant value (right side of bidix)
    */
-  wstring variant_right;
+  UString variant_right;
 
   /**
    * The paradigm being compiled
    */
-  wstring current_paradigm;
+  UString current_paradigm;
 
   /**
    * The direction of the compilation, 'lr' (left-to-right) or 'rl'
    * (right-to-left)
    */
-  wstring direction;
+  UString direction;
 
   /**
    * Do we print boundaries or not?
@@ -79,16 +79,16 @@ private:
   /**
    * Paradigms
    */
-  map<wstring, EntList, Ltstr> paradigm;
+  map<UString, EntList> paradigm;
 
-  map<wstring, EntList, Ltstr> paradigm_lr;
+  map<UString, EntList> paradigm_lr;
 
-  map<wstring, EntList, Ltstr> paradigm_rl;
+  map<UString, EntList> paradigm_rl;
 
   /**
    * Method to parse an XML Node
    */
-  void procNode(FILE *output);
+  void procNode(UFILE* output);
 
   /**
    * Parse the &lt;pardef&gt; element
@@ -98,67 +98,67 @@ private:
   /**
    * Parse the &lt;e&gt; element
    */
-  void procEntry(FILE *output);
+  void procEntry(UFILE* output);
 
   /**
    * Parse the &lt;re&gt; element
    * @return the string representing the regular expression
    */
-  wstring procRegexp();
+  UString procRegexp();
 
   /**
    * Gets an attribute value with their name and the current context
    * @param name the name of the attribute
    * @return the value of the attribute
    */
-  wstring attrib(wstring const &name);
+  UString attrib(UString const &name);
 
   /**
    * Parse the &lt;p&gt; element
    * @return a pair of strings, left part and right part of a transduction
    */
-  pair<wstring, wstring> procTransduction();
+  pair<UString, UString> procTransduction();
 
   /**
    * Parse the &lt;i&gt; element
    * @return a string from the dictionary's entry
    */
-  wstring procIdentity();
+  UString procIdentity();
 
   /**
    * Parse the &lt;ig&gt; element
    * @return a pair of strings, whose right part begins with '#'
    * but are otherwise identical
    */
-  pair<wstring, wstring> procIdentityGroup();
+  pair<UString, UString> procIdentityGroup();
 
   /**
    * Parse the &lt;par&gt; element
    * @return the name of the paradigm
    */
-  wstring procPar();
+  UString procPar();
 
   /**
    * Skip all document #text nodes before "elem"
    * @param name the name of the node
    * @param elem the name of the expected node
    */
-  void skip(wstring &name, wstring const &elem);
+  void skip(UString &name, UString const &elem);
 
   /**
    * Skip all blank #text nodes before "name"
    * @param name the name of the node
    */
-  void skipBlanks(wstring &name);
+  void skipBlanks(UString &name);
 
 
-  void readString(wstring &result, wstring const &name);
+  void readString(UString &result, UString const &name);
 
   /**
    * Force an element to be empty, and check for it
    * @param name the element
    */
-  void requireEmptyError(wstring const &name);
+  void requireEmptyError(UString const &name);
 
   /**
    * Force an attribute to be specified, amd check for it
@@ -166,8 +166,8 @@ private:
    * @param attrname the name of the attribute
    * @param elemname the parent of the attribute
    */
-  void requireAttribute(wstring const &value, wstring const &attrname,
-                        wstring const &elemname);
+  void requireAttribute(UString const &value, UString const &attrname,
+                        UString const &elemname);
 
   /**
    * True if all the elements in the current node are blanks
@@ -181,8 +181,8 @@ private:
    *               this method, the result of concatenations.
    * @param endings the endings to be appended.
    */
-  static void append(list<pair<wstring, wstring> > &result,
-                     list<pair<wstring, wstring> > const &endings);
+  static void append(list<pair<UString, UString> > &result,
+                     list<pair<UString, UString> > const &endings);
 
   /**
    * Append a list of endings to a list of current transductions.
@@ -190,8 +190,8 @@ private:
    *               this method, the result of concatenations.
    * @param endings the endings to be appended.
    */
-  static void append(list<pair<wstring, wstring> > &result,
-                     wstring const &endings);
+  static void append(list<pair<UString, UString> > &result,
+                     UString const &endings);
 
   /**
    * Append a list of endings to a list of current transductions.
@@ -199,8 +199,8 @@ private:
    *               this method, the result of concatenations.
    * @param endings the endings to be appended.
    */
-  static void append(list<pair<wstring, wstring> > &result,
-                     pair<wstring, wstring> const &endings);
+  static void append(list<pair<UString, UString> > &result,
+                     pair<UString, UString> const &endings);
 
 public:
   /**
@@ -216,31 +216,31 @@ public:
   /**
    * Compile dictionary to letter transducers
    */
-  void expand(string const &file, FILE *output);
+  void expand(string const &file, UFILE* output);
 
   /**
    * Set the alt value to use in compilation
    * @param a the value
    */
-   void setAltValue(string const &a);
+   void setAltValue(UString const &a);
 
   /**
    * Set the variant value to use in expansion
    * @param v the value
    */
-   void setVariantValue(string const &v);
+   void setVariantValue(UString const &v);
 
   /**
    * Set the variant_left value to use in expansion
    * @param v the value
    */
-   void setVariantLeftValue(string const &v);
+   void setVariantLeftValue(UString const &v);
 
   /**
    * Set the variant_right value to use in expansion
    * @param v the value
    */
-   void setVariantRightValue(string const &v);
+   void setVariantRightValue(UString const &v);
 
   /**
    * Set if we are going to keep morpheme boundaries

@@ -19,17 +19,14 @@
 
 #include <string>
 #include <fstream>
-#include <sstream>
 #include <map>
 #include <set>
 #include <vector>
 
+#include <lttoolbox/ustring.h>
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
-
-#include <unicode/numfmt.h>
-#include <unicode/unistr.h>
 
 #include <cstdlib>
 
@@ -79,8 +76,9 @@ public:
   /**
    * Reads the AT&T format file @p file_name. The transducer and the alphabet
    * are both cleared before reading the new file.
+   * If read_rl = true then the second tape is used as the input
    */
-  void parse(UnicodeString const &file_name, UnicodeString const &dir);
+  void parse(string const &file_name, bool read_rl);
 
   /** Writes the transducer to @p file_name in lt binary format. */
 
@@ -108,13 +106,13 @@ private:
   struct Transduction
   {
     int            to;
-    UnicodeString  upper;
-    UnicodeString  lower;
+    UString        upper;
+    UString        lower;
     int            tag;
     double         weight;
     TransducerType type;
 
-    Transduction(int to, UnicodeString upper, UnicodeString lower, int tag,
+    Transduction(int to, UString upper, UString lower, int tag,
                  double weight, TransducerType type=UNDECIDED) :
       to(to), upper(upper), lower(lower), tag(tag), weight(weight), type(type) {}
   };
@@ -175,7 +173,7 @@ private:
    * @todo Are there other special symbols? If so, add them, and maybe use a map
    *       for conversion?
    */
-  void convert_hfst(UnicodeString& symbol);
+  void convert_hfst(UString& symbol);
 
   /**
    * Returns the code of the symbol in the alphabet. Run after convert_hfst has
@@ -186,15 +184,7 @@ private:
    * @return the code of the symbol, if @p symbol is multichar; its first (and
    *         only) character otherwise.
    */
-  int symbol_code(const UnicodeString& symbol);
-
-  /**
-   * Wrappers around ICU number parsing functions
-   */
-  NumberFormat* int_parser;
-  NumberFormat* float_parser;
-  int parse_state(const UnicodeString& s, int line);
-  double parse_weight(const UnicodeString& s, int line);
+  int symbol_code(const UString& symbol);
 };
 
 #endif /* _MYATT_COMPILER_ */

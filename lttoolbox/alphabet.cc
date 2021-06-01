@@ -26,7 +26,7 @@
 #include <cwchar>
 #include <cwctype>
 
-#include "string_utils.h"
+#include <unicode/uchar.h>
 
 using namespace std;
 using namespace icu;
@@ -73,7 +73,7 @@ Alphabet::copy(Alphabet const &a)
 }
 
 void
-Alphabet::includeSymbol(UnicodeString const &s)
+Alphabet::includeSymbol(UString const &s)
 {
   if(slexic.find(s) == slexic.end())
   {
@@ -98,13 +98,13 @@ Alphabet::operator()(int const c1, int const c2)
 }
 
 int
-Alphabet::operator()(UnicodeString const &s)
+Alphabet::operator()(UString const &s)
 {
   return slexic[s];
 }
 
 int
-Alphabet::operator()(UnicodeString const &s) const
+Alphabet::operator()(UString const &s) const
 {
   auto it = slexic.find(s);
   if (it == slexic.end()) {
@@ -114,7 +114,7 @@ Alphabet::operator()(UnicodeString const &s) const
 }
 
 bool
-Alphabet::isSymbolDefined(UnicodeString const &s)
+Alphabet::isSymbolDefined(UString const &s)
 {
   return slexic.find(s) != slexic.end();
 }
@@ -132,7 +132,7 @@ Alphabet::write(FILE *output)
   Compression::multibyte_write(slexicinv.size(), output);  // taglist size
   for(unsigned int i = 0, limit = slexicinv.size(); i < limit; i++)
   {
-    Compression::string_write(slexicinv[i].tempSubString(1, slexicinv[i].length()-2), output);
+    Compression::string_write(slexicinv[i].substr(1, slexicinv[i].size()-2), output);
   }
 
   // Then we write the list of pairs
@@ -159,7 +159,9 @@ Alphabet::read(FILE *input)
   while(tam > 0)
   {
     tam--;
-    UnicodeString mytag = "<" + Compression::string_read(input) + ">";
+    UString mytag{'<'};
+    mytag.append(Compression::string_read(input));
+    mytag += (UChar)'>';
     a_new.slexicinv.push_back(mytag);
     a_new.slexic[mytag]= -a_new.slexicinv.size(); // ToDo: This does not turn the result negative due to unsigned semantics
   }
@@ -184,7 +186,7 @@ Alphabet::read(FILE *input)
 void
 Alphabet::serialise(std::ostream &serialised) const
 {
-  Serialiser<const vector<UnicodeString> >::serialise(slexicinv, serialised);
+  Serialiser<const vector<UString> >::serialise(slexicinv, serialised);
   Serialiser<vector<pair<int, int> > >::serialise(spairinv, serialised);
 }
 
@@ -195,7 +197,7 @@ Alphabet::deserialise(std::istream &serialised)
   slexic.clear();
   spairinv.clear();
   spair.clear();
-  slexicinv = Deserialiser<vector<UnicodeString> >::deserialise(serialised);
+  slexicinv = Deserialiser<vector<UString> >::deserialise(serialised);
   for (size_t i = 0; i < slexicinv.size(); i++) {
     slexic[slexicinv[i]] = -i - 1; // ToDo: This does not turn the result negative due to unsigned semantics
   }
@@ -219,7 +221,7 @@ Alphabet::writeSymbol(int const symbol, UFILE *output) const
 }
 
 void
-Alphabet::getSymbol(UnicodeString &result, int const symbol, bool uppercase) const
+Alphabet::getSymbol(UString &result, int const symbol, bool uppercase) const
 {
   if(symbol == 0)
   {
@@ -239,7 +241,7 @@ Alphabet::getSymbol(UnicodeString &result, int const symbol, bool uppercase) con
   }
   else if(symbol >= 0)
   {
-    result += static_cast<UChar>(toupper(static_cast<wint_t>(symbol)));
+    result += u_toupper(static_cast<UChar>(symbol));
   }
   else
   {
@@ -270,7 +272,7 @@ Alphabet::symbolsWhereLeftIs(UChar l) const {
   return eps;
 }
 
-void Alphabet::setSymbol(int symbol, UnicodeString newSymbolString) {
+void Alphabet::setSymbol(int symbol, UString newSymbolString) {
   //Should be a special character!
   if (symbol < 0) slexicinv[-symbol-1] = newSymbolString;
 }

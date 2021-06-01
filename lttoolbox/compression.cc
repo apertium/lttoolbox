@@ -254,7 +254,7 @@ Compression::multibyte_read(istream &input)
 
 
 void
-Compression::string_write(UnicodeString const &str, FILE *output)
+Compression::string_write(UString const &str, FILE *output)
 {
   Compression::multibyte_write(str.size(), output);
   for(auto c : str)
@@ -263,10 +263,10 @@ Compression::string_write(UnicodeString const &str, FILE *output)
   }
 }
 
-wstring
+UString
 Compression::string_read(FILE *input)
 {
-  UnicodeString retval = "";
+  UString retval;
 
   for(unsigned int i = 0, limit = Compression::multibyte_read(input);
       i != limit; i++)
