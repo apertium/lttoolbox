@@ -18,6 +18,7 @@
 #include <lttoolbox/trans_exe.h>
 #include <lttoolbox/compression.h>
 #include <lttoolbox/my_stdio.h>
+#include <cstring>
 
 TransExe::TransExe():
 initial_id(0),

@@ -20,7 +20,6 @@
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/regexp_compiler.h>
 #include <lttoolbox/entry_token.h>
-#include <lttoolbox/ltstr.h>
 #include <lttoolbox/transducer.h>
 
 #include <map>
@@ -60,22 +59,22 @@ private:
   /**
    * Origin language
    */
-  wstring origin_language;
+  UString origin_language;
 
   /**
    * Meta language
    */
-  wstring meta_language;
+  UString meta_language;
 
   /**
    * Origin language code in the TMX
    */
-  wstring origin_language_inner_code;
+  UString origin_language_inner_code;
 
   /**
    * Origin language code in the TMX
    */
-  wstring meta_language_inner_code;
+  UString meta_language_inner_code;
 
 
   /**
@@ -100,26 +99,26 @@ private:
    * @param name the name of the attribute
    * @return the value of the attribute
    */
-  wstring attrib(wstring const &name);
+  UString attrib(UString const &name);
 
   /**
    * Skip all document #text nodes before "elem"
    * @param name the name of the node
    * @param elem the name of the expected node
    */
-  void skip(wstring &name, wstring const &elem);
+  void skip(UString &name, UString const &elem);
 
   /**
    * Skip all blank #text nodes before "name"
    * @param name the name of the node
    */
-  void skipBlanks(wstring &name);
+  void skipBlanks(UString &name);
 
   /**
    * Force an element to be empty, and check for it
    * @param name the element
    */
-  void requireEmptyError(wstring const &name);
+  void requireEmptyError(UString const &name);
 
   /**
    * Force an attribute to be specified, amd check for it
@@ -127,8 +126,8 @@ private:
    * @param attrname the name of the attribute
    * @param elemname the parent of the attribute
    */
-  void requireAttribute(wstring const &value, wstring const &attrname,
-                        wstring const &elemname);
+  void requireAttribute(UString const &value, UString const &attrname,
+                        UString const &elemname);
 
   /**
    * True if all the elements in the current node are blanks
@@ -136,7 +135,7 @@ private:
    */
   bool allBlanks();
 
-  wstring getTag(size_t const &val) const;
+  UString getTag(size_t const &val) const;
   void trim(vector<int> &v) const;
   void align(vector<int> &origin, vector<int> &meta);
   unsigned int numberLength(vector<int> &v, unsigned int const position) const;
@@ -155,17 +154,17 @@ public:
    * Constants to represent the element and the attributes of
    * translation memories in TMX format
    */
-  static wstring const TMX_COMPILER_TMX_ELEM;
-  static wstring const TMX_COMPILER_HEADER_ELEM;
-  static wstring const TMX_COMPILER_BODY_ELEM;
-  static wstring const TMX_COMPILER_TU_ELEM;
-  static wstring const TMX_COMPILER_TUV_ELEM;
-  static wstring const TMX_COMPILER_HI_ELEM;
-  static wstring const TMX_COMPILER_PH_ELEM;
-  static wstring const TMX_COMPILER_XMLLANG_ATTR;
-  static wstring const TMX_COMPILER_LANG_ATTR;
-  static wstring const TMX_COMPILER_SEG_ELEM;
-  static wstring const TMX_COMPILER_PROP_ELEM;
+  static UString const TMX_COMPILER_TMX_ELEM;
+  static UString const TMX_COMPILER_HEADER_ELEM;
+  static UString const TMX_COMPILER_BODY_ELEM;
+  static UString const TMX_COMPILER_TU_ELEM;
+  static UString const TMX_COMPILER_TUV_ELEM;
+  static UString const TMX_COMPILER_HI_ELEM;
+  static UString const TMX_COMPILER_PH_ELEM;
+  static UString const TMX_COMPILER_XMLLANG_ATTR;
+  static UString const TMX_COMPILER_LANG_ATTR;
+  static UString const TMX_COMPILER_SEG_ELEM;
+  static UString const TMX_COMPILER_PROP_ELEM;
 
 
   /**
@@ -181,7 +180,7 @@ public:
   /**
    * Compile dictionary to letter transducers
    */
-  void parse(string const &file, wstring const &lo, wstring const &lm);
+  void parse(string const &file, UString const &lo, UString const &lm);
 
   /**
    * Write the result of compilation
@@ -193,13 +192,13 @@ public:
    * Set origin language inner code
    * @param code the code of the origin language into the TMX file being compiled
    */
-  void setOriginLanguageCode(wstring const &code);
+  void setOriginLanguageCode(UString const &code);
 
   /**
    * Set meta language inner code
    * @param code the code of the meta language into the TMX file being compiled
    */
-  void setMetaLanguageCode(wstring const &code);
+  void setMetaLanguageCode(UString const &code);
 
 };
 

@@ -33,7 +33,8 @@ public:
   /* If attrib does not exist (or other error), returns fallback: */
   static UString attrib(xmlTextReaderPtr reader, UString const &name, const UString fallback);
 
-  static UString toUString(xmlChar const * input);
+  static UString readName(xmlTextReaderPtr reader);
+  static UString readValue(xmlTextReaderPtr reader);
 };
 
 #endif

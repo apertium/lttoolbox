@@ -96,14 +96,14 @@ RegexpCompiler::isReserved(int const t)
 void
 RegexpCompiler::error()
 {
-  wcerr << L"Error parsing regexp" <<endl;
+  cerr << "Error parsing regexp" <<endl;
   exit(EXIT_FAILURE);
 }
 
 void
 RegexpCompiler::errorConsuming(int const t)
 {
-  wcerr << L"Error parsing regexp" << endl;
+  cerr << "Error parsing regexp" << endl;
   exit(EXIT_FAILURE);
 }
 
@@ -113,7 +113,7 @@ RegexpCompiler::consume(int const t)
   if(token == t)
   {
     input = input.substr(1);
-    if(input ==  L"")
+    if(input.empty())
     {
       token = FIN_FICHERO;
     }
@@ -200,20 +200,20 @@ RegexpCompiler::Term()
     e = t.insertNewSingleTransduction((*alphabet)(letter, letter), e, default_weight);
     t.setFinal(e, default_weight);
     Postop();
-    if(postop == L"*")
+    if(postop == "*"_u)
     {
       t.zeroOrMore((*alphabet)(0, 0));
     }
-    else if(postop == L"+")
+    else if(postop == "+"_u)
     {
       t.oneOrMore((*alphabet)(0, 0));
     }
-    else if(postop == L"?")
+    else if(postop == "?"_u)
     {
       t.optional((*alphabet)(0, 0));
     }
 
-    postop = L"";
+    postop.clear();
     state = transducer.insertTransducer(state, t, (*alphabet)(0, 0));
   }
   else if(token == '(')
@@ -227,20 +227,20 @@ RegexpCompiler::Term()
     consume(')');
     transducer.setFinal(state, default_weight);
     Postop();
-    if(postop == L"*")
+    if(postop == "*"_u)
     {
       transducer.zeroOrMore((*alphabet)(0, 0));
     }
-    else if(postop == L"+")
+    else if(postop == "+"_u)
     {
       transducer.oneOrMore((*alphabet)(0, 0));
     }
-    else if(postop == L"?")
+    else if(postop == "?"_u)
     {
       transducer.optional((*alphabet)(0, 0));
     }
 
-    postop = L"";
+    postop.clear();
     state = t.insertTransducer(e, transducer, (*alphabet)(0, 0));
     transducer = t;
   }
@@ -298,17 +298,17 @@ RegexpCompiler::Postop()
   if(token == '*')
   {
     consume('*');
-    postop = L"*";
+    postop = "*"_u;
   }
   else if(token == '?')
   {
     consume('?');
-    postop = L"?";
+    postop = "?"_u;
   }
   else if(token == '+')
   {
     consume('+');
-    postop = L"+";
+    postop = "+"_u;
   }
   else if(token == '(' || token == '[' || !isReserved(token) ||
           token == '\\' || token == '|' ||  token == FIN_FICHERO ||
@@ -367,20 +367,20 @@ RegexpCompiler::Esp()
     error();
   }
 
-  if(postop == L"+")
+  if(postop == "+"_u)
   {
     t.oneOrMore((*alphabet)(0, 0));
   }
-  else if(postop == L"*")
+  else if(postop == "*"_u)
   {
     t.zeroOrMore((*alphabet)(0, 0));
   }
-  else if(postop == L"?")
+  else if(postop == "?"_u)
   {
     t.optional((*alphabet)(0, 0));
   }
   brackets.clear();
-  postop = L"";
+  postop.clear();
 
   state = transducer.insertTransducer(state, t, (*alphabet)(0, 0));
 }
@@ -478,5 +478,5 @@ RegexpCompiler::initialize(Alphabet *a)
   setAlphabet(a);
   transducer.clear();
   brackets.clear();
-  postop = L"";
+  postop.clear();
 }

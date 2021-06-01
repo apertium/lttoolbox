@@ -55,7 +55,8 @@ void endProgram(char *name)
 
 int main(int argc, char *argv[])
 {
-  FILE *input = NULL, *output = NULL;
+  FILE* input = NULL;
+  UFILE* output = NULL;
   Expander e;
   e.setKeepBoundaries(false);
 
@@ -86,15 +87,15 @@ int main(int argc, char *argv[])
     switch (cnt)
     {
       case 'a':
-        e.setAltValue(optarg);
+        e.setAltValue(to_ustring(optarg));
         break;
 
       case 'v':
-        e.setVariantValue(optarg);
+        e.setVariantValue(to_ustring(optarg));
         break;
 
       case 'l':
-        e.setVariantLeftValue(optarg);
+        e.setVariantLeftValue(to_ustring(optarg));
         break;
 
       case 'm':
@@ -102,7 +103,7 @@ int main(int argc, char *argv[])
         break;
 
       case 'r':
-        e.setVariantRightValue(optarg);
+        e.setVariantRightValue(to_ustring(optarg));
         break;
 
       case 'h':
@@ -122,11 +123,11 @@ int main(int argc, char *argv[])
       input = fopen(infile.c_str(), "rb");
       if(input == NULL)
       {
-        wcerr << "Error: Cannot open file '" << infile << "'." << endl;
+        cerr << "Error: Cannot open file '" << infile << "'." << endl;
         exit(EXIT_FAILURE);
       }
       fclose(input);
-      output = stdout;
+      output = u_finit(stdout, NULL, NULL);
       break;
 
     case 3:
@@ -134,16 +135,16 @@ int main(int argc, char *argv[])
       input = fopen(infile.c_str(), "rb");
       if(input == NULL)
       {
-        wcerr << "Error: Cannot open file '" << infile << "'." << endl;
+        cerr << "Error: Cannot open file '" << infile << "'." << endl;
         exit(EXIT_FAILURE);
       }
       fclose(input);
 
       outfile = argv[argc-1];
-      output = fopen(argv[argc-1], "wb");
+      output = u_fopen(argv[argc-1], "wb", NULL, NULL);
       if(output == NULL)
       {
-        wcerr << "Error: Cannot open file '" << outfile << "'." << endl;
+        cerr << "Error: Cannot open file '" << outfile << "'." << endl;
         exit(EXIT_FAILURE);
       }
       break;
@@ -158,7 +159,7 @@ int main(int argc, char *argv[])
 #endif
 
   e.expand(infile, output);
-  fclose(output);
+  u_fclose(output);
 
   return EXIT_SUCCESS;
 }

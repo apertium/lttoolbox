@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 #include <unicode/unistr.h>
+#include <utf8.h>
+#include <cstring>
 
 using namespace icu;
 
@@ -17,7 +19,7 @@ stoi(const UString& str)
   int ret;
   int c = u_sscanf(str.c_str(), "%d", &ret);
   if (c != 1) {
-    throw std::invalid_argument();
+    throw std::invalid_argument("unable to parse int");
   }
   return ret;
 }
@@ -28,7 +30,7 @@ stod(const UString& str)
   double ret;
   int c = u_sscanf(str.c_str(), "%f", &ret);
   if (c != 1) {
-    throw std::invalid_argument();
+    throw std::invalid_argument("unable to parse float");
   }
   return ret;
 }
@@ -36,26 +38,18 @@ stod(const UString& str)
 UString
 to_ustring(const char* s)
 {
-  UnicodeString temp = UnicodeString::fromUTF8(s);
-  UString ret = temp.getTerminatedBuffer();
+  auto sz = strlen(s);
+  UString ret;
+  ret.reserve(sz);
+  utf8::utf8to16(s, s+sz, std::back_inserter(ret));
   return ret;
 }
 
-char*
+const char*
 to_char(const UString& str)
 {
   std::string stemp;
   UnicodeString utemp = str.c_str();
   utemp.toUTF8String(stemp);
   return stemp.c_str();
-}
-
-static std::ostream&
-operator<<(std::ostream& ostr, const UString& str)
-{
-  std::string res;
-  UnicodeString temp = str.c_str();
-  temp.toUTF8String(res);
-  ostr << res;
-  return ostr;
 }

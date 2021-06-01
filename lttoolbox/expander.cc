@@ -97,7 +97,7 @@ bool
 Expander::allBlanks()
 {
   bool flag = true;
-  UString text = to_ustring((char*)xmlTextReaderConstValue(reader));
+  UString text = XMLParseUtil::readValue(reader);
 
   for(auto c : text)
   {
@@ -112,7 +112,7 @@ Expander::readString(UString &result, UString const &name)
 {
   if(name == Compiler::COMPILER_TEXT_NODE)
   {
-    UString value = to_ustring((char*)xmlTextReaderConstValue(reader));
+    UString value = XMLParseUtil::readValue(reader);
     UString escaped = (const UChar*)"^$/<>{}\\*@#+~:";
     for(size_t i = value.size()-1; i > 0; i--)
     {
@@ -181,7 +181,7 @@ Expander::skipBlanks(UString &name)
       exit(EXIT_FAILURE);
     }
     xmlTextReaderRead(reader);
-    name = to_ustring((char*)xmlTextReaderConstName(reader));
+    name = XMLParseUtil::readName(reader);
   }
 }
 
@@ -189,7 +189,7 @@ void
 Expander::skip(UString &name, UString const &elem)
 {
   xmlTextReaderRead(reader);
-  name = to_ustring((char*)xmlTextReaderConstName(reader));
+  name = XMLParseUtil::readName(reader);
 
   if(name == Compiler::COMPILER_TEXT_NODE)
   {
@@ -200,7 +200,7 @@ Expander::skip(UString &name, UString const &elem)
       exit(EXIT_FAILURE);
     }
     xmlTextReaderRead(reader);
-    name = to_ustring((char*)xmlTextReaderConstName(reader));
+    name = XMLParseUtil::readName(reader);
   }
 
   if(name != elem)
@@ -223,7 +223,7 @@ Expander::procIdentity()
     while(true)
     {
       xmlTextReaderRead(reader);
-      name = to_ustring((char*)xmlTextReaderConstName(reader));
+      name = XMLParseUtil::readName(reader);
       if(name == Compiler::COMPILER_IDENTITY_ELEM)
       {
         break;
@@ -248,7 +248,7 @@ Expander::procIdentityGroup()
     while(true)
     {
       xmlTextReaderRead(reader);
-      name = to_ustring((char*)xmlTextReaderConstName(reader));
+      name = XMLParseUtil::readName(reader);
       if(name == Compiler::COMPILER_IDENTITYGROUP_ELEM)
       {
         break;
@@ -277,7 +277,7 @@ Expander::procTransduction()
     while(true)
     {
       xmlTextReaderRead(reader);
-      name = to_ustring((char*)xmlTextReaderConstName(reader));
+      name = XMLParseUtil::readName(reader);
       if(name == Compiler::COMPILER_LEFT_ELEM)
       {
         break;
@@ -294,7 +294,7 @@ Expander::procTransduction()
     while(true)
     {
       xmlTextReaderRead(reader);
-      name = to_ustring((char*)xmlTextReaderConstName(reader));
+      name = XMLParseUtil::readName(reader);
       if(name == Compiler::COMPILER_RIGHT_ELEM)
       {
         break;
@@ -365,7 +365,7 @@ Expander::procEntry(UFILE* output)
         cerr << "): Parse error." << endl;
         exit(EXIT_FAILURE);
       }
-      myname = to_ustring((char*)xmlTextReaderConstName(reader));
+      myname = XMLParseUtil::readName(reader);
     }
     while(myname != Compiler::COMPILER_ENTRY_ELEM);
     return;
@@ -397,7 +397,7 @@ Expander::procEntry(UFILE* output)
       cerr << "): Parse error." << endl;
       exit(EXIT_FAILURE);
     }
-    UString name = to_ustring((char*)xmlTextReaderConstName(reader));
+    UString name = XMLParseUtil::readName(reader);
     skipBlanks(name);
 
     int type = xmlTextReaderNodeType(reader);
@@ -495,28 +495,15 @@ Expander::procEntry(UFILE* output)
       {
         for(auto& it : items)
         {
-          u_fputs(it.first, output);
-          u_fputc(':', output);
-          u_fputs(it.second, output);
-          u_fputc('\n', output);
+          u_fprintf(output, "%S:%S\n", it.first.c_str(), it.second.c_str());
         }
         for(auto& it : items_lr)
         {
-          u_fputs(it.first, output);
-          u_fputc(':', output);
-          u_fputc('>', output);
-          u_fputc(':', output);
-          u_fputs(it.second, output);
-          u_fputc('\n', output);
+          u_fprintf(output, "%S:>:%S\n", it.first.c_str(), it.second.c_str());
         }
         for(auto& it : items_rl)
         {
-          u_fputs(it.first, output);
-          u_fputc(':', output);
-          u_fputc('<', output);
-          u_fputc(':', output);
-          u_fputs(it.second, output);
-          u_fputc('\n', output);
+          u_fprintf(output, "%S:<:%S\n", it.first.c_str(), it.second.c_str());
         }
       }
       else
@@ -550,7 +537,7 @@ Expander::procEntry(UFILE* output)
 void
 Expander::procNode(UFILE *output)
 {
-  UString name = to_ustring((char*)xmlTextReaderConstName(reader));
+  UString name = XMLParseUtil::readName(reader);
 
   // DO: optimize the execution order of this string "ifs"
 
@@ -606,7 +593,7 @@ UString
 Expander::procRegexp()
 {
   xmlTextReaderRead(reader);
-  UString re = to_ustring((char*)xmlTextReaderConstValue(reader));
+  UString re = XMLParseUtil::readValue(reader);
   xmlTextReaderRead(reader);
   return re;
 }

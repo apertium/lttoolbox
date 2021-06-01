@@ -22,9 +22,9 @@
 #include <cstdlib>
 #include <iostream>
 
-wstring const PatternList::ANY_CHAR  = L"<ANY_CHAR>";
-wstring const PatternList::ANY_TAG   = L"<ANY_TAG>";
-wstring const PatternList::QUEUE = L"<QUEUE>";
+UString const PatternList::ANY_CHAR  = "<ANY_CHAR>"_u;
+UString const PatternList::ANY_TAG   = "<ANY_TAG>"_u;
+UString const PatternList::QUEUE     = "<QUEUE>"_u;
 
 void
 PatternList::copy(PatternList const &o)
@@ -80,7 +80,7 @@ PatternList::beginSequence()
 {
   if(sequence)
   {
-    wcerr << L"Error: opening an unended sequence" << endl;
+    cerr << "Error: opening an unended sequence" << endl;
     exit(EXIT_FAILURE);
   }
   sequence = true;
@@ -92,7 +92,7 @@ PatternList::endSequence()
 {
   if(!sequence)
   {
-    wcerr << L"Error: ending an unopened sequence" << endl;
+    cerr << "Error: ending an unopened sequence" << endl;
     exit(EXIT_FAILURE);
   }
   sequence = false;
@@ -107,10 +107,10 @@ PatternList::endSequence()
 }
 
 void
-PatternList::insertOutOfSequence(wstring const &lemma, wstring const &tags,
+PatternList::insertOutOfSequence(UString const &lemma, UString const &tags,
                                  vector<int> &result)
 {
-  if(lemma == L"")
+  if(lemma.empty())
   {
     result.push_back(alphabet(ANY_CHAR));
   }
@@ -128,7 +128,7 @@ PatternList::insertOutOfSequence(wstring const &lemma, wstring const &tags,
       }
     }
   }
-  if(tags == L"")
+  if(tags.empty())
   {
     result.push_back(alphabet(ANY_TAG));
   }
@@ -136,9 +136,9 @@ PatternList::insertOutOfSequence(wstring const &lemma, wstring const &tags,
   {
     for(unsigned int i = 0, limit = tagCount(tags); i < limit; i++)
     {
-      wstring tag = L"<" + tagAt(tags, i) + L">";
+      UString tag = "<"_u + tagAt(tags, i) + ">"_u;
 
-      if(tag == L"<*>")
+      if(tag == "<*>"_u)
       {
         result.push_back(alphabet(ANY_TAG));
       }
@@ -152,8 +152,8 @@ PatternList::insertOutOfSequence(wstring const &lemma, wstring const &tags,
 }
 
 void
-PatternList::insertIntoSequence(int const id, wstring const &lemma,
-				wstring const &tags)
+PatternList::insertIntoSequence(int const id, UString const &lemma,
+				UString const &tags)
 {
   sequence_id = id;
 
@@ -176,7 +176,7 @@ PatternList::insertIntoSequence(int const id, wstring const &lemma,
 }
 
 void
-PatternList::insert(int const id, wstring const &lemma, wstring const &tags)
+PatternList::insert(int const id, UString const &lemma, UString const &tags)
 {
   if(!sequence)
   {
@@ -196,7 +196,7 @@ PatternList::insert(int const id, int const otherid)
 {
   if(!sequence)
   {
-    wcerr << L"Error: using labels outside of a sequence" << endl;
+    cerr << "Error: using labels outside of a sequence" << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -233,7 +233,7 @@ PatternList::insert(int const id, int const otherid)
 }
 
 int
-PatternList::tagCount(wstring const &tags)
+PatternList::tagCount(UString const &tags)
 {
   int count = 0;
 
@@ -252,8 +252,8 @@ PatternList::tagCount(wstring const &tags)
   return count;
 }
 
-wstring
-PatternList::tagAt(wstring const &tags, int const index)
+UString
+PatternList::tagAt(UString const &tags, int const index)
 {
   int start = 0;
   int end = 0;
@@ -282,7 +282,7 @@ PatternList::tagAt(wstring const &tags, int const index)
 
   if(index > count)
   {
-    return L"";
+    return ""_u;
   }
   if(end != 0)
   {
@@ -366,10 +366,10 @@ void
 PatternList::write(FILE *output)
 {
   alphabet.write(output);
-  wstring const tagger_name = L"tagger";
+  UString const tagger_name = "tagger"_u;
 
   Compression::multibyte_write(1, output);
-  Compression::wstring_write(tagger_name, output);
+  Compression::string_write(tagger_name, output);
   transducer.write(output, alphabet.size());
 
   Compression::multibyte_write(final_type.size(), output);
@@ -391,7 +391,7 @@ PatternList::read(FILE *input)
   alphabet.read(input);
   if(Compression::multibyte_read(input) == 1)
   {
-    wstring mystr = Compression::wstring_read(input);
+    UString mystr = Compression::string_read(input);
     transducer.read(input, alphabet.size());
 
     int finalsize = Compression::multibyte_read(input);

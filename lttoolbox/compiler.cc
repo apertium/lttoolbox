@@ -28,47 +28,47 @@
 
 using namespace std;
 
-UString const Compiler::COMPILER_DICTIONARY_ELEM    = (const UChar*)"dictionary";
-UString const Compiler::COMPILER_ALPHABET_ELEM      = (const UChar*)"alphabet";
-UString const Compiler::COMPILER_SDEFS_ELEM         = (const UChar*)"sdefs";
-UString const Compiler::COMPILER_SDEF_ELEM          = (const UChar*)"sdef";
-UString const Compiler::COMPILER_N_ATTR             = (const UChar*)"n";
-UString const Compiler::COMPILER_PARDEFS_ELEM       = (const UChar*)"pardefs";
-UString const Compiler::COMPILER_PARDEF_ELEM        = (const UChar*)"pardef";
-UString const Compiler::COMPILER_PAR_ELEM           = (const UChar*)"par";
-UString const Compiler::COMPILER_ENTRY_ELEM         = (const UChar*)"e";
-UString const Compiler::COMPILER_RESTRICTION_ATTR   = (const UChar*)"r";
-UString const Compiler::COMPILER_RESTRICTION_LR_VAL = (const UChar*)"LR";
-UString const Compiler::COMPILER_RESTRICTION_RL_VAL = (const UChar*)"RL";
-UString const Compiler::COMPILER_PAIR_ELEM          = (const UChar*)"p";
-UString const Compiler::COMPILER_LEFT_ELEM          = (const UChar*)"l";
-UString const Compiler::COMPILER_RIGHT_ELEM         = (const UChar*)"r";
-UString const Compiler::COMPILER_S_ELEM             = (const UChar*)"s";
-UString const Compiler::COMPILER_M_ELEM             = (const UChar*)"m";
-UString const Compiler::COMPILER_REGEXP_ELEM        = (const UChar*)"re";
-UString const Compiler::COMPILER_SECTION_ELEM       = (const UChar*)"section";
-UString const Compiler::COMPILER_ID_ATTR            = (const UChar*)"id";
-UString const Compiler::COMPILER_TYPE_ATTR          = (const UChar*)"type";
-UString const Compiler::COMPILER_IDENTITY_ELEM      = (const UChar*)"i";
-UString const Compiler::COMPILER_IDENTITYGROUP_ELEM = (const UChar*)"ig";
-UString const Compiler::COMPILER_JOIN_ELEM          = (const UChar*)"j";
-UString const Compiler::COMPILER_BLANK_ELEM         = (const UChar*)"b";
-UString const Compiler::COMPILER_POSTGENERATOR_ELEM = (const UChar*)"a";
-UString const Compiler::COMPILER_GROUP_ELEM         = (const UChar*)"g";
-UString const Compiler::COMPILER_LEMMA_ATTR         = (const UChar*)"lm";
-UString const Compiler::COMPILER_IGNORE_ATTR        = (const UChar*)"i";
-UString const Compiler::COMPILER_IGNORE_YES_VAL     = (const UChar*)"yes";
-UString const Compiler::COMPILER_ALT_ATTR           = (const UChar*)"alt";
-UString const Compiler::COMPILER_V_ATTR             = (const UChar*)"v";
-UString const Compiler::COMPILER_VL_ATTR            = (const UChar*)"vl";
-UString const Compiler::COMPILER_VR_ATTR            = (const UChar*)"vr";
-UString const Compiler::COMPILER_WEIGHT_ATTR        = (const UChar*)"w";
-UString const Compiler::COMPILER_TEXT_NODE          = (const UChar*)"#text";
-UString const Compiler::COMPILER_COMMENT_NODE       = (const UChar*)"#comment";
-UString const Compiler::COMPILER_ACX_ANALYSIS_ELEM  = (const UChar*)"analysis-chars";
-UString const Compiler::COMPILER_ACX_CHAR_ELEM      = (const UChar*)"char";
-UString const Compiler::COMPILER_ACX_EQUIV_CHAR_ELEM= (const UChar*)"equiv-char";
-UString const Compiler::COMPILER_ACX_VALUE_ATTR     = (const UChar*)"value";
+UString const Compiler::COMPILER_DICTIONARY_ELEM    = "dictionary"_u;
+UString const Compiler::COMPILER_ALPHABET_ELEM      = "alphabet"_u;
+UString const Compiler::COMPILER_SDEFS_ELEM         = "sdefs"_u;
+UString const Compiler::COMPILER_SDEF_ELEM          = "sdef"_u;
+UString const Compiler::COMPILER_N_ATTR             = "n"_u;
+UString const Compiler::COMPILER_PARDEFS_ELEM       = "pardefs"_u;
+UString const Compiler::COMPILER_PARDEF_ELEM        = "pardef"_u;
+UString const Compiler::COMPILER_PAR_ELEM           = "par"_u;
+UString const Compiler::COMPILER_ENTRY_ELEM         = "e"_u;
+UString const Compiler::COMPILER_RESTRICTION_ATTR   = "r"_u;
+UString const Compiler::COMPILER_RESTRICTION_LR_VAL = "LR"_u;
+UString const Compiler::COMPILER_RESTRICTION_RL_VAL = "RL"_u;
+UString const Compiler::COMPILER_PAIR_ELEM          = "p"_u;
+UString const Compiler::COMPILER_LEFT_ELEM          = "l"_u;
+UString const Compiler::COMPILER_RIGHT_ELEM         = "r"_u;
+UString const Compiler::COMPILER_S_ELEM             = "s"_u;
+UString const Compiler::COMPILER_M_ELEM             = "m"_u;
+UString const Compiler::COMPILER_REGEXP_ELEM        = "re"_u;
+UString const Compiler::COMPILER_SECTION_ELEM       = "section"_u;
+UString const Compiler::COMPILER_ID_ATTR            = "id"_u;
+UString const Compiler::COMPILER_TYPE_ATTR          = "type"_u;
+UString const Compiler::COMPILER_IDENTITY_ELEM      = "i"_u;
+UString const Compiler::COMPILER_IDENTITYGROUP_ELEM = "ig"_u;
+UString const Compiler::COMPILER_JOIN_ELEM          = "j"_u;
+UString const Compiler::COMPILER_BLANK_ELEM         = "b"_u;
+UString const Compiler::COMPILER_POSTGENERATOR_ELEM = "a"_u;
+UString const Compiler::COMPILER_GROUP_ELEM         = "g"_u;
+UString const Compiler::COMPILER_LEMMA_ATTR         = "lm"_u;
+UString const Compiler::COMPILER_IGNORE_ATTR        = "i"_u;
+UString const Compiler::COMPILER_IGNORE_YES_VAL     = "yes"_u;
+UString const Compiler::COMPILER_ALT_ATTR           = "alt"_u;
+UString const Compiler::COMPILER_V_ATTR             = "v"_u;
+UString const Compiler::COMPILER_VL_ATTR            = "vl"_u;
+UString const Compiler::COMPILER_VR_ATTR            = "vr"_u;
+UString const Compiler::COMPILER_WEIGHT_ATTR        = "w"_u;
+UString const Compiler::COMPILER_TEXT_NODE          = "#text"_u;
+UString const Compiler::COMPILER_COMMENT_NODE       = "#comment"_u;
+UString const Compiler::COMPILER_ACX_ANALYSIS_ELEM  = "analysis-chars"_u;
+UString const Compiler::COMPILER_ACX_CHAR_ELEM      = "char"_u;
+UString const Compiler::COMPILER_ACX_EQUIV_CHAR_ELEM= "equiv-char"_u;
+UString const Compiler::COMPILER_ACX_VALUE_ATTR     = "value"_u;
 
 Compiler::Compiler() :
 reader(0),
@@ -175,8 +175,7 @@ Compiler::procAlphabet()
     int ret = xmlTextReaderRead(reader);
     if(ret == 1)
     {
-      xmlChar const *value = xmlTextReaderConstValue(reader);
-      letters = XMLParseUtil::toUString(value);
+      letters = XMLParseUtil::readValue(reader);
       bool space = true;
       for(unsigned int i = 0; i < letters.length(); i++)
       {
@@ -203,7 +202,7 @@ Compiler::procAlphabet()
 void
 Compiler::procSDef()
 {
-  alphabet.includeSymbol((const UChar*)"<"+attrib(COMPILER_N_ATTR)+(const UChar*)">");
+  alphabet.includeSymbol("<"_u+attrib(COMPILER_N_ATTR)+">"_u);
 }
 
 void
@@ -333,7 +332,7 @@ bool
 Compiler::allBlanks()
 {
   bool flag = true;
-  UString text = XMLParseUtil::toUString(xmlTextReaderConstValue(reader));
+  UString text = XMLParseUtil::readValue(reader);
 
   for(auto c : text)
   {
@@ -348,7 +347,7 @@ Compiler::readString(list<int> &result, UString const &name)
 {
   if(name == COMPILER_TEXT_NODE)
   {
-    UString value = XMLParseUtil::toUString(xmlTextReaderConstValue(reader));
+    UString value = XMLParseUtil::readValue(reader);
     for(unsigned int i = 0, limit = value.size(); i < limit; i++)
     {
       result.push_back(static_cast<int>(value[i]));
@@ -388,7 +387,7 @@ Compiler::readString(list<int> &result, UString const &name)
   else if(name == COMPILER_S_ELEM)
   {
     requireEmptyError(name);
-    UString symbol = (const UChar*)"<" + attrib(COMPILER_N_ATTR) + (const UChar*)">";
+    UString symbol = "<"_u + attrib(COMPILER_N_ATTR) + ">"_u;
 
     if(!alphabet.isSymbolDefined(symbol))
     {
@@ -424,7 +423,7 @@ Compiler::skipBlanks(UString &name)
     }
 
     xmlTextReaderRead(reader);
-    name = XMLParseUtil::toUString(xmlTextReaderConstName(reader));
+    name = XMLParseUtil::readName(reader);
   }
 }
 
@@ -438,12 +437,12 @@ void
 Compiler::skip(UString &name, UString const &elem, bool open)
 {
   xmlTextReaderRead(reader);
-  name = XMLParseUtil::toUString(xmlTextReaderConstName(reader));
+  name = XMLParseUtil::readName(reader);
   UString slash;
 
   if(!open)
   {
-    slash = (const UChar*)"/";
+    slash = "/"_u;
   }
 
   while(name == COMPILER_TEXT_NODE || name == COMPILER_COMMENT_NODE)
@@ -458,7 +457,7 @@ Compiler::skip(UString &name, UString const &elem, bool open)
       }
     }
     xmlTextReaderRead(reader);
-    name = XMLParseUtil::toUString(xmlTextReaderConstName(reader));
+    name = XMLParseUtil::readName(reader);
   }
 
   if(name != elem)
@@ -482,7 +481,7 @@ Compiler::procIdentity(UString const &wsweight, bool ig)
     while(true)
     {
       xmlTextReaderRead(reader);
-      name = XMLParseUtil::toUString(xmlTextReaderConstName(reader));
+      name = XMLParseUtil::readName(reader);
       if(name == COMPILER_IDENTITY_ELEM || name == COMPILER_IDENTITYGROUP_ELEM)
       {
         break;
@@ -527,7 +526,7 @@ Compiler::procTransduction(UString const &wsweight)
     while(true)
     {
       xmlTextReaderRead(reader);
-      name = XMLParseUtil::toUString(xmlTextReaderConstName(reader));
+      name = XMLParseUtil::readName(reader);
       if(name == COMPILER_LEFT_ELEM)
       {
         break;
@@ -551,7 +550,7 @@ Compiler::procTransduction(UString const &wsweight)
     while(true)
     {
       xmlTextReaderRead(reader);
-      name = XMLParseUtil::toUString(xmlTextReaderConstName(reader));
+      name = XMLParseUtil::readName(reader);
       if(name == COMPILER_RIGHT_ELEM)
       {
         break;
@@ -724,7 +723,7 @@ Compiler::procSection()
     requireAttribute(type, COMPILER_TYPE_ATTR, COMPILER_SECTION_ELEM);
 
     current_section = id;
-    current_section += (const UChar*)"@";
+    current_section += "@"_u;
     current_section.append(type);
   }
   else
@@ -758,7 +757,7 @@ Compiler::procEntry()
     while(name != COMPILER_ENTRY_ELEM)
     {
       xmlTextReaderRead(reader);
-      name = XMLParseUtil::toUString(xmlTextReaderConstName(reader));
+      name = XMLParseUtil::readName(reader);
     }
 
     return;
@@ -766,7 +765,7 @@ Compiler::procEntry()
 
   if(wsweight.empty())
   {
-    wsweight = (const UChar*)"0.0000";
+    wsweight = "0.0000"_u;
   }
 
   vector<EntryToken> elements;
@@ -780,7 +779,7 @@ Compiler::procEntry()
       cerr << "): Parse error." << endl;
       exit(EXIT_FAILURE);
     }
-    UString name = XMLParseUtil::toUString(xmlTextReaderConstName(reader));
+    UString name = XMLParseUtil::readName(reader);
     skipBlanks(name);
 
     if(current_paradigm.empty() && verbose)
@@ -825,7 +824,7 @@ Compiler::procEntry()
         while(name != COMPILER_ENTRY_ELEM || type != XML_READER_TYPE_END_ELEMENT)
         {
           xmlTextReaderRead(reader);
-          name = XMLParseUtil::toUString(xmlTextReaderConstName(reader));
+          name = XMLParseUtil::readName(reader);
           type = xmlTextReaderNodeType(reader);
         }
         return;
@@ -853,8 +852,7 @@ Compiler::procEntry()
 void
 Compiler::procNodeACX()
 {
-  xmlChar  const *xname = xmlTextReaderConstName(reader);
-  UString name = XMLParseUtil::toUString(xname);
+  UString name = XMLParseUtil::readName(reader);
   if(name == COMPILER_TEXT_NODE)
   {
     /* ignore */
@@ -886,8 +884,7 @@ Compiler::procNodeACX()
 void
 Compiler::procNode()
 {
-  xmlChar const *xname = xmlTextReaderConstName(reader);
-  UString name = XMLParseUtil::toUString(xname);
+  UString name = XMLParseUtil::readName(reader);
 
   // TODO: optimize the execution order of the string "ifs"
 
@@ -944,7 +941,7 @@ Compiler::procRegexp()
 {
   EntryToken et;
   xmlTextReaderRead(reader);
-  UString re = XMLParseUtil::toUString(xmlTextReaderConstValue(reader));
+  UString re = XMLParseUtil::readValue(reader);
   et.setRegexp(re);
   xmlTextReaderRead(reader);
   return et;

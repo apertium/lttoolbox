@@ -30,6 +30,8 @@
 #include <lttoolbox/match_state.h>
 #include <lttoolbox/transducer.h>
 
+#include <lttoolbox/ustring.h>
+
 using namespace std;
 
 /**
@@ -188,9 +190,9 @@ public:
    */
   void step(int const input, set<int> const alts);
 
-  void step_case(wchar_t val, bool caseSensitive);
+  void step_case(UChar val, bool caseSensitive);
 
-  void step_case(wchar_t val, wchar_t val2, bool caseSensitive);
+  void step_case(UChar val, UChar val2, bool caseSensitive);
 
   void step_careful(int const input, int const alt);
 
@@ -236,7 +238,7 @@ public:
       }
   };
 
-  vector<pair< wstring, double >> NFinals(vector<pair<wstring, double>> lf,
+  vector<pair< UString, double >> NFinals(vector<pair<UString, double>> lf,
                                           int maxAnalyses,
                                           int maxWeightClasses) const;
 
@@ -252,9 +254,9 @@ public:
    * @param firstchar first character of the word
    * @return the result of the transduction
    */
-  wstring filterFinals(map<Node *, double> const &finals,
+  UString filterFinals(map<Node *, double> const &finals,
                        Alphabet const &a,
-                       set<wchar_t> const &escaped_chars,
+                       set<UChar> const &escaped_chars,
                        bool display_weights = false,
                        int max_analyses = INT_MAX,
                        int max_weight_classes = INT_MAX,
@@ -273,9 +275,9 @@ public:
    * @param firstchar first character of the word
    * @return the result of the transduction
    */
-  wstring filterFinalsSAO(map<Node *, double> const &finals,
+  UString filterFinalsSAO(map<Node *, double> const &finals,
                           Alphabet const &a,
-                          set<wchar_t> const &escaped_chars,
+                          set<UChar> const &escaped_chars,
                           bool uppercase = false,
                           bool firstupper = false,
                           int firstchar = 0) const;
@@ -293,9 +295,9 @@ public:
    * @return the result of the transduction
    */
 
-  set<pair<wstring, vector<wstring> > > filterFinalsLRX(map<Node *, double> const &finals,
+  set<pair<UString, vector<UString> > > filterFinalsLRX(map<Node *, double> const &finals,
                                                         Alphabet const &a,
-                                                        set<wchar_t> const &escaped_chars,
+                                                        set<UChar> const &escaped_chars,
                                                         bool uppercase = false,
                                                         bool firstupper = false,
                                                         int firstchar = 0) const;
@@ -326,13 +328,13 @@ public:
   /**
    * Return the full states string (to allow debuging...) using a Java ArrayList.toString style
    */
-  wstring getReadableString(const Alphabet &a);
+  UString getReadableString(const Alphabet &a);
 
-  wstring filterFinalsTM(map<Node *, double> const &finals,
+  UString filterFinalsTM(map<Node *, double> const &finals,
                          Alphabet const &alphabet,
-                         set<wchar_t> const &escaped_chars,
-                         queue<wstring> &blanks,
-                         vector<wstring> &numbers) const;
+                         set<UChar> const &escaped_chars,
+                         queue<UString> &blanks,
+                         vector<UString> &numbers) const;
 
 };
 

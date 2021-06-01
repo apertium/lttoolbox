@@ -252,7 +252,8 @@ int main(int argc, char *argv[])
     }
   }
 
-  FILE *input = stdin, *output = stdout;
+  UFILE* input = u_finit(stdin, NULL, NULL);
+  UFILE* output = u_finit(stdout, NULL, NULL);
   LtLocale::tryToSetLocale();
 
   if(optind == (argc - 3))
@@ -264,15 +265,15 @@ int main(int argc, char *argv[])
       exit(EXIT_FAILURE);
     }
 
-    input = fopen(argv[optind+1], "rb");
-    if(input == NULL || ferror(input))
+    input = u_fopen(argv[optind+1], "rb", NULL, NULL);
+    if(input == NULL)
     {
       wcerr << "Error: Cannot open file '" << argv[optind+1] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
-    output= fopen(argv[optind+2], "wb");
-    if(output == NULL || ferror(output))
+    output = u_fopen(argv[optind+2], "wb", NULL, NULL);
+    if(output == NULL)
     {
       wcerr << "Error: Cannot open file '" << argv[optind+2] << "'." << endl << endl;
       exit(EXIT_FAILURE);
@@ -290,8 +291,8 @@ int main(int argc, char *argv[])
       exit(EXIT_FAILURE);
     }
 
-    input = fopen(argv[optind+1], "rb");
-    if(input == NULL || ferror(input))
+    input = u_fopen(argv[optind+1], "rb", NULL, NULL);
+    if(input == NULL)
     {
       wcerr << "Error: Cannot open file '" << argv[optind+1] << "'." << endl << endl;
       exit(EXIT_FAILURE);
@@ -416,13 +417,13 @@ int main(int argc, char *argv[])
   {
     wcerr << e.what();
     if (fstp.getNullFlush()) {
-      fputwc_unlocked(L'\0', output);
+      u_fputc('\0', output);
     }
 
     exit(1);
   }
 
-  fclose(input);
-  fclose(output);
+  u_fclose(input);
+  u_fclose(output);
   return EXIT_SUCCESS;
 }

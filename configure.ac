@@ -41,28 +41,6 @@ AC_ARG_ENABLE(profile,
 PKG_CHECK_MODULES(LIBXML, [libxml-2.0 >= 2.6.17])
 PKG_CHECK_MODULES(ICU, [icu-i18n, icu-io, icu-uc])
 
-# Check for wide strings
-AC_DEFUN([AC_CXX_WSTRING],[
-  AC_CACHE_CHECK(whether the compiler supports wide strings,
-  ac_cv_cxx_wstring,
-  [AC_LANG_SAVE
-   AC_LANG_CPLUSPLUS
-   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <string>]],[[
-std::wstring test = L"test";
-   ]])],
-   [ac_cv_cxx_wstring=yes], [ac_cv_cxx_wstring=no])
-   AC_LANG_RESTORE
-  ])
-])
-
-AC_CXX_WSTRING
-
-if test "$ac_cv_cxx_wstring" = no
-then
-  AC_MSG_ERROR([Missing wide string support])
-fi
-
-
 # Checks for libraries.
 AC_CHECK_LIB(xml2, xmlReaderForFile)
 

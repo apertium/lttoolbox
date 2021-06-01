@@ -18,9 +18,9 @@
 #ifndef _FSTPROCESSOR_
 #define _FSTPROCESSOR_
 
+#include <lttoolbox/ustring.h>
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/buffer.h>
-#include <lttoolbox/ltstr.h>
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/state.h>
 #include <lttoolbox/trans_exe.h>
@@ -56,7 +56,7 @@ private:
   /**
    * Transducers in FSTP
    */
-  map<wstring, TransExe, Ltstr> transducers;
+  map<UString, TransExe> transducers;
 
   /**
    * Current state of lexical analysis
@@ -101,27 +101,27 @@ private:
   /**
    * Queue of blanks, used in reading methods
    */
-  queue<wstring> blankqueue;
+  queue<UString> blankqueue;
 
   /**
    * Queue of wordbound blanks, used in reading methods
    */
-  queue<wstring> wblankqueue;
+  queue<UString> wblankqueue;
 
   /**
    * Set of characters being considered alphabetics
    */
-  set<wchar_t> alphabetic_chars;
+  set<UChar> alphabetic_chars;
 
   /**
    * Set of characters to escape with a backslash
    */
-  set<wchar_t> escaped_chars;
+  set<UChar> escaped_chars;
 
   /**
    * Set of characters to ignore
    */
-  set<wchar_t> ignored_chars;
+  set<UChar> ignored_chars;
 
   /**
    * Mapping of characters for simplistic diacritic restoration specified in RCX files
@@ -262,7 +262,7 @@ private:
    * @param input the stream to read from
    * @return code of the character
    */
-  wchar_t readEscaped(FILE *input);
+  UChar readEscaped(UFILE *input);
 
   /**
    * Reads a block from the stream input, enclosed by delim1 and delim2
@@ -270,13 +270,13 @@ private:
    * @param delim1 the delimiter of the beginning of the sequence
    * @param delim1 the delimiter of the end of the sequence
    */
-  wstring readFullBlock(FILE *input, wchar_t const delim1, wchar_t const delim2);
+  UString readFullBlock(UFILE *input, UChar const delim1, UChar const delim2);
 
   /**
    * Reads a wordbound blank from the stream input
    * @param input the stream being read
    */
-  wstring readWblank(FILE *input);
+  UString readWblank(UFILE *input);
 
   /**
    * Reads a wordbound blank (opening blank to closing blank) from the stream input -> [[...]]xyz[[/]]
@@ -284,28 +284,28 @@ private:
    * @param output the stream to write on
    * @return true if the word enclosed by the wordbound blank has a ~ for postgeneration activation
    */
-  bool wblankPostGen(FILE *input, FILE *output);
+  bool wblankPostGen(UFILE *input, UFILE *output);
 
   /**
    * Returns true if the character code is identified as alphabetic
    * @param c the code provided by the user
    * @return true if it's alphabetic
    */
-  bool isAlphabetic(wchar_t const c) const;
+  bool isAlphabetic(UChar const c) const;
 
   /**
    * Tests if a character is in the set of escaped_chars
    * @param c the character code provided by the user
    * @return true if it is in the set
    */
-  bool isEscaped(wchar_t const c) const;
+  bool isEscaped(UChar const c) const;
 
   /**
    * Read text from stream (analysis version)
    * @param input the stream to read
    * @return the next symbol in the stream
    */
-  int readAnalysis(FILE *input);
+  int readAnalysis(UFILE *input);
 
   /**
    * Read text from stream (decomposition version)
@@ -313,7 +313,7 @@ private:
    * @param output the stream to write on
    * @return the next symbol in the stream
    */
-  int readDecomposition(FILE *input, FILE *output);
+  int readDecomposition(UFILE *input, UFILE *output);
 
   /**
    * Read text from stream (postgeneration version)
@@ -321,7 +321,7 @@ private:
    * @param output the stream to write on
    * @return the next symbol in the stream
    */
-  int readPostgeneration(FILE *input, FILE *output);
+  int readPostgeneration(UFILE *input, UFILE *output);
 
   /**
    * Read text from stream (generation version)
@@ -329,7 +329,7 @@ private:
    * @param output the stream being written to
    * @return the next symbol in the stream
    */
-  int readGeneration(FILE *input, FILE *output);
+  int readGeneration(UFILE *input, UFILE *output);
 
   /**
    * Read text from stream (biltrans version)
@@ -337,32 +337,32 @@ private:
    * @param output the stream to write on
    * @return the queue of 0-symbols, and the next symbol in the stream
    */
-  pair<wstring, int> readBilingual(FILE *input, FILE *output);
+  pair<UString, int> readBilingual(UFILE *input, UFILE *output);
 
   /**
    * Read text from stream (SAO version)
    * @param input the stream to read
    * @return the next symbol in the stream
    */
-  int readSAO(FILE *input);
+  int readSAO(UFILE *input);
 
   /**
    * Flush all the blanks remaining in the current process
    * @param output stream to write blanks
    */
-  void flushBlanks(FILE *output);
+  void flushBlanks(UFILE *output);
 
   /**
    * Flush all the wordbound blanks remaining in the current process
    * @param output stream to write blanks
    */
-  void flushWblanks(FILE *output);
+  void flushWblanks(UFILE *output);
 
   /**
    * Combine wordbound blanks in the queue and return them
    * @return final wblank string
   */
-  wstring combineWblanks();
+  UString combineWblanks();
 
   /**
    * Calculate the initial state of parsing
@@ -379,7 +379,7 @@ private:
    * @param str the string to write, escaping characters
    * @param output the stream to write in
    */
-  void writeEscaped(wstring const &str, FILE *output);
+  void writeEscaped(UString const &str, UFILE *output);
 
   /**
    * Write a string to an output stream.
@@ -390,7 +390,7 @@ private:
    * @param output the stream to write in
    * @return how many blanks to pop and print after printing lu
    */
-  size_t writeEscapedPopBlanks(wstring const &str, FILE *output);
+  size_t writeEscapedPopBlanks(UString const &str, UFILE *output);
 
   /**
    * Write a string to an output stream, escaping all escapable characters
@@ -398,7 +398,7 @@ private:
    * @param str the string to write, escaping characters
    * @param output the stream to write in
    */
-  void writeEscapedWithTags(wstring const &str, FILE *output);
+  void writeEscapedWithTags(UString const &str, UFILE *output);
 
 
   /**
@@ -407,7 +407,7 @@ private:
    * @param the searched suffix
    * @returns true if 'str' has the suffix 'suffix'
    */
-  static bool endsWith(wstring const &str, wstring const &suffix);
+  static bool endsWith(UString const &str, UString const &suffix);
 
   /**
    * Prints a word
@@ -415,7 +415,7 @@ private:
    * @param lf lexical form of the word
    * @param output stream where the word is written
    */
-  void printWord(wstring const &sf, wstring const &lf, FILE *output);
+  void printWord(UString const &sf, UString const &lf, UFILE *output);
 
   /**
    * Prints a word.
@@ -425,7 +425,7 @@ private:
    * @param lf lexical form of the word
    * @param output stream where the word is written
    */
-  void printWordPopBlank(wstring const &sf, wstring const &lf, FILE *output);
+  void printWordPopBlank(UString const &sf, UString const &lf, UFILE *output);
 
   /**
    * Prints a word (Bilingual version)
@@ -433,7 +433,7 @@ private:
    * @param lf lexical form of the word
    * @param output stream where the word is written
    */
-  void printWordBilingual(wstring const &sf, wstring const &lf, FILE *output);
+  void printWordBilingual(UString const &sf, UString const &lf, UFILE *output);
 
 
   /**
@@ -441,21 +441,21 @@ private:
    * @param lf lexical form
    * @param output stream where the word is written
    */
-  void printSAOWord(wstring const &lf, FILE *output);
+  void printSAOWord(UString const &lf, UFILE *output);
 
   /**
    * Prints an unknown word
    * @param sf surface form of the word
    * @param output stream where the word is written
    */
-  void printUnknownWord(wstring const &sf, FILE *output);
+  void printUnknownWord(UString const &sf, UFILE *output);
 
   void initDecompositionSymbols();
 
-  vector<wstring> numbers;
-  int readTMAnalysis(FILE *input);
+  vector<UString> numbers;
+  int readTMAnalysis(UFILE *input);
 
-  unsigned int lastBlank(wstring const &str);
+  unsigned int lastBlank(UString const &str);
 
   /**
    * Print one blankqueue item if there is one, or a given "space" value.
@@ -463,23 +463,22 @@ private:
    * @param val the space character to use if no blank queue
    * @param output stream where the word is written
    */
-  void printSpace(wchar_t const val, FILE *output);
+  void printSpace(UChar const val, UFILE *output);
 
-  void skipUntil(FILE *input, FILE *output, wint_t const character);
-  static wstring removeTags(wstring const &str);
-  wstring compoundAnalysis(wstring str, bool uppercase, bool firstupper);
-  size_t firstNotAlpha(wstring const &sf);
+  void skipUntil(UFILE *input, UFILE *output, wint_t const character);
+  static UString removeTags(UString const &str);
+  UString compoundAnalysis(UString str, bool uppercase, bool firstupper);
+  size_t firstNotAlpha(UString const &sf);
 
-  void analysis_wrapper_null_flush(FILE *input, FILE *output);
-  void lsx_wrapper_null_flush(FILE *input, FILE *output);
-  void bilingual_wrapper_null_flush(FILE *input, FILE *output, GenerationMode mode = gm_unknown);
-  void generation_wrapper_null_flush(FILE *input, FILE *output,
+  void analysis_wrapper_null_flush(UFILE *input, UFILE *output);
+  void bilingual_wrapper_null_flush(UFILE *input, UFILE *output, GenerationMode mode = gm_unknown);
+  void generation_wrapper_null_flush(UFILE *input, UFILE *output,
                                      GenerationMode mode);
-  void postgeneration_wrapper_null_flush(FILE *input, FILE *output);
-  void intergeneration_wrapper_null_flush(FILE *input, FILE *output);
-  void transliteration_wrapper_null_flush(FILE *input, FILE *output);
+  void postgeneration_wrapper_null_flush(UFILE *input, UFILE *output);
+  void intergeneration_wrapper_null_flush(UFILE *input, UFILE *output);
+  void transliteration_wrapper_null_flush(UFILE *input, UFILE *output);
 
-  wstring compose(wstring const &lexforms, wstring const &queue) const;
+  UString compose(UString const &lexforms, UString const &queue) const;
 
   void procNodeICX();
   void procNodeRCX();
@@ -499,24 +498,22 @@ public:
   void initBiltrans();
   void initDecomposition();
 
-  void analysis(FILE *input = stdin, FILE *output = stdout);
-  void tm_analysis(FILE *input = stdin, FILE *output = stdout);
-  void generation(FILE *input = stdin, FILE *output = stdout, GenerationMode mode = gm_unknown);
-  void postgeneration(FILE *input = stdin, FILE *output = stdout);
-  void intergeneration(FILE *input = stdin, FILE *output = stdout);
-  void transliteration(FILE *input = stdin, FILE *output = stdout);
-  wstring biltrans(wstring const &input_word, bool with_delim = true);
-  wstring biltransfull(wstring const &input_word, bool with_delim = true);
-  void bilingual(FILE *input = stdin, FILE *output = stdout, GenerationMode mode = gm_unknown);
-  pair<wstring, int> biltransWithQueue(wstring const &input_word, bool with_delim = true);
-  wstring biltransWithoutQueue(wstring const &input_word, bool with_delim = true);
-  void SAO(FILE *input = stdin, FILE *output = stdout);
+  void analysis(UFILE *input, UFILE *output);
+  void tm_analysis(UFILE *input, UFILE *output);
+  void generation(UFILE *input, UFILE *output, GenerationMode mode = gm_unknown);
+  void postgeneration(UFILE *input, UFILE *output);
+  void intergeneration(UFILE *input, UFILE *output);
+  void transliteration(UFILE *input, UFILE *output);
+  UString biltrans(UString const &input_word, bool with_delim = true);
+  UString biltransfull(UString const &input_word, bool with_delim = true);
+  void bilingual(UFILE *input, UFILE *output, GenerationMode mode = gm_unknown);
+  pair<UString, int> biltransWithQueue(UString const &input_word, bool with_delim = true);
+  UString biltransWithoutQueue(UString const &input_word, bool with_delim = true);
+  void SAO(UFILE *input, UFILE *output);
   void parseICX(string const &file);
   void parseRCX(string const &file);
 
   void load(FILE *input);
-
-  void lsx(FILE *input, FILE *output);
 
   bool valid() const;
 

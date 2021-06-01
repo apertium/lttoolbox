@@ -171,7 +171,7 @@ public:
 
   /**
    * Note: both the symbol int and int-pair are specific to this alphabet instance.
-   * @see operator() to go from general wstrings to alphabet-specific ints.
+   * @see operator() to go from general strings to alphabet-specific ints.
    * @param code a symbol
    * @return the pair which code represents in this alphabet
    */

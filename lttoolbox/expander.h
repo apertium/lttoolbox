@@ -17,8 +17,7 @@
 #ifndef _EXPANDER_
 #define _EXPANDER_
 
-#include <lttoolbox/ltstr.h>
-#include <lttoolbox/string_to_wostream.h>
+#include <lttoolbox/ustring.h>
 
 #include <list>
 #include <map>

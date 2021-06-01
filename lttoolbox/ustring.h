@@ -19,8 +19,23 @@ double stod(const UString& str);
 UString to_ustring(const char* str);
 
 // for interfacing with e.g. XML library
-char* to_char(const UString& str);
+const char* to_char(const UString& str);
 
-static std::ostream& operator<<(std::ostream& ostr, const UString& str);
+static std::ostream& operator<<(std::ostream& ostr, const UString& str)
+{
+  std::string res;
+  icu::UnicodeString temp = str.c_str();
+  temp.toUTF8String(res);
+  ostr << res;
+  return ostr;
+}
+
+inline UString operator "" _u(const char* str, std::size_t len) {
+	UString us(len, 0);
+	for (size_t i = 0; i < len; ++i) {
+		us[i] = str[i];
+	}
+	return us;
+}
 
 #endif

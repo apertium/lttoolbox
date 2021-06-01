@@ -24,6 +24,7 @@
 #include <iostream>
 #include <libgen.h>
 #include <string>
+#include <cstring>
 #include <getopt.h>
 
 #ifdef _MSC_VER
@@ -50,7 +51,7 @@ int main(int argc, char *argv[])
 {
   bool hfst = false;
   FILE* input = NULL;
-  FILE* output = stdout;
+  UFILE* output = u_finit(stdout, NULL, NULL);
 
   LtLocale::tryToSetLocale();
 
@@ -118,7 +119,7 @@ int main(int argc, char *argv[])
 
   if(outfile != "")
   {
-    output = fopen(outfile.c_str(), "wb");
+    output = u_fopen(outfile.c_str(), "wb", NULL, NULL);
     if(!output)
     {
       cerr << "Error: Cannot open file '" << outfile << "' for writing." << endl;
@@ -127,9 +128,9 @@ int main(int argc, char *argv[])
   }
 
   Alphabet alphabet;
-  set<wchar_t> alphabetic_chars;
+  set<UChar> alphabetic_chars;
 
-  map<wstring, Transducer> transducers;
+  map<UString, Transducer> transducers;
 
   fpos_t pos;
   if (fgetpos(input, &pos) == 0) {
@@ -162,13 +163,7 @@ int main(int argc, char *argv[])
 
   while(len > 0)
   {
-    int len2 = Compression::multibyte_read(input);
-    wstring name = L"";
-    while(len2 > 0)
-    {
-      name += static_cast<wchar_t>(Compression::multibyte_read(input));
-      len2--;
-    }
+    UString name = Compression::string_read(input);
     transducers[name].read(input);
 
     len--;
@@ -176,23 +171,21 @@ int main(int argc, char *argv[])
 
   /////////////////////
 
-  map<wstring, Transducer>::iterator penum = transducers.end();
+  map<UString, Transducer>::iterator penum = transducers.end();
   penum--;
-  for(map<wstring, Transducer>::iterator it = transducers.begin(); it != transducers.end(); it++)
+  for(map<UString, Transducer>::iterator it = transducers.begin(); it != transducers.end(); it++)
   {
     it->second.joinFinals();
     it->second.show(alphabet, output, 0, hfst);
     if(it != penum)
     {
-      fwprintf(output, L"--\n", it->first.c_str()); // ToDo: Was %ls meant to go somewhere here?
+      u_fputs("--\n"_u, output);
+      //fwprintf(output, L"--\n", it->first.c_str()); // ToDo: Was %ls meant to go somewhere here?
     }
   }
 
   fclose(input);
-  if(output != stdout)
-  {
-    fclose(output);
-  }
+  u_fclose(output);
 
   return 0;
 }

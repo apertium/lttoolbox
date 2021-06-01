@@ -26,7 +26,7 @@ XMLParseUtil::attrib(xmlTextReaderPtr reader, UString const &name)
 {
   xmlChar *attrname = xmlCharStrdup(to_char(name));
   xmlChar *myattr = xmlTextReaderGetAttribute(reader, attrname);
-  UString result = to_ustring(myattr);
+  UString result = to_ustring(reinterpret_cast<char*>(myattr));
   xmlFree(myattr);
   xmlFree(attrname);
   return result;
@@ -37,7 +37,7 @@ XMLParseUtil::attrib(xmlTextReaderPtr reader, UString const &name, const UString
 {
   xmlChar *attrname = xmlCharStrdup(to_char(name));
   xmlChar *myattr = xmlTextReaderGetAttribute(reader, attrname);
-  UString result = to_ustring(myattr);
+  UString result = to_ustring(reinterpret_cast<char*>(myattr));
   xmlFree(myattr);
   xmlFree(attrname);
   if(myattr == NULL) {
@@ -46,4 +46,18 @@ XMLParseUtil::attrib(xmlTextReaderPtr reader, UString const &name, const UString
   else {
     return result;
   }
+}
+
+UString
+XMLParseUtil::readName(xmlTextReaderPtr reader)
+{
+  const xmlChar* name = xmlTextReaderConstName(reader);
+  return to_ustring(reinterpret_cast<const char*>(name));
+}
+
+UString
+XMLParseUtil::readValue(xmlTextReaderPtr reader)
+{
+  const xmlChar* val = xmlTextReaderConstValue(reader);
+  return to_ustring(reinterpret_cast<const char*>(val));
 }

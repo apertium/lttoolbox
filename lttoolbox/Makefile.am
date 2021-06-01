@@ -1,7 +1,7 @@
 
 h_sources = alphabet.h att_compiler.h buffer.h compiler.h compression.h  \
             deserialiser.h entry_token.h expander.h fst_processor.h lt_locale.h \
-            ltstr.h match_exe.h match_node.h match_state.h my_stdio.h node.h \
+            match_exe.h match_node.h match_state.h my_stdio.h node.h \
             pattern_list.h regexp_compiler.h serialiser.h sorted_vector.h state.h \
             transducer.h trans_exe.h xml_parse_util.h exception.h tmx_compiler.h \
             string_to_wostream.h ustring.h
@@ -50,10 +50,7 @@ lt_tmxproc_SOURCES = lt_tmxproc.cc
 
 man_MANS = lt-comp.1 lt-expand.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1 lt-print.1 lt-trim.1
 
-INCLUDES = -I$(top_srcdir) $(LIBXML_CFLAGS) $(ICU_CFLAGS)
-if WINDOWS
-  INCLUDES += -I$(top_srcdir)/utf8
-endif
+INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/utf8 $(LIBXML_CFLAGS) $(ICU_CFLAGS)
 CLEANFILES = *~
 
 EXTRA_DIST = dix.dtd dix.rng dix.rnc acx.rng xsd/dix.xsd xsd/acx.xsd $(man_MANS)
