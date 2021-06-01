@@ -159,9 +159,9 @@ Alphabet::read(FILE *input)
   while(tam > 0)
   {
     tam--;
-    UString mytag{'<'};
-    mytag.append(Compression::string_read(input));
-    mytag += (UChar)'>';
+    UString mytag = "<"_u;
+    mytag += Compression::string_read(input);
+    mytag += ">"_u;
     a_new.slexicinv.push_back(mytag);
     a_new.slexic[mytag]= -a_new.slexicinv.size(); // ToDo: This does not turn the result negative due to unsigned semantics
   }

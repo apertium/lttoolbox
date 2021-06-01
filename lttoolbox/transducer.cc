@@ -724,7 +724,8 @@ Transducer::escapeSymbol(UString& symbol, bool hfst) const
     }
     else
     {
-      symbol = "ε"_u;
+      //symbol = "ε"_u;
+      symbol += (UChar)949;
     }
   }
   else if(hfst && symbol == " "_u)
@@ -749,11 +750,11 @@ Transducer::show(Alphabet const &alphabet, UFILE *output, int const epsilon_tag,
       UString l;
       alphabet.getSymbol(l, t.first);
       escapeSymbol(l, hfst);
-      u_fprintf(output, "%ls\t", l.c_str());
+      u_fprintf(output, "%S\t", l.c_str());
       UString r;
       alphabet.getSymbol(r, t.second);
       escapeSymbol(r, hfst);
-      u_fprintf(output, "%ls\t", r.c_str());
+      u_fprintf(output, "%S\t", r.c_str());
       u_fprintf(output, "%f\t\n", it2.second.second);
     }
   }
