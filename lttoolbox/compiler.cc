@@ -202,7 +202,7 @@ Compiler::procAlphabet()
 void
 Compiler::procSDef()
 {
-  alphabet.includeSymbol("<"_u+attrib(COMPILER_N_ATTR)+">"_u);
+  alphabet.includeSymbol("<"_u + attrib(COMPILER_N_ATTR) + ">"_u);
 }
 
 void

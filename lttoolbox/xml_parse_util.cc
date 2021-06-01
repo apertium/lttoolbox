@@ -18,32 +18,31 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <utf8.h>
 
 using namespace std;
 
 UString
 XMLParseUtil::attrib(xmlTextReaderPtr reader, UString const &name)
 {
-  xmlChar *attrname = xmlCharStrdup(to_char(name));
-  xmlChar *myattr = xmlTextReaderGetAttribute(reader, attrname);
-  UString result = to_ustring(reinterpret_cast<char*>(myattr));
-  xmlFree(myattr);
-  xmlFree(attrname);
-  return result;
+  return attrib(reader, name, ""_u);
 }
 
 UString
 XMLParseUtil::attrib(xmlTextReaderPtr reader, UString const &name, const UString fallback)
 {
-  xmlChar *attrname = xmlCharStrdup(to_char(name));
+  std::string temp;
+  temp.reserve(name.size());
+  utf8::utf16to8(name.begin(), name.end(), std::back_inserter(temp));
+  xmlChar *attrname = xmlCharStrdup(temp.c_str());
   xmlChar *myattr = xmlTextReaderGetAttribute(reader, attrname);
-  UString result = to_ustring(reinterpret_cast<char*>(myattr));
-  xmlFree(myattr);
   xmlFree(attrname);
   if(myattr == NULL) {
+    xmlFree(myattr);
     return fallback;
-  }
-  else {
+  } else {
+    UString result = to_ustring(reinterpret_cast<char*>(myattr));
+    xmlFree(myattr);
     return result;
   }
 }
