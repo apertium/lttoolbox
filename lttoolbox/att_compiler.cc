@@ -24,6 +24,7 @@
 #include <stack>
 #include <unicode/unistr.h>
 #include <unicode/numfmt.h>
+#include <unicode/uchar.h>
 
 using namespace std;
 using namespace icu;
@@ -55,19 +56,20 @@ AttCompiler::clear()
 void
 AttCompiler::convert_hfst(UString& symbol)
 {
-  if (symbol == (const UChar*)"@0@" || symbol == (const UChar*)"ε")
+  if (symbol == "@0@"_u || symbol == "ε"_u)
   {
-    symbol = (const UChar*)"";
+    symbol.clear();
   }
-  else if (symbol == (const UChar*)"@_SPACE_@")
+  else if (symbol == "@_SPACE_@"_u)
   {
-    symbol = (const UChar*)" ";
+    symbol = " "_u;
   }
 }
 
 bool
 AttCompiler::is_word_punct(UChar symbol)
 {
+  return u_charType(symbol) & (U_NON_SPACING_MARK | U_ENCLOSING_MARK | U_COMBINING_SPACING_MARK);
   // https://en.wikipedia.org/wiki/Combining_character#Unicode_ranges
   if((symbol >= 0x0300 && symbol <= 0x036F) // Combining Diacritics
   || (symbol >= 0x1AB0 && symbol <= 0x1AFF) // ... Extended
@@ -98,17 +100,17 @@ AttCompiler::symbol_code(const UString& symbol)
     return alphabet(symbol);
   } else if (symbol.empty()) {
     return 0;
-  } else if ((iswpunct(symbol[0]) || iswspace(symbol[0])) && !is_word_punct(symbol[0])) {
+  } else if ((u_ispunct(symbol[0]) || u_isspace(symbol[0])) && !is_word_punct(symbol[0])) {
     return symbol[0];
   } else {
     letters.insert(symbol[0]);
-    if(iswlower(symbol[0]))
+    if(u_islower(symbol[0]))
     {
-      letters.insert(towupper(symbol[0]));
+      letters.insert(u_toupper(symbol[0]));
     }
-    else if(iswupper(symbol[0]))
+    else if(u_isupper(symbol[0]))
     {
-      letters.insert(towlower(symbol[0]));
+      letters.insert(u_tolower(symbol[0]));
     }
     return symbol[0];
   }
@@ -134,13 +136,13 @@ AttCompiler::parse(string const &file_name, bool read_rl)
   {
     line_number++;
     tokens.clear();
-    tokens.push_back((UChar*)"");
+    tokens.push_back(""_u);
     do {
       UChar32 c = u_fgetcx(infile);
       if (c == '\n') {
         break;
       } else if (c == '\t') {
-        tokens.push_back((UChar*)"");
+        tokens.push_back(""_u);
       } else {
         tokens.back() += c;
       }
@@ -191,8 +193,7 @@ AttCompiler::parse(string const &file_name, bool read_rl)
 
       // Add an Epsilon transition from the new starting state
       starting_node->transductions.push_back(
-         Transduction(from, (const UChar*)"", (const UChar*)"",
-                      0, default_weight));
+                     Transduction(from, ""_u, ""_u, 0, default_weight));
       first_line_in_fst = false;
     }
 
@@ -358,7 +359,7 @@ AttCompiler::classify_single_transition(Transduction& t)
     if (letters.find(t.upper[0]) != letters.end()) {
       t.type |= WORD;
     }
-    if (iswpunct(t.upper[0])) {
+    if (u_ispunct(t.upper[0])) {
       t.type |= PUNCT;
     }
   }
@@ -381,10 +382,10 @@ AttCompiler::classify_forwards()
     for(auto& t1 : n1->transductions) {
       AttNode* n2 = get_node(t1.to);
       for(auto& t2 : n2->transductions) {
-	t2.type |= t1.type;
+        t2.type |= t1.type;
       }
       if(done.find(t1.to) == done.end()) {
-	todo.push(t1.to);
+        todo.push(t1.to);
       }
     }
     done.insert(next);
@@ -449,12 +450,12 @@ AttCompiler::write(FILE *output)
   {
     Compression::multibyte_write(2, output);
   }
-  Compression::string_write((const UChar*)"main@standard", output);
+  Compression::string_write("main@standard"_u, output);
   Transducer word_fst = extract_transducer(WORD);
   word_fst.write(output);
   wcout << L"main@standard" << " " << word_fst.size();
   wcout << " " << word_fst.numberOfTransitions() << endl;
-  Compression::string_write((const UChar*)"final@inconditional", output);
+  Compression::string_write("final@inconditional"_u, output);
   if(punct_fst.numberOfTransitions() != 0)
   {
     punct_fst.write(output);

@@ -29,14 +29,13 @@ XMLParseUtil::attrib(xmlTextReaderPtr reader, UString const &name)
 }
 
 UString
-XMLParseUtil::attrib(xmlTextReaderPtr reader, UString const &name, const UString fallback)
+XMLParseUtil::attrib(xmlTextReaderPtr reader, UString const& name, const UString& fallback)
 {
   std::string temp;
   temp.reserve(name.size());
   utf8::utf16to8(name.begin(), name.end(), std::back_inserter(temp));
-  xmlChar *attrname = xmlCharStrdup(temp.c_str());
+  const xmlChar *attrname = reinterpret_cast<const xmlChar*>(temp.c_str());
   xmlChar *myattr = xmlTextReaderGetAttribute(reader, attrname);
-  xmlFree(attrname);
   if(myattr == NULL) {
     xmlFree(myattr);
     return fallback;

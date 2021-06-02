@@ -9,6 +9,8 @@ typedef std::basic_string<UChar> UString;
 
 void u_fputs(const UString& str, UFILE* output);
 
+void write(const UString& str, UFILE* output);
+
 // like std::stoi, throws invalid_argument if unable to parse
 int stoi(const UString& str);
 

@@ -43,7 +43,7 @@ void checkValidity(FSTProcessor const &fstp)
 
 int main(int argc, char *argv[])
 {
-  UFILE* input = u_finit(stdin, NULL, NULL);
+  InputFile input;
   UFILE* output = u_finit(stdout, NULL, NULL);
   LtLocale::tryToSetLocale();
   FSTProcessor fstp;
@@ -59,9 +59,7 @@ int main(int argc, char *argv[])
       }
       // follow
     case 3:
-      input = u_fopen(argv[2], "rb", NULL, NULL);
-      if(!input)
-      {
+      if (!input.open(argv[2])) {
         endProgram(argv[0]);
       }
       // follow
@@ -83,7 +81,6 @@ int main(int argc, char *argv[])
   checkValidity(fstp);
   fstp.tm_analysis(input, output);
 
-  u_fclose(input);
   u_fclose(output);
   return EXIT_SUCCESS;
 }

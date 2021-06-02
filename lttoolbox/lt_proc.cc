@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
       maxAnalyses = atoi(optarg);
       if (maxAnalyses < 1)
       {
-        wcerr << "Invalid or no argument for analyses count" << endl;
+        cerr << "Invalid or no argument for analyses count" << endl;
         exit(EXIT_FAILURE);
       }
       fstp.setMaxAnalysesValue(maxAnalyses);
@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
       maxWeightClasses = atoi(optarg);
       if (maxWeightClasses < 1)
       {
-        wcerr << "Invalid or no argument for weight class count" << endl;
+        cerr << "Invalid or no argument for weight class count" << endl;
         exit(EXIT_FAILURE);
       }
       fstp.setMaxWeightClassesValue(maxWeightClasses);
@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  UFILE* input = u_finit(stdin, NULL, NULL);
+  InputFile input;
   UFILE* output = u_finit(stdout, NULL, NULL);
   LtLocale::tryToSetLocale();
 
@@ -261,21 +261,19 @@ int main(int argc, char *argv[])
     FILE *in = fopen(argv[optind], "rb");
     if(in == NULL || ferror(in))
     {
-      wcerr << "Error: Cannot open file '" << argv[optind] << "'." << endl << endl;
+      cerr << "Error: Cannot open file '" << argv[optind] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
-    input = u_fopen(argv[optind+1], "rb", NULL, NULL);
-    if(input == NULL)
-    {
-      wcerr << "Error: Cannot open file '" << argv[optind+1] << "'." << endl << endl;
+    if (!input.open(argv[optind+1])) {
+      cerr << "Error: Cannot open file '" << argv[optind+1] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
     output = u_fopen(argv[optind+2], "wb", NULL, NULL);
     if(output == NULL)
     {
-      wcerr << "Error: Cannot open file '" << argv[optind+2] << "'." << endl << endl;
+      cerr << "Error: Cannot open file '" << argv[optind+2] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
@@ -287,14 +285,12 @@ int main(int argc, char *argv[])
     FILE *in = fopen(argv[optind], "rb");
     if(in == NULL || ferror(in))
     {
-      wcerr << "Error: Cannot open file '" << argv[optind] << "'." << endl << endl;
+      cerr << "Error: Cannot open file '" << argv[optind] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
-    input = u_fopen(argv[optind+1], "rb", NULL, NULL);
-    if(input == NULL)
-    {
-      wcerr << "Error: Cannot open file '" << argv[optind+1] << "'." << endl << endl;
+    if (!input.open(argv[optind+1])) {
+      cerr << "Error: Cannot open file '" << argv[optind+1] << "'." << endl << endl;
       exit(EXIT_FAILURE);
     }
 
@@ -306,7 +302,7 @@ int main(int argc, char *argv[])
     FILE *in = fopen(argv[optind], "rb");
     if(in == NULL || ferror(in))
     {
-      wcerr << "Error: Cannot open file '" << argv[optind] << "'." << endl << endl;
+      cerr << "Error: Cannot open file '" << argv[optind] << "'." << endl << endl;
       exit(EXIT_FAILURE);
      }
     fstp.load(in);
@@ -415,7 +411,7 @@ int main(int argc, char *argv[])
   }
   catch (exception& e)
   {
-    wcerr << e.what();
+    cerr << e.what();
     if (fstp.getNullFlush()) {
       u_fputc('\0', output);
     }
@@ -423,7 +419,6 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
-  u_fclose(input);
   u_fclose(output);
   return EXIT_SUCCESS;
 }

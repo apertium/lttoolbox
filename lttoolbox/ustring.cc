@@ -13,6 +13,13 @@ u_fputs(const UString& str, UFILE* output)
   u_fputs(str.c_str(), output);
 }
 
+void
+write(const UString& str, UFILE* output)
+{
+  // u_fputs() inserts a newline
+  u_fprintf(output, "%S", str.c_str());
+}
+
 int
 stoi(const UString& str)
 {
@@ -28,7 +35,7 @@ double
 stod(const UString& str)
 {
   double ret;
-  int c = u_sscanf(str.c_str(), "%f", &ret);
+  int c = u_sscanf(str.c_str(), "%lf", &ret);
   if (c != 1) {
     throw std::invalid_argument("unable to parse float");
   }

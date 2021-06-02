@@ -21,6 +21,8 @@
 #include <cmath>
 #include <limits>
 #include <iostream>
+#include <utf8.h>
+#include <vector>
 
 void
 Compression::writeByte(unsigned char byte, FILE *output)
@@ -256,8 +258,12 @@ Compression::multibyte_read(istream &input)
 void
 Compression::string_write(UString const &str, FILE *output)
 {
-  Compression::multibyte_write(str.size(), output);
-  for(auto c : str)
+  vector<UChar32> vec;
+  string temp;
+  utf8::utf16to8(str.begin(), str.end(), std::back_inserter(temp));
+  utf8::utf8to32(temp.begin(), temp.end(), std::back_inserter(vec));
+  Compression::multibyte_write(vec.size(), output);
+  for(auto c : vec)
   {
     Compression::multibyte_write(static_cast<int>(c), output);
   }
@@ -267,12 +273,17 @@ UString
 Compression::string_read(FILE *input)
 {
   UString retval;
+  std::vector<UChar32> vec;
 
   for(unsigned int i = 0, limit = Compression::multibyte_read(input);
       i != limit; i++)
   {
-    retval += static_cast<UChar>(Compression::multibyte_read(input));
+    vec.push_back(static_cast<UChar32>(Compression::multibyte_read(input)));
+    //retval += static_cast<UChar>(Compression::multibyte_read(input));
   }
+  string temp;
+  utf8::utf32to8(vec.begin(), vec.end(), std::back_inserter(temp));
+  utf8::utf8to16(temp.begin(), temp.end(), std::back_inserter(retval));
 
   return retval;
 }

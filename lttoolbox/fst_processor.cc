@@ -190,16 +190,16 @@ FSTProcessor::procNodeRCX()
 }
 
 UChar
-FSTProcessor::readEscaped(UFILE *input)
+FSTProcessor::readEscaped(InputFile& input)
 {
-  if(u_feof(input))
+  if(input.eof())
   {
     streamError();
   }
 
-  UChar val = static_cast<UChar>(u_fgetc(input));
+  UChar val = static_cast<UChar>(input.get());
 
-  if(u_feof(input))
+  if(input.eof())
   {
     streamError();
   }
@@ -208,15 +208,15 @@ FSTProcessor::readEscaped(UFILE *input)
 }
 
 UString
-FSTProcessor::readFullBlock(UFILE *input, UChar const delim1, UChar const delim2)
+FSTProcessor::readFullBlock(InputFile& input, UChar const delim1, UChar const delim2)
 {
   UString result;
   result += delim1;
   UChar c = delim1;
 
-  while(!u_feof(input) && c != delim2)
+  while(!input.eof() && c != delim2)
   {
-    c = static_cast<UChar>(u_fgetc(input));
+    c = static_cast<UChar>(input.get());
     result += c;
     if(c != '\\')
     {
@@ -237,15 +237,15 @@ FSTProcessor::readFullBlock(UFILE *input, UChar const delim1, UChar const delim2
 }
 
 UString
-FSTProcessor::readWblank(UFILE *input)
+FSTProcessor::readWblank(InputFile& input)
 {
   UString result;
   result += "[["_u;
   UChar c = 0;
 
-  while(!u_feof(input))
+  while(!input.eof())
   {
-    c = static_cast<UChar>(u_fgetc(input));
+    c = static_cast<UChar>(input.get());
     result += c;
 
     if(c == '\\')
@@ -254,7 +254,7 @@ FSTProcessor::readWblank(UFILE *input)
     }
     else if(c == ']')
     {
-      c = static_cast<UChar>(u_fgetc(input));
+      c = static_cast<UChar>(input.get());
       result += c;
 
       if(c == ']')
@@ -273,15 +273,15 @@ FSTProcessor::readWblank(UFILE *input)
 }
 
 bool
-FSTProcessor::wblankPostGen(UFILE *input, UFILE *output)
+FSTProcessor::wblankPostGen(InputFile& input, UFILE *output)
 {
   UString result;
   result += "[["_u;
   UChar c = 0;
 
-  while(!u_feof(input))
+  while(!input.eof())
   {
-    c = static_cast<UChar>(u_fgetc(input));
+    c = static_cast<UChar>(input.get());
     result += c;
 
     if(c == '\\')
@@ -290,7 +290,7 @@ FSTProcessor::wblankPostGen(UFILE *input, UFILE *output)
     }
     else if(c == ']')
     {
-      c = static_cast<UChar>(u_fgetc(input));
+      c = static_cast<UChar>(input.get());
       result += c;
 
       if(c == ']')
@@ -298,12 +298,12 @@ FSTProcessor::wblankPostGen(UFILE *input, UFILE *output)
         int resultlen = result.size();
         if(result[resultlen-5] == '[' && result[resultlen-4] == '[' && result[resultlen-3] == '/') //ending blank [[/]]
         {
-          u_fputs(result.c_str(), output);
+          write(result, output);
           break;
         }
         else
         {
-          c = static_cast<UChar>(u_fgetc(input));
+          c = static_cast<UChar>(input.get());
           if(c == '~')
           {
             wblankqueue.push(result);
@@ -327,25 +327,27 @@ FSTProcessor::wblankPostGen(UFILE *input, UFILE *output)
 }
 
 int
-FSTProcessor::readAnalysis(UFILE *input)
+FSTProcessor::readAnalysis(InputFile& input)
 {
   if(!input_buffer.isEmpty())
   {
     return input_buffer.next();
   }
 
-  UChar val = static_cast<UChar>(u_fgetc(input));
+  UChar val = input.get();
   int altval = 0;
-  if(u_feof(input))
+  if(input.eof())
   {
     input_buffer.add(0);        // so it's treated like the NUL byte
     return 0;
+  } else if(val == U_EOF) {
+    val = 0;
   }
 
   if((useIgnoredChars || useDefaultIgnoredChars) && ignored_chars.find(val) != ignored_chars.end())
   {
     input_buffer.add(val);
-    val = static_cast<UChar>(u_fgetc(input));
+    val = static_cast<UChar>(input.get());
   }
 
   if(escaped_chars.find(val) != escaped_chars.end())
@@ -358,7 +360,7 @@ FSTProcessor::readAnalysis(UFILE *input)
         return altval;
 
       case '[':
-        val = static_cast<UChar>(u_fgetc(input));
+        val = static_cast<UChar>(input.get());
 
         if(val == '[')
         {
@@ -366,7 +368,7 @@ FSTProcessor::readAnalysis(UFILE *input)
         }
         else
         {
-          u_fungetc(val, input);
+          input.unget(val);
           blankqueue.push(readFullBlock(input, '[', ']'));
         }
 
@@ -374,7 +376,7 @@ FSTProcessor::readAnalysis(UFILE *input)
         return static_cast<int>(' ');
 
       case '\\':
-        val = static_cast<UChar>(u_fgetc(input));
+        val = static_cast<UChar>(input.get());
         input_buffer.add(static_cast<int>(val));
         return val;
 
@@ -391,7 +393,7 @@ FSTProcessor::readAnalysis(UFILE *input)
 }
 
 int
-FSTProcessor::readTMAnalysis(UFILE *input)
+FSTProcessor::readTMAnalysis(InputFile& input)
 {
   isLastBlankTM = false;
   if(!input_buffer.isEmpty())
@@ -399,9 +401,9 @@ FSTProcessor::readTMAnalysis(UFILE *input)
     return input_buffer.next();
   }
 
-  UChar val = static_cast<UChar>(u_fgetc(input));
+  UChar val = static_cast<UChar>(input.get());
   int altval = 0;
-  if(u_feof(input))
+  if(input.eof())
   {
     return 0;
   }
@@ -416,7 +418,7 @@ FSTProcessor::readTMAnalysis(UFILE *input)
         return altval;
 
       case '[':
-        val = static_cast<UChar>(u_fgetc(input));
+        val = static_cast<UChar>(input.get());
 
         if(val == '[')
         {
@@ -424,7 +426,7 @@ FSTProcessor::readTMAnalysis(UFILE *input)
         }
         else
         {
-          u_fungetc(val, input);
+          input.unget(val);
           blankqueue.push(readFullBlock(input, '[', ']'));
         }
 
@@ -433,7 +435,7 @@ FSTProcessor::readTMAnalysis(UFILE *input)
         return static_cast<int>(' ');
 
       case '\\':
-        val = static_cast<UChar>(u_fgetc(input));
+        val = static_cast<UChar>(input.get());
         input_buffer.add(static_cast<int>(val));
         return val;
       case '0':
@@ -451,9 +453,9 @@ FSTProcessor::readTMAnalysis(UFILE *input)
           do
           {
             ws += val;
-            val = static_cast<UChar>(u_fgetc(input));
+            val = static_cast<UChar>(input.get());
           } while(iswdigit(val));
-          u_fungetc(val, input);
+          input.unget(val);
           input_buffer.add(alphabet("<n>"_u));
           numbers.push_back(ws);
           return alphabet("<n>"_u);
@@ -470,17 +472,17 @@ FSTProcessor::readTMAnalysis(UFILE *input)
 }
 
 int
-FSTProcessor::readPostgeneration(UFILE *input, UFILE *output)
+FSTProcessor::readPostgeneration(InputFile& input, UFILE *output)
 {
   if(!input_buffer.isEmpty())
   {
     return input_buffer.next();
   }
 
-  UChar val = static_cast<UChar>(u_fgetc(input));
+  UChar val = static_cast<UChar>(input.get());
   int altval = 0;
   is_wblank = false;
-  if(u_feof(input))
+  if(input.eof())
   {
     return 0;
   }
@@ -493,7 +495,7 @@ FSTProcessor::readPostgeneration(UFILE *input, UFILE *output)
       return altval;
 
     case '[':
-      val = static_cast<UChar>(u_fgetc(input));
+      val = static_cast<UChar>(input.get());
 
       if(val == '[')
       {
@@ -515,7 +517,7 @@ FSTProcessor::readPostgeneration(UFILE *input, UFILE *output)
       }
       else
       {
-        u_fungetc(val, input);
+        input.unget(val);
         blankqueue.push(readFullBlock(input, '[', ']'));
 
         input_buffer.add(static_cast<int>(' '));
@@ -523,7 +525,7 @@ FSTProcessor::readPostgeneration(UFILE *input, UFILE *output)
       }
 
     case '\\':
-      val = static_cast<UChar>(u_fgetc(input));
+      val = static_cast<UChar>(input.get());
       input_buffer.add(static_cast<int>(val));
       return val;
 
@@ -534,12 +536,12 @@ FSTProcessor::readPostgeneration(UFILE *input, UFILE *output)
 }
 
 void
-FSTProcessor::skipUntil(UFILE *input, UFILE *output, wint_t const character)
+FSTProcessor::skipUntil(InputFile& input, UFILE *output, wint_t const character)
 {
   while(true)
   {
-    wint_t val = u_fgetc(input);
-    if(u_feof(input))
+    wint_t val = input.get();
+    if(input.eof())
     {
       return;
     }
@@ -547,8 +549,8 @@ FSTProcessor::skipUntil(UFILE *input, UFILE *output, wint_t const character)
     switch(val)
     {
       case '\\':
-        val = u_fgetc(input);
-        if(u_feof(input))
+        val = input.get();
+        if(input.eof())
         {
           return;
         }
@@ -579,11 +581,11 @@ FSTProcessor::skipUntil(UFILE *input, UFILE *output, wint_t const character)
 }
 
 int
-FSTProcessor::readGeneration(UFILE *input, UFILE *output)
+FSTProcessor::readGeneration(InputFile& input, UFILE *output)
 {
-  wint_t val = u_fgetc(input);
+  wint_t val = input.get();
 
-  if(u_feof(input))
+  if(input.eof())
   {
     return 0x7fffffff;
   }
@@ -592,8 +594,8 @@ FSTProcessor::readGeneration(UFILE *input, UFILE *output)
   {
     if(val == '^')
     {
-      val = u_fgetc(input);
-      if(u_feof(input))
+      val = input.get();
+      if(input.eof())
       {
         return 0x7fffffff;
       }
@@ -601,15 +603,15 @@ FSTProcessor::readGeneration(UFILE *input, UFILE *output)
     else if(val == '\\')
     {
       u_fputc(val, output);
-      val = u_fgetc(input);
-      if(u_feof(input))
+      val = input.get();
+      if(input.eof())
       {
         return 0x7fffffff;
       }
       u_fputc(val,output);
       skipUntil(input, output, '^');
-      val = u_fgetc(input);
-      if(u_feof(input))
+      val = input.get();
+      if(input.eof())
       {
         return 0x7fffffff;
       }
@@ -618,8 +620,8 @@ FSTProcessor::readGeneration(UFILE *input, UFILE *output)
     {
       u_fputc(val, output);
       skipUntil(input, output, '^');
-      val = u_fgetc(input);
-      if(u_feof(input))
+      val = input.get();
+      if(input.eof())
       {
         return 0x7fffffff;
       }
@@ -629,7 +631,7 @@ FSTProcessor::readGeneration(UFILE *input, UFILE *output)
 
   if(val == '\\')
   {
-    val = u_fgetc(input);
+    val = input.get();
     return static_cast<int>(val);
   }
   else if(val == '$')
@@ -642,9 +644,9 @@ FSTProcessor::readGeneration(UFILE *input, UFILE *output)
     UString cad;
     cad += static_cast<UChar>(val);
 
-    while((val = u_fgetc(input)) != '>')
+    while((val = input.get()) != '>')
     {
-      if(u_feof(input))
+      if(input.eof())
       {
         streamError();
       }
@@ -656,15 +658,15 @@ FSTProcessor::readGeneration(UFILE *input, UFILE *output)
   }
   else if(val == '[')
   {
-    val = u_fgetc(input);
+    val = input.get();
     if(val == '[')
     {
-      u_fputs(readWblank(input).c_str(), output);
+      write(readWblank(input), output);
     }
     else
     {
-      u_fungetc(val, input);
-      u_fputs(readFullBlock(input, '[', ']').c_str(), output);
+      input.unget(val);
+      write(readFullBlock(input, '[', ']'), output);
     }
 
     return readGeneration(input, output);
@@ -678,12 +680,12 @@ FSTProcessor::readGeneration(UFILE *input, UFILE *output)
 }
 
 pair<UString, int>
-FSTProcessor::readBilingual(UFILE *input, UFILE *output)
+FSTProcessor::readBilingual(InputFile& input, UFILE *output)
 {
-  wint_t val = u_fgetc(input);
+  wint_t val = input.get();
   UString symbol;
 
-  if(u_feof(input))
+  if(input.eof())
   {
     return pair<UString, int>(symbol, 0x7fffffff);
   }
@@ -692,8 +694,8 @@ FSTProcessor::readBilingual(UFILE *input, UFILE *output)
   {
     if(val == '^')
     {
-      val = u_fgetc(input);
-      if(u_feof(input))
+      val = input.get();
+      if(input.eof())
       {
         return pair<UString, int>(symbol, 0x7fffffff);
       }
@@ -701,15 +703,15 @@ FSTProcessor::readBilingual(UFILE *input, UFILE *output)
     else if(val == '\\')
     {
       u_fputc(val, output);
-      val = u_fgetc(input);
-      if(u_feof(input))
+      val = input.get();
+      if(input.eof())
       {
         return pair<UString, int>(symbol, 0x7fffffff);
       }
       u_fputc(val,output);
       skipUntil(input, output, '^');
-      val = u_fgetc(input);
-      if(u_feof(input))
+      val = input.get();
+      if(input.eof())
       {
         return pair<UString, int>(symbol, 0x7fffffff);
       }
@@ -718,8 +720,8 @@ FSTProcessor::readBilingual(UFILE *input, UFILE *output)
     {
       u_fputc(val, output);
       skipUntil(input, output, '^');
-      val = u_fgetc(input);
-      if(u_feof(input))
+      val = input.get();
+      if(input.eof())
       {
         return pair<UString, int>(symbol, 0x7fffffff);
       }
@@ -729,7 +731,7 @@ FSTProcessor::readBilingual(UFILE *input, UFILE *output)
 
   if(val == '\\')
   {
-    val = u_fgetc(input);
+    val = input.get();
     return pair<UString, int>(symbol, val);
   }
   else if(val == '$')
@@ -741,9 +743,9 @@ FSTProcessor::readBilingual(UFILE *input, UFILE *output)
   {
     UString cad;
     cad += static_cast<UChar>(val);
-    while((val = u_fgetc(input)) != '>')
+    while((val = input.get()) != '>')
     {
-      if(u_feof(input))
+      if(input.eof())
       {
         streamError();
       }
@@ -761,15 +763,15 @@ FSTProcessor::readBilingual(UFILE *input, UFILE *output)
   }
   else if(val == '[')
   {
-    val = u_fgetc(input);
+    val = input.get();
     if(val == '[')
     {
-      u_fputs(readWblank(input).c_str(), output);
+      write(readWblank(input), output);
     }
     else
     {
-      u_fungetc(val, input);
-      u_fputs(readFullBlock(input, '[', ']').c_str(), output);
+      input.unget(val);
+      write(readFullBlock(input, '[', ']'), output);
     }
 
     return readBilingual(input, output);
@@ -783,7 +785,7 @@ FSTProcessor::flushBlanks(UFILE *output)
 {
   for(size_t i = blankqueue.size(); i > 0; i--)
   {
-    u_fputs(blankqueue.front().c_str(), output);
+    write(blankqueue.front(), output);
     blankqueue.pop();
   }
 }
@@ -793,7 +795,7 @@ FSTProcessor::flushWblanks(UFILE *output)
 {
   while(wblankqueue.size() > 0)
   {
-    u_fputs(wblankqueue.front().c_str(), output);
+    write(wblankqueue.front(), output);
     wblankqueue.pop();
   }
 }
@@ -938,7 +940,7 @@ FSTProcessor::writeEscapedWithTags(UString const &str, UFILE *output)
   {
     if(str[i] == '<' && i >=1 && str[i-1] != '\\')
     {
-      u_fputs(str.substr(i).c_str(), output);
+      write(str.substr(i), output);
       return;
     }
 
@@ -957,7 +959,7 @@ FSTProcessor::printWord(UString const &sf, UString const &lf, UFILE *output)
 {
   u_fputc('^', output);
   writeEscaped(sf, output);
-  u_fputs(lf.c_str(), output);
+  write(lf, output);
   u_fputc('$', output);
 }
 
@@ -966,11 +968,10 @@ FSTProcessor::printWordPopBlank(UString const &sf, UString const &lf, UFILE *out
 {
   u_fputc('^', output);
   size_t postpop = writeEscapedPopBlanks(sf, output);
-  u_fputs(lf.c_str(), output);
-  u_fputc('$', output);
+  u_fprintf(output, "%S$", lf.c_str());
   while (postpop-- && blankqueue.size() > 0)
   {
-    u_fputs(blankqueue.front().c_str(), output);
+    write(blankqueue.front(), output);
     blankqueue.pop();
   }
 }
@@ -978,10 +979,7 @@ FSTProcessor::printWordPopBlank(UString const &sf, UString const &lf, UFILE *out
 void
 FSTProcessor::printWordBilingual(UString const &sf, UString const &lf, UFILE *output)
 {
-  u_fputc('^', output);
-  u_fputs(sf.c_str(), output);
-  u_fputs(lf.c_str(), output);
-  u_fputc('$', output);
+  u_fprintf(output, "^%S%S$", sf.c_str(), lf.c_str());
 }
 
 void
@@ -1208,7 +1206,7 @@ FSTProcessor::initDecomposition()
 }
 
 void
-FSTProcessor::analysis(UFILE *input, UFILE *output)
+FSTProcessor::analysis(InputFile& input, UFILE *output)
 {
   if(getNullFlush())
   {
@@ -1229,6 +1227,7 @@ FSTProcessor::analysis(UFILE *input, UFILE *output)
   do
   {
     val = readAnalysis(input);
+    cerr << "val is " << val << endl;
     // test for final states
     if(current_state.isFinal(all_finals))
     {
@@ -1365,11 +1364,11 @@ FSTProcessor::analysis(UFILE *input, UFILE *output)
     {
       if(!isAlphabetic(val) && sf.empty())
       {
-        if(iswspace(val))
+        if(u_isspace(val))
         {
           if (blankqueue.size() > 0)
           {
-            u_fputs(blankqueue.front().c_str(), output);
+            write(blankqueue.front(), output);
             blankqueue.pop();
           }
           else
@@ -1527,10 +1526,10 @@ FSTProcessor::analysis(UFILE *input, UFILE *output)
 }
 
 void
-FSTProcessor::analysis_wrapper_null_flush(UFILE *input, UFILE *output)
+FSTProcessor::analysis_wrapper_null_flush(InputFile& input, UFILE *output)
 {
   setNullFlush(false);
-  while(!u_feof(input))
+  while(!input.eof())
   {
     analysis(input, output);
     u_fputc('\0', output);
@@ -1539,13 +1538,13 @@ FSTProcessor::analysis_wrapper_null_flush(UFILE *input, UFILE *output)
 }
 
 void
-FSTProcessor::generation_wrapper_null_flush(UFILE *input, UFILE *output,
+FSTProcessor::generation_wrapper_null_flush(InputFile& input, UFILE *output,
                                             GenerationMode mode)
 {
   setNullFlush(false);
   nullFlushGeneration = true;
 
-  while(!u_feof(input))
+  while(!input.eof())
   {
     generation(input, output, mode);
     u_fputc('\0', output);
@@ -1554,10 +1553,10 @@ FSTProcessor::generation_wrapper_null_flush(UFILE *input, UFILE *output,
 }
 
 void
-FSTProcessor::postgeneration_wrapper_null_flush(UFILE *input, UFILE *output)
+FSTProcessor::postgeneration_wrapper_null_flush(InputFile& input, UFILE *output)
 {
   setNullFlush(false);
-  while(!u_feof(input))
+  while(!input.eof())
   {
     postgeneration(input, output);
     u_fputc('\0', output);
@@ -1566,10 +1565,10 @@ FSTProcessor::postgeneration_wrapper_null_flush(UFILE *input, UFILE *output)
 }
 
 void
-FSTProcessor::intergeneration_wrapper_null_flush(UFILE *input, UFILE *output)
+FSTProcessor::intergeneration_wrapper_null_flush(InputFile& input, UFILE *output)
 {
   setNullFlush(false);
-  while (!u_feof(input))
+  while (!input.eof())
   {
     intergeneration(input, output);
     u_fputc('\0', output);
@@ -1578,10 +1577,10 @@ FSTProcessor::intergeneration_wrapper_null_flush(UFILE *input, UFILE *output)
 }
 
 void
-FSTProcessor::transliteration_wrapper_null_flush(UFILE *input, UFILE *output)
+FSTProcessor::transliteration_wrapper_null_flush(InputFile& input, UFILE *output)
 {
   setNullFlush(false);
-  while(!u_feof(input))
+  while(!input.eof())
   {
     transliteration(input, output);
     u_fputc('\0', output);
@@ -1590,7 +1589,7 @@ FSTProcessor::transliteration_wrapper_null_flush(UFILE *input, UFILE *output)
 }
 
 void
-FSTProcessor::tm_analysis(UFILE *input, UFILE *output)
+FSTProcessor::tm_analysis(InputFile& input, UFILE *output)
 {
   State current_state = initial_state;
   UString lf;     //lexical form
@@ -1682,12 +1681,12 @@ FSTProcessor::tm_analysis(UFILE *input, UFILE *output)
 
         if(val == 0)
         {
-          u_fputs(sf.c_str(), output);
+          write(sf, output);
           return;
         }
 
         input_buffer.back(1);
-        u_fputs(sf.c_str(), output);
+        write(sf, output);
 
         while(blankqueue.size() > 0)
         {
@@ -1703,7 +1702,7 @@ FSTProcessor::tm_analysis(UFILE *input, UFILE *output)
         unsigned int size = sf.size();
         limit = (limit == static_cast<unsigned int>(UString::npos)?size:limit);
         input_buffer.back(1+(size-limit));
-        u_fputs(sf.substr(0, limit).c_str(), output);
+        write(sf.substr(0, limit), output);
 */      }
       else if(lf.empty())
       {
@@ -1711,10 +1710,10 @@ FSTProcessor::tm_analysis(UFILE *input, UFILE *output)
         unsigned int size = sf.size();
         limit = (limit == static_cast<unsigned int >(UString::npos)?size:limit);
         input_buffer.back(1+(size-limit));
-        u_fputs(sf.substr(0, limit).c_str(), output);
+        write(sf.substr(0, limit), output);
 */
         input_buffer.back(1);
-        u_fputs(sf.c_str(), output);
+        write(sf, output);
 
         while(blankqueue.size() > 0)
         {
@@ -1728,9 +1727,7 @@ FSTProcessor::tm_analysis(UFILE *input, UFILE *output)
       }
       else
       {
-        u_fputc('[', output);
-        u_fputs(lf.c_str(), output);
-        u_fputc(']', output);
+        u_fprintf(output, "[%S]", lf.c_str());
         input_buffer.setPos(last);
         input_buffer.back(1);
       }
@@ -1747,7 +1744,7 @@ FSTProcessor::tm_analysis(UFILE *input, UFILE *output)
 
 
 void
-FSTProcessor::generation(UFILE *input, UFILE *output, GenerationMode mode)
+FSTProcessor::generation(InputFile& input, UFILE *output, GenerationMode mode)
 {
   if(getNullFlush())
   {
@@ -1832,10 +1829,10 @@ FSTProcessor::generation(UFILE *input, UFILE *output, GenerationMode mode)
           u_fputc('^', output);
         }
 
-        u_fputs(current_state.filterFinals(all_finals, alphabet,
-                                                   escaped_chars,
-                                                   displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                                   uppercase, firstupper).substr(1).c_str(), output);
+        write(current_state.filterFinals(all_finals, alphabet,
+                                         escaped_chars,
+                                         displayWeightsMode, maxAnalyses, maxWeightClasses,
+                                         uppercase, firstupper).substr(1), output);
         if(mode == gm_tagged || mode == gm_tagged_nm)
         {
           u_fputc('/', output);
@@ -1916,7 +1913,7 @@ FSTProcessor::generation(UFILE *input, UFILE *output, GenerationMode mode)
 }
 
 void
-FSTProcessor::postgeneration(UFILE *input, UFILE *output)
+FSTProcessor::postgeneration(InputFile& input, UFILE *output)
 {
   if(getNullFlush())
   {
@@ -1950,7 +1947,7 @@ FSTProcessor::postgeneration(UFILE *input, UFILE *output)
       {
         if(need_end_wblank)
         {
-          u_fputs("[[/]]"_u, output);
+          write("[[/]]"_u, output);
           need_end_wblank = false;
         }
 
@@ -1971,7 +1968,7 @@ FSTProcessor::postgeneration(UFILE *input, UFILE *output)
 
         if(need_end_wblank)
         {
-          u_fputs("[[/]]"_u, output);
+          write("[[/]]"_u, output);
           need_end_wblank = false;
         }
       }
@@ -2060,7 +2057,7 @@ FSTProcessor::postgeneration(UFILE *input, UFILE *output)
       else
       {
         UString final_wblank = combineWblanks();
-        u_fputs(final_wblank.c_str(), output);
+        write(final_wblank, output);
 
         if(lf.empty())
         {
@@ -2082,11 +2079,11 @@ FSTProcessor::postgeneration(UFILE *input, UFILE *output)
 
           if(space_index != sf.size())
           {
-            u_fputs(sf.substr(1, space_index-1).c_str(), output);
+            write(sf.substr(1, space_index-1), output);
 
             if(need_end_wblank)
             {
-              u_fputs("[[/]]"_u, output);
+              write("[[/]]"_u, output);
               need_end_wblank = false;
               u_fputc(sf[space_index], output);
               flushWblanks(output);
@@ -2096,12 +2093,12 @@ FSTProcessor::postgeneration(UFILE *input, UFILE *output)
               u_fputc(sf[space_index], output);
             }
 
-            u_fputs(sf.substr(space_index+1, mark-space_index-1).c_str(), output);
+            write(sf.substr(space_index+1, mark-space_index-1), output);
           }
           else
           {
             flushWblanks(output);
-            u_fputs(sf.substr(1, mark-1).c_str(), output);
+            write(sf.substr(1, mark-1), output);
           }
 
           if(mark == sf.size())
@@ -2115,7 +2112,7 @@ FSTProcessor::postgeneration(UFILE *input, UFILE *output)
         }
         else
         {
-          u_fputs(lf.substr(1,lf.size()-3).c_str(), output);
+          write(lf.substr(1,lf.size()-3), output);
           input_buffer.setPos(last);
           input_buffer.back(2);
           val = lf[lf.size()-2];
@@ -2147,7 +2144,7 @@ FSTProcessor::postgeneration(UFILE *input, UFILE *output)
 }
 
 void
-FSTProcessor::intergeneration(UFILE *input, UFILE *output)
+FSTProcessor::intergeneration(InputFile& input, UFILE *output)
 {
   if (getNullFlush())
   {
@@ -2226,7 +2223,7 @@ FSTProcessor::intergeneration(UFILE *input, UFILE *output)
           if (val == '\0')
           {
             // flush source
-            u_fputs(source.c_str(), output);
+            write(source, output);
           }
           else
           {
@@ -2296,7 +2293,7 @@ FSTProcessor::intergeneration(UFILE *input, UFILE *output)
 }
 
 void
-FSTProcessor::transliteration(UFILE *input, UFILE *output)
+FSTProcessor::transliteration(InputFile& input, UFILE *output)
 {
   if(getNullFlush())
   {
@@ -2319,7 +2316,7 @@ FSTProcessor::transliteration(UFILE *input, UFILE *output)
                                       uppercase, firstupper, 0);
       if(!lf.empty())
       {
-        u_fputs(lf.substr(1).c_str(), output);
+        write(lf.substr(1), output);
         current_state = initial_state;
         lf.clear();
         sf.clear();
@@ -2358,7 +2355,7 @@ FSTProcessor::transliteration(UFILE *input, UFILE *output)
       {
         if(!lf.empty())
         {
-          u_fputs(lf.substr(1).c_str(), output);
+          write(lf.substr(1), output);
           input_buffer.setPos(last);
           input_buffer.back(1);
           val = lf[lf.size()-1];
@@ -2719,12 +2716,12 @@ FSTProcessor::biltrans(UString const &input_word, bool with_delim)
 }
 
 void
-FSTProcessor::bilingual_wrapper_null_flush(UFILE *input, UFILE *output, GenerationMode mode)
+FSTProcessor::bilingual_wrapper_null_flush(InputFile& input, UFILE *output, GenerationMode mode)
 {
   setNullFlush(false);
   nullFlushGeneration = true;
 
-  while(!u_feof(input))
+  while(!input.eof())
   {
     bilingual(input, output, mode);
     u_fputc('\0', output);
@@ -2755,7 +2752,7 @@ FSTProcessor::compose(UString const &lexforms, UString const &queue) const
 }
 
 void
-FSTProcessor::bilingual(UFILE *input, UFILE *output, GenerationMode mode)
+FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
 {
   if(getNullFlush())
   {
@@ -3260,15 +3257,15 @@ FSTProcessor::valid() const
 }
 
 int
-FSTProcessor::readSAO(UFILE *input)
+FSTProcessor::readSAO(InputFile& input)
 {
   if(!input_buffer.isEmpty())
   {
     return input_buffer.next();
   }
 
-  UChar val = static_cast<UChar>(u_fgetc(input));
-  if(u_feof(input))
+  UChar val = static_cast<UChar>(input.get());
+  if(input.eof())
   {
     return 0;
   }
@@ -3294,7 +3291,7 @@ FSTProcessor::readSAO(UFILE *input)
       }
     }
     else if (val == '\\') {
-      val = static_cast<UChar>(u_fgetc(input));
+      val = static_cast<UChar>(input.get());
       if(isEscaped(val))
       {
         input_buffer.add(val);
@@ -3327,7 +3324,7 @@ FSTProcessor::printSAOWord(UString const &lf, UFILE *output)
 }
 
 void
-FSTProcessor::SAO(UFILE *input, UFILE *output)
+FSTProcessor::SAO(InputFile& input, UFILE *output)
 {
   bool last_incond = false;
   bool last_postblank = false;

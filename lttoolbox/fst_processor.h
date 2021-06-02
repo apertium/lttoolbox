@@ -24,6 +24,7 @@
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/state.h>
 #include <lttoolbox/trans_exe.h>
+#include <lttoolbox/input_file.h>
 #include <libxml/xmlreader.h>
 
 #include <cwchar>
@@ -262,7 +263,7 @@ private:
    * @param input the stream to read from
    * @return code of the character
    */
-  UChar readEscaped(UFILE *input);
+  UChar readEscaped(InputFile& input);
 
   /**
    * Reads a block from the stream input, enclosed by delim1 and delim2
@@ -270,13 +271,13 @@ private:
    * @param delim1 the delimiter of the beginning of the sequence
    * @param delim1 the delimiter of the end of the sequence
    */
-  UString readFullBlock(UFILE *input, UChar const delim1, UChar const delim2);
+  UString readFullBlock(InputFile& input, UChar const delim1, UChar const delim2);
 
   /**
    * Reads a wordbound blank from the stream input
    * @param input the stream being read
    */
-  UString readWblank(UFILE *input);
+  UString readWblank(InputFile& input);
 
   /**
    * Reads a wordbound blank (opening blank to closing blank) from the stream input -> [[...]]xyz[[/]]
@@ -284,7 +285,7 @@ private:
    * @param output the stream to write on
    * @return true if the word enclosed by the wordbound blank has a ~ for postgeneration activation
    */
-  bool wblankPostGen(UFILE *input, UFILE *output);
+  bool wblankPostGen(InputFile& input, UFILE *output);
 
   /**
    * Returns true if the character code is identified as alphabetic
@@ -305,7 +306,7 @@ private:
    * @param input the stream to read
    * @return the next symbol in the stream
    */
-  int readAnalysis(UFILE *input);
+  int readAnalysis(InputFile& input);
 
   /**
    * Read text from stream (decomposition version)
@@ -313,7 +314,7 @@ private:
    * @param output the stream to write on
    * @return the next symbol in the stream
    */
-  int readDecomposition(UFILE *input, UFILE *output);
+  int readDecomposition(InputFile& input, UFILE *output);
 
   /**
    * Read text from stream (postgeneration version)
@@ -321,7 +322,7 @@ private:
    * @param output the stream to write on
    * @return the next symbol in the stream
    */
-  int readPostgeneration(UFILE *input, UFILE *output);
+  int readPostgeneration(InputFile& input, UFILE *output);
 
   /**
    * Read text from stream (generation version)
@@ -329,7 +330,7 @@ private:
    * @param output the stream being written to
    * @return the next symbol in the stream
    */
-  int readGeneration(UFILE *input, UFILE *output);
+  int readGeneration(InputFile& input, UFILE *output);
 
   /**
    * Read text from stream (biltrans version)
@@ -337,14 +338,14 @@ private:
    * @param output the stream to write on
    * @return the queue of 0-symbols, and the next symbol in the stream
    */
-  pair<UString, int> readBilingual(UFILE *input, UFILE *output);
+  pair<UString, int> readBilingual(InputFile& input, UFILE *output);
 
   /**
    * Read text from stream (SAO version)
    * @param input the stream to read
    * @return the next symbol in the stream
    */
-  int readSAO(UFILE *input);
+  int readSAO(InputFile& input);
 
   /**
    * Flush all the blanks remaining in the current process
@@ -453,7 +454,7 @@ private:
   void initDecompositionSymbols();
 
   vector<UString> numbers;
-  int readTMAnalysis(UFILE *input);
+  int readTMAnalysis(InputFile& input);
 
   unsigned int lastBlank(UString const &str);
 
@@ -465,18 +466,18 @@ private:
    */
   void printSpace(UChar const val, UFILE *output);
 
-  void skipUntil(UFILE *input, UFILE *output, wint_t const character);
+  void skipUntil(InputFile& input, UFILE *output, wint_t const character);
   static UString removeTags(UString const &str);
   UString compoundAnalysis(UString str, bool uppercase, bool firstupper);
   size_t firstNotAlpha(UString const &sf);
 
-  void analysis_wrapper_null_flush(UFILE *input, UFILE *output);
-  void bilingual_wrapper_null_flush(UFILE *input, UFILE *output, GenerationMode mode = gm_unknown);
-  void generation_wrapper_null_flush(UFILE *input, UFILE *output,
+  void analysis_wrapper_null_flush(InputFile& input, UFILE *output);
+  void bilingual_wrapper_null_flush(InputFile& input, UFILE *output, GenerationMode mode = gm_unknown);
+  void generation_wrapper_null_flush(InputFile& input, UFILE *output,
                                      GenerationMode mode);
-  void postgeneration_wrapper_null_flush(UFILE *input, UFILE *output);
-  void intergeneration_wrapper_null_flush(UFILE *input, UFILE *output);
-  void transliteration_wrapper_null_flush(UFILE *input, UFILE *output);
+  void postgeneration_wrapper_null_flush(InputFile& input, UFILE *output);
+  void intergeneration_wrapper_null_flush(InputFile& input, UFILE *output);
+  void transliteration_wrapper_null_flush(InputFile& input, UFILE *output);
 
   UString compose(UString const &lexforms, UString const &queue) const;
 
@@ -498,18 +499,18 @@ public:
   void initBiltrans();
   void initDecomposition();
 
-  void analysis(UFILE *input, UFILE *output);
-  void tm_analysis(UFILE *input, UFILE *output);
-  void generation(UFILE *input, UFILE *output, GenerationMode mode = gm_unknown);
-  void postgeneration(UFILE *input, UFILE *output);
-  void intergeneration(UFILE *input, UFILE *output);
-  void transliteration(UFILE *input, UFILE *output);
+  void analysis(InputFile& input, UFILE *output);
+  void tm_analysis(InputFile& input, UFILE *output);
+  void generation(InputFile& input, UFILE *output, GenerationMode mode = gm_unknown);
+  void postgeneration(InputFile& input, UFILE *output);
+  void intergeneration(InputFile& input, UFILE *output);
+  void transliteration(InputFile& input, UFILE *output);
   UString biltrans(UString const &input_word, bool with_delim = true);
   UString biltransfull(UString const &input_word, bool with_delim = true);
-  void bilingual(UFILE *input, UFILE *output, GenerationMode mode = gm_unknown);
+  void bilingual(InputFile& input, UFILE *output, GenerationMode mode = gm_unknown);
   pair<UString, int> biltransWithQueue(UString const &input_word, bool with_delim = true);
   UString biltransWithoutQueue(UString const &input_word, bool with_delim = true);
-  void SAO(UFILE *input, UFILE *output);
+  void SAO(InputFile& input, UFILE *output);
   void parseICX(string const &file);
   void parseRCX(string const &file);
 
