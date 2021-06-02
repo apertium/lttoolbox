@@ -1227,7 +1227,6 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
   do
   {
     val = readAnalysis(input);
-    cerr << "val is " << val << endl;
     // test for final states
     if(current_state.isFinal(all_finals))
     {

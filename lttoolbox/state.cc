@@ -539,9 +539,11 @@ State::filterFinals(map<Node *, double> const &finals,
     result += it->first;
     if(display_weights)
     {
-      UChar* temp;
+      UChar* temp = new UChar[16];
+      // if anyone wants a weight of 10000, this will not be enough
       u_sprintf(temp, "<W:%f>", it->second);
       result += temp;
+      delete temp;
     }
   }
 
