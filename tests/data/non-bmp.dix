@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+	<alphabet>𐅀𐅁𐅂𐅃𐅄𐅅𐅆𐅇𐅈𐅉𐅊𐅋𐅌𐅍𐅎𐅏</alphabet>
+	<sdefs>
+		<sdef n="num"/>
+	</sdefs>
+	<pardefs>
+		<pardef n="num">
+			<e><p><l></l><r><s n="num"/></r></p></e>
+		</pardef>
+	</pardefs>
+	<section id="main" type="standard">
+		<e><re>[𐅀𐅁𐅂𐅃𐅄𐅅𐅆𐅇𐅈𐅉𐅊𐅋𐅌𐅍𐅎𐅏]+</re><par n="num"/></e>
+	</section>
+</dictionary>
