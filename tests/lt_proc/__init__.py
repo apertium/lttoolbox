@@ -148,8 +148,8 @@ class PostgenerationBasicTest(ProcTest):
                         "El perro ~de el amigo.",
                         "abc ~les testword"]
     expectedOutputs = [ "xyz ejemplo u ho nombre.",
-                        "xyz se la pelota.", 
-                        "El perro del amigo.", 
+                        "xyz se la pelota.",
+                        "El perro del amigo.",
                         "abc le pe test testword"]
 
 class PostgenerationWordboundBlankTest(ProcTest):
@@ -218,6 +218,12 @@ class SpaceAtEOF(ProcTest):
     expectedOutputs = ['^./.<sent>$ ']
     procflags = []              # type: List[str]
     flushing = False
+
+
+class NonBMPTest(ProcTest):
+	procdix = "data/non-bmp.dix"
+	inputs = ['𐅁𐅃𐅅', '𐅂𐅄𐅆']
+	expectedOutputs = ['^𐅁𐅃𐅅/𐅁𐅃𐅅<num>$', '^𐅂𐅄𐅆/𐅂𐅄𐅆<num>$']
 
 
 # These fail on some systems:

@@ -57,7 +57,7 @@ AC_TYPE_SIZE_T
 AC_FUNC_ERROR_AT_LINE
 
 AC_CHECK_DECLS([fread_unlocked, fwrite_unlocked, fgetc_unlocked, \
-fputc_unlocked, fputs_unlocked, fgetwc_unlocked, fputwc_unlocked, fputws_unlocked, ungetwc_unlocked])
+fputc_unlocked, fputs_unlocked])
 
 AC_CHECK_FUNCS([setlocale strdup getopt_long])
 
