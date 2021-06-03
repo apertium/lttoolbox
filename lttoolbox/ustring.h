@@ -40,4 +40,14 @@ inline UString operator "" _u(const char* str, std::size_t len) {
 	return us;
 }
 
+static void operator+=(UString& str, UChar32 c)
+{
+  if (c <= 0xFFFF) {
+    str += static_cast<UChar>(c);
+  } else {
+    str += static_cast<UChar>(0xD800 + ((c - 0x10000) >> 10));
+    str += static_cast<UChar>(0xDC00 + (c & 0x3FF));
+  }
+}
+
 #endif

@@ -220,11 +220,16 @@ class SpaceAtEOF(ProcTest):
     flushing = False
 
 
-class NonBMPTest(ProcTest):
+class NonBMPDixTest(ProcTest):
 	procdix = "data/non-bmp.dix"
 	inputs = ['𐅁𐅃𐅅', '𐅂𐅄𐅆']
 	expectedOutputs = ['^𐅁𐅃𐅅/𐅁𐅃𐅅<num>$', '^𐅂𐅄𐅆/𐅂𐅄𐅆<num>$']
 
+
+class NonBMPATTTest(ProcTest):
+	procdix = "data/non-bmp.att"
+	inputs = ['𐅁𐅃𐅅', '𐅂𐅄𐅆']
+	expectedOutputs = ['^𐅁𐅃𐅅/𐅁𐅃𐅅<num>$', '^𐅂𐅄𐅆/𐅂𐅄𐅆<num>$']
 
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *

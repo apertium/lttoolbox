@@ -334,8 +334,8 @@ FSTProcessor::readAnalysis(InputFile& input)
     return input_buffer.next();
   }
 
-  UChar val = input.get();
-  int altval = 0;
+  UChar32 val = input.get();
+  int32_t altval = 0;
   if(input.eof())
   {
     input_buffer.add(0);        // so it's treated like the NUL byte
@@ -347,7 +347,7 @@ FSTProcessor::readAnalysis(InputFile& input)
   if((useIgnoredChars || useDefaultIgnoredChars) && ignored_chars.find(val) != ignored_chars.end())
   {
     input_buffer.add(val);
-    val = static_cast<UChar>(input.get());
+    val = input.get();
   }
 
   if(escaped_chars.find(val) != escaped_chars.end())
@@ -355,12 +355,12 @@ FSTProcessor::readAnalysis(InputFile& input)
     switch(val)
     {
       case '<':
-        altval = static_cast<int>(alphabet(readFullBlock(input, '<', '>')));
+        altval = alphabet(readFullBlock(input, '<', '>'));
         input_buffer.add(altval);
         return altval;
 
       case '[':
-        val = static_cast<UChar>(input.get());
+        val = input.get();
 
         if(val == '[')
         {
@@ -372,12 +372,12 @@ FSTProcessor::readAnalysis(InputFile& input)
           blankqueue.push(readFullBlock(input, '[', ']'));
         }
 
-        input_buffer.add(static_cast<int>(' '));
-        return static_cast<int>(' ');
+        input_buffer.add(static_cast<int32_t>(' '));
+        return static_cast<int32_t>(' ');
 
       case '\\':
-        val = static_cast<UChar>(input.get());
-        input_buffer.add(static_cast<int>(val));
+        val = input.get();
+        input_buffer.add(static_cast<int32_t>(val));
         return val;
 
       default:
@@ -1223,7 +1223,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
   bool firstupper = false, uppercase = false;
   map<int, set<int> >::iterator rcx_map_ptr;
 
-  UChar val;
+  UChar32 val;
   do
   {
     val = readAnalysis(input);

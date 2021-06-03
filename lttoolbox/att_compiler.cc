@@ -25,6 +25,8 @@
 #include <unicode/unistr.h>
 #include <unicode/numfmt.h>
 #include <unicode/uchar.h>
+#include <unicode/ustring.h>
+#include <utf8.h>
 
 using namespace std;
 using namespace icu;
@@ -95,24 +97,31 @@ AttCompiler::is_word_punct(UChar symbol)
 int
 AttCompiler::symbol_code(const UString& symbol)
 {
-  if (symbol.length() > 1) {
+  if (u_strHasMoreChar32Than(symbol.c_str(), -1, 1)) {
     alphabet.includeSymbol(symbol);
     return alphabet(symbol);
   } else if (symbol.empty()) {
     return 0;
-  } else if ((u_ispunct(symbol[0]) || u_isspace(symbol[0])) && !is_word_punct(symbol[0])) {
-    return symbol[0];
   } else {
-    letters.insert(symbol[0]);
-    if(u_islower(symbol[0]))
-    {
-      letters.insert(u_toupper(symbol[0]));
+    UChar32 c = symbol[0];
+    if (symbol.size() > 1) {
+      vector<char> v8;
+      vector<UChar32> v32;
+      utf8::utf16to8(symbol.begin(), symbol.end(), std::back_inserter(v8));
+      utf8::utf8to32(v8.begin(), v8.end(), std::back_inserter(v32));
+      c = v32[0];
     }
-    else if(u_isupper(symbol[0]))
-    {
-      letters.insert(u_tolower(symbol[0]));
+    if ((u_ispunct(c) || u_isspace(c)) && !is_word_punct(c)) {
+      return c;
+    } else {
+      letters.insert(c);
+      if(u_islower(c)) {
+        letters.insert(u_toupper(c));
+      } else if(u_isupper(c)) {
+        letters.insert(u_tolower(c));
+      }
+      return c;
     }
-    return symbol[0];
   }
 }
 
@@ -138,7 +147,7 @@ AttCompiler::parse(string const &file_name, bool read_rl)
     tokens.clear();
     tokens.push_back(""_u);
     do {
-      UChar32 c = u_fgetcx(infile);
+      UChar c = u_fgetc(infile);
       if (c == '\n') {
         break;
       } else if (c == '\t') {
@@ -355,11 +364,12 @@ AttCompiler::_extract_transducer(TransducerType type, int from,
 void
 AttCompiler::classify_single_transition(Transduction& t)
 {
-  if (t.upper.length() == 1) {
-    if (letters.find(t.upper[0]) != letters.end()) {
+  int32_t sym = alphabet.decode(t.tag).first;
+  if (sym > 0) {
+    if (letters.find(sym) != letters.end()) {
       t.type |= WORD;
     }
-    if (u_ispunct(t.upper[0])) {
+    if (u_ispunct(sym)) {
       t.type |= PUNCT;
     }
   }
@@ -453,14 +463,14 @@ AttCompiler::write(FILE *output)
   Compression::string_write("main@standard"_u, output);
   Transducer word_fst = extract_transducer(WORD);
   word_fst.write(output);
-  wcout << L"main@standard" << " " << word_fst.size();
-  wcout << " " << word_fst.numberOfTransitions() << endl;
+  cout << "main@standard" << " " << word_fst.size();
+  cout << " " << word_fst.numberOfTransitions() << endl;
   Compression::string_write("final@inconditional"_u, output);
   if(punct_fst.numberOfTransitions() != 0)
   {
     punct_fst.write(output);
-    wcout << L"final@inconditional" << " " << punct_fst.size();
-    wcout << " " << punct_fst.numberOfTransitions() << endl;
+    cout << "final@inconditional" << " " << punct_fst.size();
+    cout << " " << punct_fst.numberOfTransitions() << endl;
   }
 //  fclose(output);
 }

@@ -32,6 +32,7 @@
 #include <queue>
 #include <set>
 #include <string>
+#include <cstdint>
 
 using namespace std;
 
@@ -142,7 +143,7 @@ private:
   /**
    * Input buffer
    */
-  Buffer<int> input_buffer;
+  Buffer<int32_t> input_buffer;
 
   /**
    * Begin of the transducer
@@ -220,7 +221,7 @@ private:
   /**
    * Show or not the controls symbols (as compoundRSymbol)
    */
-   bool showControlSymbols;
+  bool showControlSymbols;
 
   /**
    * Max compound elements

@@ -8,7 +8,7 @@ class InputFile
 {
 private:
   FILE* infile;
-  UChar ubuffer[3];
+  UChar32 ubuffer[3];
   char cbuffer[4];
   int buffer_size;
   void internal_read();
@@ -17,9 +17,9 @@ public:
   ~InputFile();
   bool open(char* fname);
   void close();
-  UChar get();
-  UChar peek();
-  void unget(UChar c);
+  UChar32 get();
+  UChar32 peek();
+  void unget(UChar32 c);
   bool eof();
 };
 

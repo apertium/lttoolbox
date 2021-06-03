@@ -79,17 +79,11 @@ InputFile::internal_read()
     break;
   }
   memset(ubuffer, 0, 3*sizeof(UChar));
-  utf8::utf8to16(cbuffer, cbuffer+i, ubuffer+1);
-  if (ubuffer[2]) {
-    ubuffer[0] = ubuffer[2];
-    buffer_size = 2;
-  } else {
-    ubuffer[0] = ubuffer[1];
-    buffer_size = 1;
-  }
+  utf8::utf8to32(cbuffer, cbuffer+i, ubuffer);
+  buffer_size = 1;
 }
 
-UChar
+UChar32
 InputFile::get()
 {
   if (!buffer_size) {
@@ -98,7 +92,7 @@ InputFile::get()
   return ubuffer[--buffer_size];
 }
 
-UChar
+UChar32
 InputFile::peek()
 {
   if (!buffer_size) {
@@ -108,7 +102,7 @@ InputFile::peek()
 }
 
 void
-InputFile::unget(UChar c)
+InputFile::unget(UChar32 c)
 {
   // this will probably segfault if called multiple times
   ubuffer[buffer_size++] = c;
