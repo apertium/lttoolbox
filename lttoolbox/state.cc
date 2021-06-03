@@ -17,7 +17,6 @@
 #include <lttoolbox/state.h>
 
 #include <cstring>
-#include <cwctype>
 #include <climits>
 #include <algorithm>
 
@@ -403,12 +402,12 @@ State::step(int const input, set<int> const alts)
 }
 
 void
-State::step_case(UChar val, UChar val2, bool caseSensitive)
+State::step_case(UChar32 val, UChar32 val2, bool caseSensitive)
 {
-  if (!iswupper(val) || caseSensitive) {
+  if (!u_isupper(val) || caseSensitive) {
     step(val, val2);
-  } else if(val != towlower(val)) {
-    step(val, towlower(val), val2);
+  } else if(val != u_tolower(val)) {
+    step(val, u_tolower(val), val2);
   } else {
     step(val, val2);
   }
@@ -416,12 +415,12 @@ State::step_case(UChar val, UChar val2, bool caseSensitive)
 
 
 void
-State::step_case(UChar val, bool caseSensitive)
+State::step_case(UChar32 val, bool caseSensitive)
 {
-  if (!iswupper(val) || caseSensitive) {
+  if (!u_isupper(val) || caseSensitive) {
     step(val);
   } else {
-    step(val, towlower(val));
+    step(val, u_tolower(val));
   }
 }
 
@@ -501,11 +500,11 @@ State::filterFinals(map<Node *, double> const &finals,
           if(result[first_char] == '~')
           {
             // skip post-generation mark
-            result[first_char+1] = towupper(result[first_char+1]);
+            result[first_char+1] = u_toupper(result[first_char+1]);
           }
           else
           {
-            result[first_char] = towupper(result[first_char]);
+            result[first_char] = u_toupper(result[first_char]);
           }
         }
       }
@@ -638,11 +637,11 @@ State::filterFinalsSAO(map<Node *, double> const &finals,
         if(result[first_char] == '~')
         {
           // skip post-generation mark
-          result[first_char+1] = towupper(result[first_char+1]);
+          result[first_char+1] = u_toupper(result[first_char+1]);
         }
         else
         {
-          result[first_char] = towupper(result[first_char]);
+          result[first_char] = u_toupper(result[first_char]);
         }
       }
     }
@@ -721,7 +720,7 @@ State::filterFinalsTM(map<Node *, double> const &finals,
             for(unsigned int k = (unsigned int) j+3, limit2 = fragment[i].size();
                 k != limit2; k++)
             {
-              if(iswdigit(fragment[i][k]))
+              if(u_isdigit(fragment[i][k]))
               {
                 num = num * 10;
                 num += (int) fragment[i][k] - 48;

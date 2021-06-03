@@ -22,7 +22,6 @@
 #include <iostream>
 #include <cerrno>
 #include <climits>
-#include <cwctype>
 
 #if defined(_WIN32) && !defined(_MSC_VER)
 #include <utf8_fwrap.h>
@@ -1321,7 +1320,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
       {
         current_state.step(val, tmpset);
       }
-      else if(rcx_map.find(towlower(val)) != rcx_map.end())
+      else if(rcx_map.find(u_tolower(val)) != rcx_map.end())
       {
         rcx_map_ptr = rcx_map.find(tolower(val));
         tmpset.insert(tolower(val));
@@ -1336,14 +1335,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
     }
     else
     {
-      if(!u_isupper(val) || caseSensitive)
-      {
-        current_state.step(val);
-      }
-      else
-      {
-        current_state.step(val, towlower(val));
-      }
+      current_state.step_case(val, caseSensitive);
     }
 
     if(current_state.size() != 0)
@@ -1609,14 +1601,7 @@ FSTProcessor::tm_analysis(InputFile& input, UFILE *output)
       last = input_buffer.getPos();
     }
 
-    if(!u_isupper(val))
-    {
-      current_state.step(val);
-    }
-    else
-    {
-      current_state.step(val, towlower(val));
-    }
+    current_state.step_case(val, false);
 
     if(current_state.size() != 0)
     {
@@ -1889,11 +1874,11 @@ FSTProcessor::generation(InputFile& input, UFILE *output, GenerationMode mode)
         {
           if(mode == gm_carefulcase)
           {
-            current_state.step_careful(val, towlower(val));
+            current_state.step_careful(val, u_tolower(val));
           }
           else
           {
-            current_state.step(val, towlower(val));
+            current_state.step(val, u_tolower(val));
           }
         }
         else
@@ -2009,11 +1994,11 @@ FSTProcessor::postgeneration(InputFile& input, UFILE *output)
             {
               if(myfirstupper && i != lf.size())
               {
-                lf[i] = towupper(lf[i]);
+                lf[i] = u_toupper(lf[i]);
               }
               else
               {
-                lf[i] = towlower(lf[i]);
+                lf[i] = u_tolower(lf[i]);
               }
               break;
             }
@@ -2021,11 +2006,11 @@ FSTProcessor::postgeneration(InputFile& input, UFILE *output)
             {
               if(myuppercase)
               {
-                lf[i-1] = towupper(lf[i-1]);
+                lf[i-1] = u_toupper(lf[i-1]);
               }
               else
               {
-                lf[i-1] = towlower(lf[i-1]);
+                lf[i-1] = u_tolower(lf[i-1]);
               }
             }
           }
@@ -2034,14 +2019,7 @@ FSTProcessor::postgeneration(InputFile& input, UFILE *output)
         last = input_buffer.getPos();
       }
 
-      if(!u_isupper(val) || caseSensitive)
-      {
-        current_state.step(val);
-      }
-      else
-      {
-        current_state.step(val, towlower(val));
-      }
+      current_state.step_case(val, caseSensitive);
 
       if(current_state.size() != 0)
       {
@@ -2195,14 +2173,7 @@ FSTProcessor::intergeneration(InputFile& input, UFILE *output)
 
       if (val != '\0')
       {
-        if (!u_isupper(val) || caseSensitive)
-        {
-          current_state.step(val);
-        }
-        else
-        {
-          current_state.step(val, towlower(val));
-        }
+        current_state.step_case(val, caseSensitive);
       }
 
       if (val != '\0' && current_state.size() != 0)
@@ -2440,7 +2411,7 @@ FSTProcessor::biltransfull(UString const &input_word, bool with_delim)
     {
       if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
       {
-        current_state.step(val, towlower(val));
+        current_state.step(val, u_tolower(val));
       }
       else
       {
@@ -2608,7 +2579,7 @@ FSTProcessor::biltrans(UString const &input_word, bool with_delim)
     {
       if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
       {
-        current_state.step(val, towlower(val));
+        current_state.step(val, u_tolower(val));
       }
       else
       {
@@ -2877,7 +2848,7 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
       {
         if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
         {
-          current_state.step(val, towlower(val));
+          current_state.step(val, u_tolower(val));
         }
         else
         {
@@ -2983,7 +2954,7 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
     {
       if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
       {
-        current_state.step(val, towlower(val));
+        current_state.step(val, u_tolower(val));
       }
       else
       {
@@ -3164,7 +3135,7 @@ FSTProcessor::biltransWithoutQueue(UString const &input_word, bool with_delim)
     {
       if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
       {
-        current_state.step(val, towlower(val));
+        current_state.step(val, u_tolower(val));
       }
       else
       {
@@ -3380,14 +3351,7 @@ FSTProcessor::SAO(InputFile& input, UFILE *output)
       last = input_buffer.getPos();
     }
 
-    if(!u_isupper(val) || caseSensitive)
-    {
-      current_state.step(val);
-    }
-    else
-    {
-      current_state.step(val, towlower(val));
-    }
+    current_state.step_case(val, caseSensitive);
 
     if(current_state.size() != 0)
     {

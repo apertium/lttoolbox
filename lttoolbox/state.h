@@ -190,9 +190,9 @@ public:
    */
   void step(int const input, set<int> const alts);
 
-  void step_case(UChar val, bool caseSensitive);
+  void step_case(UChar32 val, bool caseSensitive);
 
-  void step_case(UChar val, UChar val2, bool caseSensitive);
+  void step_case(UChar32 val, UChar32 val2, bool caseSensitive);
 
   void step_careful(int const input, int const alt);
 

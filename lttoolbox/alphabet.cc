@@ -23,8 +23,6 @@
 #include <cctype>
 #include <cstdlib>
 #include <set>
-#include <cwchar>
-#include <cwctype>
 
 #include <unicode/uchar.h>
 

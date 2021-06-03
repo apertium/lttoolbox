@@ -50,7 +50,7 @@ private:
 
   /**
    * Map from symbol-pairs to symbols; tags get negative numbers,
-   * other characters are wchar_t's casted to ints.
+   * other characters are UChar32's casted to ints.
    * @see spairinv
    */
   map<pair<int32_t, int32_t>, int32_t> spair;

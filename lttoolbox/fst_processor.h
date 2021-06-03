@@ -27,7 +27,6 @@
 #include <lttoolbox/input_file.h>
 #include <libxml/xmlreader.h>
 
-#include <cwchar>
 #include <map>
 #include <queue>
 #include <set>

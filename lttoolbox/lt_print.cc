@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
   int len = Compression::multibyte_read(input);
   while(len > 0)
   {
-    alphabetic_chars.insert(static_cast<wchar_t>(Compression::multibyte_read(input)));
+    alphabetic_chars.insert(static_cast<UChar32>(Compression::multibyte_read(input)));
     len--;
   }
 
@@ -180,7 +180,6 @@ int main(int argc, char *argv[])
     if(it != penum)
     {
       u_fputs("--\n"_u, output);
-      //fwprintf(output, L"--\n", it->first.c_str()); // ToDo: Was %ls meant to go somewhere here?
     }
   }
 

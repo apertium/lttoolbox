@@ -101,7 +101,7 @@ TMXCompiler::allBlanks()
 
   for(auto c : text)
   {
-    flag = flag && iswspace(c);
+    flag = flag && u_isspace(c);
   }
 
   return flag;
@@ -467,7 +467,7 @@ TMXCompiler::trim(vector<int> &v) const
 {
   while(v.size() > 0)
   {
-    if(iswspace(v[v.size()-1]))
+    if(u_isspace(v[v.size()-1]))
     {
       v.pop_back();
     }
@@ -481,7 +481,7 @@ TMXCompiler::trim(vector<int> &v) const
   vector<int> aux;
   for(auto c : v)
   {
-    if(!iswspace(c) || !principio)
+    if(!u_isspace(c) || !principio)
     {
       principio = false;
       aux.push_back(c);
@@ -575,7 +575,7 @@ TMXCompiler::numberLength(vector<int> &v, unsigned int const position) const
 {
   for(unsigned int i = position, limit = v.size(); i < limit; i++)
   {
-    if(!iswdigit(v[i]) && (v[i] != '.' || i == position) && (v[i] != ',' || i == position))
+    if(!u_isdigit(v[i]) && (v[i] != '.' || i == position) && (v[i] != ',' || i == position))
     {
       if(i == position)
       {
@@ -586,7 +586,7 @@ TMXCompiler::numberLength(vector<int> &v, unsigned int const position) const
         while(i != position)
         {
           i--;
-          if(iswdigit(v[i]))
+          if(u_isdigit(v[i]))
           {
             return i - position + 1;
           }
@@ -600,7 +600,7 @@ TMXCompiler::numberLength(vector<int> &v, unsigned int const position) const
   while(i != position)
   {
     i--;
-    if(iswdigit(v[i]))
+    if(u_isdigit(v[i]))
     {
       return i - position + 1;
     }

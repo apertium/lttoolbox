@@ -97,12 +97,6 @@ public:
                                std::ostream &Output);
 };
 
-template <> class Serialiser<wchar_t> {
-public:
-  inline static void serialise(const wchar_t &SerialisedType_,
-                               std::ostream &Output);
-};
-
 template <> class Serialiser<char> {
 public:
   inline static void serialise(const char &SerialisedType_,
@@ -218,11 +212,6 @@ void Serialiser<int32_t>::serialise(const int32_t &SerialisedType_,
 void Serialiser<uint32_t>::serialise(const uint32_t &SerialisedType_,
                                      std::ostream &Output) {
   int_serialise((uint64_t)SerialisedType_, Output);
-}
-
-void Serialiser<wchar_t>::serialise(const wchar_t &SerialisedType_,
-                                    std::ostream &Output) {
-  int_serialise((uint32_t)SerialisedType_, Output);
 }
 
 void Serialiser<char>::serialise(const char &SerialisedType_,
