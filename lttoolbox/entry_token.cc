@@ -68,7 +68,7 @@ EntryToken::setParadigm(UString const &np)
 }
 
 void
-EntryToken::setSingleTransduction(list<int> const &pi, list<int> const &pd, double const ew)
+EntryToken::setSingleTransduction(vector<int> const &pi, vector<int> const &pd, double const ew)
 {
   weight = ew;
   leftSide = pi;
@@ -79,7 +79,15 @@ EntryToken::setSingleTransduction(list<int> const &pi, list<int> const &pd, doub
 void
 EntryToken::setRegexp(UString const &r)
 {
-  myregexp = r;
+  //myregexp = r;
+  myregexp = vector<int32_t>(r.begin(), r.end());
+  type = regexp;
+}
+
+void
+EntryToken::readRegexp(xmlTextReaderPtr reader)
+{
+  XMLParseUtil::readValueInto32(reader, myregexp);
   type = regexp;
 }
 
@@ -107,19 +115,19 @@ EntryToken::paradigmName() const
   return parName;
 }
 
-list<int> const &
+vector<int> const &
 EntryToken::left() const
 {
   return leftSide;
 }
 
-list<int> const &
+vector<int> const &
 EntryToken::right() const
 {
   return rightSide;
 }
 
-UString const &
+vector<int32_t> const &
 EntryToken::regExp() const
 {
   return myregexp;

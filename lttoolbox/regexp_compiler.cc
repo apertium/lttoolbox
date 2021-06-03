@@ -20,6 +20,7 @@
 #include <iostream>
 
 RegexpCompiler::RegexpCompiler() :
+index(0),
 token(0),
 alphabet(0),
 state(0),
@@ -112,14 +113,14 @@ RegexpCompiler::consume(int const t)
 {
   if(token == t)
   {
-    input = input.substr(1);
-    if(input.empty())
+    index++;
+    if(index == input.size())
     {
       token = FIN_FICHERO;
     }
     else
     {
-      token = input[0];
+      token = input[index];
     }
   }
   else
@@ -129,10 +130,11 @@ RegexpCompiler::consume(int const t)
 }
 
 void
-RegexpCompiler::compile(UString const &er)
+RegexpCompiler::compile(vector<int32_t> const &er)
 {
   input = er;
-  token = static_cast<int>(input[0]);
+  token = input[0];
+  index = 0;
   state = transducer.getInitial();
   S();
   transducer.setFinal(state, default_weight);

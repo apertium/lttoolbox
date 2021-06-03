@@ -20,6 +20,8 @@
 #include <libxml/encoding.h>
 #include <libxml/xmlreader.h>
 #include <lttoolbox/ustring.h>
+#include <vector>
+#include <cstdint>
 
 using namespace std;
 
@@ -35,6 +37,7 @@ public:
 
   static UString readName(xmlTextReaderPtr reader);
   static UString readValue(xmlTextReaderPtr reader);
+  static void readValueInto32(xmlTextReaderPtr reader, vector<int32_t>& vec);
 };
 
 #endif

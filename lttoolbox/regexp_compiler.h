@@ -22,6 +22,8 @@
 #include <lttoolbox/transducer.h>
 
 #include <set>
+#include <vector>
+#include <cstdint>
 
 using namespace std;
 
@@ -42,7 +44,12 @@ private:
   /**
    * Input string
    */
-  UString input;
+  vector<int32_t> input;
+
+  /**
+   * Location in the input string
+   */
+  size_t index;
 
   /**
    * Alphabet to encode symbols
@@ -201,7 +208,7 @@ public:
    * Function that parses a regular expression and produces a transducer
    * @param er the regular expression
    */
-  void compile(UString const &er);
+  void compile(vector<int32_t> const &er);
 
   /**
    * Set the decoder of symbols

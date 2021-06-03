@@ -59,3 +59,12 @@ XMLParseUtil::readValue(xmlTextReaderPtr reader)
   const xmlChar* val = xmlTextReaderConstValue(reader);
   return to_ustring(reinterpret_cast<const char*>(val));
 }
+
+void
+XMLParseUtil::readValueInto32(xmlTextReaderPtr reader, vector<int32_t>& vec)
+{
+  const xmlChar* val = xmlTextReaderConstValue(reader);
+  auto sz = xmlStrlen(val);
+  vec.reserve(vec.size() + sz);
+  utf8::utf8to32(val, val+sz, std::back_inserter(vec));
+}

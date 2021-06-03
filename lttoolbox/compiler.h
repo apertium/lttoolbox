@@ -216,7 +216,7 @@ private:
    * @param t the transducer
    * @return the last state of the inserted transduction
    */
-  int matchTransduction(list<int> const &lp, list<int> const &rp,
+  int matchTransduction(vector<int> const &lp, vector<int> const &rp,
                         int state, Transducer &t, double const &entry_weight);
   /**
    * Parse the &lt;p&gt; element
@@ -264,7 +264,7 @@ private:
   void skipBlanks(UString &name);
 
 
-  void readString(list<int> &result, UString const &name);
+  void readString(vector<int> &result, UString const &name);
 
   /**
    * Force an element to be empty, and check for it

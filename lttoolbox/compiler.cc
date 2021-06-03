@@ -226,12 +226,12 @@ Compiler::procParDef()
 }
 
 int
-Compiler::matchTransduction(list<int> const &pi,
-                           list<int> const &pd,
+Compiler::matchTransduction(vector<int> const &pi,
+                           vector<int> const &pd,
                            int state, Transducer &t,
                            double const &entry_weight)
 {
-  list<int>::const_iterator left, right, limleft, limright;
+  vector<int>::const_iterator left, right, limleft, limright;
 
   if(direction == COMPILER_RESTRICTION_LR_VAL)
   {
@@ -336,22 +336,18 @@ Compiler::allBlanks()
 
   for(auto c : text)
   {
-    flag = flag && iswspace(c);
+    flag = flag && u_isspace(c);
   }
 
   return flag;
 }
 
 void
-Compiler::readString(list<int> &result, UString const &name)
+Compiler::readString(vector<int> &result, UString const &name)
 {
   if(name == COMPILER_TEXT_NODE)
   {
-    UString value = XMLParseUtil::readValue(reader);
-    for(unsigned int i = 0, limit = value.size(); i < limit; i++)
-    {
-      result.push_back(static_cast<int>(value[i]));
-    }
+    XMLParseUtil::readValueInto32(reader, result);
   }
   else if(name == COMPILER_M_ELEM)
   {
@@ -471,7 +467,7 @@ Compiler::skip(UString &name, UString const &elem, bool open)
 EntryToken
 Compiler::procIdentity(UString const &wsweight, bool ig)
 {
-  list<int> both_sides;
+  vector<int> both_sides;
   double entry_weight = stod(wsweight);
 
   if(!xmlTextReaderIsEmptyElement(reader))
@@ -499,7 +495,7 @@ Compiler::procIdentity(UString const &wsweight, bool ig)
   EntryToken e;
   if(ig)
   {
-    list<int> right;
+    vector<int> right;
     right.push_back(static_cast<int>(L'#'));
     right.insert(right.end(), both_sides.begin(), both_sides.end());
     e.setSingleTransduction(both_sides, right, entry_weight);
@@ -514,7 +510,7 @@ Compiler::procIdentity(UString const &wsweight, bool ig)
 EntryToken
 Compiler::procTransduction(UString const &wsweight)
 {
-  list<int> lhs, rhs;
+  vector<int> lhs, rhs;
   double entry_weight = stod(wsweight);
   UString name;
 
@@ -941,8 +937,7 @@ Compiler::procRegexp()
 {
   EntryToken et;
   xmlTextReaderRead(reader);
-  UString re = XMLParseUtil::readValue(reader);
-  et.setRegexp(re);
+  et.readRegexp(reader);
   xmlTextReaderRead(reader);
   return et;
 }
