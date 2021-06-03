@@ -56,27 +56,21 @@ InputFile::internal_read()
     ubuffer[buffer_size++] = '\0';
     return;
   }
-  switch (cbuffer[0] & 0xF0) {
-  case 0xF0:
+  if ((cbuffer[0] & 0xF0) == 0xF0) {
     i += 3;
     if (fread(cbuffer+1, 1, 3, infile) != 3) {
       throw std::runtime_error("Could not read 3 expected bytes from stream");
     }
-    break;
-  case 0xE0:
+  } else if ((cbuffer[0] & 0xE0) == 0xE0) {
     i += 2;
     if (fread(cbuffer+1, 1, 2, infile) != 2) {
       throw std::runtime_error("Could not read 2 expected bytes from stream");
     }
-    break;
-  case 0xC0:
+  } else if ((cbuffer[0] & 0xC0) == 0xC0) {
     i += 1;
     if (fread(cbuffer+1, 1, 1, infile) != 1) {
       throw std::runtime_error("Could not read 1 expected byte from stream");
     }
-    break;
-  default:
-    break;
   }
   memset(ubuffer, 0, 3*sizeof(UChar));
   utf8::utf8to32(cbuffer, cbuffer+i, ubuffer);
