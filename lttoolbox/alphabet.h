@@ -179,7 +179,7 @@ public:
   /**
    * Get all symbols where the left-hand side of the symbol-pair is l.
    */
-  set<int32_t> symbolsWhereLeftIs(UChar l) const;
+  set<int32_t> symbolsWhereLeftIs(UChar32 l) const;
 
   enum Side
   {

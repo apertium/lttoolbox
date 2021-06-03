@@ -212,11 +212,12 @@ Alphabet::writeSymbol(int32_t const symbol, UFILE *output) const
 {
   if(symbol < 0)
   {
-    u_fputs(slexicinv[-symbol-1], output);
+    // write() has a name conflict
+    u_fprintf(output, "%S", slexicinv[-symbol-1].c_str());
   }
   else
   {
-    u_fputc(static_cast<UChar>(symbol), output);
+    u_fputc(static_cast<UChar32>(symbol), output);
   }
 }
 
@@ -262,7 +263,7 @@ Alphabet::decode(int32_t const code) const
 }
 
 set<int32_t>
-Alphabet::symbolsWhereLeftIs(UChar l) const {
+Alphabet::symbolsWhereLeftIs(UChar32 l) const {
   set<int32_t> eps;
   for(const auto& sp: spair) {  // [(l, r) : tag]
     if(sp.first.first == l) {

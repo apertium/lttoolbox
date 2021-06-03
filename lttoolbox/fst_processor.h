@@ -113,17 +113,17 @@ private:
   /**
    * Set of characters being considered alphabetics
    */
-  set<UChar> alphabetic_chars;
+  set<UChar32> alphabetic_chars;
 
   /**
    * Set of characters to escape with a backslash
    */
-  set<UChar> escaped_chars;
+  set<UChar32> escaped_chars;
 
   /**
    * Set of characters to ignore
    */
-  set<UChar> ignored_chars;
+  set<UChar32> ignored_chars;
 
   /**
    * Mapping of characters for simplistic diacritic restoration specified in RCX files
@@ -264,7 +264,7 @@ private:
    * @param input the stream to read from
    * @return code of the character
    */
-  UChar readEscaped(InputFile& input);
+  UChar32 readEscaped(InputFile& input);
 
   /**
    * Reads a block from the stream input, enclosed by delim1 and delim2
@@ -272,7 +272,7 @@ private:
    * @param delim1 the delimiter of the beginning of the sequence
    * @param delim1 the delimiter of the end of the sequence
    */
-  UString readFullBlock(InputFile& input, UChar const delim1, UChar const delim2);
+  UString readFullBlock(InputFile& input, UChar32 const delim1, UChar32 const delim2);
 
   /**
    * Reads a wordbound blank from the stream input
@@ -293,14 +293,14 @@ private:
    * @param c the code provided by the user
    * @return true if it's alphabetic
    */
-  bool isAlphabetic(UChar const c) const;
+  bool isAlphabetic(UChar32 const c) const;
 
   /**
    * Tests if a character is in the set of escaped_chars
    * @param c the character code provided by the user
    * @return true if it is in the set
    */
-  bool isEscaped(UChar const c) const;
+  bool isEscaped(UChar32 const c) const;
 
   /**
    * Read text from stream (analysis version)
@@ -467,7 +467,7 @@ private:
    */
   void printSpace(UChar const val, UFILE *output);
 
-  void skipUntil(InputFile& input, UFILE *output, wint_t const character);
+  void skipUntil(InputFile& input, UFILE *output, UChar32 const character);
   static UString removeTags(UString const &str);
   UString compoundAnalysis(UString str, bool uppercase, bool firstupper);
   size_t firstNotAlpha(UString const &sf);

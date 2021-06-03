@@ -469,7 +469,7 @@ State::NFinals(vector<pair<UString, double>> lf, int maxAnalyses, int maxWeightC
 UString
 State::filterFinals(map<Node *, double> const &finals,
                     Alphabet const &alphabet,
-                    set<UChar> const &escaped_chars,
+                    set<UChar32> const &escaped_chars,
                     bool display_weights, int max_analyses, int max_weight_classes,
                     bool uppercase, bool firstupper, int firstchar) const
 {
@@ -554,7 +554,7 @@ State::filterFinals(map<Node *, double> const &finals,
 set<pair<UString, vector<UString> > >
 State::filterFinalsLRX(map<Node *, double> const &finals,
                        Alphabet const &alphabet,
-                       set<UChar> const &escaped_chars,
+                       set<UChar32> const &escaped_chars,
                        bool uppercase, bool firstupper, int firstchar) const
 {
   set<pair<UString, vector<UString> > > results;
@@ -602,7 +602,7 @@ State::filterFinalsLRX(map<Node *, double> const &finals,
 UString
 State::filterFinalsSAO(map<Node *, double> const &finals,
                        Alphabet const &alphabet,
-                       set<UChar> const &escaped_chars,
+                       set<UChar32> const &escaped_chars,
                        bool uppercase, bool firstupper, int firstchar) const
 {
   UString result;
@@ -654,7 +654,7 @@ State::filterFinalsSAO(map<Node *, double> const &finals,
 UString
 State::filterFinalsTM(map<Node *, double> const &finals,
                       Alphabet const &alphabet,
-                      set<UChar> const &escaped_chars,
+                      set<UChar32> const &escaped_chars,
                       queue<UString> &blankqueue, vector<UString> &numbers) const
 {
   UString result;

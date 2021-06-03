@@ -256,7 +256,7 @@ public:
    */
   UString filterFinals(map<Node *, double> const &finals,
                        Alphabet const &a,
-                       set<UChar> const &escaped_chars,
+                       set<UChar32> const &escaped_chars,
                        bool display_weights = false,
                        int max_analyses = INT_MAX,
                        int max_weight_classes = INT_MAX,
@@ -277,7 +277,7 @@ public:
    */
   UString filterFinalsSAO(map<Node *, double> const &finals,
                           Alphabet const &a,
-                          set<UChar> const &escaped_chars,
+                          set<UChar32> const &escaped_chars,
                           bool uppercase = false,
                           bool firstupper = false,
                           int firstchar = 0) const;
@@ -297,7 +297,7 @@ public:
 
   set<pair<UString, vector<UString> > > filterFinalsLRX(map<Node *, double> const &finals,
                                                         Alphabet const &a,
-                                                        set<UChar> const &escaped_chars,
+                                                        set<UChar32> const &escaped_chars,
                                                         bool uppercase = false,
                                                         bool firstupper = false,
                                                         int firstchar = 0) const;
@@ -332,7 +332,7 @@ public:
 
   UString filterFinalsTM(map<Node *, double> const &finals,
                          Alphabet const &alphabet,
-                         set<UChar> const &escaped_chars,
+                         set<UChar32> const &escaped_chars,
                          queue<UString> &blanks,
                          vector<UString> &numbers) const;
 

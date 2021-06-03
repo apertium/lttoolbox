@@ -137,7 +137,7 @@ FSTProcessor::procNodeICX()
   }
   else if(name == "char"_u)
   {
-    ignored_chars.insert(static_cast<int>(XMLParseUtil::attrib(reader, "value"_u)[0]));
+    ignored_chars.insert(static_cast<int32_t>(XMLParseUtil::attrib(reader, "value"_u)[0]));
   }
   else if(name == "#comment"_u)
   {
@@ -171,11 +171,11 @@ FSTProcessor::procNodeRCX()
   }
   else if(name == "char"_u)
   {
-    rcx_current_char = static_cast<int>(XMLParseUtil::attrib(reader, "value"_u)[0]);
+    rcx_current_char = static_cast<int32_t>(XMLParseUtil::attrib(reader, "value"_u)[0]);
   }
   else if(name == "restore-char"_u)
   {
-    rcx_map[rcx_current_char].insert(static_cast<int>(XMLParseUtil::attrib(reader, "value"_u)[0]));
+    rcx_map[rcx_current_char].insert(static_cast<int32_t>(XMLParseUtil::attrib(reader, "value"_u)[0]));
   }
   else if(name == "#comment"_u)
   {
@@ -189,7 +189,7 @@ FSTProcessor::procNodeRCX()
   }
 }
 
-UChar
+UChar32
 FSTProcessor::readEscaped(InputFile& input)
 {
   if(input.eof())
@@ -197,7 +197,7 @@ FSTProcessor::readEscaped(InputFile& input)
     streamError();
   }
 
-  UChar val = static_cast<UChar>(input.get());
+  UChar32 val = input.get();
 
   if(input.eof())
   {
@@ -208,15 +208,15 @@ FSTProcessor::readEscaped(InputFile& input)
 }
 
 UString
-FSTProcessor::readFullBlock(InputFile& input, UChar const delim1, UChar const delim2)
+FSTProcessor::readFullBlock(InputFile& input, UChar32 const delim1, UChar32 const delim2)
 {
   UString result;
   result += delim1;
-  UChar c = delim1;
+  UChar32 c = delim1;
 
   while(!input.eof() && c != delim2)
   {
-    c = static_cast<UChar>(input.get());
+    c = input.get();
     result += c;
     if(c != '\\')
     {
@@ -224,7 +224,7 @@ FSTProcessor::readFullBlock(InputFile& input, UChar const delim1, UChar const de
     }
     else
     {
-      result += static_cast<UChar>(readEscaped(input));
+      result += readEscaped(input);
     }
   }
 
@@ -241,20 +241,20 @@ FSTProcessor::readWblank(InputFile& input)
 {
   UString result;
   result += "[["_u;
-  UChar c = 0;
+  UChar32 c = 0;
 
   while(!input.eof())
   {
-    c = static_cast<UChar>(input.get());
+    c = input.get();
     result += c;
 
     if(c == '\\')
     {
-      result += static_cast<UChar>(readEscaped(input));
+      result += readEscaped(input);
     }
     else if(c == ']')
     {
-      c = static_cast<UChar>(input.get());
+      c = input.get();
       result += c;
 
       if(c == ']')
@@ -277,20 +277,20 @@ FSTProcessor::wblankPostGen(InputFile& input, UFILE *output)
 {
   UString result;
   result += "[["_u;
-  UChar c = 0;
+  UChar32 c = 0;
 
   while(!input.eof())
   {
-    c = static_cast<UChar>(input.get());
+    c = input.get();
     result += c;
 
     if(c == '\\')
     {
-      result += static_cast<UChar>(readEscaped(input));
+      result += readEscaped(input);
     }
     else if(c == ']')
     {
-      c = static_cast<UChar>(input.get());
+      c = input.get();
       result += c;
 
       if(c == ']')
@@ -303,7 +303,7 @@ FSTProcessor::wblankPostGen(InputFile& input, UFILE *output)
         }
         else
         {
-          c = static_cast<UChar>(input.get());
+          c = input.get();
           if(c == '~')
           {
             wblankqueue.push(result);
@@ -401,24 +401,24 @@ FSTProcessor::readTMAnalysis(InputFile& input)
     return input_buffer.next();
   }
 
-  UChar val = static_cast<UChar>(input.get());
-  int altval = 0;
+  UChar32 val = input.get();
+  int32_t altval = 0;
   if(input.eof())
   {
     return 0;
   }
 
-  if(escaped_chars.find(val) != escaped_chars.end() || iswdigit(val))
+  if(escaped_chars.find(val) != escaped_chars.end() || u_isdigit(val))
   {
     switch(val)
     {
       case '<':
-        altval = static_cast<int>(alphabet(readFullBlock(input, '<', '>')));
+        altval = alphabet(readFullBlock(input, '<', '>'));
         input_buffer.add(altval);
         return altval;
 
       case '[':
-        val = static_cast<UChar>(input.get());
+        val = input.get();
 
         if(val == '[')
         {
@@ -430,13 +430,13 @@ FSTProcessor::readTMAnalysis(InputFile& input)
           blankqueue.push(readFullBlock(input, '[', ']'));
         }
 
-        input_buffer.add(static_cast<int>(' '));
+        input_buffer.add(static_cast<int32_t>(' '));
         isLastBlankTM = true;
-        return static_cast<int>(' ');
+        return static_cast<int32_t>(' ');
 
       case '\\':
-        val = static_cast<UChar>(input.get());
-        input_buffer.add(static_cast<int>(val));
+        val = input.get();
+        input_buffer.add(static_cast<int32_t>(val));
         return val;
       case '0':
       case '1':
@@ -453,8 +453,8 @@ FSTProcessor::readTMAnalysis(InputFile& input)
           do
           {
             ws += val;
-            val = static_cast<UChar>(input.get());
-          } while(iswdigit(val));
+            val = input.get();
+          } while(u_isdigit(val));
           input.unget(val);
           input_buffer.add(alphabet("<n>"_u));
           numbers.push_back(ws);
@@ -479,8 +479,8 @@ FSTProcessor::readPostgeneration(InputFile& input, UFILE *output)
     return input_buffer.next();
   }
 
-  UChar val = static_cast<UChar>(input.get());
-  int altval = 0;
+  UChar32 val = input.get();
+  int32_t altval = 0;
   is_wblank = false;
   if(input.eof())
   {
@@ -490,12 +490,12 @@ FSTProcessor::readPostgeneration(InputFile& input, UFILE *output)
   switch(val)
   {
     case '<':
-      altval = static_cast<int>(alphabet(readFullBlock(input, '<', '>')));
+      altval = alphabet(readFullBlock(input, '<', '>'));
       input_buffer.add(altval);
       return altval;
 
     case '[':
-      val = static_cast<UChar>(input.get());
+      val = input.get();
 
       if(val == '[')
       {
@@ -503,16 +503,16 @@ FSTProcessor::readPostgeneration(InputFile& input, UFILE *output)
         {
           wblankqueue.push(readWblank(input));
           is_wblank = true;
-          return static_cast<int>(' ');
+          return static_cast<int32_t>(' ');
         }
         else if(wblankPostGen(input, output))
         {
-          return static_cast<int>('~');
+          return static_cast<int32_t>('~');
         }
         else
         {
           is_wblank = true;
-          return static_cast<int>(' ');
+          return static_cast<int32_t>(' ');
         }
       }
       else
@@ -520,13 +520,13 @@ FSTProcessor::readPostgeneration(InputFile& input, UFILE *output)
         input.unget(val);
         blankqueue.push(readFullBlock(input, '[', ']'));
 
-        input_buffer.add(static_cast<int>(' '));
-        return static_cast<int>(' ');
+        input_buffer.add(static_cast<int32_t>(' '));
+        return static_cast<int32_t>(' ');
       }
 
     case '\\':
-      val = static_cast<UChar>(input.get());
-      input_buffer.add(static_cast<int>(val));
+      val = input.get();
+      input_buffer.add(static_cast<int32_t>(val));
       return val;
 
     default:
@@ -536,11 +536,11 @@ FSTProcessor::readPostgeneration(InputFile& input, UFILE *output)
 }
 
 void
-FSTProcessor::skipUntil(InputFile& input, UFILE *output, wint_t const character)
+FSTProcessor::skipUntil(InputFile& input, UFILE *output, UChar32 const character)
 {
   while(true)
   {
-    wint_t val = input.get();
+    UChar32 val = input.get();
     if(input.eof())
     {
       return;
@@ -583,7 +583,7 @@ FSTProcessor::skipUntil(InputFile& input, UFILE *output, wint_t const character)
 int
 FSTProcessor::readGeneration(InputFile& input, UFILE *output)
 {
-  wint_t val = input.get();
+  UChar32 val = input.get();
 
   if(input.eof())
   {
@@ -632,17 +632,17 @@ FSTProcessor::readGeneration(InputFile& input, UFILE *output)
   if(val == '\\')
   {
     val = input.get();
-    return static_cast<int>(val);
+    return static_cast<int32_t>(val);
   }
   else if(val == '$')
   {
     outOfWord = true;
-    return static_cast<int>('$');
+    return static_cast<int32_t>('$');
   }
   else if(val == '<')
   {
     UString cad;
-    cad += static_cast<UChar>(val);
+    cad += val;
 
     while((val = input.get()) != '>')
     {
@@ -650,9 +650,9 @@ FSTProcessor::readGeneration(InputFile& input, UFILE *output)
       {
         streamError();
       }
-      cad += static_cast<UChar>(val);
+      cad += val;
     }
-    cad += static_cast<UChar>(val);
+    cad += val;
 
     return alphabet(cad);
   }
@@ -673,7 +673,7 @@ FSTProcessor::readGeneration(InputFile& input, UFILE *output)
   }
   else
   {
-    return static_cast<int>(val);
+    return static_cast<int32_t>(val);
   }
 
   return 0x7fffffff;
@@ -682,7 +682,7 @@ FSTProcessor::readGeneration(InputFile& input, UFILE *output)
 pair<UString, int>
 FSTProcessor::readBilingual(InputFile& input, UFILE *output)
 {
-  wint_t val = input.get();
+  UChar32 val = input.get();
   UString symbol;
 
   if(input.eof())
@@ -737,21 +737,21 @@ FSTProcessor::readBilingual(InputFile& input, UFILE *output)
   else if(val == '$')
   {
     outOfWord = true;
-    return pair<UString, int>(symbol, static_cast<int>('$'));
+    return pair<UString, int>(symbol, static_cast<int32_t>('$'));
   }
   else if(val == '<')
   {
     UString cad;
-    cad += static_cast<UChar>(val);
+    cad += val;
     while((val = input.get()) != '>')
     {
       if(input.eof())
       {
         streamError();
       }
-      cad += static_cast<UChar>(val);
+      cad += val;
     }
-    cad += static_cast<UChar>(val);
+    cad += val;
 
     int res = alphabet(cad);
 
@@ -1021,15 +1021,15 @@ FSTProcessor::printSpace(UChar const val, UFILE *output)
 }
 
 bool
-FSTProcessor::isEscaped(UChar const c) const
+FSTProcessor::isEscaped(UChar32 const c) const
 {
   return escaped_chars.find(c) != escaped_chars.end();
 }
 
 bool
-FSTProcessor::isAlphabetic(UChar const c) const
+FSTProcessor::isAlphabetic(UChar32 const c) const
 {
-  return (bool)std::iswalnum(c) || alphabetic_chars.find(c) != alphabetic_chars.end();
+  return u_isalnum(c) || alphabetic_chars.find(c) != alphabetic_chars.end();
 }
 
 void
@@ -1055,7 +1055,7 @@ FSTProcessor::load(FILE *input)
   int len = Compression::multibyte_read(input);
   while(len > 0)
   {
-    alphabetic_chars.insert(static_cast<UChar>(Compression::multibyte_read(input)));
+    alphabetic_chars.insert(static_cast<UChar32>(Compression::multibyte_read(input)));
     len--;
   }
 
@@ -1066,13 +1066,7 @@ FSTProcessor::load(FILE *input)
 
   while(len > 0)
   {
-    int len2 = Compression::multibyte_read(input);
-    UString name;
-    while(len2 > 0)
-    {
-      name += static_cast<UChar>(Compression::multibyte_read(input));
-      len2--;
-    }
+    UString name = Compression::string_read(input);
     transducers[name].read(input, alphabet);
     len--;
   }
@@ -1234,8 +1228,8 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
       {
         if(!dictionaryCase)
         {
-          firstupper = iswupper(sf[0]);
-          uppercase = firstupper && iswupper(sf[sf.size()-1]);
+          firstupper = u_isupper(sf[0]);
+          uppercase = firstupper && u_isupper(sf[sf.size()-1]);
         }
 
         if(do_decomposition && compoundOnlyLSymbol != 0)
@@ -1253,8 +1247,8 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
       {
         if(!dictionaryCase)
         {
-          firstupper = iswupper(sf[0]);
-          uppercase = firstupper && iswupper(sf[sf.size()-1]);
+          firstupper = u_isupper(sf[0]);
+          uppercase = firstupper && u_isupper(sf[sf.size()-1]);
         }
 
         if(do_decomposition && compoundOnlyLSymbol != 0)
@@ -1272,8 +1266,8 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
       {
         if(!dictionaryCase)
         {
-          firstupper = iswupper(sf[0]);
-          uppercase = firstupper && iswupper(sf[sf.size()-1]);
+          firstupper = u_isupper(sf[0]);
+          uppercase = firstupper && u_isupper(sf[sf.size()-1]);
         }
 
         if(do_decomposition && compoundOnlyLSymbol != 0)
@@ -1291,8 +1285,8 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
       {
         if(!dictionaryCase)
         {
-          firstupper = iswupper(sf[0]);
-          uppercase = firstupper && iswupper(sf[sf.size()-1]);
+          firstupper = u_isupper(sf[0]);
+          uppercase = firstupper && u_isupper(sf[sf.size()-1]);
         }
 
         if(do_decomposition && compoundOnlyLSymbol != 0)
@@ -1309,7 +1303,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
         last = input_buffer.getPos();
       }
     }
-    else if(sf.empty() && iswspace(val))
+    else if(sf.empty() && u_isspace(val))
     {
       lf = "/*"_u;
       lf.append(sf);
@@ -1323,7 +1317,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
     {
       rcx_map_ptr = rcx_map.find(val);
       set<int> tmpset = rcx_map_ptr->second;
-      if(!iswupper(val) || caseSensitive)
+      if(!u_isupper(val) || caseSensitive)
       {
         current_state.step(val, tmpset);
       }
@@ -1342,7 +1336,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
     }
     else
     {
-      if(!iswupper(val) || caseSensitive)
+      if(!u_isupper(val) || caseSensitive)
       {
         current_state.step(val);
       }
@@ -1436,8 +1430,8 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
           {
             if(!dictionaryCase)
             {
-              firstupper = iswupper(sf[0]);
-              uppercase = firstupper && iswupper(sf[sf.size()-1]);
+              firstupper = u_isupper(sf[0]);
+              uppercase = firstupper && u_isupper(sf[sf.size()-1]);
             }
 
             UString compound;
@@ -1475,8 +1469,8 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
           {
             if(!dictionaryCase)
             {
-              firstupper = iswupper(sf[0]);
-              uppercase = firstupper && iswupper(sf[sf.size()-1]);
+              firstupper = u_isupper(sf[0]);
+              uppercase = firstupper && u_isupper(sf[sf.size()-1]);
             }
 
             UString compound;
@@ -1595,12 +1589,12 @@ FSTProcessor::tm_analysis(InputFile& input, UFILE *output)
   UString sf;     //surface form
   int last = 0;
 
-  while(UChar val = readTMAnalysis(input))
+  while(int32_t val = readTMAnalysis(input))
   {
     // test for final states
     if(current_state.isFinal(all_finals))
     {
-      if(iswpunct(val))
+      if(u_ispunct(val))
       {
         lf = current_state.filterFinalsTM(all_finals, alphabet,
                                           escaped_chars,
@@ -1609,13 +1603,13 @@ FSTProcessor::tm_analysis(InputFile& input, UFILE *output)
         numbers.clear();
       }
     }
-    else if(sf.empty() && iswspace(val))
+    else if(sf.empty() && u_isspace(val))
     {
       lf.append(sf);
       last = input_buffer.getPos();
     }
 
-    if(!iswupper(val))
+    if(!u_isupper(val))
     {
       current_state.step(val);
     }
@@ -1641,9 +1635,9 @@ FSTProcessor::tm_analysis(InputFile& input, UFILE *output)
     }
     else
     {
-      if((iswspace(val) || iswpunct(val)) && sf.empty())
+      if((u_isspace(val) || u_ispunct(val)) && sf.empty())
       {
-        if(iswspace(val))
+        if(u_isspace(val))
         {
           printSpace(val, output);
         }
@@ -1656,7 +1650,7 @@ FSTProcessor::tm_analysis(InputFile& input, UFILE *output)
           u_fputc(val, output);
         }
       }
-      else if(!iswspace(val) && !iswpunct(val) &&
+      else if(!u_isspace(val) && !u_ispunct(val) &&
               ((sf.size()-input_buffer.diffPrevPos(last)) > lastBlank(sf) ||
                lf.empty()))
       {
@@ -1676,7 +1670,7 @@ FSTProcessor::tm_analysis(InputFile& input, UFILE *output)
             alphabet.getSymbol(sf, val);
           }
         }
-        while((val = readTMAnalysis(input)) && !iswspace(val) && !iswpunct(val));
+        while((val = readTMAnalysis(input)) && !u_isspace(val) && !u_ispunct(val));
 
         if(val == 0)
         {
@@ -1819,8 +1813,8 @@ FSTProcessor::generation(InputFile& input, UFILE *output, GenerationMode mode)
         bool firstupper = false, uppercase = false;
         if(!dictionaryCase)
         {
-          uppercase = sf.size() > 1 && iswupper(sf[1]);
-          firstupper= iswupper(sf[0]);
+          uppercase = sf.size() > 1 && u_isupper(sf[1]);
+          firstupper= u_isupper(sf[0]);
         }
 
         if(mode == gm_tagged || mode == gm_tagged_nm)
@@ -1878,7 +1872,7 @@ FSTProcessor::generation(InputFile& input, UFILE *output, GenerationMode mode)
       current_state = initial_state;
       sf.clear();
     }
-    else if(iswspace(val) && sf.size() == 0)
+    else if(u_isspace(val) && sf.size() == 0)
     {
       // do nothing
     }
@@ -1891,7 +1885,7 @@ FSTProcessor::generation(InputFile& input, UFILE *output, GenerationMode mode)
       alphabet.getSymbol(sf,val);
       if(current_state.size() > 0)
       {
-        if(!alphabet.isTag(val) && iswupper(val) && !caseSensitive)
+        if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
         {
           if(mode == gm_carefulcase)
           {
@@ -1926,7 +1920,7 @@ FSTProcessor::postgeneration(InputFile& input, UFILE *output)
   UString lf;
   UString sf;
   int last = 0;
-  set<UChar> empty_escaped_chars;
+  set<UChar32> empty_escaped_chars;
 
   while(UChar val = readPostgeneration(input, output))
   {
@@ -1942,7 +1936,7 @@ FSTProcessor::postgeneration(InputFile& input, UFILE *output)
     }
     else if(skip_mode)
     {
-      if(iswspace(val))
+      if(u_isspace(val))
       {
         if(need_end_wblank)
         {
@@ -1982,8 +1976,8 @@ FSTProcessor::postgeneration(InputFile& input, UFILE *output)
       // test for final states
       if(current_state.isFinal(all_finals))
       {
-        bool firstupper = iswupper(sf[1]);
-        bool uppercase = sf.size() > 1 && firstupper && iswupper(sf[2]);
+        bool firstupper = u_isupper(sf[1]);
+        bool uppercase = sf.size() > 1 && firstupper && u_isupper(sf[2]);
         lf = current_state.filterFinals(all_finals, alphabet,
                                         empty_escaped_chars,
                                         displayWeightsMode, maxAnalyses, maxWeightClasses,
@@ -2006,8 +2000,8 @@ FSTProcessor::postgeneration(InputFile& input, UFILE *output)
 
         if(mybuf.size() > 0)
         {
-          bool myfirstupper = iswupper(mybuf[0]);
-          bool myuppercase = mybuf.size() > 1 && iswupper(mybuf[1]);
+          bool myfirstupper = u_isupper(mybuf[0]);
+          bool myuppercase = mybuf.size() > 1 && u_isupper(mybuf[1]);
 
           for(size_t i = lf.size(); i > 0; --i)
           {
@@ -2040,7 +2034,7 @@ FSTProcessor::postgeneration(InputFile& input, UFILE *output)
         last = input_buffer.getPos();
       }
 
-      if(!iswupper(val) || caseSensitive)
+      if(!u_isupper(val) || caseSensitive)
       {
         current_state.step(val);
       }
@@ -2115,7 +2109,7 @@ FSTProcessor::postgeneration(InputFile& input, UFILE *output)
           input_buffer.setPos(last);
           input_buffer.back(2);
           val = lf[lf.size()-2];
-          if(iswspace(val))
+          if(u_isspace(val))
           {
             printSpace(val, output);
           }
@@ -2155,7 +2149,7 @@ FSTProcessor::intergeneration(InputFile& input, UFILE *output)
   UString target;
   UString source;
   int last = 0;
-  set<UChar> empty_escaped_chars;
+  set<UChar32> empty_escaped_chars;
 
   while (true)
   {
@@ -2168,7 +2162,7 @@ FSTProcessor::intergeneration(InputFile& input, UFILE *output)
 
     if (skip_mode)
     {
-      if (iswspace(val))
+      if (u_isspace(val))
       {
         printSpace(val, output);
       }
@@ -2189,8 +2183,8 @@ FSTProcessor::intergeneration(InputFile& input, UFILE *output)
       // test for final states
       if (current_state.isFinal(all_finals))
       {
-        bool firstupper = iswupper(source[1]);
-        bool uppercase = source.size() > 1 && firstupper && iswupper(source[2]);
+        bool firstupper = u_isupper(source[1]);
+        bool uppercase = source.size() > 1 && firstupper && u_isupper(source[2]);
         target = current_state.filterFinals(all_finals, alphabet,
                                         empty_escaped_chars,
                                         displayWeightsMode, maxAnalyses, maxWeightClasses,
@@ -2201,7 +2195,7 @@ FSTProcessor::intergeneration(InputFile& input, UFILE *output)
 
       if (val != '\0')
       {
-        if (!iswupper(val) || caseSensitive)
+        if (!u_isupper(val) || caseSensitive)
         {
           current_state.step(val);
         }
@@ -2253,7 +2247,7 @@ FSTProcessor::intergeneration(InputFile& input, UFILE *output)
           for(unsigned int i=1; i<target.size(); i++) {
             UChar c = target[i];
 
-            if (iswspace(c))
+            if (u_isspace(c))
             {
               printSpace(c, output);
             }
@@ -2306,10 +2300,10 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
 
   while(UChar val = readPostgeneration(input, output))
   {
-    if(iswpunct(val) || iswspace(val))
+    if(u_ispunct(val) || u_isspace(val))
     {
-      bool firstupper = iswupper(sf[1]);
-      bool uppercase = sf.size() > 1 && firstupper && iswupper(sf[2]);
+      bool firstupper = u_isupper(sf[1]);
+      bool uppercase = sf.size() > 1 && firstupper && u_isupper(sf[2]);
       lf = current_state.filterFinals(all_finals, alphabet, escaped_chars,
                                       displayWeightsMode, maxAnalyses, maxWeightClasses,
                                       uppercase, firstupper, 0);
@@ -2320,7 +2314,7 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
         lf.clear();
         sf.clear();
       }
-      if(iswspace(val))
+      if(u_isspace(val))
       {
         printSpace(val, output);
       }
@@ -2337,8 +2331,8 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
     {
       if(current_state.isFinal(all_finals))
       {
-        bool firstupper = iswupper(sf[1]);
-        bool uppercase = sf.size() > 1 && firstupper && iswupper(sf[2]);
+        bool firstupper = u_isupper(sf[1]);
+        bool uppercase = sf.size() > 1 && firstupper && u_isupper(sf[2]);
         lf = current_state.filterFinals(all_finals, alphabet, escaped_chars,
                                         displayWeightsMode, maxAnalyses, maxWeightClasses,
                                         uppercase, firstupper, 0);
@@ -2361,7 +2355,7 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
         }
         else
         {
-          if(iswspace(val))
+          if(u_isspace(val))
           {
             printSpace(val, output);
           }
@@ -2411,8 +2405,8 @@ FSTProcessor::biltransfull(UString const &input_word, bool with_delim)
     mark = true;
   }
 
-  bool firstupper = iswupper(input_word[start_point]);
-  bool uppercase = firstupper && iswupper(input_word[start_point+1]);
+  bool firstupper = u_isupper(input_word[start_point]);
+  bool uppercase = firstupper && u_isupper(input_word[start_point+1]);
 
   for(unsigned int i = start_point; i <= end_point; i++)
   {
@@ -2422,7 +2416,7 @@ FSTProcessor::biltransfull(UString const &input_word, bool with_delim)
     if(input_word[i] == '\\')
     {
       i++;
-      val = static_cast<int>(input_word[i]);
+      val = static_cast<int32_t>(input_word[i]);
     }
     else if(input_word[i] == '<')
     {
@@ -2440,11 +2434,11 @@ FSTProcessor::biltransfull(UString const &input_word, bool with_delim)
     }
     else
     {
-      val = static_cast<int>(input_word[i]);
+      val = static_cast<int32_t>(input_word[i]);
     }
     if(current_state.size() != 0)
     {
-      if(!alphabet.isTag(val) && iswupper(val) && !caseSensitive)
+      if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
       {
         current_state.step(val, towlower(val));
       }
@@ -2579,8 +2573,8 @@ FSTProcessor::biltrans(UString const &input_word, bool with_delim)
     mark = true;
   }
 
-  bool firstupper = iswupper(input_word[start_point]);
-  bool uppercase = firstupper && iswupper(input_word[start_point+1]);
+  bool firstupper = u_isupper(input_word[start_point]);
+  bool uppercase = firstupper && u_isupper(input_word[start_point+1]);
 
   for(unsigned int i = start_point; i <= end_point; i++)
   {
@@ -2590,7 +2584,7 @@ FSTProcessor::biltrans(UString const &input_word, bool with_delim)
     if(input_word[i] == '\\')
     {
       i++;
-      val = static_cast<int>(input_word[i]);
+      val = static_cast<int32_t>(input_word[i]);
     }
     else if(input_word[i] == '<')
     {
@@ -2608,11 +2602,11 @@ FSTProcessor::biltrans(UString const &input_word, bool with_delim)
     }
     else
     {
-      val = static_cast<int>(input_word[i]);
+      val = static_cast<int32_t>(input_word[i]);
     }
     if(current_state.size() != 0)
     {
-      if(!alphabet.isTag(val) && iswupper(val) && !caseSensitive)
+      if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
       {
         current_state.step(val, towlower(val));
       }
@@ -2807,8 +2801,8 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
     {
       if(!seentags)        // if no tags: only return complete matches
       {
-        bool uppercase = sf.size() > 1 && iswupper(sf[1]);
-        bool firstupper= iswupper(sf[0]);
+        bool uppercase = sf.size() > 1 && u_isupper(sf[1]);
+        bool firstupper= u_isupper(sf[0]);
 
         result = current_state.filterFinals(all_finals, alphabet,
                                             escaped_chars,
@@ -2848,7 +2842,7 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
       sf.clear();
       seentags = false;
     }
-    else if(iswspace(val) && sf.size() == 0)
+    else if(u_isspace(val) && sf.size() == 0)
     {
       // do nothing
     }
@@ -2881,7 +2875,7 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
       }
       if(current_state.size() != 0)
       {
-        if(!alphabet.isTag(val) && iswupper(val) && !caseSensitive)
+        if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
         {
           current_state.step(val, towlower(val));
         }
@@ -2892,8 +2886,8 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
       }
       if(current_state.isFinal(all_finals))
       {
-        bool uppercase = sf.size() > 1 && iswupper(sf[1]);
-        bool firstupper= iswupper(sf[0]);
+        bool uppercase = sf.size() > 1 && u_isupper(sf[1]);
+        bool firstupper= u_isupper(sf[0]);
 
         queue.clear(); // the intervening tags were matched
         result = current_state.filterFinals(all_finals, alphabet,
@@ -2953,8 +2947,8 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
     mark = true;
   }
 
-  bool firstupper = iswupper(input_word[start_point]);
-  bool uppercase = firstupper && iswupper(input_word[start_point+1]);
+  bool firstupper = u_isupper(input_word[start_point]);
+  bool uppercase = firstupper && u_isupper(input_word[start_point+1]);
 
   for(unsigned int i = start_point; i <= end_point; i++)
   {
@@ -2987,7 +2981,7 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
     }
     if(current_state.size() != 0)
     {
-      if(!alphabet.isTag(val) && iswupper(val) && !caseSensitive)
+      if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
       {
         current_state.step(val, towlower(val));
       }
@@ -3135,8 +3129,8 @@ FSTProcessor::biltransWithoutQueue(UString const &input_word, bool with_delim)
     mark = true;
   }
 
-  bool firstupper = iswupper(input_word[start_point]);
-  bool uppercase = firstupper && iswupper(input_word[start_point+1]);
+  bool firstupper = u_isupper(input_word[start_point]);
+  bool uppercase = firstupper && u_isupper(input_word[start_point+1]);
 
   for(unsigned int i = start_point; i <= end_point; i++)
   {
@@ -3146,7 +3140,7 @@ FSTProcessor::biltransWithoutQueue(UString const &input_word, bool with_delim)
     if(input_word[i] == '\\')
     {
       i++;
-      val = static_cast<int>(input_word[i]);
+      val = static_cast<int32_t>(input_word[i]);
     }
     else if(input_word[i] == '<')
     {
@@ -3164,11 +3158,11 @@ FSTProcessor::biltransWithoutQueue(UString const &input_word, bool with_delim)
     }
     else
     {
-      val = static_cast<int>(input_word[i]);
+      val = static_cast<int32_t>(input_word[i]);
     }
     if(current_state.size() != 0)
     {
-      if(!alphabet.isTag(val) && iswupper(val) && !caseSensitive)
+      if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
       {
         current_state.step(val, towlower(val));
       }
@@ -3263,7 +3257,7 @@ FSTProcessor::readSAO(InputFile& input)
     return input_buffer.next();
   }
 
-  UChar val = static_cast<UChar>(input.get());
+  UChar32 val = input.get();
   if(input.eof())
   {
     return 0;
@@ -3281,8 +3275,8 @@ FSTProcessor::readSAO(InputFile& input)
           str.append(readFullBlock(input, '<', '>').substr(1));
         }
         blankqueue.push(str);
-        input_buffer.add(static_cast<int>(' '));
-        return static_cast<int>(' ');
+        input_buffer.add(static_cast<int32_t>(' '));
+        return static_cast<int32_t>(' ');
       }
       else
       {
@@ -3290,11 +3284,11 @@ FSTProcessor::readSAO(InputFile& input)
       }
     }
     else if (val == '\\') {
-      val = static_cast<UChar>(input.get());
+      val = input.get();
       if(isEscaped(val))
       {
         input_buffer.add(val);
-        return static_cast<int>(val);
+        return static_cast<int32_t>(val);
       }
       else
         streamError();
@@ -3305,8 +3299,8 @@ FSTProcessor::readSAO(InputFile& input)
     }
   }
 
-  input_buffer.add(val);
-  return static_cast<int>(val);
+  input_buffer.add(static_cast<int32_t>(val));
+  return static_cast<int32_t>(val);
 }
 
 void
@@ -3333,19 +3327,19 @@ FSTProcessor::SAO(InputFile& input, UFILE *output)
   int last = 0;
 
   escaped_chars.clear();
-  escaped_chars.insert(static_cast<UChar>('\\'));
-  escaped_chars.insert(static_cast<UChar>('<'));
-  escaped_chars.insert(static_cast<UChar>('>'));
+  escaped_chars.insert('\\');
+  escaped_chars.insert('<');
+  escaped_chars.insert('>');
 
-  while(UChar val = readSAO(input))
+  while(UChar32 val = readSAO(input))
   {
     // test for final states
     if(current_state.isFinal(all_finals))
     {
       if(current_state.isFinal(inconditional))
       {
-        bool firstupper = iswupper(sf[0]);
-        bool uppercase = firstupper && iswupper(sf[sf.size()-1]);
+        bool firstupper = u_isupper(sf[0]);
+        bool uppercase = firstupper && u_isupper(sf[sf.size()-1]);
 
         lf = current_state.filterFinalsSAO(all_finals, alphabet,
                                         escaped_chars,
@@ -3355,8 +3349,8 @@ FSTProcessor::SAO(InputFile& input, UFILE *output)
       }
       else if(current_state.isFinal(postblank))
       {
-        bool firstupper = iswupper(sf[0]);
-        bool uppercase = firstupper && iswupper(sf[sf.size()-1]);
+        bool firstupper = u_isupper(sf[0]);
+        bool uppercase = firstupper && u_isupper(sf[sf.size()-1]);
 
         lf = current_state.filterFinalsSAO(all_finals, alphabet,
                                         escaped_chars,
@@ -3366,8 +3360,8 @@ FSTProcessor::SAO(InputFile& input, UFILE *output)
       }
       else if(!isAlphabetic(val))
       {
-        bool firstupper = iswupper(sf[0]);
-        bool uppercase = firstupper && iswupper(sf[sf.size()-1]);
+        bool firstupper = u_isupper(sf[0]);
+        bool uppercase = firstupper && u_isupper(sf[sf.size()-1]);
 
         lf = current_state.filterFinalsSAO(all_finals, alphabet,
                                         escaped_chars,
@@ -3377,7 +3371,7 @@ FSTProcessor::SAO(InputFile& input, UFILE *output)
         last = input_buffer.getPos();
       }
     }
-    else if(sf.empty() && iswspace(val))
+    else if(sf.empty() && u_isspace(val))
     {
       lf = "/*"_u;
       lf.append(sf);
@@ -3386,7 +3380,7 @@ FSTProcessor::SAO(InputFile& input, UFILE *output)
       last = input_buffer.getPos();
     }
 
-    if(!iswupper(val) || caseSensitive)
+    if(!u_isupper(val) || caseSensitive)
     {
       current_state.step(val);
     }
@@ -3403,7 +3397,7 @@ FSTProcessor::SAO(InputFile& input, UFILE *output)
     {
       if(!isAlphabetic(val) && sf.empty())
       {
-        if(iswspace(val))
+        if(u_isspace(val))
         {
           printSpace(val, output);
         }

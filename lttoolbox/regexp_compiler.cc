@@ -20,8 +20,8 @@
 #include <iostream>
 
 RegexpCompiler::RegexpCompiler() :
-index(0),
 token(0),
+index(0),
 alphabet(0),
 state(0),
 letter(0),

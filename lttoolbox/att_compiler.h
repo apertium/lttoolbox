@@ -157,7 +157,7 @@ private:
    * Returns true for combining diacritics and modifier letters
    *
    */
-  bool is_word_punct(UChar symbol);
+  bool is_word_punct(UChar32 symbol);
 
   /**
    * Determines initial type of single transition
