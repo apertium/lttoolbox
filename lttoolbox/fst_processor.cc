@@ -23,9 +23,6 @@
 #include <cerrno>
 #include <climits>
 
-#if defined(_WIN32) && !defined(_MSC_VER)
-#include <utf8_fwrap.h>
-#endif
 
 using namespace std;
 
