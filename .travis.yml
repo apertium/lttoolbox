@@ -9,7 +9,7 @@ compiler:
 addons:
   homebrew:
     packages:
-	- icu4c
+      - icu4c
 
 before_install:
   - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install -y swig; else brew install swig; fi
