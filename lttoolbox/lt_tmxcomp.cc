@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
   FILE *output = fopen(argv[argc-1], "wb");
   if(!output)
   {
-    wcerr << "Error: Cannot open file '" << argv[2] << "'." << endl;
+    cerr << "Error: Cannot open file '" << argv[2] << "'." << endl;
     exit(EXIT_FAILURE);
   }
   c.write(output);

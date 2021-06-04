@@ -17,7 +17,6 @@
 #include <lttoolbox/compiler.h>
 #include <lttoolbox/att_compiler.h>
 #include <lttoolbox/lt_locale.h>
-#include <lttoolbox/string_to_wostream.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -176,7 +175,7 @@ int main(int argc, char *argv[])
   }
   else
   {
-    wcerr << "Error: Cannot not open file '" << infile << "'." << endl << endl;
+    cerr << "Error: Cannot not open file '" << infile << "'." << endl << endl;
     exit(EXIT_FAILURE);
   }
   initGenericErrorDefaultFunc(NULL);
@@ -230,7 +229,7 @@ int main(int argc, char *argv[])
   FILE *output = fopen(outfile.c_str(), "wb");
   if(!output)
   {
-    wcerr << "Error: Cannot open file '" << outfile << "'." << endl;
+    cerr << "Error: Cannot open file '" << outfile << "'." << endl;
     exit(EXIT_FAILURE);
   }
   if(ttype == 'a')

@@ -146,8 +146,6 @@ private:
   void align_blanks(vector<int> &o, vector<int> &m);
   vector<int> join(vector<vector<int> > const &v, int const s) const;
 
-  static void printvector(vector<int> const &v, wostream &wos = std::wcout);  //eliminar este método
-
 public:
 
   /*

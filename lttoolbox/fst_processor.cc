@@ -637,20 +637,7 @@ FSTProcessor::readGeneration(InputFile& input, UFILE *output)
   }
   else if(val == '<')
   {
-    UString cad;
-    cad += val;
-
-    while((val = input.get()) != '>')
-    {
-      if(input.eof())
-      {
-        streamError();
-      }
-      cad += val;
-    }
-    cad += val;
-
-    return alphabet(cad);
+    return alphabet(readFullBlock(input, '<', '>'));
   }
   else if(val == '[')
   {
@@ -737,17 +724,7 @@ FSTProcessor::readBilingual(InputFile& input, UFILE *output)
   }
   else if(val == '<')
   {
-    UString cad;
-    cad += val;
-    while((val = input.get()) != '>')
-    {
-      if(input.eof())
-      {
-        streamError();
-      }
-      cad += val;
-    }
-    cad += val;
+    UString cad = readFullBlock(input, '<', '>');
 
     int res = alphabet(cad);
 
@@ -815,7 +792,7 @@ FSTProcessor::combineWblanks()
         final_wblank += "; "_u;
       }
 
-      final_wblank += last_wblank.substr(2,last_wblank.size()-4); //add wblank without brackets [[..]]
+      final_wblank.append(last_wblank, 2, last_wblank.size()-4); //add wblank without brackets [[..]]
       last_wblank.clear();
     }
     else

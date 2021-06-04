@@ -29,7 +29,7 @@ Compression::writeByte(unsigned char byte, FILE *output)
 {
   if(fwrite_unlocked(&byte, 1, 1, output) != 1)
   {
-    wcerr << L"I/O Error writing" << endl;
+    cerr << "I/O Error writing" << endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -41,7 +41,7 @@ Compression::readByte(FILE *input)
   if(fread_unlocked(&value, 1, 1, input) != 1)
   {
 //    Not uncomment this code since
-//    wcerr << L"I/O Error reading" << endl;
+//    cerr << "I/O Error reading" << endl;
 //    exit(EXIT_FAILURE);
   }
 
@@ -88,7 +88,7 @@ Compression::multibyte_write(unsigned int value, FILE *output)
   }
   else
   {
-    wcerr << L"Out of range: " << value << endl;
+    cerr << "Out of range: " << value << endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -135,7 +135,7 @@ Compression::multibyte_write(unsigned int value, ostream &output)
   }
   else
   {
-    wcerr << "Out of range: " << value << endl;
+    cerr << "Out of range: " << value << endl;
     exit(EXIT_FAILURE);
   }
 }

@@ -19,11 +19,8 @@
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
-#include <lttoolbox/string_to_wostream.h>
 #include <algorithm>
 #include <stack>
-#include <unicode/unistr.h>
-#include <unicode/numfmt.h>
 #include <unicode/uchar.h>
 #include <unicode/ustring.h>
 #include <utf8.h>
@@ -280,27 +277,27 @@ AttCompiler::extract_transducer(TransducerType type)
   _extract_transducer(type, starting_state, transducer, corr, visited);
 
   /* The final states. */
-  bool noFinals = true;
+  //bool noFinals = true;
   for (auto& f : finals)
   {
     if (corr.find(f.first) != corr.end())
     {
       transducer.setFinal(corr[f.first], f.second);
-      noFinals = false;
+      //noFinals = false;
     }
   }
 
 /*
   if(noFinals)
   {
-    wcerr << L"No final states (" << type << ")" << endl;
-    wcerr << L"  were:" << endl;
-    wcerr << L"\t" ;
+    cerr << "No final states (" << type << ")" << endl;
+    cerr << "  were:" << endl;
+    cerr << "\t" ;
     for (auto& f : finals)
     {
-      wcerr << f.first << L" ";
+      cerr << f.first << " ";
     }
-    wcerr << endl;
+    cerr << endl;
   }
 */
   return transducer;
@@ -413,7 +410,7 @@ TransducerType
 AttCompiler::classify_backwards(int state, set<int>& path)
 {
   if(finals.find(state) != finals.end()) {
-    wcerr << L"ERROR: Transducer contains epsilon transition to a final state. Aborting." << endl;
+    cerr << "ERROR: Transducer contains epsilon transition to a final state. Aborting." << endl;
     exit(EXIT_FAILURE);
   }
   AttNode* node = get_node(state);
@@ -422,7 +419,7 @@ AttCompiler::classify_backwards(int state, set<int>& path)
     if(t1.type != UNDECIDED) {
       type |= t1.type;
     } else if(path.find(t1.to) != path.end()) {
-      wcerr << L"ERROR: Transducer contains initial epsilon loop. Aborting." << endl;
+      cerr << "ERROR: Transducer contains initial epsilon loop. Aborting." << endl;
       exit(EXIT_FAILURE);
     } else {
       path.insert(t1.to);

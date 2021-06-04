@@ -381,18 +381,9 @@ TMXCompiler::procTU()
 
   trim(origin);
   trim(meta);
-//  cout << "DESPUES DE TRIM\n";
-//  printvector(origin);
-//  printvector(meta);
 
   align(origin, meta);
-//  cout << "DESPUES DE ALIGN\n";
-//  printvector(origin);
-//  printvector(meta);
   align_blanks(origin, meta);
-//  cout << "DESPUES DE ALIGNBLANKS\n";
-//  printvector(origin);
-//  printvector(meta);
   insertTU(origin, meta);
 }
 
@@ -624,27 +615,6 @@ TMXCompiler::vectorcmp(vector<int> const &orig, unsigned int const begin_orig,
   }
 
   return true;
-}
-
-void
-TMXCompiler::printvector(vector<int> const &v, wostream &os)
-{
-  for(unsigned int i = 0, limit = v.size(); i != limit; i++)
-  {
-    if(i != 0)
-    {
-      os << " ";
-    }
-    if(v[i] > 31)
-    {
-      os << v[i] << " ('" << UChar(v[i]) << "')";
-    }
-    else
-    {
-      os << v[i];
-    }
-  }
-  os << endl;
 }
 
 void

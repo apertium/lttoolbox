@@ -231,5 +231,13 @@ class NonBMPATTTest(ProcTest):
 	inputs = ['𐅁𐅃𐅅', '𐅂𐅄𐅆']
 	expectedOutputs = ['^𐅁𐅃𐅅/𐅁𐅃𐅅<num>$', '^𐅂𐅄𐅆/𐅂𐅄𐅆<num>$']
 
+
+class NonBMPGeneratorTest(ProcTest):
+	procdix = "data/non-bmp.att"
+	inputs = ['^𐅁𐅃𐅅<num>$', '^𐅂𐅄𐅆<num>$']
+	expectedOutputs = ['𐅁𐅃𐅅', '𐅂𐅄𐅆']
+	procflags = ['-z', '-g']
+	procdir = "rl"
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *
