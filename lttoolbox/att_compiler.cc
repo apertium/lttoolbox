@@ -69,7 +69,7 @@ AttCompiler::convert_hfst(UString& symbol)
 bool
 AttCompiler::is_word_punct(UChar32 symbol)
 {
-  // this version isn't quite write, but something like it should be possible
+  // this version isn't quite right, but something like it should be possible
   //return u_charType(symbol) & (U_NON_SPACING_MARK | U_ENCLOSING_MARK | U_COMBINING_SPACING_MARK);
   // https://en.wikipedia.org/wiki/Combining_character#Unicode_ranges
   if((symbol >= 0x0300 && symbol <= 0x036F) // Combining Diacritics
