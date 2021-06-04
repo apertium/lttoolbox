@@ -20,6 +20,7 @@
 #include <stdexcept>
 #include <utf8.h>
 #include <cstring>
+#include <unicode/utf16.h>
 
 using namespace icu;
 
@@ -60,4 +61,21 @@ to_ustring(const char* s)
   ret.reserve(sz);
   utf8::utf8to16(s, s+sz, std::back_inserter(ret));
   return ret;
+}
+
+void
+ustring_to_vec32(const UString& str, std::vector<int32_t>& vec)
+{
+  if (str.empty()) {
+    return;
+  }
+
+  size_t i = 0;
+  size_t len = str.size();
+  vec.reserve(vec.size() + str.size());
+  int32_t c;
+  while (i < str.size()) {
+    U16_NEXT(str, i, len, c);
+    vec.push_back(c);
+  }
 }

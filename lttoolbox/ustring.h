@@ -18,9 +18,11 @@
 #ifndef _LT_USTRING_H_
 #define _LT_USTRING_H_
 
-#include <unicode/unistr.h>
 #include <unicode/ustdio.h>
 #include <string>
+#include <utf8/utf8.h>
+#include <vector>
+#include <cstdint>
 
 typedef std::basic_string<UChar> UString;
 
@@ -35,11 +37,13 @@ double stod(const UString& str);
 // for command-line arguments
 UString to_ustring(const char* str);
 
-static std::ostream& operator<<(std::ostream& ostr, const UString& str)
+// append UTF-16 string to UTF-32 vector of symbols
+void ustring_to_vec32(const UString& str, std::vector<int32_t>& vec);
+
+inline std::ostream& operator<<(std::ostream& ostr, const UString& str)
 {
   std::string res;
-  icu::UnicodeString temp = str.c_str();
-  temp.toUTF8String(res);
+  utf8::utf16to8(str.begin(), str.end(), std::back_inserter(res));
   ostr << res;
   return ostr;
 }
@@ -52,7 +56,7 @@ inline UString operator "" _u(const char* str, std::size_t len) {
 	return us;
 }
 
-static void operator+=(UString& str, UChar32 c)
+inline void operator+=(UString& str, UChar32 c)
 {
   if (c <= 0xFFFF) {
     str += static_cast<UChar>(c);

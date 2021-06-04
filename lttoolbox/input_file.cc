@@ -31,26 +31,25 @@ InputFile::~InputFile()
 }
 
 bool
-InputFile::open(char* fname)
+InputFile::open(const char* fname)
 {
   close();
-  if (fname == NULL) {
+  if (fname == nullptr) {
     infile = stdin;
   } else {
-    infile = fopen(fname, "r");
+    infile = fopen(fname, "rb");
   }
-  return (infile != NULL);
+  return (infile != nullptr);
 }
 
 void
 InputFile::close()
 {
-  if (infile != NULL) {
+  if (infile != nullptr) {
     if (infile != stdin) {
       fclose(infile);
-      delete infile;
     }
-    infile = NULL;
+    infile = nullptr;
   }
 }
 
@@ -122,5 +121,5 @@ InputFile::unget(UChar32 c)
 bool
 InputFile::eof()
 {
-  return (infile == NULL) || feof(infile);
+  return (infile == nullptr) || feof(infile);
 }

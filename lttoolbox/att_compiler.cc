@@ -24,6 +24,7 @@
 #include <unicode/uchar.h>
 #include <unicode/ustring.h>
 #include <utf8.h>
+#include <unicode/utf16.h>
 
 using namespace std;
 using namespace icu;
@@ -102,13 +103,8 @@ AttCompiler::symbol_code(const UString& symbol)
   } else if (symbol.empty()) {
     return 0;
   } else {
-    UChar32 c = symbol[0];
-    if (symbol.size() > 1) {
-      // it's 2 UTF-16 code units,
-      // so combine them into a single UTF-32 codepoint
-      c = ((c - 0xD800) << 10) + 0x10000;
-      c += (symbol[1] - 0xDC00);
-    }
+    UChar32 c;
+    U16_GET(symbol, 0, 0, symbol.size(), c);
     if ((u_ispunct(c) || u_isspace(c)) && !is_word_punct(c)) {
       return c;
     } else {

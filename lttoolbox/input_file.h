@@ -32,7 +32,7 @@ private:
 public:
   InputFile();
   ~InputFile();
-  bool open(char* fname);
+  bool open(const char* fname = nullptr);
   void close();
   UChar32 get();
   UChar32 peek();

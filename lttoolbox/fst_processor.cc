@@ -153,7 +153,7 @@ FSTProcessor::procNodeICX()
   }
   else
   {
-    cerr << "Error in ICX UFILE (" << xmlTextReaderGetParserLineNumber(reader);
+    cerr << "Error in ICX file (" << xmlTextReaderGetParserLineNumber(reader);
     cerr << "): Invalid node '<" << name << ">'." << endl;
     exit(EXIT_FAILURE);
   }
@@ -191,7 +191,7 @@ FSTProcessor::procNodeRCX()
   }
   else
   {
-    cerr << "Error in RCX UFILE (" << xmlTextReaderGetParserLineNumber(reader);
+    cerr << "Error in RCX file (" << xmlTextReaderGetParserLineNumber(reader);
     cerr << "): Invalid node '<" << name << ">'." << endl;
     exit(EXIT_FAILURE);
   }
@@ -1110,7 +1110,7 @@ FSTProcessor::compoundAnalysis(UString input_word, bool uppercase, bool firstupp
 
   for(unsigned int i=0; i<input_word.size(); i++)
   {
-    UChar val=input_word.at(i);
+    UChar val=input_word[i];
 
     current_state.step_case(val, caseSensitive);
 
@@ -2651,6 +2651,7 @@ UString
 FSTProcessor::compose(UString const &lexforms, UString const &queue) const
 {
   UString result;
+  result.reserve(lexforms.size() + 2 * queue.size());
   result += '/';
 
   for(unsigned int i = 1; i< lexforms.size(); i++)
@@ -2667,7 +2668,8 @@ FSTProcessor::compose(UString const &lexforms, UString const &queue) const
     result += lexforms[i];
   }
 
-  return result + queue;
+  result += queue;
+  return result;
 }
 
 void

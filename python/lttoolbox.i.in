@@ -54,8 +54,8 @@ public:
 
   void lt_proc(int argc, char **argv, char *input_path, char *output_path)
   {
-	InputFile input;
-	input.open(input_path);
+    InputFile input;
+    input.open(input_path);
     UFILE* output = u_fopen(output_path, "w", NULL, NULL);
     int cmd = 0;
     int c = 0;

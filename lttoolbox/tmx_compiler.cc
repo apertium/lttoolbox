@@ -522,13 +522,12 @@ TMXCompiler::align(vector<int> &origin, vector<int> &meta)
           {
             modified_meta.push_back('@');
             modified_meta.push_back('(');
-            UChar* valor = new UChar[8];
-            u_snprintf(valor, 8, "%d", j+1);
-            for(int k = 0, limit3 = u_strlen(valor); k != limit3; k++)
+            UChar valor[8]{};
+            int limit3 = u_snprintf(valor, 8, "%d", j+1);
+            for(int k = 0; k != limit3; k++)
             {
               modified_meta.push_back(valor[k]);
             }
-            delete[] valor;
             modified_meta.push_back(')');
             i += nl-1;
             tocado = true;

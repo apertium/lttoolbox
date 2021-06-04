@@ -79,8 +79,8 @@ EntryToken::setSingleTransduction(vector<int> const &pi, vector<int> const &pd, 
 void
 EntryToken::setRegexp(UString const &r)
 {
-  //myregexp = r;
-  myregexp = vector<int32_t>(r.begin(), r.end());
+  myregexp.clear();
+  ustring_to_vec32(r, myregexp);
   type = regexp;
 }
 
