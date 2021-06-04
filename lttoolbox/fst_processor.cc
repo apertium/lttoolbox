@@ -27,6 +27,18 @@
 using namespace std;
 
 
+UString const FSTProcessor::XML_TEXT_NODE           = "#text"_u;
+UString const FSTProcessor::XML_COMMENT_NODE        = "#comment"_u;
+UString const FSTProcessor::XML_IGNORED_CHARS_ELEM  = "ignored-chars"_u;
+UString const FSTProcessor::XML_RESTORE_CHAR_ELEM   = "restore-char"_u;
+UString const FSTProcessor::XML_RESTORE_CHARS_ELEM  = "restore-chars"_u;
+UString const FSTProcessor::XML_VALUE_ATTR          = "value"_u;
+UString const FSTProcessor::XML_CHAR_ELEM           = "char"_u;
+UString const FSTProcessor::WBLANK_START            = "[["_u;
+UString const FSTProcessor::WBLANK_END              = "]]"_u;
+UString const FSTProcessor::WBLANK_FINAL            = "[[/]]"_u;
+
+
 FSTProcessor::FSTProcessor() :
 default_weight(0.0000),
 outOfWord(false),
@@ -123,19 +135,19 @@ void
 FSTProcessor::procNodeICX()
 {
   UString name = XMLParseUtil::readName(reader);
-  if(name == "#text"_u)
+  if(name == XML_TEXT_NODE)
   {
     /* ignore */
   }
-  else if(name == "ignored-chars"_u)
+  else if(name == XML_IGNORED_CHARS_ELEM)
   {
     /* ignore */
   }
-  else if(name == "char"_u)
+  else if(name == XML_CHAR_ELEM)
   {
-    ignored_chars.insert(static_cast<int32_t>(XMLParseUtil::attrib(reader, "value"_u)[0]));
+    ignored_chars.insert(static_cast<int32_t>(XMLParseUtil::attrib(reader, XML_VALUE_ATTR)[0]));
   }
-  else if(name == "#comment"_u)
+  else if(name == XML_COMMENT_NODE)
   {
     /* ignore */
   }
@@ -157,23 +169,23 @@ void
 FSTProcessor::procNodeRCX()
 {
   UString name = XMLParseUtil::readName(reader);
-  if(name == "#text"_u)
+  if(name == XML_TEXT_NODE)
   {
     /* ignore */
   }
-  else if(name == "restore-chars"_u)
+  else if(name == XML_RESTORE_CHARS_ELEM)
   {
     /* ignore */
   }
-  else if(name == "char"_u)
+  else if(name == XML_CHAR_ELEM)
   {
-    rcx_current_char = static_cast<int32_t>(XMLParseUtil::attrib(reader, "value"_u)[0]);
+    rcx_current_char = static_cast<int32_t>(XMLParseUtil::attrib(reader, XML_VALUE_ATTR)[0]);
   }
-  else if(name == "restore-char"_u)
+  else if(name == XML_RESTORE_CHAR_ELEM)
   {
-    rcx_map[rcx_current_char].insert(static_cast<int32_t>(XMLParseUtil::attrib(reader, "value"_u)[0]));
+    rcx_map[rcx_current_char].insert(static_cast<int32_t>(XMLParseUtil::attrib(reader, XML_VALUE_ATTR)[0]));
   }
-  else if(name == "#comment"_u)
+  else if(name == XML_COMMENT_NODE)
   {
     /* ignore */
   }
@@ -235,8 +247,7 @@ FSTProcessor::readFullBlock(InputFile& input, UChar32 const delim1, UChar32 cons
 UString
 FSTProcessor::readWblank(InputFile& input)
 {
-  UString result;
-  result += "[["_u;
+  UString result = WBLANK_START;
   UChar32 c = 0;
 
   while(!input.eof())
@@ -271,8 +282,7 @@ FSTProcessor::readWblank(InputFile& input)
 bool
 FSTProcessor::wblankPostGen(InputFile& input, UFILE *output)
 {
-  UString result;
-  result += "[["_u;
+  UString result = WBLANK_START;
   UChar32 c = 0;
 
   while(!input.eof())
@@ -781,11 +791,11 @@ FSTProcessor::combineWblanks()
 
   while(wblankqueue.size() > 0)
   {
-    if(wblankqueue.front().compare("[[/]]"_u) == 0)
+    if(wblankqueue.front().compare(WBLANK_FINAL) == 0)
     {
       if(final_wblank.empty())
       {
-        final_wblank += "[["_u;
+        final_wblank += WBLANK_START;
       }
       else if(final_wblank.size() > 2)
       {
@@ -809,7 +819,7 @@ FSTProcessor::combineWblanks()
 
   if(!final_wblank.empty())
   {
-    final_wblank += "]]"_u;
+    final_wblank += WBLANK_END;
     need_end_wblank = true;
   }
 
@@ -1899,7 +1909,7 @@ FSTProcessor::postgeneration(InputFile& input, UFILE *output)
       {
         if(need_end_wblank)
         {
-          write("[[/]]"_u, output);
+          write(WBLANK_FINAL, output);
           need_end_wblank = false;
         }
 
@@ -1920,7 +1930,7 @@ FSTProcessor::postgeneration(InputFile& input, UFILE *output)
 
         if(need_end_wblank)
         {
-          write("[[/]]"_u, output);
+          write(WBLANK_FINAL, output);
           need_end_wblank = false;
         }
       }
@@ -2028,7 +2038,7 @@ FSTProcessor::postgeneration(InputFile& input, UFILE *output)
 
             if(need_end_wblank)
             {
-              write("[[/]]"_u, output);
+              write(WBLANK_FINAL, output);
               need_end_wblank = false;
               u_fputc(sf[space_index], output);
               flushWblanks(output);
@@ -2394,32 +2404,17 @@ FSTProcessor::biltransfull(UString const &input_word, bool with_delim)
     }
     if(current_state.isFinal(all_finals))
     {
-      result = current_state.filterFinals(all_finals, alphabet,
-                                          escaped_chars,
-                                          displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                          uppercase, firstupper, 0);
-      if(with_delim)
-      {
-        if(mark)
-        {
-          result = "^="_u + result.substr(1);
-        }
-        else
-        {
-          result[0] = '^';
-        }
+      result.clear();
+      if(with_delim) {
+        result += '^';
       }
-      else
-      {
-        if(mark)
-        {
-          result = "="_u + result.substr(1);
-        }
-        else
-        {
-          result = result.substr(1);
-        }
+      if(mark) {
+        result += '=';
       }
+      result += current_state.filterFinals(all_finals, alphabet,
+                                           escaped_chars,
+                                           displayWeightsMode, maxAnalyses, maxWeightClasses,
+                                           uppercase, firstupper, 0).substr(1);
     }
 
     if(current_state.size() == 0)
@@ -2562,32 +2557,17 @@ FSTProcessor::biltrans(UString const &input_word, bool with_delim)
     }
     if(current_state.isFinal(all_finals))
     {
-      result = current_state.filterFinals(all_finals, alphabet,
-                                          escaped_chars,
-                                          displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                          uppercase, firstupper, 0);
-      if(with_delim)
-      {
-        if(mark)
-        {
-          result = "^="_u + result.substr(1);
-        }
-        else
-        {
-          result[0] = '^';
-        }
+      result.clear();
+      if (with_delim) {
+        result += '^';
       }
-      else
-      {
-        if(mark)
-        {
-          result = "="_u + result.substr(1);
-        }
-        else
-        {
-          result = result.substr(1);
-        }
+      if (mark) {
+        result += '=';
       }
+      result += current_state.filterFinals(all_finals, alphabet,
+                                           escaped_chars,
+                                           displayWeightsMode, maxAnalyses, maxWeightClasses,
+                                           uppercase, firstupper, 0).substr(1);
     }
 
     if(current_state.size() == 0)
@@ -2671,6 +2651,7 @@ UString
 FSTProcessor::compose(UString const &lexforms, UString const &queue) const
 {
   UString result;
+  result += '/';
 
   for(unsigned int i = 1; i< lexforms.size(); i++)
   {
@@ -2686,7 +2667,7 @@ FSTProcessor::compose(UString const &lexforms, UString const &queue) const
     result += lexforms[i];
   }
 
-  return "/"_u + result + queue;
+  return result + queue;
 }
 
 void
@@ -2937,32 +2918,17 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
     }
     if(current_state.isFinal(all_finals))
     {
-      result = current_state.filterFinals(all_finals, alphabet,
-                                          escaped_chars,
-                                          displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                          uppercase, firstupper, 0);
-      if(with_delim)
-      {
-        if(mark)
-        {
-          result = "^="_u + result.substr(1);
-        }
-        else
-        {
-          result[0] = '^';
-        }
+      result.clear();
+      if (with_delim) {
+        result += '^';
       }
-      else
-      {
-        if(mark)
-        {
-          result = "="_u + result.substr(1);
-        }
-        else
-        {
-          result = result.substr(1);
-        }
+      if (mark) {
+        result += '=';
       }
+      result += current_state.filterFinals(all_finals, alphabet,
+                                           escaped_chars,
+                                           displayWeightsMode, maxAnalyses, maxWeightClasses,
+                                           uppercase, firstupper, 0).substr(1);
     }
 
     if(current_state.size() == 0)
@@ -2988,10 +2954,9 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
   }
 
   if (!seentags
-      && ""_u == current_state.filterFinals(all_finals, alphabet,
-                                           escaped_chars,
-                                           displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                           uppercase, firstupper, 0))
+      && current_state.filterFinals(all_finals, alphabet, escaped_chars,
+                                    displayWeightsMode, maxAnalyses, maxWeightClasses,
+                                    uppercase, firstupper, 0).empty())
   {
     // word is not present
     if(with_delim)
@@ -3118,32 +3083,17 @@ FSTProcessor::biltransWithoutQueue(UString const &input_word, bool with_delim)
     }
     if(current_state.isFinal(all_finals))
     {
-      result = current_state.filterFinals(all_finals, alphabet,
-                                          escaped_chars,
-                                          displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                          uppercase, firstupper, 0);
-      if(with_delim)
-      {
-        if(mark)
-        {
-          result = "^="_u + result.substr(1);
-        }
-        else
-        {
-          result[0] = '^';
-        }
+      result.clear();
+      if (with_delim) {
+        result += '^';
       }
-      else
-      {
-        if(mark)
-        {
-          result = "="_u + result.substr(1);
-        }
-        else
-        {
-          result = result.substr(1);
-        }
+      if (mark) {
+        result += '=';
       }
+      result += current_state.filterFinals(all_finals, alphabet,
+                                           escaped_chars,
+                                           displayWeightsMode, maxAnalyses, maxWeightClasses,
+                                           uppercase, firstupper, 0).substr(1);
     }
 
     if(current_state.size() == 0)

@@ -489,6 +489,21 @@ private:
 
   xmlTextReaderPtr reader;
 public:
+
+  /*
+   * String constants
+   */
+  static UString const XML_TEXT_NODE;
+  static UString const XML_COMMENT_NODE;
+  static UString const XML_IGNORED_CHARS_ELEM;
+  static UString const XML_RESTORE_CHAR_ELEM;
+  static UString const XML_RESTORE_CHARS_ELEM;
+  static UString const XML_VALUE_ATTR;
+  static UString const XML_CHAR_ELEM;
+  static UString const WBLANK_START;
+  static UString const WBLANK_END;
+  static UString const WBLANK_FINAL;
+
   FSTProcessor();
 
   void initAnalysis();

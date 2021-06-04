@@ -76,6 +76,9 @@ private:
    */
   UString meta_language_inner_code;
 
+  int32_t number_tag;
+  int32_t blank_tag;
+
 
   /**
    * Method to parse an XML Node
@@ -163,6 +166,10 @@ public:
   static UString const TMX_COMPILER_LANG_ATTR;
   static UString const TMX_COMPILER_SEG_ELEM;
   static UString const TMX_COMPILER_PROP_ELEM;
+  static UString const TMX_COMPILER_TEXT_NODE;
+  static UString const TMX_COMPILER_COMMENT_NODE;
+  static UString const TMX_COMPILER_NUMBER_TAG;
+  static UString const TMX_COMPILER_BLANK_TAG;
 
 
   /**

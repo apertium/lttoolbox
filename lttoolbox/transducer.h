@@ -92,6 +92,22 @@ private:
 public:
 
   /**
+   * String constants
+   */
+  static UString const HFST_EPSILON_SYMBOL_SHORT;
+  static UString const HFST_EPSILON_SYMBOL_LONG;
+  static UString const LTTB_EPSILON_SYMBOL;
+  static UString const HFST_SPACE_SYMBOL;
+  static UString const HFST_TAB_SYMBOL;
+  static UString const GROUP_SYMBOL;
+  static UString const JOIN_SYMBOL;
+  static UString const ANY_TAG_SYMBOL;
+  static UString const ANY_CHAR_SYMBOL;
+  static UString const LSX_BOUNDARY_SYMBOL;
+  static UString const COMPOUND_ONLY_L_SYMBOL;
+  static UString const COMPOUND_R_SYMBOL;
+
+  /**
    * Constructor
    */
   Transducer();

@@ -25,6 +25,7 @@ index(0),
 alphabet(0),
 state(0),
 letter(0),
+postop(0),
 default_weight(0.0000)
 {
 }
@@ -202,20 +203,20 @@ RegexpCompiler::Term()
     e = t.insertNewSingleTransduction((*alphabet)(letter, letter), e, default_weight);
     t.setFinal(e, default_weight);
     Postop();
-    if(postop == "*"_u)
+    if(postop == '*')
     {
       t.zeroOrMore((*alphabet)(0, 0));
     }
-    else if(postop == "+"_u)
+    else if(postop == '+')
     {
       t.oneOrMore((*alphabet)(0, 0));
     }
-    else if(postop == "?"_u)
+    else if(postop == '?')
     {
       t.optional((*alphabet)(0, 0));
     }
 
-    postop.clear();
+    postop = 0;
     state = transducer.insertTransducer(state, t, (*alphabet)(0, 0));
   }
   else if(token == '(')
@@ -229,20 +230,20 @@ RegexpCompiler::Term()
     consume(')');
     transducer.setFinal(state, default_weight);
     Postop();
-    if(postop == "*"_u)
+    if(postop == '*')
     {
       transducer.zeroOrMore((*alphabet)(0, 0));
     }
-    else if(postop == "+"_u)
+    else if(postop == '+')
     {
       transducer.oneOrMore((*alphabet)(0, 0));
     }
-    else if(postop == "?"_u)
+    else if(postop == '?')
     {
       transducer.optional((*alphabet)(0, 0));
     }
 
-    postop.clear();
+    postop = 0;
     state = t.insertTransducer(e, transducer, (*alphabet)(0, 0));
     transducer = t;
   }
@@ -300,17 +301,17 @@ RegexpCompiler::Postop()
   if(token == '*')
   {
     consume('*');
-    postop = "*"_u;
+    postop = '*';
   }
   else if(token == '?')
   {
     consume('?');
-    postop = "?"_u;
+    postop = '?';
   }
   else if(token == '+')
   {
     consume('+');
-    postop = "+"_u;
+    postop = '+';
   }
   else if(token == '(' || token == '[' || !isReserved(token) ||
           token == '\\' || token == '|' ||  token == FIN_FICHERO ||
@@ -369,20 +370,20 @@ RegexpCompiler::Esp()
     error();
   }
 
-  if(postop == "+"_u)
+  if(postop == '+')
   {
     t.oneOrMore((*alphabet)(0, 0));
   }
-  else if(postop == "*"_u)
+  else if(postop == '*')
   {
     t.zeroOrMore((*alphabet)(0, 0));
   }
-  else if(postop == "?"_u)
+  else if(postop == '?')
   {
     t.optional((*alphabet)(0, 0));
   }
   brackets.clear();
-  postop.clear();
+  postop = 0;
 
   state = transducer.insertTransducer(state, t, (*alphabet)(0, 0));
 }
@@ -480,5 +481,5 @@ RegexpCompiler::initialize(Alphabet *a)
   setAlphabet(a);
   transducer.clear();
   brackets.clear();
-  postop.clear();
+  postop = 0;
 }

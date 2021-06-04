@@ -37,14 +37,20 @@ UString const TMXCompiler::TMX_COMPILER_XMLLANG_ATTR = "xml:lang"_u;
 UString const TMXCompiler::TMX_COMPILER_LANG_ATTR    = "lang"_u;
 UString const TMXCompiler::TMX_COMPILER_SEG_ELEM     = "seg"_u;
 UString const TMXCompiler::TMX_COMPILER_PROP_ELEM    = "prop"_u;
+UString const TMXCompiler::TMX_COMPILER_TEXT_NODE    = "#text"_u;
+UString const TMXCompiler::TMX_COMPILER_COMMENT_NODE = "#comment"_u;
+UString const TMXCompiler::TMX_COMPILER_NUMBER_TAG   = "<n>"_u;
+UString const TMXCompiler::TMX_COMPILER_BLANK_TAG    = "<b>"_u;
 
 TMXCompiler::TMXCompiler() :
 reader(0),
 default_weight(0.0000)
 {
   LtLocale::tryToSetLocale();
-  alphabet.includeSymbol("<n>"_u); // -1 -> numbers
-  alphabet.includeSymbol("<b>"_u); // -2 -> blanks
+  alphabet.includeSymbol(TMX_COMPILER_NUMBER_TAG); // -1 -> numbers
+  alphabet.includeSymbol(TMX_COMPILER_BLANK_TAG); // -2 -> blanks
+  number_tag = alphabet(TMX_COMPILER_NUMBER_TAG);
+  blank_tag = alphabet(TMX_COMPILER_BLANK_TAG);
 }
 
 TMXCompiler::~TMXCompiler()
@@ -96,23 +102,23 @@ TMXCompiler::requireEmptyError(UString const &name)
 bool
 TMXCompiler::allBlanks()
 {
-  bool flag = true;
   UString text = XMLParseUtil::readValue(reader);
 
   for(auto c : text)
   {
-    flag = flag && u_isspace(c);
+    if (!u_isspace(c)) {
+      return false;
+    }
   }
-
-  return flag;
+  return true;
 }
 
 void
 TMXCompiler::skipBlanks(UString &name)
 {
-  while(name == "#text"_u || name == "#comment"_u)
+  while(name == TMX_COMPILER_TEXT_NODE || name == TMX_COMPILER_COMMENT_NODE)
   {
-    if(name != "#comment"_u)
+    if(name != TMX_COMPILER_COMMENT_NODE)
     {
       if(!allBlanks())
       {
@@ -133,9 +139,9 @@ TMXCompiler::skip(UString &name, UString const &elem)
   xmlTextReaderRead(reader);
   name = XMLParseUtil::readName(reader);
 
-  while(name == "#text"_u || name == "#comment"_u)
+  while(name == TMX_COMPILER_TEXT_NODE || name == TMX_COMPILER_COMMENT_NODE)
   {
-    if(name != "#comment"_u)
+    if(name != TMX_COMPILER_COMMENT_NODE)
     {
       if(!allBlanks())
       {
@@ -192,7 +198,7 @@ TMXCompiler::insertTU(vector<int> const &origin, vector<int> const &meta)
     return;
   }
 
-  if(origin[0] == alphabet("<b>"_u) || meta[0] == alphabet("<b>"_u))
+  if(origin[0] == blank_tag || meta[0] == blank_tag)
   {
     return;
   }
@@ -268,12 +274,10 @@ TMXCompiler::align_blanks(vector<int> &o, vector<int> &m)
   vector<unsigned int> puntos;
   vector<int> resultado_o, resultado_m;
 
-  int const symbol = alphabet("<b>"_u);
-
   vector<vector<int> > so, sm;
 
-  split(o, so, symbol);
-  split(m, sm, symbol);
+  split(o, so, blank_tag);
+  split(m, sm, blank_tag);
 
   if(so.size() == sm.size())
   {
@@ -357,19 +361,15 @@ TMXCompiler::procTU()
         name = XMLParseUtil::readName(reader);
         type = xmlTextReaderNodeType(reader);
 
-        if(name == "#text"_u)
+        if(name == TMX_COMPILER_TEXT_NODE)
         {
-          UString l = XMLParseUtil::readValue(reader);
-          for(size_t i = 0, limit = l.size(); i != limit; i++)
-          {
-            ref->push_back(l[i]);
-          }
+          XMLParseUtil::readValueInto32(reader, *ref);
         }
         else if(name == TMX_COMPILER_HI_ELEM || name == TMX_COMPILER_PH_ELEM)
         {
           if(type != XML_READER_TYPE_END_ELEMENT)
           {
-            ref->push_back(alphabet("<b>"_u));
+            ref->push_back(blank_tag);
           }
         }
       }
@@ -394,7 +394,7 @@ TMXCompiler::procNode()
 
   // HACER: optimizar el orden de ejecución de esta ristra de "ifs"
 
-  if(name == "#text"_u)
+  if(name == TMX_COMPILER_TEXT_NODE)
   {
     /* ignorar */
   }
@@ -418,7 +418,7 @@ TMXCompiler::procNode()
   {
     procTU();
   }
-  else if(name== "#comment"_u)
+  else if(name== TMX_COMPILER_COMMENT_NODE)
   {
     /* ignorar */
   }
@@ -438,14 +438,14 @@ TMXCompiler::write(FILE *output)
   write_le(output, features);
 
   // letters (empty to keep the file format)
-  Compression::string_write(""_u, output);
+  Compression::multibyte_write(0, output);
 
   // symbols
   alphabet.write(output);
 
-  // transducers
+  // transducers (1, with empty name)
   Compression::multibyte_write(1, output); // keeping file format
-  Compression::string_write(""_u, output); // keeping file format
+  Compression::multibyte_write(0, output); // keeping file format
   transducer.write(output);
 
   cout << origin_language << "->" << meta_language << " ";
@@ -498,7 +498,7 @@ TMXCompiler::align(vector<int> &origin, vector<int> &meta)
       numbers_origin_start.push_back(i);
       numbers_origin_length.push_back(nl);
       i += nl-1;
-      modified_origin.push_back(alphabet("<n>"_u));
+      modified_origin.push_back(number_tag);
     }
     else
     {

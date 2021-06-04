@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
     it->second.show(alphabet, output, 0, hfst);
     if(it != penum)
     {
-      u_fputs("--\n"_u, output);
+      u_fputs("--"_u, output);
     }
   }
 

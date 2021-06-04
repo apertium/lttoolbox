@@ -222,13 +222,13 @@ private:
    * Parse the &lt;p&gt; element
    * @return a list of tokens from the dictionary's entry
    */
-  EntryToken procTransduction(UString const &wsweight);
+  EntryToken procTransduction(double const entry_weight);
 
   /**
    * Parse the &lt;i&gt; element
    * @return a list of tokens from the dictionary's entry
    */
-  EntryToken procIdentity(UString const &wsweight, bool ig = false);
+  EntryToken procIdentity(double const entry_weight, bool ig = false);
 
   /**
    * Parse the &lt;par&gt; element

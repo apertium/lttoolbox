@@ -74,7 +74,7 @@ private:
   /**
    * Post-operator: '+', '?', '*'
    */
-  UString postop;
+  UChar32 postop;
 
   /**
    * Default value of weight

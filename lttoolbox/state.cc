@@ -894,7 +894,8 @@ State::restartFinals(const map<Node *, double> &finals, int requiredSymbol, Stat
 UString
 State::getReadableString(const Alphabet &a)
 {
-  UString retval = "["_u;
+  UString retval;
+  retval += '[';
 
   for(unsigned int i=0; i<state.size(); i++)
   {
@@ -908,9 +909,10 @@ State::getReadableString(const Alphabet &a)
 
     if(i+1 < state.size())
     {
-      retval.append(", "_u);
+      retval += ',';
+      retval += ' ';
     }
   }
-  retval.append("]"_u);
+  retval += ']';
   return retval;
 }

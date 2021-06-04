@@ -26,6 +26,23 @@
 #include <vector>
 #include <cstring>
 
+UString const Transducer::HFST_EPSILON_SYMBOL_SHORT   = "@0@"_u;
+UString const Transducer::HFST_EPSILON_SYMBOL_LONG    = "@_EPSILON_SYMBOL_@"_u;
+// could extend the ""_u helper to include u""_u
+// this is the only place that needs it
+UString const Transducer::LTTB_EPSILON_SYMBOL         = UString(1, (UChar)0x3B5);
+                                                   // = "ε"_u;
+UString const Transducer::HFST_SPACE_SYMBOL           = "@_SPACE_@"_u;
+UString const Transducer::HFST_TAB_SYMBOL             = "@_TAB_@"_u;
+UString const Transducer::GROUP_SYMBOL                = "#"_u;
+UString const Transducer::JOIN_SYMBOL                 = "+"_u;
+UString const Transducer::ANY_TAG_SYMBOL              = "<ANY_TAG>"_u;
+UString const Transducer::ANY_CHAR_SYMBOL             = "<ANY_CHAR>"_u;
+UString const Transducer::LSX_BOUNDARY_SYMBOL         = "<$>"_u;
+UString const Transducer::COMPOUND_ONLY_L_SYMBOL      = "<compound-only-L>"_u;
+UString const Transducer::COMPOUND_R_SYMBOL           = "<compound-R>"_u;
+
+
 int
 Transducer::newState()
 {
@@ -720,21 +737,20 @@ Transducer::escapeSymbol(UString& symbol, bool hfst) const
   {
     if(hfst)
     {
-      symbol = "@0@"_u;
+      symbol = HFST_EPSILON_SYMBOL_SHORT;
     }
     else
     {
-      //symbol = "ε"_u;
-      symbol += (UChar)949;
+      symbol = LTTB_EPSILON_SYMBOL;
     }
   }
   else if(hfst && symbol == " "_u)
   {
-    symbol = "@_SPACE_@"_u;
+    symbol = HFST_SPACE_SYMBOL;
   }
   else if(hfst && symbol == "\t"_u)
   {
-    symbol = "@_TAB_@"_u;
+    symbol = HFST_TAB_SYMBOL;
   }
 }
 
@@ -983,10 +999,6 @@ Transducer
 Transducer::moveLemqsLast(Alphabet const &alphabet,
                           int const epsilon_tag)
 {
-  // TODO: These should be in file which is included by both
-  // fst_processor.cc and compiler.cc:
-  UString COMPILER_GROUP_ELEM = "#"_u;
-
   Transducer new_t;
   typedef int SearchState;
   std::set<SearchState> seen;
@@ -1009,7 +1021,7 @@ Transducer::moveLemqsLast(Alphabet const &alphabet,
       alphabet.getSymbol(left, alphabet.decode(label).first);
       int new_src = states_this_new[this_src];
 
-      if(left == COMPILER_GROUP_ELEM)
+      if(left == GROUP_SYMBOL)
       {
         Transducer tagsFirst = copyWithTagsFirst(this_trg, label, alphabet, epsilon_tag);
         new_t.finals.insert(make_pair(
@@ -1053,16 +1065,6 @@ Transducer::intersect(Transducer &trimmer,
    *
    * The trimmer is typically a bidix passed through appendDotStar.
    */
-
-  // TODO: These should be in file which is included by both
-  // fst_processor.cc and compiler.cc:
-  UString compoundOnlyLSymbol = "<compound-only-L>"_u;
-  UString compoundRSymbol = "<compound-R>"_u;
-  UString COMPILER_JOIN_ELEM = "+"_u;
-  UString COMPILER_GROUP_ELEM = "#"_u;
-  UString COMPILER_ANY_TAG = "<ANY_TAG>"_u;
-  UString COMPILER_ANY_CHAR = "<ANY_CHAR>"_u;
-  UString COMPILER_SEPARABLE_BOUNDARY = "<$>"_u;
 
   // When searching, we need to record (this, (trimmer, trimmer_pre_plus))
   typedef std::pair<int, std::pair<int, int > > SearchState;
@@ -1138,7 +1140,7 @@ Transducer::intersect(Transducer &trimmer,
       UString this_right;
       this_a.getSymbol(this_right, this_a.decode(this_label).second);
 
-      if(this_right == COMPILER_JOIN_ELEM || this_right == COMPILER_SEPARABLE_BOUNDARY)
+      if(this_right == JOIN_SYMBOL || this_right == LSX_BOUNDARY_SYMBOL)
       {
         if(trimmer_preplus == trimmer_src) {
           // Keep the old preplus state if it was set; equal to current trimmer state means unset:
@@ -1159,13 +1161,13 @@ Transducer::intersect(Transducer &trimmer,
                            trimmed_trg, // toState
                            this_label, // symbol-pair, using this alphabet
                            this_wt); //weight of transduction
-        if(this_right == COMPILER_SEPARABLE_BOUNDARY && isFinal(this_trg))
+        if(this_right == LSX_BOUNDARY_SYMBOL && isFinal(this_trg))
         {
           trimmed.setFinal(trimmed_trg, default_weight);
         }
       }
-      else if ( this_right == compoundOnlyLSymbol
-                || this_right == compoundRSymbol
+      else if ( this_right == COMPOUND_ONLY_L_SYMBOL
+                || this_right == COMPOUND_R_SYMBOL
                 || this_right.empty() )
       {
         // Stay put in the trimmer FST
@@ -1196,7 +1198,7 @@ Transducer::intersect(Transducer &trimmer,
         // Loop through non-epsilon arcs from the live state of trimmer
 
         // If we see a hash/group, we may have to rewind our trimmer state first:
-        if(this_right == COMPILER_GROUP_ELEM && trimmer_preplus != trimmer_src)
+        if(this_right == GROUP_SYMBOL && trimmer_preplus != trimmer_src)
         {
           states_this_trimmed.insert(make_pair(make_pair(this_src, make_pair(trimmer_preplus,
                                                                              trimmer_preplus)),
@@ -1218,7 +1220,7 @@ Transducer::intersect(Transducer &trimmer,
 
           if(!trimmer_left.empty() && // we've already dealt with trimmer epsilons
              (this_right == trimmer_left ||
-              (this_right == ((trimmer_left[0] == '<') ? COMPILER_ANY_TAG : COMPILER_ANY_CHAR))))
+              (this_right == ((trimmer_left[0] == '<') ? ANY_TAG_SYMBOL : ANY_CHAR_SYMBOL))))
           {
             next = make_pair(this_trg, make_pair(trimmer_trg, trimmer_preplus_next));
             if(seen.find(next) == seen.end())

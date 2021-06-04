@@ -464,10 +464,9 @@ Compiler::skip(UString &name, UString const &elem, bool open)
 }
 
 EntryToken
-Compiler::procIdentity(UString const &wsweight, bool ig)
+Compiler::procIdentity(double const entry_weight, bool ig)
 {
   vector<int> both_sides;
-  double entry_weight = stod(wsweight);
 
   if(!xmlTextReaderIsEmptyElement(reader))
   {
@@ -507,10 +506,9 @@ Compiler::procIdentity(UString const &wsweight, bool ig)
 }
 
 EntryToken
-Compiler::procTransduction(UString const &wsweight)
+Compiler::procTransduction(double const entry_weight)
 {
   vector<int> lhs, rhs;
-  double entry_weight = stod(wsweight);
   UString name;
 
   skip(name, COMPILER_LEFT_ELEM);
@@ -718,7 +716,7 @@ Compiler::procSection()
     requireAttribute(type, COMPILER_TYPE_ATTR, COMPILER_SECTION_ELEM);
 
     current_section = id;
-    current_section += "@"_u;
+    current_section += '@';
     current_section.append(type);
   }
   else
@@ -758,9 +756,10 @@ Compiler::procEntry()
     return;
   }
 
-  if(wsweight.empty())
+  double weight = 0.0;
+  if(!wsweight.empty())
   {
-    wsweight = "0.0000"_u;
+    weight = stod(wsweight);
   }
 
   vector<EntryToken> elements;
@@ -785,15 +784,15 @@ Compiler::procEntry()
     int type = xmlTextReaderNodeType(reader);
     if(name == COMPILER_PAIR_ELEM)
     {
-      elements.push_back(procTransduction(wsweight));
+      elements.push_back(procTransduction(weight));
     }
     else if(name == COMPILER_IDENTITY_ELEM)
     {
-      elements.push_back(procIdentity(wsweight, false));
+      elements.push_back(procIdentity(weight, false));
     }
     else if(name == COMPILER_IDENTITYGROUP_ELEM)
     {
-      elements.push_back(procIdentity(wsweight, true));
+      elements.push_back(procIdentity(weight, true));
     }
     else if(name == COMPILER_REGEXP_ELEM)
     {

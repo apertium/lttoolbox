@@ -55,13 +55,14 @@ AttCompiler::clear()
 void
 AttCompiler::convert_hfst(UString& symbol)
 {
-  if (symbol == "@0@"_u || symbol == "ε"_u)
-  {
+  if (symbol == Transducer::HFST_EPSILON_SYMBOL_SHORT ||
+      symbol == Transducer::HFST_EPSILON_SYMBOL_LONG ||
+      symbol == Transducer::LTTB_EPSILON_SYMBOL) {
     symbol.clear();
-  }
-  else if (symbol == "@_SPACE_@"_u)
-  {
+  } else if (symbol == Transducer::HFST_SPACE_SYMBOL) {
     symbol = " "_u;
+  } else if (symbol == Transducer::HFST_TAB_SYMBOL) {
+    symbol = "\t"_u;
   }
 }
 
