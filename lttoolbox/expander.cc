@@ -110,7 +110,7 @@ Expander::readString(UString &result, UString const &name)
   if(name == Compiler::COMPILER_TEXT_NODE)
   {
     UString value = XMLParseUtil::readValue(reader);
-    UString escaped = (const UChar*)"^$/<>{}\\*@#+~:";
+    UString escaped = "^$/<>{}\\*@#+~:"_u;
     for(size_t i = value.size()-1; i > 0; i--)
     {
       if(escaped.find(value[i]) != UString::npos) {
@@ -235,7 +235,7 @@ pair<UString, UString>
 Expander::procIdentityGroup()
 {
   UString lhs;
-  UString rhs = (const UChar*)"#";
+  UString rhs = "#"_u;
   UString both_sides;
 
   if(!xmlTextReaderIsEmptyElement(reader))
@@ -373,16 +373,16 @@ Expander::procEntry(UFILE* output)
    || (!varval.empty() && varval != variant && attribute != Compiler::COMPILER_RESTRICTION_RL_VAL)
    || (!varl.empty() && varl != variant_left))
   {
-    items_lr.push_back(make_pair((const UChar*)"", (const UChar*)""));
+    items_lr.push_back(make_pair(""_u, ""_u));
   }
   else if(attribute == Compiler::COMPILER_RESTRICTION_RL_VAL
         || (!varr.empty() && varr != variant_right))
   {
-    items_rl.push_back(make_pair((const UChar*)"", (const UChar*)""));
+    items_rl.push_back(make_pair(""_u, ""_u));
   }
   else
   {
-    items.push_back(make_pair((const UChar*)"", (const UChar*)""));
+    items.push_back(make_pair(""_u, ""_u));
   }
 
   while(true)
@@ -421,7 +421,7 @@ Expander::procEntry(UFILE* output)
     }
     else if(name == Compiler::COMPILER_REGEXP_ELEM)
     {
-      UString val = (const UChar*)"__REGEXP__" + procRegexp();
+      UString val = "__REGEXP__"_u + procRegexp();
       append(items, val);
       append(items_lr, val);
       append(items_rl, val);
