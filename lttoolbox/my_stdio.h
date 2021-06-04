@@ -46,20 +46,4 @@
 #define fread_unlocked fread
 #endif
 
-#if !HAVE_DECL_FGETWC_UNLOCKED
-#define fgetwc_unlocked fgetwc
-#endif
-
-#if !HAVE_DECL_FPUTWC_UNLOCKED
-#define fputwc_unlocked fputwc
-#endif
-
-#if !HAVE_DECL_FPUTWS_UNLOCKED
-#define fputws_unlocked fputws
-#endif
-
-#if !HAVE_DECL_UNGETWC_UNLOCKED
-#define ungetwc_unlocked ungetwc
-#endif
-
 #endif

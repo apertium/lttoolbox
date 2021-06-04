@@ -535,7 +535,7 @@ bool Transducer::weighted() {
 void
 Transducer::write(FILE *output, int const decalage)
 {
-  fwrite(HEADER_TRANSDUCER, 1, 4, output);
+  fwrite_unlocked(HEADER_TRANSDUCER, 1, 4, output);
 
   bool write_weights = weighted();
 
@@ -596,7 +596,7 @@ Transducer::read(FILE *input, int const decalage)
   fpos_t pos;
   if (fgetpos(input, &pos) == 0) {
       char header[4]{};
-      fread(header, 1, 4, input);
+      fread_unlocked(header, 1, 4, input);
       if (strncmp(header, HEADER_TRANSDUCER, 4) == 0) {
           auto features = read_le<uint64_t>(input);
           if (features >= TDF_UNKNOWN) {

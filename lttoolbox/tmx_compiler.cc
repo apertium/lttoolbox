@@ -433,7 +433,7 @@ TMXCompiler::procNode()
 void
 TMXCompiler::write(FILE *output)
 {
-  fwrite(HEADER_LTTOOLBOX, 1, 4, output);
+  fwrite_unlocked(HEADER_LTTOOLBOX, 1, 4, output);
   uint64_t features = 0;
   write_le(output, features);
 

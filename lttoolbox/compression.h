@@ -42,7 +42,7 @@ enum TD_FEATURES : uint64_t {
 
 
 inline auto write_u64(FILE *out, uint64_t value) {
-  auto rv = fwrite(reinterpret_cast<const char*>(&value), 1, sizeof(value), out);
+  auto rv = fwrite_unlocked(reinterpret_cast<const char*>(&value), 1, sizeof(value), out);
   if (rv != sizeof(value)) {
     throw std::runtime_error("Failed to write uint64_t");
   }
@@ -77,7 +77,7 @@ inline auto write_le(Stream& out, uint64_t value) {
 
 inline auto read_u64(FILE *in) {
   uint64_t value = 0;
-  if (fread(reinterpret_cast<char*>(&value), 1, sizeof(value), in) != sizeof(value)) {
+  if (fread_unlocked(reinterpret_cast<char*>(&value), 1, sizeof(value), in) != sizeof(value)) {
     throw std::runtime_error("Failed to read uint64_t");
   }
   return value;

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021 Apertium
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef _LT_USTRING_H_
 #define _LT_USTRING_H_
 
@@ -6,8 +23,6 @@
 #include <string>
 
 typedef std::basic_string<UChar> UString;
-
-void u_fputs(const UString& str, UFILE* output);
 
 void write(const UString& str, UFILE* output);
 
@@ -19,9 +34,6 @@ double stod(const UString& str);
 
 // for command-line arguments
 UString to_ustring(const char* str);
-
-// for interfacing with e.g. XML library
-const char* to_char(const UString& str);
 
 static std::ostream& operator<<(std::ostream& ostr, const UString& str)
 {

@@ -1,17 +1,27 @@
+/*
+ * Copyright (C) 2021 Apertium
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "ustring.h"
 
 #include <stdexcept>
-#include <unicode/unistr.h>
 #include <utf8.h>
 #include <cstring>
 
 using namespace icu;
-
-void
-u_fputs(const UString& str, UFILE* output)
-{
-  u_fputs(str.c_str(), output);
-}
 
 void
 write(const UString& str, UFILE* output)
@@ -50,13 +60,4 @@ to_ustring(const char* s)
   ret.reserve(sz);
   utf8::utf8to16(s, s+sz, std::back_inserter(ret));
   return ret;
-}
-
-const char*
-to_char(const UString& str)
-{
-  std::string stemp;
-  UnicodeString utemp = str.c_str();
-  utemp.toUTF8String(stemp);
-  return stemp.c_str();
 }

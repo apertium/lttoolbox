@@ -46,7 +46,7 @@ read_fst(FILE *bin_file)
   fpos_t pos;
   if (fgetpos(bin_file, &pos) == 0) {
       char header[4]{};
-      fread(header, 1, 4, bin_file);
+      fread_unlocked(header, 1, 4, bin_file);
       if (strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
           auto features = read_le<uint64_t>(bin_file);
           if (features >= LTF_UNKNOWN) {

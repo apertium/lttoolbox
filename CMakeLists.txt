@@ -110,7 +110,7 @@ endif()
 # Unlocked I/O functions
 include(CheckSymbolExists)
 set(CMAKE_REQUIRED_DEFINITIONS -D_POSIX_C_SOURCE=200112 -D_GNU_SOURCE)
-foreach(func fread_unlocked fwrite_unlocked fgetc_unlocked fputc_unlocked fputs_unlocked fgetwc_unlocked fputwc_unlocked fputws_unlocked)
+foreach(func fread_unlocked fwrite_unlocked fgetc_unlocked fputc_unlocked fputs_unlocked)
 	string(TOUPPER ${func} _uc)
 	CHECK_SYMBOL_EXISTS(${func} "stdio.h" HAVE_DECL_${_uc})
 	if(HAVE_DECL_${_uc})
