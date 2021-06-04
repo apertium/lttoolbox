@@ -104,11 +104,10 @@ AttCompiler::symbol_code(const UString& symbol)
   } else {
     UChar32 c = symbol[0];
     if (symbol.size() > 1) {
-      vector<char> v8;
-      vector<UChar32> v32;
-      utf8::utf16to8(symbol.begin(), symbol.end(), std::back_inserter(v8));
-      utf8::utf8to32(v8.begin(), v8.end(), std::back_inserter(v32));
-      c = v32[0];
+      // it's 2 UTF-16 code units,
+      // so combine them into a single UTF-32 codepoint
+      c = ((c - 0xD800) << 10) + 0x10000;
+      c += (symbol[1] - 0xDC00);
     }
     if ((u_ispunct(c) || u_isspace(c)) && !is_word_punct(c)) {
       return c;
