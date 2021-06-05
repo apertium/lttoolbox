@@ -12,7 +12,7 @@ The three programs main programs are lt-comp, the compiler, lt-proc,
 the processor, and lt-expand, which generates all possible mappings
 between surface forms and lexical forms in the dictionary.
 
-Executables built by this pacage:
+Executables built by this package:
 
 * `lt-comp`: compiler, execute without parameters to show usage
   instructions.
@@ -54,7 +54,7 @@ Requirements:
 
 Building & installing:
 
-* ./configure
+* ./autogen.sh
 * make
 * make install
 
