@@ -20,6 +20,7 @@
 #include <stdexcept>
 #include <unicode/ustdio.h>
 #include <cstring>
+#include <iostream>
 
 InputFile::InputFile()
   : infile(stdin), buffer_size(0)
@@ -40,6 +41,15 @@ InputFile::open(const char* fname)
     infile = fopen(fname, "rb");
   }
   return (infile != nullptr);
+}
+
+void
+InputFile::open_or_exit(const char* fname)
+{
+  if (!open(fname)) {
+    std::cerr << "Error: Unable to open '" << fname << "' for reading." << std::endl;
+    exit(EXIT_FAILURE);
+  }
 }
 
 void

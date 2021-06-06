@@ -33,6 +33,7 @@ public:
   InputFile();
   ~InputFile();
   bool open(const char* fname = nullptr);
+  void open_or_exit(const char* fname = nullptr);
   void close();
   UChar32 get();
   UChar32 peek();
