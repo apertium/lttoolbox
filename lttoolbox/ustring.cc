@@ -63,16 +63,6 @@ to_ustring(const char* s)
   return ret;
 }
 
-UString
-to_ustring(char* s)
-{
-  auto sz = strlen(s);
-  UString ret;
-  ret.reserve(sz);
-  utf8::utf8to16(s, s+sz, std::back_inserter(ret));
-  return ret;
-}
-
 void
 ustring_to_vec32(const UString& str, std::vector<int32_t>& vec)
 {

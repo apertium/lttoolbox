@@ -37,13 +37,11 @@ double stod(const UString& str);
 // for command-line arguments
 UString to_ustring(const char* str);
 
-// for XML
-UString to_ustring(char* str);
-
 // append UTF-16 string to UTF-32 vector of symbols
 void ustring_to_vec32(const UString& str, std::vector<int32_t>& vec);
 
-inline std::ostream& operator<<(std::ostream& ostr, const UString& str)
+inline std::basic_ostream<char>&
+operator<<(std::basic_ostream<char>& ostr, const UString& str)
 {
   std::string res;
   utf8::utf16to8(str.begin(), str.end(), std::back_inserter(res));

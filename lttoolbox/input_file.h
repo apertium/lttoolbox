@@ -39,6 +39,7 @@ public:
   UChar32 peek();
   void unget(UChar32 c);
   bool eof();
+  void rewind();
 };
 
 #endif

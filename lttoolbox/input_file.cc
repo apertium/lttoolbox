@@ -133,3 +133,14 @@ InputFile::eof()
 {
   return (infile == nullptr) || feof(infile);
 }
+
+void
+InputFile::rewind()
+{
+  if (infile != nullptr) {
+    if (std::fseek(infile, 0, SEEK_SET) != 0) {
+      std::cerr << "Error: Unable to rewind file" << std::endl;
+      exit(EXIT_FAILURE);
+    }
+  }
+}
