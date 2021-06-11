@@ -12,7 +12,7 @@ addons:
 	- icu4c
 
 before_install:
-  - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install -y swig; else brew install swig; fi
+  - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install -y swig libutfcpp-dev; else brew install swig utfcpp; fi
 script:
   - $CXX --version
   - autoreconf -fvi
