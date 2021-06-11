@@ -22,6 +22,7 @@
 #include <lttoolbox/ustring.h>
 #include <vector>
 #include <cstdint>
+#include <string>
 
 using namespace std;
 
@@ -34,6 +35,8 @@ public:
 
   /* If attrib does not exist (or other error), returns fallback: */
   static UString attrib(xmlTextReaderPtr reader, UString const &name, const UString& fallback);
+
+  static string attrib_str(xmlTextReaderPtr reader, const UString& name);
 
   static UString readName(xmlTextReaderPtr reader);
   static UString readValue(xmlTextReaderPtr reader);

@@ -46,6 +46,24 @@ XMLParseUtil::attrib(xmlTextReaderPtr reader, UString const& name, const UString
   }
 }
 
+std::string
+XMLParseUtil::attrib_str(xmlTextReaderPtr reader, const UString& name)
+{
+  std::string temp;
+  temp.reserve(name.size());
+  utf8::utf16to8(name.begin(), name.end(), std::back_inserter(temp));
+  const xmlChar *attrname = reinterpret_cast<const xmlChar*>(temp.c_str());
+  xmlChar *myattr = xmlTextReaderGetAttribute(reader, attrname);
+  if(myattr == NULL) {
+    xmlFree(myattr);
+    return "";
+  } else {
+    std::string result = reinterpret_cast<char*>(myattr);
+    xmlFree(myattr);
+    return result;
+  }
+}
+
 UString
 XMLParseUtil::readName(xmlTextReaderPtr reader)
 {
