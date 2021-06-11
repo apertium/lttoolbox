@@ -20,6 +20,7 @@
 
 #include <cstdio>
 #include <unicode/uchar.h>
+#include <lttoolbox/ustring.h>
 
 class InputFile
 {
@@ -40,6 +41,7 @@ public:
   void unget(UChar32 c);
   bool eof();
   void rewind();
+  UString readBlock(const UChar32 start, const UChar32 end);
 };
 
 #endif

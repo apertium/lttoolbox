@@ -144,3 +144,19 @@ InputFile::rewind()
     }
   }
 }
+
+UString
+InputFile::readBlock(const UChar32 start, const UChar32 end)
+{
+  UString ret;
+  ret += start;
+  UChar32 c = 0;
+  while (c != end && !eof()) {
+    c = get();
+    ret += c;
+    if (c == '\\') {
+      ret += get();
+    }
+  }
+  return ret;
+}
