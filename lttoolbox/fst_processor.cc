@@ -280,11 +280,28 @@ FSTProcessor::wblankPostGen(FILE *input, FILE *output)
   wstring result = L"";
   result += L"[[";
   wchar_t c = 0;
+  bool in_content = false;
 
   while(!feof(input))
   {
     c = static_cast<wchar_t>(fgetwc_unlocked(input));
-    result += c;
+
+    if(in_content && c == L'~')
+    {
+      if(result[result.size()-1] == L']') {
+        // We just saw the end of a wblank, may want to merge
+        wblankqueue.push(result);
+      }
+      else {
+        // wake-up-mark happened some characters into the wblanked word
+        fputws(result.c_str(), output);
+      }
+      return true;
+    }
+    else
+    {
+      result += c;
+    }
 
     if(c == L'\\')
     {
@@ -305,16 +322,7 @@ FSTProcessor::wblankPostGen(FILE *input, FILE *output)
         }
         else
         {
-          c = static_cast<wchar_t>(fgetwc_unlocked(input));
-          if(c == L'~')
-          {
-            wblankqueue.push(result);
-            return true;
-          }
-          else
-          {
-            result += c;
-          }
+          in_content = true; // Assumption: No nested wblanks, always balanced
         }
       }
     }
@@ -805,25 +813,32 @@ FSTProcessor::combineWblanks()
 {
   wstring final_wblank;
   wstring last_wblank = L"";
+  bool seen_wblank = false;
 
   while(wblankqueue.size() > 0)
   {
     if(wblankqueue.front().compare(L"[[/]]") == 0)
     {
-      if(final_wblank.empty())
-      {
-        final_wblank += L"[[";
-      }
-      else if(final_wblank.size() > 2)
-      {
-        final_wblank += L"; ";
-      }
+      if(seen_wblank) {
+        if(final_wblank.empty())
+        {
+          final_wblank += L"[[";
+        }
+        else if(final_wblank.size() > 2)
+        {
+          final_wblank += L"; ";
+        }
 
-      final_wblank += last_wblank.substr(2,last_wblank.size()-4); //add wblank without brackets [[..]]
+        final_wblank += last_wblank.substr(2,last_wblank.size()-4); //add wblank without brackets [[..]]
+      }
+      else {
+        need_end_wblank = true;
+      }
       last_wblank.clear();
     }
     else
     {
+      seen_wblank = true;
       last_wblank = wblankqueue.front();
     }
     wblankqueue.pop();
@@ -839,7 +854,6 @@ FSTProcessor::combineWblanks()
     final_wblank += L"]]";
     need_end_wblank = true;
   }
-
   return final_wblank;
 }
 
