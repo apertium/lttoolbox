@@ -20,7 +20,7 @@
 
 #include <unicode/ustdio.h>
 #include <string>
-#include <utf8/utf8.h>
+#include <utf8.h>
 #include <vector>
 #include <cstdint>
 

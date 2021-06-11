@@ -50,7 +50,7 @@ lt_tmxproc_SOURCES = lt_tmxproc.cc
 
 man_MANS = lt-comp.1 lt-expand.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1 lt-print.1 lt-trim.1
 
-INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/utf8 $(LIBXML_CFLAGS) $(ICU_CFLAGS)
+INCLUDES = -I$(top_srcdir) $(LIBXML_CFLAGS) $(ICU_CFLAGS)
 CLEANFILES = *~
 
 EXTRA_DIST = dix.dtd dix.rng dix.rnc acx.rng xsd/dix.xsd xsd/acx.xsd $(man_MANS)
