@@ -31,28 +31,6 @@ write(const UString& str, UFILE* output)
   u_fprintf(output, "%S", str.c_str());
 }
 
-int
-stoi(const UString& str)
-{
-  int ret;
-  int c = u_sscanf(str.c_str(), "%d", &ret);
-  if (c != 1) {
-    throw std::invalid_argument("unable to parse int");
-  }
-  return ret;
-}
-
-double
-stod(const UString& str)
-{
-  double ret;
-  int c = u_sscanf(str.c_str(), "%lf", &ret);
-  if (c != 1) {
-    throw std::invalid_argument("unable to parse float");
-  }
-  return ret;
-}
-
 UString
 to_ustring(const char* s)
 {

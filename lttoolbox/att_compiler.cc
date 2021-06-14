@@ -19,6 +19,7 @@
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
+#include <lttoolbox/string_utils.h>
 #include <algorithm>
 #include <stack>
 #include <unicode/uchar.h>
@@ -185,7 +186,7 @@ AttCompiler::parse(string const &file_name, bool read_rl)
       continue;
     }
 
-    from = stoi(tokens[0]) + state_id_offset;
+    from = StringUtils::stoi(tokens[0]) + state_id_offset;
     largest_seen_state_id = max(largest_seen_state_id, from);
 
     AttNode* source = get_node(from);
@@ -205,7 +206,7 @@ AttCompiler::parse(string const &file_name, bool read_rl)
     {
       if (tokens.size() > 1)
       {
-        weight = stod(tokens[1]);
+        weight = StringUtils::stod(tokens[1]);
       }
       else
       {
@@ -215,7 +216,7 @@ AttCompiler::parse(string const &file_name, bool read_rl)
     }
     else
     {
-      to = stoi(tokens[1]) + state_id_offset;
+      to = StringUtils::stoi(tokens[1]) + state_id_offset;
       largest_seen_state_id = max(largest_seen_state_id, to);
       if(read_rl)
       {
@@ -232,7 +233,7 @@ AttCompiler::parse(string const &file_name, bool read_rl)
       int tag = alphabet(symbol_code(upper), symbol_code(lower));
       if(tokens.size() > 4)
       {
-        weight = stod(tokens[4]);
+        weight = StringUtils::stod(tokens[4]);
       }
       else
       {

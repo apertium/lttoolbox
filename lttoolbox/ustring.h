@@ -28,12 +28,6 @@ typedef std::basic_string<UChar> UString;
 
 void write(const UString& str, UFILE* output);
 
-// like std::stoi, throws invalid_argument if unable to parse
-int stoi(const UString& str);
-
-// like std::stoi, throws invalid_argument if unable to parse
-double stod(const UString& str);
-
 // for command-line arguments
 UString to_ustring(const char* str);
 

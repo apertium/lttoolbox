@@ -19,6 +19,7 @@
 #include <lttoolbox/entry_token.h>
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/xml_parse_util.h>
+#include <lttoolbox/string_utils.h>
 
 #include <string>
 #include <cstdlib>
@@ -759,7 +760,7 @@ Compiler::procEntry()
   double weight = 0.0;
   if(!wsweight.empty())
   {
-    weight = stod(wsweight);
+    weight = StringUtils::stod(wsweight);
   }
 
   vector<EntryToken> elements;
