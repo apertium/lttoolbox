@@ -31,6 +31,8 @@ public:
 
   static UString getcase(const UString& str);
   static UString copycase(const UString& source, const UString& target);
+
+  static bool caseequal(const UString& a, const UString& b);
 };
 
 #endif // __LT_STRING_UTILS_H__

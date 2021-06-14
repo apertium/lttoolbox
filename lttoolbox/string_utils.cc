@@ -233,3 +233,17 @@ StringUtils::copycase(const UString& source, const UString& target)
     return tolower(target);
   }
 }
+
+bool
+StringUtils::caseequal(const UString& a, const UString& b)
+{
+  UErrorCode err = U_ZERO_ERROR;
+  int cmp = u_strCaseCompare(a.c_str(), -1, b.c_str(), -1, 0, &err);
+  if (U_FAILURE(err)) {
+    std::cerr << "Error: caseless string comparison failed on '";
+    std::cerr << a << "' and '" << b << "'" << std::endl;
+    std::cerr << "error code: " << u_errorName(err) << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  return (cmp == 0);
+}
