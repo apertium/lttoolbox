@@ -36,6 +36,7 @@ public:
   bool open(const char* fname = nullptr);
   void open_or_exit(const char* fname = nullptr);
   void close();
+  void wrap(FILE* newinfile);
   UChar32 get();
   UChar32 peek();
   void unget(UChar32 c);

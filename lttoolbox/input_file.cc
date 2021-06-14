@@ -64,6 +64,13 @@ InputFile::close()
 }
 
 void
+InputFile::wrap(FILE* newinfile)
+{
+  close();
+  infile = newinfile;
+}
+
+void
 InputFile::internal_read()
 {
   if (buffer_size) {
