@@ -808,7 +808,7 @@ FSTProcessor::combineWblanks()
         }
         else if(final_wblank.size() > 2)
         {
-          final_wblank += L"; "_u;
+          final_wblank += "; "_u;
         }
 
         final_wblank += last_wblank.substr(2,last_wblank.size()-4); //add wblank without brackets [[..]]
