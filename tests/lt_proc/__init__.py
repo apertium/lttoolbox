@@ -173,7 +173,11 @@ class PostgenerationWordboundBlankTest(ProcTest):
                         "[[t:b:Z9eiLA]]abc[[/]] [[t:i:123456]]~les[[/]] [[t:i:4_tPUA]]~de[[/]] [[t:b:Z9eiLA]]el[[/]] [[t:i:wSM6RQ]]testword[[/]]",
                         "[[t:b:Z9eiLA]]abc[[/]] [[t:i:123456]]~les pes[[/]] [[t:i:4_tPUA]]~de[[/]] [[t:b:Z9eiLA]]el[[/]] [[t:i:wSM6RQ]]testword[[/]]",
                         "[[t:b:Z9eiLA]]abc[[/]] [[t:i:123456]]~les[[/]] [[t:b:12bsa23]]pes[[/]] [[t:i:4_tPUA]]~de[[/]] [[t:b:Z9eiLA]]el[[/]] [[t:i:wSM6RQ]]testword[[/]]",
-                        "[[t:b:Z9eiLA]]abc[[/]] ~les [[t:b:12bsa23]]pes[[/]] [[t:i:4_tPUA]]~de[[/]] [[t:b:Z9eiLA]]el[[/]] [[t:i:wSM6RQ]]testword[[/]]"]
+                        "[[t:b:Z9eiLA]]abc[[/]] ~les [[t:b:12bsa23]]pes[[/]] [[t:i:4_tPUA]]~de[[/]] [[t:b:Z9eiLA]]el[[/]] [[t:i:wSM6RQ]]testword[[/]]",
+                        "[[t:text:NaNaNa]]pla~ss[[/]]",
+                        "[[t:text:NaNaNa]]pla~sss[[/]]",
+                        "[[t:text:NaNaNa]]pla~ssar[[/]]",
+                        "[[t:text:NaNaNa]]pla~sssar[[/]]"]
 
     expectedOutputs = [ "xyz ejemplo [[t:i:123456; t:b:abc123; t:i:123456]]u ho[[/]] [[t:b:iopmnb]]nombre[[/]].",
                         "xyz ejemplo [[t:b:poim230]]u ho[[/]] [[t:i:mnbj203]]nombre[[/]].",
@@ -193,7 +197,11 @@ class PostgenerationWordboundBlankTest(ProcTest):
                         "[[t:b:Z9eiLA]]abc[[/]] [[t:i:123456]]le pe test[[/]] [[t:i:4_tPUA; t:b:Z9eiLA]]del[[/]] [[t:i:wSM6RQ]]testword[[/]]",
                         "[[t:b:Z9eiLA]]abc[[/]] [[t:i:123456]]les pes test[[/]] [[t:i:4_tPUA; t:b:Z9eiLA]]del[[/]] [[t:i:wSM6RQ]]testword[[/]]",
                         "[[t:b:Z9eiLA]]abc[[/]] [[t:i:123456; t:b:12bsa23]]les pes test[[/]] [[t:i:4_tPUA; t:b:Z9eiLA]]del[[/]] [[t:i:wSM6RQ]]testword[[/]]",
-                        "[[t:b:Z9eiLA]]abc[[/]] [[t:b:12bsa23]]les pes test[[/]] [[t:i:4_tPUA; t:b:Z9eiLA]]del[[/]] [[t:i:wSM6RQ]]testword[[/]]"]
+                        "[[t:b:Z9eiLA]]abc[[/]] [[t:b:12bsa23]]les pes test[[/]] [[t:i:4_tPUA; t:b:Z9eiLA]]del[[/]] [[t:i:wSM6RQ]]testword[[/]]",
+                        "[[t:text:NaNaNa]]plass[[/]]",
+                        "[[t:text:NaNaNa]]plass[[/]]",
+                        "[[t:text:NaNaNa]]plassar[[/]]",
+                        "[[t:text:NaNaNa]]plassar[[/]]"]
 
 
 class PostgenerationWordboundBlankEscapingTest(ProcTest):

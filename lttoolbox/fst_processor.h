@@ -360,7 +360,15 @@ private:
   void flushWblanks(UFILE *output);
 
   /**
-   * Combine wordbound blanks in the queue and return them
+   * Combine wordbound blanks in the queue and return them.
+   *
+   * May pop from 'wblankqueue' and set 'need_end_wblank' to true.
+   *
+   * If 'wblankqueue' (see which) is empty, we get an empty string,
+   * otherwise we return a semicolon-separated combination of opening
+   * wblanks in the queue. If there is only a closing wblank, we just
+   * set need_end_wblank.
+   *
    * @return final wblank string
   */
   UString combineWblanks();
