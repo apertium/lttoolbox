@@ -179,7 +179,7 @@ Compiler::procAlphabet()
       bool space = true;
       for(unsigned int i = 0; i < letters.length(); i++)
       {
-        if(!isspace(letters.at(i)))
+        if(!u_isspace(letters.at(i)))
         {
           space = false;
           break;

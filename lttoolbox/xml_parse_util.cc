@@ -68,6 +68,7 @@ UString
 XMLParseUtil::readName(xmlTextReaderPtr reader)
 {
   const xmlChar* name = xmlTextReaderConstName(reader);
+  if (name == NULL) return ""_u;
   return to_ustring(reinterpret_cast<const char*>(name));
 }
 
@@ -75,6 +76,7 @@ UString
 XMLParseUtil::readValue(xmlTextReaderPtr reader)
 {
   const xmlChar* val = xmlTextReaderConstValue(reader);
+  if (val == NULL) return ""_u;
   return to_ustring(reinterpret_cast<const char*>(val));
 }
 
@@ -82,6 +84,7 @@ void
 XMLParseUtil::readValueInto32(xmlTextReaderPtr reader, vector<int32_t>& vec)
 {
   const xmlChar* val = xmlTextReaderConstValue(reader);
+  if (val == NULL) return;
   auto sz = xmlStrlen(val);
   vec.reserve(vec.size() + sz);
   utf8::utf8to32(val, val+sz, std::back_inserter(vec));
