@@ -72,7 +72,7 @@ private:
   /**
    * Default value of weight unless specified
    */
-  double default_weight;
+  double default_weight = 0.0000;
 
   /**
    * The final states of inconditional sections in the dictionaries
@@ -152,86 +152,86 @@ private:
   /**
    * true if the position of input stream is out of a word
    */
-  bool outOfWord;
+  bool outOfWord = false;
 
   /**
    * true if we're automatically removing surface forms.
    */
-  bool biltransSurfaceForms;
+  bool biltransSurfaceForms = false;
 
 
   /**
    * if true, makes always difference between uppercase and lowercase
    * characters
    */
-  bool caseSensitive;
+  bool caseSensitive = false;
 
   /**
    * if true, uses the dictionary case, discarding surface case
    * information
    */
-  bool dictionaryCase;
+  bool dictionaryCase = false;
 
   /**
    * if true, flush the output when the null character is found
    */
-  bool nullFlush;
+  bool nullFlush = false;
 
   /**
    * nullFlush property for the skipUntil function
    */
-  bool nullFlushGeneration;
+  bool nullFlushGeneration = false;
 
   /**
    * if true, ignore the provided set of characters
    */
-  bool useIgnoredChars;
+  bool useIgnoredChars = false;
 
   /**
    * if true, attempt simplistic diacritic restoration
    */
-  bool useRestoreChars;
+  bool useRestoreChars = false;
 
   /**
    * if true, skips loading the default set of ignored characters
    */
-  bool useDefaultIgnoredChars;
+  bool useDefaultIgnoredChars = true;
 
   /**
    * if true, displays the final weights (if any)
    */
-  bool displayWeightsMode;
+  bool displayWeightsMode = false;
 
   /**
    * try analysing unknown words as compounds
    */
-  bool do_decomposition;
+  bool do_decomposition = false;
 
   /**
    * Symbol of CompoundOnlyL
    */
-  int compoundOnlyLSymbol;
+  int compoundOnlyLSymbol = 0;
 
   /**
    * Symbol of CompoundR
    */
-  int compoundRSymbol;
+  int compoundRSymbol = 0;
 
   /**
    * Show or not the controls symbols (as compoundRSymbol)
    */
-  bool showControlSymbols;
+  bool showControlSymbols = false;
 
   /**
    * Max compound elements
    * Hard coded for now, but there might come a switch one day
    */
-  int compound_max_elements;
+  int compound_max_elements = 4;
 
   /**
    * Output no more than 'N' number of weighted analyses
    */
-  int maxAnalyses;
+  int maxAnalyses = INT_MAX;
 
   /**
    * True if a wblank block ([[..]]xyz[[/]]) was just read
@@ -251,33 +251,12 @@ private:
   /**
    * Output no more than 'N' best weight classes
    */
-  int maxWeightClasses;
+  int maxWeightClasses = INT_MAX;
 
   /**
    * Prints an error of input stream and exits
    */
   void streamError();
-
-  /**
-   * Reads a character that is defined in the set of escaped_chars
-   * @param input the stream to read from
-   * @return code of the character
-   */
-  UChar32 readEscaped(InputFile& input);
-
-  /**
-   * Reads a block from the stream input, enclosed by delim1 and delim2
-   * @param input the stream being read
-   * @param delim1 the delimiter of the beginning of the sequence
-   * @param delim1 the delimiter of the end of the sequence
-   */
-  UString readFullBlock(InputFile& input, UChar32 const delim1, UChar32 const delim2);
-
-  /**
-   * Reads a wordbound blank from the stream input
-   * @param input the stream being read
-   */
-  UString readWblank(InputFile& input);
 
   /**
    * Reads a wordbound blank (opening blank to closing blank) from the stream input -> [[...]]xyz[[/]]
@@ -493,7 +472,7 @@ private:
   void procNodeRCX();
   void initDefaultIgnoredCharacters();
 
-  bool isLastBlankTM;
+  bool isLastBlankTM = false;
 
   xmlTextReaderPtr reader;
 public:

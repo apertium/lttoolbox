@@ -42,7 +42,13 @@ public:
   void unget(UChar32 c);
   bool eof();
   void rewind();
+  // assumes that start has already been read
+  // returns string from start to end inclusive
+  // respects backslash escapes
   UString readBlock(const UChar32 start, const UChar32 end);
+  // assumes [[ has already been read, reads to ]]
+  // returns entire string, including brackets
+  UString finishWBlank();
 };
 
 #endif

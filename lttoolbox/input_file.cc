@@ -167,3 +167,23 @@ InputFile::readBlock(const UChar32 start, const UChar32 end)
   }
   return ret;
 }
+
+UString
+InputFile::finishWBlank()
+{
+  UString ret;
+  ret += '[';
+  ret += '[';
+  UChar32 c = 0;
+  while (!eof()) {
+    c = get();
+    ret += c;
+    if (c == '\\') {
+      ret += get();
+    } else if (c == ']' && peek() == ']') {
+      ret += get();
+      break;
+    }
+  }
+  return ret;
+}

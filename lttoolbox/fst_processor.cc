@@ -39,10 +39,7 @@ UString const FSTProcessor::WBLANK_END              = "]]"_u;
 UString const FSTProcessor::WBLANK_FINAL            = "[[/]]"_u;
 
 
-FSTProcessor::FSTProcessor() :
-default_weight(0.0000),
-outOfWord(false),
-isLastBlankTM(false)
+FSTProcessor::FSTProcessor()
 {
   // escaped_chars chars
   escaped_chars.insert('[');
@@ -56,23 +53,6 @@ isLastBlankTM(false)
   escaped_chars.insert('@');
   escaped_chars.insert('<');
   escaped_chars.insert('>');
-
-  caseSensitive = false;
-  dictionaryCase = false;
-  do_decomposition = false;
-  nullFlush = false;
-  nullFlushGeneration = false;
-  useIgnoredChars = false;
-  useDefaultIgnoredChars = true;
-  useRestoreChars = false;
-  displayWeightsMode = false;
-  showControlSymbols = false;
-  biltransSurfaceForms = false;
-  maxAnalyses = INT_MAX;
-  maxWeightClasses = INT_MAX;
-  compoundOnlyLSymbol = 0;
-  compoundRSymbol = 0;
-  compound_max_elements = 4;
 
   if(useDefaultIgnoredChars)
   {
@@ -197,88 +177,6 @@ FSTProcessor::procNodeRCX()
   }
 }
 
-UChar32
-FSTProcessor::readEscaped(InputFile& input)
-{
-  if(input.eof())
-  {
-    streamError();
-  }
-
-  UChar32 val = input.get();
-
-  if(input.eof())
-  {
-    streamError();
-  }
-
-  return val;
-}
-
-UString
-FSTProcessor::readFullBlock(InputFile& input, UChar32 const delim1, UChar32 const delim2)
-{
-  UString result;
-  result += delim1;
-  UChar32 c = delim1;
-
-  while(!input.eof() && c != delim2)
-  {
-    c = input.get();
-    result += c;
-    if(c != '\\')
-    {
-      continue;
-    }
-    else
-    {
-      result += readEscaped(input);
-    }
-  }
-
-  if(c != delim2)
-  {
-    streamError();
-  }
-
-  return result;
-}
-
-UString
-FSTProcessor::readWblank(InputFile& input)
-{
-  UString result = WBLANK_START;
-  UChar32 c = 0;
-
-  while(!input.eof())
-  {
-    c = input.get();
-    result += c;
-
-    if(c == '\\')
-    {
-      result += readEscaped(input);
-    }
-    else if(c == ']')
-    {
-      c = input.get();
-      result += c;
-
-      if(c == ']')
-      {
-        break;
-      }
-    }
-  }
-
-  if(c != ']')
-  {
-    streamError();
-  }
-
-  return result;
-}
-
 bool
 FSTProcessor::wblankPostGen(InputFile& input, UFILE *output)
 {
@@ -308,7 +206,8 @@ FSTProcessor::wblankPostGen(InputFile& input, UFILE *output)
 
     if(c == '\\')
     {
-      result += readEscaped(input);
+      if (input.eof()) streamError();
+      result += input.get();
     }
     else if(c == ']')
     {
@@ -368,7 +267,7 @@ FSTProcessor::readAnalysis(InputFile& input)
     switch(val)
     {
       case '<':
-        altval = alphabet(readFullBlock(input, '<', '>'));
+        altval = alphabet(input.readBlock('<', '>'));
         input_buffer.add(altval);
         return altval;
 
@@ -377,12 +276,12 @@ FSTProcessor::readAnalysis(InputFile& input)
 
         if(val == '[')
         {
-          blankqueue.push(readWblank(input));
+          blankqueue.push(input.finishWBlank());
         }
         else
         {
           input.unget(val);
-          blankqueue.push(readFullBlock(input, '[', ']'));
+          blankqueue.push(input.readBlock('[', ']'));
         }
 
         input_buffer.add(static_cast<int32_t>(' '));
@@ -426,7 +325,7 @@ FSTProcessor::readTMAnalysis(InputFile& input)
     switch(val)
     {
       case '<':
-        altval = alphabet(readFullBlock(input, '<', '>'));
+        altval = alphabet(input.readBlock('<', '>'));
         input_buffer.add(altval);
         return altval;
 
@@ -435,12 +334,12 @@ FSTProcessor::readTMAnalysis(InputFile& input)
 
         if(val == '[')
         {
-          blankqueue.push(readWblank(input));
+          blankqueue.push(input.finishWBlank());
         }
         else
         {
           input.unget(val);
-          blankqueue.push(readFullBlock(input, '[', ']'));
+          blankqueue.push(input.readBlock('[', ']'));
         }
 
         input_buffer.add(static_cast<int32_t>(' '));
@@ -503,7 +402,7 @@ FSTProcessor::readPostgeneration(InputFile& input, UFILE *output)
   switch(val)
   {
     case '<':
-      altval = alphabet(readFullBlock(input, '<', '>'));
+      altval = alphabet(input.readBlock('<', '>'));
       input_buffer.add(altval);
       return altval;
 
@@ -514,7 +413,7 @@ FSTProcessor::readPostgeneration(InputFile& input, UFILE *output)
       {
         if(collect_wblanks)
         {
-          wblankqueue.push(readWblank(input));
+          wblankqueue.push(input.finishWBlank());
           is_wblank = true;
           return static_cast<int32_t>(' ');
         }
@@ -531,7 +430,7 @@ FSTProcessor::readPostgeneration(InputFile& input, UFILE *output)
       else
       {
         input.unget(val);
-        blankqueue.push(readFullBlock(input, '[', ']'));
+        blankqueue.push(input.readBlock('[', ']'));
 
         input_buffer.add(static_cast<int32_t>(' '));
         return static_cast<int32_t>(' ');
@@ -654,19 +553,19 @@ FSTProcessor::readGeneration(InputFile& input, UFILE *output)
   }
   else if(val == '<')
   {
-    return alphabet(readFullBlock(input, '<', '>'));
+    return alphabet(input.readBlock('<', '>'));
   }
   else if(val == '[')
   {
     val = input.get();
     if(val == '[')
     {
-      write(readWblank(input), output);
+      write(input.finishWBlank(), output);
     }
     else
     {
       input.unget(val);
-      write(readFullBlock(input, '[', ']'), output);
+      write(input.readBlock('[', ']'), output);
     }
 
     return readGeneration(input, output);
@@ -741,7 +640,7 @@ FSTProcessor::readBilingual(InputFile& input, UFILE *output)
   }
   else if(val == '<')
   {
-    UString cad = readFullBlock(input, '<', '>');
+    UString cad = input.readBlock('<', '>');
 
     int res = alphabet(cad);
 
@@ -756,12 +655,12 @@ FSTProcessor::readBilingual(InputFile& input, UFILE *output)
     val = input.get();
     if(val == '[')
     {
-      write(readWblank(input), output);
+      write(input.finishWBlank(), output);
     }
     else
     {
       input.unget(val);
-      write(readFullBlock(input, '[', ']'), output);
+      write(input.readBlock('[', ']'), output);
     }
 
     return readBilingual(input, output);
@@ -3177,12 +3076,12 @@ FSTProcessor::readSAO(InputFile& input)
   {
     if(val == '<')
     {
-      UString str = readFullBlock(input, '<', '>');
+      UString str = input.readBlock('<', '>');
       if(str.substr(0, 9) == "<![CDATA["_u)
       {
         while(str.substr(str.size()-3) != "]]>"_u)
         {
-          str.append(readFullBlock(input, '<', '>').substr(1));
+          str.append(input.readBlock('<', '>').substr(1));
         }
         blankqueue.push(str);
         input_buffer.add(static_cast<int32_t>(' '));
