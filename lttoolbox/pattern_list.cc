@@ -118,7 +118,7 @@ PatternList::insertOutOfSequence(UString const &lemma, UString const &tags,
   {
     for(unsigned int i = 0, limit = lemma.size(); i < limit; i++)
     {
-      if(lemma[i] == L'*')
+      if(lemma[i] == '*')
       {
         result.push_back(alphabet(ANY_CHAR));
       }
@@ -169,7 +169,7 @@ PatternList::insertIntoSequence(int const id, UString const &lemma,
     list<vector<int> >::iterator limit = sequence_data.end();
     for(; it != limit; it++)
     {
-      it->push_back(L'+');
+      it->push_back('+');
       insertOutOfSequence(lemma, tags, *it);
     }
   }
@@ -221,7 +221,7 @@ PatternList::insert(int const id, int const otherid)
           p.first != p.second; p.first++)
       {
         vector<int> temp = *it;
-        temp.push_back(L'+');
+        temp.push_back('+');
         temp.insert(temp.end(), (p.first->second).begin(),
                     (p.first->second).end());
         new_sequence_data.push_back(temp);
@@ -243,7 +243,7 @@ PatternList::tagCount(UString const &tags)
     {
       count++;
     }
-    else if(tags[i] == L'.')
+    else if(tags[i] == '.')
     {
       count++;
     }
@@ -261,7 +261,7 @@ PatternList::tagAt(UString const &tags, int const index)
 
   for(unsigned int i = 0, limit = tags.size(); i < limit; i++)
   {
-    if(tags[i] == L'.')
+    if(tags[i] == '.')
     {
       count++;
       if(end == 0)
@@ -331,9 +331,9 @@ PatternList::buildTransducer()
 
         // optional queue
         prevstate = state;
-        state = transducer.insertSingleTransduction(static_cast<int>(L'_'), state, default_weight);
-        transducer.linkStates(prevstate, state, static_cast<int>(L' '), default_weight);
-        transducer.linkStates(prevstate, state, static_cast<int>(L'#'), default_weight);
+        state = transducer.insertSingleTransduction(static_cast<int>('_'), state, default_weight);
+        transducer.linkStates(prevstate, state, static_cast<int>(' '), default_weight);
+        transducer.linkStates(prevstate, state, static_cast<int>('#'), default_weight);
         transducer.linkStates(state, state, alphabet(ANY_CHAR), default_weight);
       }
       else

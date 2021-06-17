@@ -816,7 +816,7 @@ Transducer::recognise(UString pattern, Alphabet &a, FILE *err)
   {
     set<int> new_state;        //Transducer::closure(int const state, int const epsilon_tag)
     // For each of the current alive states
-    //fwprintf(err, "step: %ls %lc (%d)\n", pattern.c_str(), *it, sym);
+    //fprintf(err, "step: %ls %lc (%d)\n", pattern.c_str(), *it, sym);
     for(auto& it2 : states)
     {
       auto& p = transitions[it2];
@@ -831,7 +831,7 @@ Transducer::recognise(UString pattern, Alphabet &a, FILE *err)
         //UString r;
         //a.getSymbol(r, t.second);
 
-        //fwprintf(err, "  -> state: %d, trans: %ls:%ls, targ: %d\n", *it2, (l.empty()) ?  "ε" : l.c_str(),  (r.empty()) ?  "ε" : r.c_str(), it3->second);
+        //fprintf(err, "  -> state: %d, trans: %ls:%ls, targ: %d\n", *it2, (l.empty()) ?  "ε" : l.c_str(),  (r.empty()) ?  "ε" : r.c_str(), it3->second);
         //if(l.find(*it) != UString::npos || l.empty() )
         if(l.find(it) != UString::npos)
         {

@@ -187,7 +187,7 @@ FSTProcessor::wblankPostGen(InputFile& input, UFILE *output)
   while(!input.eof())
   {
     c = input.get();
-    if(in_content && c == L'~')
+    if(in_content && c == '~')
     {
       if(result[result.size()-1] == ']') {
         // We just saw the end of a wblank, may want to merge
@@ -2614,7 +2614,7 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
     symbol = tr.first;
     val = tr.second;
 
-    //fwprintf(stderr, "> %ls : %lc : %d\n", tr.first.c_str(), tr.second, tr.second);
+    //fprintf(stderr, "> %ls : %lc : %d\n", tr.first.c_str(), tr.second, tr.second);
     if(biltransSurfaceForms && !seensurface && !outOfWord)
     {
       while(val != '/' && val != 0x7fffffff)
@@ -2624,7 +2624,7 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
         tr = readBilingual(input, output);
         symbol = tr.first;
         val = tr.second;
-        //fwprintf(stderr, " == %ls : %lc : %d => %ls\n", symbol.c_str(), val, val, surface.c_str());
+        //fprintf(stderr, " == %ls : %lc : %d => %ls\n", symbol.c_str(), val, val, surface.c_str());
       }
       seensurface = true;
       tr = readBilingual(input, output);

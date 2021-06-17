@@ -146,7 +146,7 @@ Compiler::valid(UString const& dir) const
 {
   const char* side = dir == COMPILER_RESTRICTION_RL_VAL ? "right" : "left";
   const set<int> epsilonSymbols = alphabet.symbolsWhereLeftIs(0);
-  const set<int> spaceSymbols = alphabet.symbolsWhereLeftIs(L' ');
+  const set<int> spaceSymbols = alphabet.symbolsWhereLeftIs(' ');
   for (auto &section : sections) {
     auto &fst = section.second;
     auto finals = fst.getFinals();
@@ -354,30 +354,30 @@ Compiler::readString(vector<int> &result, UString const &name)
     requireEmptyError(name);
     if(keep_boundaries)
     {
-      result.push_back(static_cast<int>(L'>'));
+      result.push_back(static_cast<int>('>'));
     }
   }
   else if(name == COMPILER_BLANK_ELEM)
   {
     requireEmptyError(name);
-    result.push_back(static_cast<int>(L' '));
+    result.push_back(static_cast<int>(' '));
   }
   else if(name == COMPILER_JOIN_ELEM)
   {
     requireEmptyError(name);
-    result.push_back(static_cast<int>(L'+'));
+    result.push_back(static_cast<int>('+'));
   }
   else if(name == COMPILER_POSTGENERATOR_ELEM)
   {
     requireEmptyError(name);
-    result.push_back(static_cast<int>(L'~'));
+    result.push_back(static_cast<int>('~'));
   }
   else if(name == COMPILER_GROUP_ELEM)
   {
     int type=xmlTextReaderNodeType(reader);
     if(type != XML_READER_TYPE_END_ELEMENT)
     {
-      result.push_back(static_cast<int>(L'#'));
+      result.push_back(static_cast<int>('#'));
     }
   }
   else if(name == COMPILER_S_ELEM)
@@ -485,7 +485,7 @@ Compiler::procIdentity(double const entry_weight, bool ig)
     }
   }
 
-  if(verbose && first_element && (both_sides.front() == (int)L' '))
+  if(verbose && first_element && (both_sides.front() == (int)' '))
   {
     cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
     cerr << "): Entry begins with space." << endl;
@@ -495,7 +495,7 @@ Compiler::procIdentity(double const entry_weight, bool ig)
   if(ig)
   {
     vector<int> right;
-    right.push_back(static_cast<int>(L'#'));
+    right.push_back(static_cast<int>('#'));
     right.insert(right.end(), both_sides.begin(), both_sides.end());
     e.setSingleTransduction(both_sides, right, entry_weight);
   }
@@ -529,7 +529,7 @@ Compiler::procTransduction(double const entry_weight)
     }
   }
 
-  if(verbose && first_element && (lhs.front() == (int)L' '))
+  if(verbose && first_element && (lhs.front() == (int)' '))
   {
     cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
     cerr << "): Entry begins with space." << endl;
