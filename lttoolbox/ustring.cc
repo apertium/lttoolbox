@@ -34,7 +34,13 @@ write(const UString& str, UFILE* output)
 UString
 to_ustring(const char* s)
 {
-  auto sz = strlen(s);
+  return to_ustring(reinterpret_cast<const uint8_t*>(s));
+}
+
+UString
+to_ustring(const uint8_t* s)
+{
+  auto sz = strlen(reinterpret_cast<const char*>(s));
   UString ret;
   ret.reserve(sz);
   utf8::utf8to16(s, s+sz, std::back_inserter(ret));

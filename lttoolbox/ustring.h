@@ -28,8 +28,8 @@ typedef std::basic_string<UChar> UString;
 
 void write(const UString& str, UFILE* output);
 
-// for command-line arguments
 UString to_ustring(const char* str);
+UString to_ustring(const uint8_t* str);
 
 // append UTF-16 string to UTF-32 vector of symbols
 void ustring_to_vec32(const UString& str, std::vector<int32_t>& vec);
