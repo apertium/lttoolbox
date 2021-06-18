@@ -160,6 +160,9 @@ InputFile::readBlock(const UChar32 start, const UChar32 end)
   UChar32 c = 0;
   while (c != end && !eof()) {
     c = get();
+    if (c == '\0') {
+      break;
+    }
     ret += c;
     if (c == '\\') {
       ret += get();
@@ -177,6 +180,9 @@ InputFile::finishWBlank()
   UChar32 c = 0;
   while (!eof()) {
     c = get();
+    if (c == '\0') {
+      break;
+    }
     ret += c;
     if (c == '\\') {
       ret += get();
