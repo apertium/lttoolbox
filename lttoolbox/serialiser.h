@@ -29,6 +29,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <unicode/uchar.h>
 
 namespace {
 template <typename SerialisedType>
@@ -96,15 +97,15 @@ public:
                                std::ostream &Output);
 };
 
-template <> class Serialiser<wchar_t> {
-public:
-  inline static void serialise(const wchar_t &SerialisedType_,
-                               std::ostream &Output);
-};
-
 template <> class Serialiser<char> {
 public:
   inline static void serialise(const char &SerialisedType_,
+                               std::ostream &Output);
+};
+
+template <> class Serialiser<UChar> {
+public:
+  inline static void serialise(const UChar &SerialisedType_,
                                std::ostream &Output);
 };
 
@@ -213,14 +214,14 @@ void Serialiser<uint32_t>::serialise(const uint32_t &SerialisedType_,
   int_serialise((uint64_t)SerialisedType_, Output);
 }
 
-void Serialiser<wchar_t>::serialise(const wchar_t &SerialisedType_,
-                                    std::ostream &Output) {
-  int_serialise((uint32_t)SerialisedType_, Output);
-}
-
 void Serialiser<char>::serialise(const char &SerialisedType_,
                                  std::ostream &Output) {
   int_serialise((uint8_t)SerialisedType_, Output);
+}
+
+void Serialiser<UChar>::serialise(const UChar &SerialisedType_,
+                                  std::ostream &Output) {
+  int_serialise((uint16_t)SerialisedType_, Output);
 }
 
 void Serialiser<double>::serialise(const double &SerialisedType_,

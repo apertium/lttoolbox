@@ -19,9 +19,9 @@
 
 #include <cstdio>
 #include <cstdint>
-#include <string>
 #include <iostream>
 #include <stdexcept>
+#include <lttoolbox/ustring.h>
 
 using namespace std;
 
@@ -42,7 +42,7 @@ enum TD_FEATURES : uint64_t {
 
 
 inline auto write_u64(FILE *out, uint64_t value) {
-  auto rv = fwrite(reinterpret_cast<const char*>(&value), 1, sizeof(value), out);
+  auto rv = fwrite_unlocked(reinterpret_cast<const char*>(&value), 1, sizeof(value), out);
   if (rv != sizeof(value)) {
     throw std::runtime_error("Failed to write uint64_t");
   }
@@ -77,7 +77,7 @@ inline auto write_le(Stream& out, uint64_t value) {
 
 inline auto read_u64(FILE *in) {
   uint64_t value = 0;
-  if (fread(reinterpret_cast<char*>(&value), 1, sizeof(value), in) != sizeof(value)) {
+  if (fread_unlocked(reinterpret_cast<char*>(&value), 1, sizeof(value), in) != sizeof(value)) {
     throw std::runtime_error("Failed to read uint64_t");
   }
   return value;
@@ -175,30 +175,13 @@ public:
   static unsigned int multibyte_read(istream &is);
 
   /**
-   * This method allows to write a wide string to an output stream
-   * using its UCSencoding as integer.
-   * @see wstring_read()
-   * @param str the string to write.
-   * @param output the output stream.
-   */
-  static void wstring_write(wstring const &str, FILE *output);
-
-  /**
-   * This method reads a wide string from the input stream.
-   * @see wstring_write()
-   * @param input the input stream.
-   * @return the wide string read.
-   */
-  static wstring wstring_read(FILE *input);
-
-  /**
    * This method allows to write a plain string to an output stream
    * using its UCSencoding as integer.
    * @see string_read()
    * @param str the string to write.
    * @param output the output stream.
    */
-  static void string_write(string const &str, FILE *output);
+  static void string_write(UString const &str, FILE *output);
 
   /**
    * This method reads a plain string from the input stream.
@@ -206,7 +189,7 @@ public:
    * @param input the input stream.
    * @return the string read.
    */
-  static string string_read(FILE *input);
+  static UString string_read(FILE *input);
 
   /**
    * Encodes a double value and writes it into the output stream

@@ -51,6 +51,8 @@ Requirements:
 * g++ >= 2.95
 * GNU make
 * libxml2 >= 2.6.17
+* ICU
+* utfcpp
 
 Building & installing:
 

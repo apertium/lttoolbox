@@ -17,10 +17,13 @@
 #ifndef _REGEXP_COMPILER_
 #define _REGEXP_COMPILER_
 
+#include <lttoolbox/ustring.h>
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/transducer.h>
 
 #include <set>
+#include <vector>
+#include <cstdint>
 
 using namespace std;
 
@@ -41,7 +44,12 @@ private:
   /**
    * Input string
    */
-  wstring input;
+  vector<int32_t> input;
+
+  /**
+   * Location in the input string
+   */
+  size_t index;
 
   /**
    * Alphabet to encode symbols
@@ -66,7 +74,7 @@ private:
   /**
    * Post-operator: '+', '?', '*'
    */
-  wstring postop;
+  UChar32 postop;
 
   /**
    * Default value of weight
@@ -200,7 +208,7 @@ public:
    * Function that parses a regular expression and produces a transducer
    * @param er the regular expression
    */
-  void compile(wstring const &er);
+  void compile(vector<int32_t> const &er);
 
   /**
    * Set the decoder of symbols

@@ -33,6 +33,8 @@
 #include <type_traits>
 #include <iterator>
 
+#include <unicode/uchar.h>
+
 template <typename DeserialisedType> class Deserialiser;
 
 template <typename value_type>
@@ -76,12 +78,12 @@ public:
   inline static uint32_t deserialise(std::istream &Stream_);
 };
 
-template <> class Deserialiser<wchar_t> {
+template <> class Deserialiser<char> {
 public:
-  inline static wchar_t deserialise(std::istream &Stream_);
+  inline static char deserialise(std::istream &Stream_);
 };
 
-template <> class Deserialiser<char> {
+template <> class Deserialiser<UChar> {
 public:
   inline static char deserialise(std::istream &Stream_);
 };
@@ -168,12 +170,12 @@ uint32_t Deserialiser<uint32_t>::deserialise(std::istream &Stream_) {
   return int_deserialise<uint64_t>(Stream_);
 }
 
-wchar_t Deserialiser<wchar_t>::deserialise(std::istream &Stream_) {
-  return int_deserialise<uint32_t>(Stream_);
-}
-
 char Deserialiser<char>::deserialise(std::istream &Stream_) {
   return int_deserialise<uint8_t>(Stream_);
+}
+
+char Deserialiser<UChar>::deserialise(std::istream &Stream_) {
+  return int_deserialise<uint16_t>(Stream_);
 }
 
 double Deserialiser<double>::deserialise(std::istream &Stream_) {

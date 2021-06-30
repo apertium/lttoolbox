@@ -17,7 +17,6 @@
 #include <lttoolbox/state.h>
 
 #include <cstring>
-#include <cwctype>
 #include <climits>
 #include <algorithm>
 
@@ -403,12 +402,12 @@ State::step(int const input, set<int> const alts)
 }
 
 void
-State::step_case(wchar_t val, wchar_t val2, bool caseSensitive)
+State::step_case(UChar32 val, UChar32 val2, bool caseSensitive)
 {
-  if (!iswupper(val) || caseSensitive) {
+  if (!u_isupper(val) || caseSensitive) {
     step(val, val2);
-  } else if(val != towlower(val)) {
-    step(val, towlower(val), val2);
+  } else if(val != u_tolower(val)) {
+    step(val, u_tolower(val), val2);
   } else {
     step(val, val2);
   }
@@ -416,12 +415,12 @@ State::step_case(wchar_t val, wchar_t val2, bool caseSensitive)
 
 
 void
-State::step_case(wchar_t val, bool caseSensitive)
+State::step_case(UChar32 val, bool caseSensitive)
 {
-  if (!iswupper(val) || caseSensitive) {
+  if (!u_isupper(val) || caseSensitive) {
     step(val);
   } else {
-    step(val, towlower(val));
+    step(val, u_tolower(val));
   }
 }
 
@@ -441,14 +440,14 @@ State::isFinal(map<Node *, double> const &finals) const
 }
 
 
-vector<pair< wstring, double >>
-State::NFinals(vector<pair<wstring, double>> lf, int maxAnalyses, int maxWeightClasses) const
+vector<pair< UString, double >>
+State::NFinals(vector<pair<UString, double>> lf, int maxAnalyses, int maxWeightClasses) const
 {
-  vector<pair<wstring, double>> result;
+  vector<pair<UString, double>> result;
 
-  sort(lf.begin(), lf.end(), sort_weights<wstring, double>());
+  sort(lf.begin(), lf.end(), sort_weights<UString, double>());
 
-  for(vector<pair<wstring, double> >::iterator it = lf.begin(); it != lf.end(); it++)
+  for(vector<pair<UString, double> >::iterator it = lf.begin(); it != lf.end(); it++)
   {
     double last_weight = 0.0000;
     if(maxAnalyses > 0 && maxWeightClasses > 0)
@@ -466,16 +465,16 @@ State::NFinals(vector<pair<wstring, double>> lf, int maxAnalyses, int maxWeightC
 }
 
 
-wstring
+UString
 State::filterFinals(map<Node *, double> const &finals,
                     Alphabet const &alphabet,
-                    set<wchar_t> const &escaped_chars,
+                    set<UChar32> const &escaped_chars,
                     bool display_weights, int max_analyses, int max_weight_classes,
                     bool uppercase, bool firstupper, int firstchar) const
 {
-  vector<pair< wstring, double >> response;
+  vector<pair< UString, double >> response;
 
-  wstring result = L"";
+  UString result;
   double cost = 0.0000;
 
   for(size_t i = 0, limit = state.size(); i != limit; i++)
@@ -491,21 +490,21 @@ State::filterFinals(map<Node *, double> const &finals,
         {
           if(escaped_chars.find(((*(state[i].sequence))[j]).first) != escaped_chars.end())
           {
-            result += L'\\';
+            result += '\\';
           }
           alphabet.getSymbol(result, ((*(state[i].sequence))[j]).first, uppercase);
           cost += ((*(state[i].sequence))[j]).second;
         }
         if(firstupper)
         {
-          if(result[first_char] == L'~')
+          if(result[first_char] == '~')
           {
             // skip post-generation mark
-            result[first_char+1] = towupper(result[first_char+1]);
+            result[first_char+1] = u_toupper(result[first_char+1]);
           }
           else
           {
-            result[first_char] = towupper(result[first_char]);
+            result[first_char] = u_toupper(result[first_char]);
           }
         }
       }
@@ -517,7 +516,7 @@ State::filterFinals(map<Node *, double> const &finals,
         {
           if(escaped_chars.find(((*(state[i].sequence))[j]).first) != escaped_chars.end())
           {
-            result += L'\\';
+            result += '\\';
           }
           alphabet.getSymbol(result, ((*(state[i].sequence))[j]).first);
           cost += ((*(state[i].sequence))[j]).second;
@@ -532,16 +531,17 @@ State::filterFinals(map<Node *, double> const &finals,
 
   response = NFinals(response, max_analyses, max_weight_classes);
 
-  result = L"";
-  for(vector<pair<wstring, double>>::iterator it = response.begin(); it != response.end(); it++)
+  result.clear();
+  for(vector<pair<UString, double>>::iterator it = response.begin(); it != response.end(); it++)
   {
-    result += L'/';
+    result += '/';
     result += it->first;
     if(display_weights)
     {
-      result += L"<W:";
-      result += to_wstring(it->second);
-      result += L">";
+      UChar temp[16]{};
+      // if anyone wants a weight of 10000, this will not be enough
+      u_sprintf(temp, "<W:%f>", it->second);
+      result += temp;
     }
   }
 
@@ -549,39 +549,39 @@ State::filterFinals(map<Node *, double> const &finals,
 }
 
 
-set<pair<wstring, vector<wstring> > >
+set<pair<UString, vector<UString> > >
 State::filterFinalsLRX(map<Node *, double> const &finals,
                        Alphabet const &alphabet,
-                       set<wchar_t> const &escaped_chars,
+                       set<UChar32> const &escaped_chars,
                        bool uppercase, bool firstupper, int firstchar) const
 {
-  set<pair<wstring, vector<wstring> > > results;
+  set<pair<UString, vector<UString> > > results;
 
-  vector<wstring> current_result;
-  wstring rule_id = L"";
+  vector<UString> current_result;
+  UString rule_id;
 
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     if(finals.find(state[i].where) != finals.end())
     {
       current_result.clear();
-      rule_id = L"";
-      wstring current_word = L"";
+      rule_id.clear();
+      UString current_word;
       for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
       {
         if(escaped_chars.find(((*(state[i].sequence))[j]).first) != escaped_chars.end())
         {
-          current_word += L'\\';
+          current_word += '\\';
         }
-        wstring sym = L"";
+        UString sym;
         alphabet.getSymbol(sym, ((*(state[i].sequence))[j]).first, uppercase);
-        if(sym == L"<$>")
+        if(sym == "<$>"_u)
         {
-          if(current_word != L"")
+          if(!current_word.empty())
           {
             current_result.push_back(current_word);
           }
-          current_word = L"";
+          current_word.clear();
         }
         else
         {
@@ -597,32 +597,34 @@ State::filterFinalsLRX(map<Node *, double> const &finals,
 }
 
 
-wstring
+UString
 State::filterFinalsSAO(map<Node *, double> const &finals,
                        Alphabet const &alphabet,
-                       set<wchar_t> const &escaped_chars,
+                       set<UChar32> const &escaped_chars,
                        bool uppercase, bool firstupper, int firstchar) const
 {
-  wstring result = L"";
-  wstring annot = L"";
+  UString result;
+  UString annot;
 
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     if(finals.find(state[i].where) != finals.end())
     {
-      result += L'/';
+      result += '/';
       unsigned int const first_char = result.size() + firstchar;
       for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
       {
         if(escaped_chars.find(((*(state[i].sequence))[j]).first) != escaped_chars.end())
         {
-          result += L'\\';
+          result += '\\';
         }
         if(alphabet.isTag(((*(state[i].sequence))[j]).first))
         {
-          annot = L"";
+          annot.clear();
           alphabet.getSymbol(annot, ((*(state[i].sequence))[j]).first);
-          result += L'&'+annot.substr(1,annot.length()-2)+L';';
+          result += '&';
+          result += annot.substr(1,annot.length()-2);
+          result += ';';
         }
         else
         {
@@ -631,14 +633,14 @@ State::filterFinalsSAO(map<Node *, double> const &finals,
       }
       if(firstupper)
       {
-        if(result[first_char] == L'~')
+        if(result[first_char] == '~')
         {
           // skip post-generation mark
-          result[first_char+1] = towupper(result[first_char+1]);
+          result[first_char+1] = u_toupper(result[first_char+1]);
         }
         else
         {
-          result[first_char] = towupper(result[first_char]);
+          result[first_char] = u_toupper(result[first_char]);
         }
       }
     }
@@ -647,24 +649,24 @@ State::filterFinalsSAO(map<Node *, double> const &finals,
   return result;
 }
 
-wstring
+UString
 State::filterFinalsTM(map<Node *, double> const &finals,
                       Alphabet const &alphabet,
-                      set<wchar_t> const &escaped_chars,
-                      queue<wstring> &blankqueue, vector<wstring> &numbers) const
+                      set<UChar32> const &escaped_chars,
+                      queue<UString> &blankqueue, vector<UString> &numbers) const
 {
-  wstring result = L"";
+  UString result;
 
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     if(finals.find(state[i].where) != finals.end())
     {
-      result += L'/';
+      result += '/';
       for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
       {
         if(escaped_chars.find((*(state[i].sequence))[j].first) != escaped_chars.end())
         {
-          result += L'\\';
+          result += '\\';
         }
         alphabet.getSymbol(result, (*(state[i].sequence))[j].first);
       }
@@ -672,15 +674,15 @@ State::filterFinalsTM(map<Node *, double> const &finals,
   }
 
 
-  wstring result2 = L"";
-  vector<wstring> fragment;
-  fragment.push_back(L"");
+  UString result2;
+  vector<UString> fragment;
+  fragment.push_back(""_u);
 
   for(unsigned int i = 0, limit = result.size(); i != limit ; i++)
   {
-    if(result[i] == L')')
+    if(result[i] == ')')
     {
-      fragment.push_back(L"");
+      fragment.push_back(""_u);
     }
     else
     {
@@ -692,9 +694,9 @@ State::filterFinalsTM(map<Node *, double> const &finals,
   {
     if(i != limit -1)
     {
-      if(fragment[i].size() >=2 && fragment[i].substr(fragment[i].size()-2) == L"(#")
+      if(fragment[i].size() >=2 && fragment[i].substr(fragment[i].size()-2) == "(#"_u)
       {
-        wstring whitespace = L" ";
+        UString whitespace = " "_u;
         if(blankqueue.size() != 0)
         {
           whitespace = blankqueue.front().substr(1);
@@ -709,15 +711,15 @@ State::filterFinalsTM(map<Node *, double> const &finals,
         bool substitute = false;
         for(int j = fragment[i].size() - 1; j >= 0; j--)
         {
-          if(fragment[i].size()-j > 3 && fragment[i][j] == L'\\' &&
-             fragment[i][j+1] == L'@' && fragment[i][j+2] == L'(')
+          if(fragment[i].size()-j > 3 && fragment[i][j] == '\\' &&
+             fragment[i][j+1] == '@' && fragment[i][j+2] == '(')
           {
             int num = 0;
             bool correct = true;
             for(unsigned int k = (unsigned int) j+3, limit2 = fragment[i].size();
                 k != limit2; k++)
             {
-              if(iswdigit(fragment[i][k]))
+              if(u_isdigit(fragment[i][k]))
               {
                 num = num * 10;
                 num += (int) fragment[i][k] - 48;
@@ -738,13 +740,13 @@ State::filterFinalsTM(map<Node *, double> const &finals,
         }
         if(substitute == false)
         {
-          fragment[i] += L')';
+          fragment[i] += ')';
         }
       }
     }
   }
 
-  result = L"";
+  result.clear();
 
   for(unsigned int i = 0, limit = fragment.size(); i != limit; i++)
   {
@@ -888,26 +890,28 @@ State::restartFinals(const map<Node *, double> &finals, int requiredSymbol, Stat
 
 
 
-wstring
+UString
 State::getReadableString(const Alphabet &a)
 {
-  wstring retval = L"[";
+  UString retval;
+  retval += '[';
 
   for(unsigned int i=0; i<state.size(); i++)
   {
     vector<pair<int, double>>* seq = state.at(i).sequence;
     if(seq != NULL) for (unsigned int j=0; j<seq->size(); j++)
     {
-      wstring ws = L"";
+      UString ws;
       a.getSymbol(ws, (seq->at(j)).first);
       retval.append(ws);
     }
 
     if(i+1 < state.size())
     {
-      retval.append(L", ");
+      retval += ',';
+      retval += ' ';
     }
   }
-  retval.append(L"]");
+  retval += ']';
   return retval;
 }

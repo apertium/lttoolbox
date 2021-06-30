@@ -18,128 +18,74 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <utf8.h>
 
 using namespace std;
 
-wstring
-XMLParseUtil::attrib(xmlTextReaderPtr reader, wstring const &name)
+UString
+XMLParseUtil::attrib(xmlTextReaderPtr reader, UString const &name)
 {
-  string mystr = "";
-  for(int i = 0, limit = name.size(); i != limit; i++)
-  {
-    mystr += static_cast<char>(name[i]);
-  }
-
-  xmlChar *attrname = xmlCharStrdup(mystr.c_str());
-  xmlChar *myattr = xmlTextReaderGetAttribute(reader, attrname);
-  wstring result = towstring(myattr);
-  xmlFree(myattr);
-  xmlFree(attrname);
-  return result;
+  return attrib(reader, name, ""_u);
 }
 
-wstring
-XMLParseUtil::attrib(xmlTextReaderPtr reader, wstring const &name, const wstring fallback)
+UString
+XMLParseUtil::attrib(xmlTextReaderPtr reader, UString const& name, const UString& fallback)
 {
-  string mystr = "";
-  for (int i = 0, limit = name.size(); i != limit; i++) {
-    mystr += static_cast<char>(name[i]);
-  }
-
-  xmlChar *attrname = xmlCharStrdup(mystr.c_str());
+  std::string temp;
+  temp.reserve(name.size());
+  utf8::utf16to8(name.begin(), name.end(), std::back_inserter(temp));
+  const xmlChar *attrname = reinterpret_cast<const xmlChar*>(temp.c_str());
   xmlChar *myattr = xmlTextReaderGetAttribute(reader, attrname);
-  wstring result = XMLParseUtil::towstring(myattr);
-  xmlFree(myattr);
-  xmlFree(attrname);
   if(myattr == NULL) {
+    xmlFree(myattr);
     return fallback;
-  }
-  else {
+  } else {
+    UString result = to_ustring(reinterpret_cast<char*>(myattr));
+    xmlFree(myattr);
     return result;
   }
 }
 
-
-string
-XMLParseUtil::latin1(xmlChar const *input)
+std::string
+XMLParseUtil::attrib_str(xmlTextReaderPtr reader, const UString& name)
 {
- if(input == NULL)
-  {
+  std::string temp;
+  temp.reserve(name.size());
+  utf8::utf16to8(name.begin(), name.end(), std::back_inserter(temp));
+  const xmlChar *attrname = reinterpret_cast<const xmlChar*>(temp.c_str());
+  xmlChar *myattr = xmlTextReaderGetAttribute(reader, attrname);
+  if(myattr == NULL) {
+    xmlFree(myattr);
     return "";
+  } else {
+    std::string result = reinterpret_cast<char*>(myattr);
+    xmlFree(myattr);
+    return result;
   }
-
-  int outputlen = xmlStrlen(input) + 1;
-  int inputlen = xmlStrlen(input);
-
-  unsigned char* output = new unsigned char[outputlen];
-
-  if(UTF8Toisolat1(output, &outputlen, input, &inputlen) != 0)
-  {
-  }
-
-  output[outputlen] = 0;
-  string result = reinterpret_cast<char *>(output);
-  delete[] output;
-  return result;
 }
 
-wstring
-XMLParseUtil::towstring(xmlChar const * input)
+UString
+XMLParseUtil::readName(xmlTextReaderPtr reader)
 {
-  wstring result = L"";
-
-  for(int i = 0, limit = xmlStrlen(input); i != limit; i++)
-  {
-    int val = 0;
-    if(((unsigned char) input[i] & 0x80) == 0x0)
-    {
-      val = static_cast<wchar_t>(input[i]);
-    }
-    else if(((unsigned char) input[i] & 0xE0) == 0xC0)
-    {
-      val = (input[i] & 0x1F) << 6;
-      i++;
-      val += input[i] & 0x7F;
-    }
-    else if(((unsigned char) input[i] & 0xF0) == 0xE0)
-    {
-      val = (input[i] & 0x0F) << 6;
-      i++;
-      val += input[i] & 0x7F;
-      val = val << 6;
-      i++;
-      val += input[i] & 0x7F;
-    }
-    else if(((unsigned char) input[i] & 0xF8) == 0xF0)
-    {
-      val = (input[i] & 0x07) << 6;
-      i++;
-      val += input[i] & 0x7F;
-      val = val << 6;
-      i++;
-      val += input[i] & 0x7F;
-      val = val << 6;
-      i++;
-      val += input[i] & 0x7F;
-    }
-    else
-    {
-      wcerr << L"UTF-8 invalid string" << endl;
-      exit(EXIT_FAILURE);
-    }
-
-    result += static_cast<wchar_t>(val);
-  }
-  return result;
+  const xmlChar* name = xmlTextReaderConstName(reader);
+  if (name == NULL) return ""_u;
+  return to_ustring(reinterpret_cast<const char*>(name));
 }
 
-wstring
-XMLParseUtil::stows(string const &str)
+UString
+XMLParseUtil::readValue(xmlTextReaderPtr reader)
 {
-  wchar_t* result = new wchar_t[str.size()+1];
-  size_t retval = mbstowcs(result, str.c_str(), str.size());
-  result[retval] = L'\0';
-  wstring result2 = result;
-  delete[] result;
-  return result2;
+  const xmlChar* val = xmlTextReaderConstValue(reader);
+  if (val == NULL) return ""_u;
+  return to_ustring(reinterpret_cast<const char*>(val));
+}
+
+void
+XMLParseUtil::readValueInto32(xmlTextReaderPtr reader, vector<int32_t>& vec)
+{
+  const xmlChar* val = xmlTextReaderConstValue(reader);
+  if (val == NULL) return;
+  auto sz = xmlStrlen(val);
+  vec.reserve(vec.size() + sz);
+  utf8::utf8to32(val, val+sz, std::back_inserter(vec));
 }

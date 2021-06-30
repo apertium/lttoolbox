@@ -73,6 +73,7 @@
 /lttoolbox/lt-expand
 /python/Makefile
 /python/Makefile.in
+/python/lttoolbox.i
 /python/lttoolbox_wrap.cpp
 /python/lttoolbox.py
 /python/setup.py
@@ -80,3 +81,4 @@
 *.egg-info/
 *.egg
 **/.mypy_cache/
+*~

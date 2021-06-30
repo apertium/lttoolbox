@@ -10,7 +10,7 @@ jobs:
     - name: dependencies
       run: |
            sudo apt-get -qy update
-           sudo apt-get -qfy install --no-install-recommends build-essential automake autotools-dev pkg-config libxml2-dev libxml2-utils python3-dev python3-setuptools swig
+           sudo apt-get -qfy install --no-install-recommends build-essential automake autotools-dev pkg-config libutfcpp-dev libxml2-dev libxml2-utils python3-dev python3-setuptools swig
     - name: autoreconf
       run: autoreconf -fvi
     - name: configure

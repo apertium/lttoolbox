@@ -22,10 +22,11 @@
 #include <map>
 #include <set>
 #include <vector>
-
-#include <lttoolbox/ltstr.h>
+#include <cstdint>
+#include "ustring.h"
 
 using namespace std;
+using namespace icu;
 
 /**
  * Alphabet class.
@@ -38,27 +39,27 @@ private:
    * Symbol-identifier relationship. Only contains <tags>.
    * @see slexicinv
    */
-  map<wstring, int, Ltstr> slexic;
+  map<UString, int32_t> slexic;
 
   /**
    * Identifier-symbol relationship. Only contains <tags>.
    * @see slexic
    */
-  vector<wstring> slexicinv;
+  vector<UString> slexicinv;
 
 
   /**
    * Map from symbol-pairs to symbols; tags get negative numbers,
-   * other characters are wchar_t's casted to ints.
+   * other characters are UChar32's casted to ints.
    * @see spairinv
    */
-  map<pair<int,int>, int> spair;
+  map<pair<int32_t, int32_t>, int32_t> spair;
 
   /**
    * All symbol-pairs (both <tags> and letters).
    * @see spair
    */
-  vector<pair<int, int> > spairinv;
+  vector<pair<int32_t, int32_t> > spairinv;
 
 
   void copy(Alphabet const &a);
@@ -89,7 +90,7 @@ public:
   /**
    * Include a symbol into the alphabet.
    */
-  void includeSymbol(wstring const &s);
+  void includeSymbol(UString const &s);
 
   /**
    * Get an unique code for every symbol pair.  This flavour is for
@@ -98,8 +99,8 @@ public:
    * @param c2 right symbol.
    * @return code for (c1, c2).
    */
-  int operator()(int const c1, int const c2);
-  int operator()(wstring const &s) const;
+  int32_t operator()(int32_t const c1, int32_t const c2);
+  int32_t operator()(UString const &s) const;
 
   /**
    * Gets the individual symbol identifier. Assumes it already exists!
@@ -107,20 +108,20 @@ public:
    * @param s symbol to be identified.
    * @return symbol identifier.
    */
-  int operator()(wstring const &s);
+  int32_t operator()(UString const &s);
 
   /**
    * Check wether the symbol is defined in the alphabet.
    * @param s symbol
    * @return true if defined
    */
-  bool isSymbolDefined(wstring const &s);
+  bool isSymbolDefined(UString const &s);
 
   /**
    * Returns the size of the alphabet (number of symbols).
    * @return number of symbols.
    */
-  int size() const;
+  int32_t size() const;
 
   /**
    * Write method.
@@ -142,7 +143,7 @@ public:
    * @param symbol symbol code.
    * @param output output stream.
    */
-  void writeSymbol(int const symbol, FILE *output) const;
+  void writeSymbol(int32_t const symbol, UFILE *output) const;
 
   /**
    * Concat a symbol in the string that is passed by reference.
@@ -150,7 +151,7 @@ public:
    * @param symbol code of the symbol
    * @param uppercase true if we want an uppercase symbol
    */
-  void getSymbol(wstring &result, int const symbol,
+  void getSymbol(UString &result, int32_t const symbol,
 		 bool uppercase = false) const;
 
   /**
@@ -158,27 +159,27 @@ public:
    * @param symbol the code of the symbol
    * @return true if the symbol is a tag
    */
-  bool isTag(int const symbol) const;
+  bool isTag(int32_t const symbol) const;
 
   /**
    * Sets an already existing symbol to represent a new value.
    * @param symbol the code of the symbol to set
    * @param newSymbolString the new string for this symbol
    */
-  void setSymbol(int symbol, wstring newSymbolString);
+  void setSymbol(int32_t symbol, UString newSymbolString);
 
   /**
    * Note: both the symbol int and int-pair are specific to this alphabet instance.
-   * @see operator() to go from general wstrings to alphabet-specific ints.
+   * @see operator() to go from general strings to alphabet-specific ints.
    * @param code a symbol
    * @return the pair which code represents in this alphabet
    */
-  pair<int, int> const & decode(int const code) const;
+  pair<int32_t, int32_t> const & decode(int32_t const code) const;
 
   /**
    * Get all symbols where the left-hand side of the symbol-pair is l.
    */
-  set<int> symbolsWhereLeftIs(wchar_t l) const;
+  set<int32_t> symbolsWhereLeftIs(UChar32 l) const;
 
   enum Side
   {
@@ -195,7 +196,7 @@ public:
    * @param s whether to loopback on the left or right side of the symbol-pair
    * @param nonTagsToo by default only tags are included, but if this is true we include all symbols
    */
-  void createLoopbackSymbols(set<int> &symbols, Alphabet &basis, Side s = right, bool nonTagsToo = false);
+  void createLoopbackSymbols(set<int32_t> &symbols, Alphabet &basis, Side s = right, bool nonTagsToo = false);
 };
 
 #endif

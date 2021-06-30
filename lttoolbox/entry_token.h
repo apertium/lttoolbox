@@ -18,8 +18,10 @@
 #define _ENTRYTOKEN_
 
 
-#include <list>
-#include <string>
+#include <vector>
+#include <lttoolbox/ustring.h>
+#include <lttoolbox/xml_parse_util.h>
+#include <cstdint>
 
 using namespace std;
 
@@ -42,7 +44,7 @@ private:
   /**
    * Name of the paradigm (if it is of 'paradigm' 'type')
    */
-  wstring parName;
+  UString parName;
 
   /**
    * Weight value for the entry (default_weight if unspecified)
@@ -52,17 +54,17 @@ private:
   /**
    * Left side of transduction (if 'single_transduction')
    */
-  list<int> leftSide;
+  vector<int> leftSide;
 
   /**
    * Right side of transduction (if 'single_transduction')
    */
-  list<int> rightSide;
+  vector<int> rightSide;
 
   /**
    * Regular expression (if 'regexp')
    */
-  wstring myregexp;
+  vector<int32_t> myregexp;
 
   /**
    * copy method
@@ -99,7 +101,7 @@ public:
    * Sets the name of the paradigm.
    * @param np the paradigm name
    */
-  void setParadigm(wstring const &np);
+  void setParadigm(UString const &np);
 
   /**
    * Set both parts of a single transduction.
@@ -107,13 +109,19 @@ public:
    * @param pd right part
    * @param ew entry weight
    */
-  void setSingleTransduction(list<int> const &pi, list<int> const &pd, double const ew = 0);
+  void setSingleTransduction(vector<int> const &pi, vector<int> const &pd, double const ew = 0);
 
   /**
    * Set regular expression.
    * @param r the regular expression specification.
    */
-  void setRegexp(wstring const &r);
+  void setRegexp(UString const &r);
+
+  /**
+   * More efficient version of setRegexp()
+   * @param reader the current xml parser state
+   */
+  void readRegexp(xmlTextReaderPtr reader);
 
   /**
    * eTest EntryToken to detect if is a paradigm.
@@ -137,25 +145,25 @@ public:
    * Retrieve the name of the paradigm.
    * @return the name of the paradigm.
    */
-  wstring const & paradigmName() const;
+  UString const & paradigmName() const;
 
   /**
    * Retrieve the left part of the paradigm.
    * @return the left part of the paradigm.
    */
-  list<int> const & left() const;
+  vector<int> const & left() const;
 
   /**
    * Retrieve the right part of the paradigm.
    * @return the right part of the paradigm.
    */
-  list<int> const & right() const;
+  vector<int> const & right() const;
 
   /**
    * Retrieve the regular expression specification.
    * @return the regular expression specification.
    */
-  wstring const & regExp() const;
+  vector<int32_t> const & regExp() const;
 
   /**
    * Retrieve the weight value of the entry.

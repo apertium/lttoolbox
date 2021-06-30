@@ -25,9 +25,6 @@
 #include <iostream>
 #include <libxml/encoding.h>
 
-#if defined(_WIN32) && !defined(_MSC_VER)
-#include <utf8_fwrap.h>
-#endif
 
 using namespace std;
 
@@ -42,12 +39,12 @@ Expander::~Expander()
 }
 
 void
-Expander::expand(string const &file, FILE *output)
+Expander::expand(string const &file, UFILE* output)
 {
   reader = xmlReaderForFile(file.c_str(), NULL, 0);
   if(reader == NULL)
   {
-    wcerr << "Error: Cannot open '" << file << "'." << endl;
+    cerr << "Error: Cannot open '" << file << "'." << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -60,7 +57,7 @@ Expander::expand(string const &file, FILE *output)
 
   if(ret != 0)
   {
-    wcerr << L"Error: Parse error at the end of input." << endl;
+    cerr << "Error: Parse error at the end of input." << endl;
   }
 
   xmlFreeTextReader(reader);
@@ -78,17 +75,17 @@ Expander::procParDef()
   }
   else
   {
-    current_paradigm = L"";
+    current_paradigm.clear();
   }
 }
 
 void
-Expander::requireEmptyError(wstring const &name)
+Expander::requireEmptyError(UString const &name)
 {
   if(!xmlTextReaderIsEmptyElement(reader))
   {
-    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << L"): Non-empty element '<" << name << L">' should be empty." << endl;
+    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    cerr << "): Non-empty element '<" << name << ">' should be empty." << endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -97,7 +94,7 @@ bool
 Expander::allBlanks()
 {
   bool flag = true;
-  wstring text = XMLParseUtil::towstring(xmlTextReaderConstValue(reader));
+  UString text = XMLParseUtil::readValue(reader);
 
   for(auto c : text)
   {
@@ -108,16 +105,16 @@ Expander::allBlanks()
 }
 
 void
-Expander::readString(wstring &result, wstring const &name)
+Expander::readString(UString &result, UString const &name)
 {
-  if(name == L"#text")
+  if(name == Compiler::COMPILER_TEXT_NODE)
   {
-    wstring value = XMLParseUtil::towstring(xmlTextReaderConstValue(reader));
-    wstring escaped = L"^$/<>{}\\*@#+~:";
+    UString value = XMLParseUtil::readValue(reader);
+    UString escaped = "^$/<>{}\\*@#+~:"_u;
     for(size_t i = value.size()-1; i > 0; i--)
     {
-      if(escaped.find(value[i]) != wstring::npos) {
-        value.insert(value.begin()+i, L'\\');
+      if(escaped.find(value[i]) != UString::npos) {
+        value.insert(value.begin()+i, '\\');
       }
     }
     result.append(value);
@@ -125,105 +122,105 @@ Expander::readString(wstring &result, wstring const &name)
   else if(name == Compiler::COMPILER_BLANK_ELEM)
   {
     requireEmptyError(name);
-    result += L' ';
+    result += ' ';
   }
   else if(name == Compiler::COMPILER_M_ELEM)
   {
     requireEmptyError(name);
     if(keep_boundaries)
     {
-      result += L'>';
+      result += '>';
     }
   }
   else if(name == Compiler::COMPILER_JOIN_ELEM)
   {
     requireEmptyError(name);
-    result += L'+';
+    result += '+';
   }
   else if(name == Compiler::COMPILER_POSTGENERATOR_ELEM)
   {
     requireEmptyError(name);
-    result += L'~';
+    result += '~';
   }
   else if(name == Compiler::COMPILER_GROUP_ELEM)
   {
     int type=xmlTextReaderNodeType(reader);
     if(type != XML_READER_TYPE_END_ELEMENT)
     {
-      result += L'#';
+      result += '#';
     }
   }
   else if(name == Compiler::COMPILER_S_ELEM)
   {
     requireEmptyError(name);
-    result += L'<';
+    result += '<';
     result.append(attrib(Compiler::COMPILER_N_ATTR));
-    result += L'>';
+    result += '>';
   }
   else
   {
-    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << L"): Invalid specification of element '<" << name;
-    wcerr << L">' in this context." << endl;
+    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    cerr << "): Invalid specification of element '<" << name;
+    cerr << ">' in this context." << endl;
     exit(EXIT_FAILURE);
   }
 }
 
 void
-Expander::skipBlanks(wstring &name)
+Expander::skipBlanks(UString &name)
 {
-  if(name == L"#text")
+  if(name == Compiler::COMPILER_TEXT_NODE)
   {
     if(!allBlanks())
     {
-      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << L"): Invalid construction." << endl;
+      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      cerr << "): Invalid construction." << endl;
       exit(EXIT_FAILURE);
     }
     xmlTextReaderRead(reader);
-    name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+    name = XMLParseUtil::readName(reader);
   }
 }
 
 void
-Expander::skip(wstring &name, wstring const &elem)
+Expander::skip(UString &name, UString const &elem)
 {
   xmlTextReaderRead(reader);
-  name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+  name = XMLParseUtil::readName(reader);
 
-  if(name == L"#text")
+  if(name == Compiler::COMPILER_TEXT_NODE)
   {
     if(!allBlanks())
     {
-      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << L"): Invalid construction." << endl;
+      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      cerr << "): Invalid construction." << endl;
       exit(EXIT_FAILURE);
     }
     xmlTextReaderRead(reader);
-    name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+    name = XMLParseUtil::readName(reader);
   }
 
   if(name != elem)
   {
-    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << L"): Expected '<" << elem << L">'." << endl;
+    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    cerr << "): Expected '<" << elem << ">'." << endl;
     exit(EXIT_FAILURE);
   }
 }
 
-wstring
+UString
 Expander::procIdentity()
 {
-  wstring both_sides = L"";
+  UString both_sides;
 
   if(!xmlTextReaderIsEmptyElement(reader))
   {
-    wstring name = L"";
+    UString name;
 
     while(true)
     {
       xmlTextReaderRead(reader);
-      name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+      name = XMLParseUtil::readName(reader);
       if(name == Compiler::COMPILER_IDENTITY_ELEM)
       {
         break;
@@ -234,21 +231,21 @@ Expander::procIdentity()
   return both_sides;
 }
 
-pair<wstring, wstring>
+pair<UString, UString>
 Expander::procIdentityGroup()
 {
-  wstring lhs = L"";
-  wstring rhs = L"#";
-  wstring both_sides = L"";
+  UString lhs;
+  UString rhs = "#"_u;
+  UString both_sides;
 
   if(!xmlTextReaderIsEmptyElement(reader))
   {
-    wstring name = L"";
+    UString name;
 
     while(true)
     {
       xmlTextReaderRead(reader);
-      name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+      name = XMLParseUtil::readName(reader);
       if(name == Compiler::COMPILER_IDENTITYGROUP_ELEM)
       {
         break;
@@ -259,25 +256,25 @@ Expander::procIdentityGroup()
   lhs += both_sides;
   rhs += both_sides;
 
-  pair<wstring, wstring> e(lhs, rhs);
+  pair<UString, UString> e(lhs, rhs);
   return e;
 }
 
-pair<wstring, wstring>
+pair<UString, UString>
 Expander::procTransduction()
 {
-  wstring lhs = L"", rhs = L"";
-  wstring name = L"";
+  UString lhs, rhs;
+  UString name;
 
   skip(name, Compiler::COMPILER_LEFT_ELEM);
 
   if(!xmlTextReaderIsEmptyElement(reader))
   {
-    name = L"";
+    name.clear();
     while(true)
     {
       xmlTextReaderRead(reader);
-      name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+      name = XMLParseUtil::readName(reader);
       if(name == Compiler::COMPILER_LEFT_ELEM)
       {
         break;
@@ -290,11 +287,11 @@ Expander::procTransduction()
 
   if(!xmlTextReaderIsEmptyElement(reader))
   {
-    name = L"";
+    name.clear();
     while(true)
     {
       xmlTextReaderRead(reader);
-      name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+      name = XMLParseUtil::readName(reader);
       if(name == Compiler::COMPILER_RIGHT_ELEM)
       {
         break;
@@ -305,67 +302,67 @@ Expander::procTransduction()
 
   skip(name, Compiler::COMPILER_PAIR_ELEM);
 
-  pair<wstring, wstring> e(lhs, rhs);
+  pair<UString, UString> e(lhs, rhs);
   return e;
 }
 
-wstring
-Expander::attrib(wstring const &name)
+UString
+Expander::attrib(UString const &name)
 {
   return XMLParseUtil::attrib(reader, name);
 }
 
-wstring
+UString
 Expander::procPar()
 {
   EntryToken e;
-  wstring paradigm_name = attrib(Compiler::COMPILER_N_ATTR);
+  UString paradigm_name = attrib(Compiler::COMPILER_N_ATTR);
   return paradigm_name;
 }
 
 void
-Expander::requireAttribute(wstring const &value, wstring const &attrname,
-                           wstring const &elemname)
+Expander::requireAttribute(UString const &value, UString const &attrname,
+                           UString const &elemname)
 {
-  if(value == L"")
+  if(value.empty())
   {
-    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << L"): '<" << elemname;
-    wcerr << L"' element must specify non-void '";
-    wcerr<< attrname << L"' attribute." << endl;
+    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    cerr << "): '<" << elemname;
+    cerr << "' element must specify non-void '";
+    cerr<< attrname << "' attribute." << endl;
     exit(EXIT_FAILURE);
   }
 }
 
 void
-Expander::procEntry(FILE *output)
+Expander::procEntry(UFILE* output)
 {
-  wstring attribute = this->attrib(Compiler::COMPILER_RESTRICTION_ATTR);
-  wstring entrname  = this->attrib(Compiler::COMPILER_LEMMA_ATTR);
-  wstring altval    = this->attrib(Compiler::COMPILER_ALT_ATTR);
-  wstring varval    = this->attrib(Compiler::COMPILER_V_ATTR);
-  wstring varl      = this->attrib(Compiler::COMPILER_VL_ATTR);
-  wstring varr      = this->attrib(Compiler::COMPILER_VR_ATTR);
-  wstring wsweight  = this->attrib(Compiler::COMPILER_WEIGHT_ATTR);
+  UString attribute = this->attrib(Compiler::COMPILER_RESTRICTION_ATTR);
+  UString entrname  = this->attrib(Compiler::COMPILER_LEMMA_ATTR);
+  UString altval    = this->attrib(Compiler::COMPILER_ALT_ATTR);
+  UString varval    = this->attrib(Compiler::COMPILER_V_ATTR);
+  UString varl      = this->attrib(Compiler::COMPILER_VL_ATTR);
+  UString varr      = this->attrib(Compiler::COMPILER_VR_ATTR);
+  UString wsweight  = this->attrib(Compiler::COMPILER_WEIGHT_ATTR);
 
-  wstring myname = L"";
-  if(this->attrib(Compiler::COMPILER_IGNORE_ATTR) == L"yes"
-   || (altval != L"" && altval != alt)
-   || (varval != L"" && varval != variant && attribute == Compiler::COMPILER_RESTRICTION_RL_VAL)
-   || ((varl != L"" && varl != variant_left) && (varr != L"" && varr != variant_right))
-   || (varl != L"" && varl != variant_left && attribute == Compiler::COMPILER_RESTRICTION_RL_VAL)
-   || (varr != L"" && varr != variant_right && attribute == Compiler::COMPILER_RESTRICTION_LR_VAL))
+  UString myname;
+  if(this->attrib(Compiler::COMPILER_IGNORE_ATTR) == Compiler::COMPILER_IGNORE_YES_VAL
+   || (!altval.empty() && altval != alt)
+   || (!varval.empty() && varval != variant && attribute == Compiler::COMPILER_RESTRICTION_RL_VAL)
+   || ((!varl.empty() && varl != variant_left) && (!varr.empty() && varr != variant_right))
+   || (!varl.empty() && varl != variant_left && attribute == Compiler::COMPILER_RESTRICTION_RL_VAL)
+   || (!varr.empty() && varr != variant_right && attribute == Compiler::COMPILER_RESTRICTION_LR_VAL))
   {
     do
     {
       int ret = xmlTextReaderRead(reader);
       if(ret != 1)
       {
-        wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-        wcerr << L"): Parse error." << endl;
+        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+        cerr << "): Parse error." << endl;
         exit(EXIT_FAILURE);
       }
-      myname = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+      myname = XMLParseUtil::readName(reader);
     }
     while(myname != Compiler::COMPILER_ENTRY_ELEM);
     return;
@@ -373,19 +370,19 @@ Expander::procEntry(FILE *output)
 
   EntList items, items_lr, items_rl;
   if(attribute == Compiler::COMPILER_RESTRICTION_LR_VAL
-   || (varval != L"" && varval != variant && attribute != Compiler::COMPILER_RESTRICTION_RL_VAL)
-   || (varl != L"" && varl != variant_left))
+   || (!varval.empty() && varval != variant && attribute != Compiler::COMPILER_RESTRICTION_RL_VAL)
+   || (!varl.empty() && varl != variant_left))
   {
-    items_lr.push_back(make_pair(L"", L""));
+    items_lr.push_back(make_pair(""_u, ""_u));
   }
   else if(attribute == Compiler::COMPILER_RESTRICTION_RL_VAL
-        || (varr != L"" && varr != variant_right))
+        || (!varr.empty() && varr != variant_right))
   {
-    items_rl.push_back(make_pair(L"", L""));
+    items_rl.push_back(make_pair(""_u, ""_u));
   }
   else
   {
-    items.push_back(make_pair(L"", L""));
+    items.push_back(make_pair(""_u, ""_u));
   }
 
   while(true)
@@ -393,53 +390,53 @@ Expander::procEntry(FILE *output)
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << L"): Parse error." << endl;
+      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      cerr << "): Parse error." << endl;
       exit(EXIT_FAILURE);
     }
-    wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+    UString name = XMLParseUtil::readName(reader);
     skipBlanks(name);
 
     int type = xmlTextReaderNodeType(reader);
     if(name == Compiler::COMPILER_PAIR_ELEM)
     {
-      pair<wstring, wstring> p = procTransduction();
+      pair<UString, UString> p = procTransduction();
       append(items, p);
       append(items_lr, p);
       append(items_rl, p);
     }
     else if(name == Compiler::COMPILER_IDENTITY_ELEM)
     {
-      wstring val = procIdentity();
+      UString val = procIdentity();
       append(items, val);
       append(items_lr, val);
       append(items_rl, val);
     }
     else if(name == Compiler::COMPILER_IDENTITYGROUP_ELEM)
     {
-      pair<wstring, wstring> p = procIdentityGroup();
+      pair<UString, UString> p = procIdentityGroup();
       append(items, p);
       append(items_lr, p);
       append(items_rl, p);
     }
     else if(name == Compiler::COMPILER_REGEXP_ELEM)
     {
-      wstring val = L"__REGEXP__" + procRegexp();
+      UString val = "__REGEXP__"_u + procRegexp();
       append(items, val);
       append(items_lr, val);
       append(items_rl, val);
     }
     else if(name == Compiler::COMPILER_PAR_ELEM)
     {
-      wstring p = procPar();
+      UString p = procPar();
       // detection of the use of undefined paradigms
 
       if(paradigm.find(p) == paradigm.end() &&
          paradigm_lr.find(p) == paradigm_lr.end() &&
          paradigm_rl.find(p) == paradigm_rl.end())
       {
-        wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-        wcerr << L"): Undefined paradigm '" << p << L"'." <<endl;
+        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+        cerr << "): Undefined paradigm '" << p << "'." <<endl;
         exit(EXIT_FAILURE);
       }
 
@@ -491,32 +488,19 @@ Expander::procEntry(FILE *output)
     }
     else if(name == Compiler::COMPILER_ENTRY_ELEM && type == XML_READER_TYPE_END_ELEMENT)
     {
-      if(current_paradigm == L"")
+      if(current_paradigm.empty())
       {
         for(auto& it : items)
         {
-          fputws_unlocked(it.first.c_str(), output);
-          fputwc_unlocked(L':', output);
-          fputws_unlocked(it.second.c_str(), output);
-          fputwc_unlocked(L'\n', output);
+          u_fprintf(output, "%S:%S\n", it.first.c_str(), it.second.c_str());
         }
         for(auto& it : items_lr)
         {
-          fputws_unlocked(it.first.c_str(), output);
-          fputwc_unlocked(L':', output);
-          fputwc_unlocked(L'>', output);
-          fputwc_unlocked(L':', output);
-          fputws_unlocked(it.second.c_str(), output);
-          fputwc_unlocked(L'\n', output);
+          u_fprintf(output, "%S:>:%S\n", it.first.c_str(), it.second.c_str());
         }
         for(auto& it : items_rl)
         {
-          fputws_unlocked(it.first.c_str(), output);
-          fputwc_unlocked(L':', output);
-          fputwc_unlocked(L'<', output);
-          fputwc_unlocked(L':', output);
-          fputws_unlocked(it.second.c_str(), output);
-          fputwc_unlocked(L'\n', output);
+          u_fprintf(output, "%S:<:%S\n", it.first.c_str(), it.second.c_str());
         }
       }
       else
@@ -531,31 +515,30 @@ Expander::procEntry(FILE *output)
 
       return;
     }
-    else if(name == L"#text" && allBlanks())
+    else if(name == Compiler::COMPILER_TEXT_NODE && allBlanks())
     {
     }
-    else if(name == L"#comment")
+    else if(name == Compiler::COMPILER_COMMENT_NODE)
     {
     }
     else
     {
-      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << L"): Invalid inclusion of '<" << name << L">' into '<" << Compiler::COMPILER_ENTRY_ELEM;
-      wcerr << L">'." << endl;
+      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      cerr << "): Invalid inclusion of '<" << name << ">' into '<" << Compiler::COMPILER_ENTRY_ELEM;
+      cerr << ">'." << endl;
       exit(EXIT_FAILURE);
     }
   }
 }
 
 void
-Expander::procNode(FILE *output)
+Expander::procNode(UFILE *output)
 {
-  xmlChar const *xname = xmlTextReaderConstName(reader);
-  wstring name = XMLParseUtil::towstring(xname);
+  UString name = XMLParseUtil::readName(reader);
 
   // DO: optimize the execution order of this string "ifs"
 
-  if(name == L"#text")
+  if(name == Compiler::COMPILER_TEXT_NODE)
   {
     /* ignorar */
   }
@@ -591,23 +574,23 @@ Expander::procNode(FILE *output)
   {
     /* ignorar */
   }
-  else if(name == L"#comment")
+  else if(name == Compiler::COMPILER_COMMENT_NODE)
   {
     /* ignorar */
   }
   else
   {
-    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << L"): Invalid node '<" << name << L">'." << endl;
+    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    cerr << "): Invalid node '<" << name << ">'." << endl;
     exit(EXIT_FAILURE);
   }
 }
 
-wstring
+UString
 Expander::procRegexp()
 {
   xmlTextReaderRead(reader);
-  wstring re = XMLParseUtil::towstring(xmlTextReaderConstValue(reader));
+  UString re = XMLParseUtil::readValue(reader);
   xmlTextReaderRead(reader);
   return re;
 }
@@ -622,7 +605,7 @@ Expander::append(EntList &result,
   {
     for(auto& it2 : endings)
     {
-      temp.push_back(pair<wstring, wstring>(it.first + it2.first,
+      temp.push_back(pair<UString, UString>(it.first + it2.first,
                           it.second + it2.second));
     }
   }
@@ -631,7 +614,7 @@ Expander::append(EntList &result,
 }
 
 void
-Expander::append(EntList &result, wstring const &endings)
+Expander::append(EntList &result, UString const &endings)
 {
   for(auto& it : result)
   {
@@ -642,7 +625,7 @@ Expander::append(EntList &result, wstring const &endings)
 
 void
 Expander::append(EntList &result,
-                 pair<wstring, wstring> const &endings)
+                 pair<UString, UString> const &endings)
 {
   for(auto& it : result)
   {
@@ -652,27 +635,27 @@ Expander::append(EntList &result,
 }
 
 void
-Expander::setAltValue(string const &a)
+Expander::setAltValue(UString const &a)
 {
-  alt = XMLParseUtil::stows(a);
+  alt = a;
 }
 
 void
-Expander::setVariantValue(string const &v)
+Expander::setVariantValue(UString const &v)
 {
-  variant = XMLParseUtil::stows(v);
+  variant = v;
 }
 
 void
-Expander::setVariantLeftValue(string const &v)
+Expander::setVariantLeftValue(UString const &v)
 {
-  variant_left = XMLParseUtil::stows(v);
+  variant_left = v;
 }
 
 void
-Expander::setVariantRightValue(string const &v)
+Expander::setVariantRightValue(UString const &v)
 {
-  variant_right = XMLParseUtil::stows(v);
+  variant_right = v;
 }
 
 void
@@ -680,4 +663,3 @@ Expander::setKeepBoundaries(bool keep)
 {
   keep_boundaries = keep;
 }
-

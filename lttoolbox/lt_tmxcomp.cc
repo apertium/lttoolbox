@@ -82,25 +82,11 @@ int main(int argc, char *argv[])
     switch(c_t)
     {
       case 'o':
-        {
-          wchar_t *param = new wchar_t[strlen(optarg)+1];
-          if((size_t) -1 != mbstowcs(param, optarg, strlen(optarg)))
-          {
-            c.setOriginLanguageCode(param);
-          }
-          delete[] param;
-        }
+        c.setOriginLanguageCode(to_ustring(optarg));
         break;
 
       case 'm':
-        {
-          wchar_t *param = new wchar_t[strlen(optarg)+1];
-          if((size_t) -1 != mbstowcs(param, optarg, strlen(optarg)))
-          {
-            c.setMetaLanguageCode(param);
-          }
-          delete[] param;
-        }
+        c.setMetaLanguageCode(to_ustring(optarg));
         break;
 
       default:
@@ -109,27 +95,20 @@ int main(int argc, char *argv[])
     }
   }
 
-  string opc = argv[argc-3];
-  wchar_t* lo = new wchar_t[opc.size()+1];
-  wchar_t* lm = new wchar_t[opc.size()+1];
+  UString opc = to_ustring(argv[argc-3]);
+  UString lo = opc.substr(0, opc.find('-'));
+  UString lm = opc.substr(opc.find('-')+1);
 
-  if(((size_t) -1 == mbstowcs(lo, opc.substr(0, opc.find('-')).c_str(), opc.size()))||
-     ((size_t) -1 == mbstowcs(lm, opc.substr(opc.find('-')+1).c_str(), opc.size())))
-  {
-    delete[] lo;
-    delete[] lm;
+  if(lo.empty() || lm.empty()) {
     endProgram(argv[0]);
   }
 
-
   c.parse(argv[argc-2], lo, lm);
-  delete[] lo;
-  delete[] lm;
 
   FILE *output = fopen(argv[argc-1], "wb");
   if(!output)
   {
-    wcerr << "Error: Cannot open file '" << argv[2] << "'." << endl;
+    cerr << "Error: Cannot open file '" << argv[2] << "'." << endl;
     exit(EXIT_FAILURE);
   }
   c.write(output);

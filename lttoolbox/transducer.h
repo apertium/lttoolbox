@@ -87,9 +87,25 @@ private:
    * @param symbol the string to be escaped
    * @param hfst if true, use HFST-compatible escape sequences
    */
-  void escapeSymbol(wstring& symbol, bool hfst) const;
+  void escapeSymbol(UString& symbol, bool hfst) const;
 
 public:
+
+  /**
+   * String constants
+   */
+  static UString const HFST_EPSILON_SYMBOL_SHORT;
+  static UString const HFST_EPSILON_SYMBOL_LONG;
+  static UString const LTTB_EPSILON_SYMBOL;
+  static UString const HFST_SPACE_SYMBOL;
+  static UString const HFST_TAB_SYMBOL;
+  static UString const GROUP_SYMBOL;
+  static UString const JOIN_SYMBOL;
+  static UString const ANY_TAG_SYMBOL;
+  static UString const ANY_CHAR_SYMBOL;
+  static UString const LSX_BOUNDARY_SYMBOL;
+  static UString const COMPOUND_ONLY_L_SYMBOL;
+  static UString const COMPOUND_R_SYMBOL;
 
   /**
    * Constructor
@@ -172,7 +188,7 @@ public:
    * @param a widestring of the pattern to be recognised
    * @return true if the pattern is recognised by the transducer
    */
-  bool recognise(wstring pattern, Alphabet &a, FILE *err = stderr);
+  bool recognise(UString pattern, Alphabet &a, FILE *err = stderr);
 
   /**
    * Set the state as a final or not, yes by default
@@ -232,8 +248,8 @@ public:
    * @param hfst if true, use HFST-compatible escape characters
    * @param epsilon_tag the tag to take as epsilon
    */
-  void show(Alphabet const &a, FILE *output = stdout, int const epsilon_tag = 0, bool hfst = false) const;
-  void show(Alphabet const &a, FILE *output = stdout, int const epsilon_tag = 0) const;
+  void show(Alphabet const &a, UFILE *output, int const epsilon_tag = 0, bool hfst = false) const;
+  void show(Alphabet const &a, UFILE *output, int const epsilon_tag = 0) const;
 
   /**
    * Determinize the transducer

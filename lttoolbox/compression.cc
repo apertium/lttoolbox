@@ -21,13 +21,15 @@
 #include <cmath>
 #include <limits>
 #include <iostream>
+#include <utf8.h>
+#include <vector>
 
 void
 Compression::writeByte(unsigned char byte, FILE *output)
 {
   if(fwrite_unlocked(&byte, 1, 1, output) != 1)
   {
-    wcerr << L"I/O Error writing" << endl;
+    cerr << "I/O Error writing" << endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -39,7 +41,7 @@ Compression::readByte(FILE *input)
   if(fread_unlocked(&value, 1, 1, input) != 1)
   {
 //    Not uncomment this code since
-//    wcerr << L"I/O Error reading" << endl;
+//    cerr << "I/O Error reading" << endl;
 //    exit(EXIT_FAILURE);
   }
 
@@ -86,7 +88,7 @@ Compression::multibyte_write(unsigned int value, FILE *output)
   }
   else
   {
-    wcerr << L"Out of range: " << value << endl;
+    cerr << "Out of range: " << value << endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -133,7 +135,7 @@ Compression::multibyte_write(unsigned int value, ostream &output)
   }
   else
   {
-    wcerr << "Out of range: " << value << endl;
+    cerr << "Out of range: " << value << endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -254,48 +256,26 @@ Compression::multibyte_read(istream &input)
 
 
 void
-Compression::wstring_write(wstring const &str, FILE *output)
+Compression::string_write(UString const &str, FILE *output)
 {
-  Compression::multibyte_write(str.size(), output);
-  for(auto c : str)
+  vector<int32_t> vec;
+  ustring_to_vec32(str, vec);
+  Compression::multibyte_write(vec.size(), output);
+  for(auto c : vec)
   {
-    Compression::multibyte_write(static_cast<int>(c), output);
+    Compression::multibyte_write(c, output);
   }
 }
 
-wstring
-Compression::wstring_read(FILE *input)
-{
-  wstring retval = L"";
-
-  for(unsigned int i = 0, limit = Compression::multibyte_read(input);
-      i != limit; i++)
-  {
-    retval += static_cast<wchar_t>(Compression::multibyte_read(input));
-  }
-
-  return retval;
-}
-
-void
-Compression::string_write(string const &str, FILE *output)
-{
-  Compression::multibyte_write(str.size(), output);
-  for(auto c : str)
-  {
-    Compression::multibyte_write(static_cast<int>(c), output);
-  }
-}
-
-string
+UString
 Compression::string_read(FILE *input)
 {
-  string retval = "";
+  UString retval;
+  unsigned int limit = Compression::multibyte_read(input);
+  retval.reserve(limit);
 
-  for(unsigned int i = 0, limit = Compression::multibyte_read(input);
-      i != limit; i++)
-  {
-    retval += static_cast<char>(Compression::multibyte_read(input));
+  for(unsigned int i = 0; i != limit; i++) {
+    retval += static_cast<UChar32>(Compression::multibyte_read(input));
   }
 
   return retval;

@@ -61,14 +61,14 @@ EntryToken::destroy()
 }
 
 void
-EntryToken::setParadigm(wstring const &np)
+EntryToken::setParadigm(UString const &np)
 {
   parName = np;
   type = paradigm;
 }
 
 void
-EntryToken::setSingleTransduction(list<int> const &pi, list<int> const &pd, double const ew)
+EntryToken::setSingleTransduction(vector<int> const &pi, vector<int> const &pd, double const ew)
 {
   weight = ew;
   leftSide = pi;
@@ -77,9 +77,17 @@ EntryToken::setSingleTransduction(list<int> const &pi, list<int> const &pd, doub
 }
 
 void
-EntryToken::setRegexp(wstring const &r)
+EntryToken::setRegexp(UString const &r)
 {
-  myregexp = r;
+  myregexp.clear();
+  ustring_to_vec32(r, myregexp);
+  type = regexp;
+}
+
+void
+EntryToken::readRegexp(xmlTextReaderPtr reader)
+{
+  XMLParseUtil::readValueInto32(reader, myregexp);
   type = regexp;
 }
 
@@ -101,25 +109,25 @@ EntryToken::isRegexp() const
   return type == regexp;
 }
 
-wstring const &
+UString const &
 EntryToken::paradigmName() const
 {
   return parName;
 }
 
-list<int> const &
+vector<int> const &
 EntryToken::left() const
 {
   return leftSide;
 }
 
-list<int> const &
+vector<int> const &
 EntryToken::right() const
 {
   return rightSide;
 }
 
-wstring const &
+vector<int32_t> const &
 EntryToken::regExp() const
 {
   return myregexp;

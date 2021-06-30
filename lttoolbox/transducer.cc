@@ -24,6 +24,24 @@
 #include <cstdlib>
 #include <iostream>
 #include <vector>
+#include <cstring>
+
+UString const Transducer::HFST_EPSILON_SYMBOL_SHORT   = "@0@"_u;
+UString const Transducer::HFST_EPSILON_SYMBOL_LONG    = "@_EPSILON_SYMBOL_@"_u;
+// could extend the ""_u helper to include u""_u
+// this is the only place that needs it
+UString const Transducer::LTTB_EPSILON_SYMBOL         = UString(1, (UChar)0x3B5);
+                                                   // = "ε"_u;
+UString const Transducer::HFST_SPACE_SYMBOL           = "@_SPACE_@"_u;
+UString const Transducer::HFST_TAB_SYMBOL             = "@_TAB_@"_u;
+UString const Transducer::GROUP_SYMBOL                = "#"_u;
+UString const Transducer::JOIN_SYMBOL                 = "+"_u;
+UString const Transducer::ANY_TAG_SYMBOL              = "<ANY_TAG>"_u;
+UString const Transducer::ANY_CHAR_SYMBOL             = "<ANY_CHAR>"_u;
+UString const Transducer::LSX_BOUNDARY_SYMBOL         = "<$>"_u;
+UString const Transducer::COMPOUND_ONLY_L_SYMBOL      = "<compound-only-L>"_u;
+UString const Transducer::COMPOUND_R_SYMBOL           = "<compound-R>"_u;
+
 
 int
 Transducer::newState()
@@ -170,8 +188,8 @@ Transducer::linkStates(int const source, int const target,
   }
   else
   {
-    wcerr << L"Error: Trying to link nonexistent states (" << source;
-    wcerr << L", " << target << L", " << tag << L")" << endl;
+    cerr << "Error: Trying to link nonexistent states (" << source;
+    cerr << ", " << target << ", " << tag << ")" << endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -189,7 +207,7 @@ Transducer::setFinal(int const state, double const weight, bool value)
   int initial_copy = getInitial();
   if(state == initial_copy)
   {
-    wcerr << L"Setting initial state to final" << endl;
+    cerr << "Setting initial state to final" << endl;
   }
 */
   if(value)
@@ -261,7 +279,7 @@ Transducer::joinFinals(int const epsilon_tag)
   }
   else if(finals.size() == 0)
   {
-    wcerr << L"Error: empty set of final states" <<endl;
+    cerr << "Error: empty set of final states" <<endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -319,6 +337,11 @@ Transducer::determinize(int const epsilon_tag)
 
   int t = 0;
 
+  set<int> finals_state;
+  for(auto& it : finals) {
+    finals_state.insert(it.first);
+  }
+
   while(size_Q_prime != Q_prime.size())
   {
     size_Q_prime = Q_prime.size();
@@ -326,11 +349,6 @@ Transducer::determinize(int const epsilon_tag)
 
     for(auto& it : R[t])
     {
-      set<int> finals_state;
-      for(auto& it2 : finals)
-      {
-        finals_state.insert(it2.first);
-      }
       if(!isEmptyIntersection(Q_prime[it], finals_state))
       {
         double w = default_weight;
@@ -378,8 +396,8 @@ Transducer::determinize(int const epsilon_tag)
     t = (t+1)%2;
   }
 
-  transitions = transitions_prime;
-  finals = finals_prime;
+  transitions.swap(transitions_prime);
+  finals.swap(finals_prime);
   initial = initial_prime;
 }
 
@@ -517,7 +535,7 @@ bool Transducer::weighted() {
 void
 Transducer::write(FILE *output, int const decalage)
 {
-  fwrite(HEADER_TRANSDUCER, 1, 4, output);
+  fwrite_unlocked(HEADER_TRANSDUCER, 1, 4, output);
 
   bool write_weights = weighted();
 
@@ -578,7 +596,7 @@ Transducer::read(FILE *input, int const decalage)
   fpos_t pos;
   if (fgetpos(input, &pos) == 0) {
       char header[4]{};
-      fread(header, 1, 4, input);
+      fread_unlocked(header, 1, 4, input);
       if (strncmp(header, HEADER_TRANSDUCER, 4) == 0) {
           auto features = read_le<uint64_t>(input);
           if (features >= TDF_UNKNOWN) {
@@ -713,61 +731,58 @@ Transducer::reverse(int const epsilon_tag)
 }
 
 void
-Transducer::escapeSymbol(wstring& symbol, bool hfst) const
+Transducer::escapeSymbol(UString& symbol, bool hfst) const
 {
-  if(symbol == L"") // If it's an epsilon
+  if(symbol.empty()) // If it's an epsilon
   {
     if(hfst)
     {
-      symbol = L"@0@";
+      symbol = HFST_EPSILON_SYMBOL_SHORT;
     }
     else
     {
-      symbol = L"ε";
+      symbol = LTTB_EPSILON_SYMBOL;
     }
   }
-  else if(hfst && symbol == L" ")
+  else if(hfst && symbol == " "_u)
   {
-    symbol = L"@_SPACE_@";
+    symbol = HFST_SPACE_SYMBOL;
   }
-  else if(hfst && symbol == L"\t")
+  else if(hfst && symbol == "\t"_u)
   {
-    symbol = L"@_TAB_@";
+    symbol = HFST_TAB_SYMBOL;
   }
 }
 
 void
-Transducer::show(Alphabet const &alphabet, FILE *output, int const epsilon_tag, bool hfst) const
+Transducer::show(Alphabet const &alphabet, UFILE *output, int const epsilon_tag, bool hfst) const
 {
   for(auto& it : transitions)
   {
     for(auto& it2 : it.second)
     {
       auto t = alphabet.decode(it2.first);
-      fwprintf(output, L"%d\t", it.first);
-      fwprintf(output, L"%d\t", it2.second.first);
-      wstring l = L"";
+      u_fprintf(output, "%d\t%d\t", it.first, it2.second.first);
+      UString l;
       alphabet.getSymbol(l, t.first);
       escapeSymbol(l, hfst);
-      fwprintf(output, L"%ls\t", l.c_str());
-      wstring r = L"";
+      u_fprintf(output, "%S\t", l.c_str());
+      UString r;
       alphabet.getSymbol(r, t.second);
       escapeSymbol(r, hfst);
-      fwprintf(output, L"%ls\t", r.c_str());
-      fwprintf(output, L"%f\t", it2.second.second);
-      fwprintf(output, L"\n");
+      u_fprintf(output, "%S\t", r.c_str());
+      u_fprintf(output, "%f\t\n", it2.second.second);
     }
   }
 
   for(auto& it3 : finals)
   {
-    fwprintf(output, L"%d\t", it3.first);
-    fwprintf(output, L"%f\n", it3.second);
+    u_fprintf(output, "%d\t%f\n", it3.first, it3.second);
   }
 }
 
 void
-Transducer::show(Alphabet const &alphabet, FILE *output, int const epsilon_tag) const
+Transducer::show(Alphabet const &alphabet, UFILE *output, int const epsilon_tag) const
 {
   return show(alphabet, output, epsilon_tag, false);
 }
@@ -789,7 +804,7 @@ Transducer::getStateSize(int const state)
 }
 
 bool
-Transducer::recognise(wstring pattern, Alphabet &a, FILE *err)
+Transducer::recognise(UString pattern, Alphabet &a, FILE *err)
 {
   bool accepted = false;
   set<int> states;
@@ -801,7 +816,7 @@ Transducer::recognise(wstring pattern, Alphabet &a, FILE *err)
   {
     set<int> new_state;        //Transducer::closure(int const state, int const epsilon_tag)
     // For each of the current alive states
-    //fwprintf(err, L"step: %ls %lc (%d)\n", pattern.c_str(), *it, sym);
+    //fprintf(err, "step: %ls %lc (%d)\n", pattern.c_str(), *it, sym);
     for(auto& it2 : states)
     {
       auto& p = transitions[it2];
@@ -811,19 +826,19 @@ Transducer::recognise(wstring pattern, Alphabet &a, FILE *err)
       {
 
         auto t = a.decode(it3.first);
-        wstring l = L"";
+        UString l;
         a.getSymbol(l, t.first);
-        //wstring r = L"";
+        //UString r;
         //a.getSymbol(r, t.second);
 
-        //fwprintf(err, L"  -> state: %d, trans: %ls:%ls, targ: %d\n", *it2, (l == L"") ?  L"ε" : l.c_str(),  (r == L"") ?  L"ε" : r.c_str(), it3->second);
-        //if(l.find(*it) != wstring::npos || l == L"" )
-        if(l.find(it) != wstring::npos)
+        //fprintf(err, "  -> state: %d, trans: %ls:%ls, targ: %d\n", *it2, (l.empty()) ?  "ε" : l.c_str(),  (r.empty()) ?  "ε" : r.c_str(), it3->second);
+        //if(l.find(*it) != UString::npos || l.empty() )
+        if(l.find(it) != UString::npos)
         {
           auto myclosure = closure(it3.second.first, 0);
-          //wcerr << L"Before closure alives: " <<new_state.size() << endl;
+          //cerr << "Before closure alives: " <<new_state.size() << endl;
           new_state.insert(myclosure.begin(), myclosure.end());
-          //wcerr << L"After closure alives: " <<new_state.size() << endl;
+          //cerr << "After closure alives: " <<new_state.size() << endl;
         }
       }
     }
@@ -984,10 +999,6 @@ Transducer
 Transducer::moveLemqsLast(Alphabet const &alphabet,
                           int const epsilon_tag)
 {
-  // TODO: These should be in file which is included by both
-  // fst_processor.cc and compiler.cc:
-  wstring COMPILER_GROUP_ELEM = L"#";
-
   Transducer new_t;
   typedef int SearchState;
   std::set<SearchState> seen;
@@ -1006,11 +1017,11 @@ Transducer::moveLemqsLast(Alphabet const &alphabet,
     {
       int label = trans_it.first,
        this_trg = trans_it.second.first;
-      wstring left = L"";
+      UString left;
       alphabet.getSymbol(left, alphabet.decode(label).first);
       int new_src = states_this_new[this_src];
 
-      if(left == COMPILER_GROUP_ELEM)
+      if(left == GROUP_SYMBOL)
       {
         Transducer tagsFirst = copyWithTagsFirst(this_trg, label, alphabet, epsilon_tag);
         new_t.finals.insert(make_pair(
@@ -1055,16 +1066,6 @@ Transducer::intersect(Transducer &trimmer,
    * The trimmer is typically a bidix passed through appendDotStar.
    */
 
-  // TODO: These should be in file which is included by both
-  // fst_processor.cc and compiler.cc:
-  wstring compoundOnlyLSymbol = L"<compound-only-L>";
-  wstring compoundRSymbol = L"<compound-R>";
-  wstring COMPILER_JOIN_ELEM = L"+";
-  wstring COMPILER_GROUP_ELEM = L"#";
-  wstring COMPILER_ANY_TAG = L"<ANY_TAG>";
-  wstring COMPILER_ANY_CHAR = L"<ANY_CHAR>";
-  wstring COMPILER_SEPARABLE_BOUNDARY = L"<$>";
-
   // When searching, we need to record (this, (trimmer, trimmer_pre_plus))
   typedef std::pair<int, std::pair<int, int > > SearchState;
   // first: currently searched state in this;
@@ -1095,7 +1096,7 @@ Transducer::intersect(Transducer &trimmer,
         trimmer_preplus_next = trimmer_preplus;
 
     if(states_this_trimmed.find(current) == states_this_trimmed.end()) {
-      wcerr <<L"Error: couldn't find "<<this_src<<L","<<trimmer_src<<L" in state map"<<endl;
+      cerr <<"Error: couldn't find "<<this_src<<","<<trimmer_src<<" in state map"<<endl;
       exit(EXIT_FAILURE);
     }
     int trimmed_src = states_this_trimmed[current];
@@ -1105,7 +1106,7 @@ Transducer::intersect(Transducer &trimmer,
       int trimmer_label = trimmer_trans_it.first,
           trimmer_trg   = trimmer_trans_it.second.first;
       double trimmer_wt = trimmer_trans_it.second.second;
-      wstring trimmer_left = L"";
+      UString trimmer_left;
       trimmer_a.getSymbol(trimmer_left, trimmer_a.decode(trimmer_label).first);
 
       if(trimmer_preplus == trimmer_src) {
@@ -1113,7 +1114,7 @@ Transducer::intersect(Transducer &trimmer,
         trimmer_preplus_next = trimmer_trg;
       }
 
-      if(trimmer_left == L"")
+      if(trimmer_left.empty())
       {
         next = make_pair(this_src, make_pair(trimmer_trg, trimmer_preplus_next));
         if(seen.find(next) == seen.end())
@@ -1136,10 +1137,10 @@ Transducer::intersect(Transducer &trimmer,
       int this_label = trans_it.first,
           this_trg   = trans_it.second.first;
       double this_wt = trans_it.second.second;
-      wstring this_right = L"";
+      UString this_right;
       this_a.getSymbol(this_right, this_a.decode(this_label).second);
 
-      if(this_right == COMPILER_JOIN_ELEM || this_right == COMPILER_SEPARABLE_BOUNDARY)
+      if(this_right == JOIN_SYMBOL || this_right == LSX_BOUNDARY_SYMBOL)
       {
         if(trimmer_preplus == trimmer_src) {
           // Keep the old preplus state if it was set; equal to current trimmer state means unset:
@@ -1160,14 +1161,14 @@ Transducer::intersect(Transducer &trimmer,
                            trimmed_trg, // toState
                            this_label, // symbol-pair, using this alphabet
                            this_wt); //weight of transduction
-        if(this_right == COMPILER_SEPARABLE_BOUNDARY && isFinal(this_trg))
+        if(this_right == LSX_BOUNDARY_SYMBOL && isFinal(this_trg))
         {
           trimmed.setFinal(trimmed_trg, default_weight);
         }
       }
-      else if ( this_right == compoundOnlyLSymbol
-                || this_right == compoundRSymbol
-                || this_right == L"" )
+      else if ( this_right == COMPOUND_ONLY_L_SYMBOL
+                || this_right == COMPOUND_R_SYMBOL
+                || this_right.empty() )
       {
         // Stay put in the trimmer FST
         int trimmer_trg = trimmer_src;
@@ -1197,7 +1198,7 @@ Transducer::intersect(Transducer &trimmer,
         // Loop through non-epsilon arcs from the live state of trimmer
 
         // If we see a hash/group, we may have to rewind our trimmer state first:
-        if(this_right == COMPILER_GROUP_ELEM && trimmer_preplus != trimmer_src)
+        if(this_right == GROUP_SYMBOL && trimmer_preplus != trimmer_src)
         {
           states_this_trimmed.insert(make_pair(make_pair(this_src, make_pair(trimmer_preplus,
                                                                              trimmer_preplus)),
@@ -1209,7 +1210,7 @@ Transducer::intersect(Transducer &trimmer,
         {
           int trimmer_label = trimmer_trans_it.first,
               trimmer_trg   = trimmer_trans_it.second.first;
-          wstring trimmer_left = L"";
+          UString trimmer_left;
           trimmer_a.getSymbol(trimmer_left, trimmer_a.decode(trimmer_label).first);
 
           if(trimmer_preplus == trimmer_src) {
@@ -1217,9 +1218,9 @@ Transducer::intersect(Transducer &trimmer,
             trimmer_preplus_next = trimmer_trg;
           }
 
-          if(trimmer_left != L"" && // we've already dealt with trimmer epsilons
+          if(!trimmer_left.empty() && // we've already dealt with trimmer epsilons
              (this_right == trimmer_left ||
-              (this_right == ((trimmer_left[0] == L'<') ? COMPILER_ANY_TAG : COMPILER_ANY_CHAR))))
+              (this_right == ((trimmer_left[0] == '<') ? ANY_TAG_SYMBOL : ANY_CHAR_SYMBOL))))
           {
             next = make_pair(this_trg, make_pair(trimmer_trg, trimmer_preplus_next));
             if(seen.find(next) == seen.end())

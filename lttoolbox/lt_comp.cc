@@ -17,7 +17,6 @@
 #include <lttoolbox/compiler.h>
 #include <lttoolbox/att_compiler.h>
 #include <lttoolbox/lt_locale.h>
-#include <lttoolbox/string_to_wostream.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -103,21 +102,21 @@ int main(int argc, char *argv[])
     switch (cnt)
     {
       case 'a':
-        c.setAltValue(optarg);
+        c.setAltValue(to_ustring(optarg));
         break;
 
       case 'v':
-        c.setVariantValue(optarg);
+        c.setVariantValue(to_ustring(optarg));
         break;
 
       case 'l':
         vl = optarg;
-        c.setVariantLeftValue(vl);
+        c.setVariantLeftValue(to_ustring(optarg));
         break;
 
       case 'r':
         vr = optarg;
-        c.setVariantRightValue(vr);
+        c.setVariantRightValue(to_ustring(optarg));
         break;
 
       case 'm':
@@ -176,7 +175,7 @@ int main(int argc, char *argv[])
   }
   else
   {
-    wcerr << "Error: Cannot not open file '" << infile << "'." << endl << endl;
+    cerr << "Error: Cannot not open file '" << infile << "'." << endl << endl;
     exit(EXIT_FAILURE);
   }
   initGenericErrorDefaultFunc(NULL);
@@ -192,7 +191,7 @@ int main(int argc, char *argv[])
     if(ttype == 'a')
     {
       LtLocale::tryToSetLocale();
-      a.parse(infile, Compiler::COMPILER_RESTRICTION_LR_VAL);
+      a.parse(infile, false);
     }
     else
     {
@@ -214,7 +213,7 @@ int main(int argc, char *argv[])
     if(ttype == 'a')
     {
       LtLocale::tryToSetLocale();
-      a.parse(infile, Compiler::COMPILER_RESTRICTION_RL_VAL);
+      a.parse(infile, true);
     }
     else
     {
@@ -230,7 +229,7 @@ int main(int argc, char *argv[])
   FILE *output = fopen(outfile.c_str(), "wb");
   if(!output)
   {
-    wcerr << "Error: Cannot open file '" << outfile << "'." << endl;
+    cerr << "Error: Cannot open file '" << outfile << "'." << endl;
     exit(EXIT_FAILURE);
   }
   if(ttype == 'a')

@@ -23,19 +23,16 @@
 #include <cctype>
 #include <cstdlib>
 #include <set>
-#include <cwchar>
-#include <cwctype>
 
-#if defined(_WIN32) && !defined(_MSC_VER)
-#include <utf8_fwrap.h>
-#endif
+#include <unicode/uchar.h>
 
 using namespace std;
+using namespace icu;
 
 Alphabet::Alphabet()
 {
-  spair[pair<int, int>(0,0)] = 0;
-  spairinv.push_back(pair<int, int>(0,0));
+  spair[pair<int32_t, int32_t>(0,0)] = 0;
+  spairinv.push_back(pair<int32_t, int32_t>(0,0));
 }
 
 Alphabet::~Alphabet()
@@ -74,23 +71,23 @@ Alphabet::copy(Alphabet const &a)
 }
 
 void
-Alphabet::includeSymbol(wstring const &s)
+Alphabet::includeSymbol(UString const &s)
 {
   if(slexic.find(s) == slexic.end())
   {
-    int slexic_size = slexic.size();
+    int32_t slexic_size = slexic.size();
     slexic[s] = -(slexic_size+1);
     slexicinv.push_back(s);
   }
 }
 
-int
-Alphabet::operator()(int const c1, int const c2)
+int32_t
+Alphabet::operator()(int32_t const c1, int32_t const c2)
 {
   auto tmp = make_pair(c1, c2);
   if(spair.find(tmp) == spair.end())
   {
-    int spair_size = spair.size();
+    int32_t spair_size = spair.size();
     spair[tmp] = spair_size;
     spairinv.push_back(tmp);
   }
@@ -98,14 +95,14 @@ Alphabet::operator()(int const c1, int const c2)
   return spair[tmp];
 }
 
-int
-Alphabet::operator()(wstring const &s)
+int32_t
+Alphabet::operator()(UString const &s)
 {
   return slexic[s];
 }
 
-int
-Alphabet::operator()(wstring const &s) const
+int32_t
+Alphabet::operator()(UString const &s) const
 {
   auto it = slexic.find(s);
   if (it == slexic.end()) {
@@ -115,12 +112,12 @@ Alphabet::operator()(wstring const &s) const
 }
 
 bool
-Alphabet::isSymbolDefined(wstring const &s)
+Alphabet::isSymbolDefined(UString const &s)
 {
   return slexic.find(s) != slexic.end();
 }
 
-int
+int32_t
 Alphabet::size() const
 {
   return slexic.size();
@@ -131,16 +128,16 @@ Alphabet::write(FILE *output)
 {
   // First, we write the taglist
   Compression::multibyte_write(slexicinv.size(), output);  // taglist size
-  for(unsigned int i = 0, limit = slexicinv.size(); i < limit; i++)
+  for(size_t i = 0, limit = slexicinv.size(); i < limit; i++)
   {
-    Compression::wstring_write(slexicinv[i].substr(1, slexicinv[i].size()-2), output);
+    Compression::string_write(slexicinv[i].substr(1, slexicinv[i].size()-2), output);
   }
 
   // Then we write the list of pairs
   // All numbers are biased + slexicinv.size() to be positive or zero
-  unsigned int bias = slexicinv.size();
+  size_t bias = slexicinv.size();
   Compression::multibyte_write(spairinv.size(), output);
-  for(unsigned int i = 0, limit = spairinv.size(); i != limit; i++)
+  for(size_t i = 0, limit = spairinv.size(); i != limit; i++)
   {
     Compression::multibyte_write(spairinv[i].first + bias, output);
     Compression::multibyte_write(spairinv[i].second + bias, output);
@@ -155,26 +152,28 @@ Alphabet::read(FILE *input)
   a_new.spair.clear();
 
   // Reading of taglist
-  int tam = Compression::multibyte_read(input);
-  map<int, string> tmp;
+  int32_t tam = Compression::multibyte_read(input);
+  map<int32_t, string> tmp;
   while(tam > 0)
   {
     tam--;
-    wstring mytag = L"<" + Compression::wstring_read(input) + L">";
+    UString mytag = "<"_u;
+    mytag += Compression::string_read(input);
+    mytag += ">"_u;
     a_new.slexicinv.push_back(mytag);
     a_new.slexic[mytag]= -a_new.slexicinv.size(); // ToDo: This does not turn the result negative due to unsigned semantics
   }
 
   // Reading of pairlist
-  unsigned int bias = a_new.slexicinv.size();
+  size_t bias = a_new.slexicinv.size();
   tam = Compression::multibyte_read(input);
   while(tam > 0)
   {
     tam--;
-    int first = Compression::multibyte_read(input);
-    int second = Compression::multibyte_read(input);
-    pair<int, int> tmp(first - bias, second - bias);
-    int spair_size = a_new.spair.size();
+    int32_t first = Compression::multibyte_read(input);
+    int32_t second = Compression::multibyte_read(input);
+    pair<int32_t, int32_t> tmp(first - bias, second - bias);
+    int32_t spair_size = a_new.spair.size();
     a_new.spair[tmp] = spair_size;
     a_new.spairinv.push_back(tmp);
   }
@@ -185,8 +184,8 @@ Alphabet::read(FILE *input)
 void
 Alphabet::serialise(std::ostream &serialised) const
 {
-  Serialiser<const vector<wstring> >::serialise(slexicinv, serialised);
-  Serialiser<vector<pair<int, int> > >::serialise(spairinv, serialised);
+  Serialiser<const vector<UString> >::serialise(slexicinv, serialised);
+  Serialiser<vector<pair<int32_t, int32_t> > >::serialise(spairinv, serialised);
 }
 
 void
@@ -196,31 +195,32 @@ Alphabet::deserialise(std::istream &serialised)
   slexic.clear();
   spairinv.clear();
   spair.clear();
-  slexicinv = Deserialiser<vector<wstring> >::deserialise(serialised);
+  slexicinv = Deserialiser<vector<UString> >::deserialise(serialised);
   for (size_t i = 0; i < slexicinv.size(); i++) {
     slexic[slexicinv[i]] = -i - 1; // ToDo: This does not turn the result negative due to unsigned semantics
   }
-  spairinv = Deserialiser<vector<pair<int, int> > >::deserialise(serialised);
+  spairinv = Deserialiser<vector<pair<int32_t, int32_t> > >::deserialise(serialised);
   for (size_t i = 0; i < slexicinv.size(); i++) {
     spair[spairinv[i]] = i;
   }
 }
 
 void
-Alphabet::writeSymbol(int const symbol, FILE *output) const
+Alphabet::writeSymbol(int32_t const symbol, UFILE *output) const
 {
   if(symbol < 0)
   {
-    fputws_unlocked(slexicinv[-symbol-1].c_str(), output);
+    // write() has a name conflict
+    u_fprintf(output, "%S", slexicinv[-symbol-1].c_str());
   }
   else
   {
-    fputwc_unlocked(static_cast<wchar_t>(symbol), output);
+    u_fputc(static_cast<UChar32>(symbol), output);
   }
 }
 
 void
-Alphabet::getSymbol(wstring &result, int const symbol, bool uppercase) const
+Alphabet::getSymbol(UString &result, int32_t const symbol, bool uppercase) const
 {
   if(symbol == 0)
   {
@@ -231,7 +231,7 @@ Alphabet::getSymbol(wstring &result, int const symbol, bool uppercase) const
   {
     if(symbol >= 0)
     {
-      result += static_cast<wchar_t>(symbol);
+      result += static_cast<UChar32>(symbol);
     }
     else
     {
@@ -240,7 +240,7 @@ Alphabet::getSymbol(wstring &result, int const symbol, bool uppercase) const
   }
   else if(symbol >= 0)
   {
-    result += static_cast<wchar_t>(towupper(static_cast<wint_t>(symbol)));
+    result += u_toupper(static_cast<UChar32>(symbol));
   }
   else
   {
@@ -249,20 +249,20 @@ Alphabet::getSymbol(wstring &result, int const symbol, bool uppercase) const
 }
 
 bool
-Alphabet::isTag(int const symbol) const
+Alphabet::isTag(int32_t const symbol) const
 {
   return symbol < 0;
 }
 
-pair<int, int> const &
-Alphabet::decode(int const code) const
+pair<int32_t, int32_t> const &
+Alphabet::decode(int32_t const code) const
 {
   return spairinv[code];
 }
 
-set<int>
-Alphabet::symbolsWhereLeftIs(wchar_t l) const {
-  set<int> eps;
+set<int32_t>
+Alphabet::symbolsWhereLeftIs(UChar32 l) const {
+  set<int32_t> eps;
   for(const auto& sp: spair) {  // [(l, r) : tag]
     if(sp.first.first == l) {
       eps.insert(sp.second);
@@ -271,17 +271,17 @@ Alphabet::symbolsWhereLeftIs(wchar_t l) const {
   return eps;
 }
 
-void Alphabet::setSymbol(int symbol, wstring newSymbolString) {
+void Alphabet::setSymbol(int32_t symbol, UString newSymbolString) {
   //Should be a special character!
   if (symbol < 0) slexicinv[-symbol-1] = newSymbolString;
 }
 
 void
-Alphabet::createLoopbackSymbols(set<int> &symbols, Alphabet &basis, Side s, bool nonTagsToo)
+Alphabet::createLoopbackSymbols(set<int32_t> &symbols, Alphabet &basis, Side s, bool nonTagsToo)
 {
-  // Non-tag letters get the same int in spairinv across alphabets,
+  // Non-tag letters get the same int32_t in spairinv across alphabets,
   // but tags may differ, so do those separately afterwards.
-  set<int> tags;
+  set<int32_t> tags;
   for(auto& it : basis.spairinv)
   {
     if(s == left) {

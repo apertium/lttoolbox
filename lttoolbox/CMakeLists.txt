@@ -57,7 +57,6 @@ if(WIN32)
 		win32/regex.c
 		win32/regex.h
 		win32/unistd.h
-		${CMAKE_SOURCE_DIR}/utf8/utf8_fwrap.h
 		${LIBLTTOOLBOX_SOURCES}
 		)
 	if(NOT VCPKG_TOOLCHAIN)

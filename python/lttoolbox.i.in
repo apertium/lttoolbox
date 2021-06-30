@@ -54,8 +54,9 @@ public:
 
   void lt_proc(int argc, char **argv, char *input_path, char *output_path)
   {
-    FILE* input = fopen(input_path, "r");
-    FILE* output = fopen(output_path, "w");
+    InputFile input;
+    input.open(input_path);
+    UFILE* output = u_fopen(output_path, "w", NULL, NULL);
     int cmd = 0;
     int c = 0;
     optind = 1;
@@ -103,8 +104,7 @@ public:
         break;
       }
 
-    fclose(input);
-    fclose(output);
+    u_fclose(output);
   }
 };
 

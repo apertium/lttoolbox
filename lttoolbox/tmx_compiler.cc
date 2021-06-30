@@ -19,37 +19,38 @@
 #include <lttoolbox/entry_token.h>
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/xml_parse_util.h>
-#include <lttoolbox/string_to_wostream.h>
 
 #include <cstdlib>
 #include <iostream>
 #include <libxml/encoding.h>
 
-#ifdef _WIN32
-#define swprintf _snwprintf
-#endif
-
 using namespace std;
 
-wstring const TMXCompiler::TMX_COMPILER_TMX_ELEM     = L"tmx";
-wstring const TMXCompiler::TMX_COMPILER_HEADER_ELEM  = L"header";
-wstring const TMXCompiler::TMX_COMPILER_BODY_ELEM    = L"body";
-wstring const TMXCompiler::TMX_COMPILER_TU_ELEM      = L"tu";
-wstring const TMXCompiler::TMX_COMPILER_TUV_ELEM     = L"tuv";
-wstring const TMXCompiler::TMX_COMPILER_HI_ELEM      = L"hi";
-wstring const TMXCompiler::TMX_COMPILER_PH_ELEM      = L"ph";
-wstring const TMXCompiler::TMX_COMPILER_XMLLANG_ATTR = L"xml:lang";
-wstring const TMXCompiler::TMX_COMPILER_LANG_ATTR    = L"lang";
-wstring const TMXCompiler::TMX_COMPILER_SEG_ELEM     = L"seg";
-wstring const TMXCompiler::TMX_COMPILER_PROP_ELEM    = L"prop";
+UString const TMXCompiler::TMX_COMPILER_TMX_ELEM     = "tmx"_u;
+UString const TMXCompiler::TMX_COMPILER_HEADER_ELEM  = "header"_u;
+UString const TMXCompiler::TMX_COMPILER_BODY_ELEM    = "body"_u;
+UString const TMXCompiler::TMX_COMPILER_TU_ELEM      = "tu"_u;
+UString const TMXCompiler::TMX_COMPILER_TUV_ELEM     = "tuv"_u;
+UString const TMXCompiler::TMX_COMPILER_HI_ELEM      = "hi"_u;
+UString const TMXCompiler::TMX_COMPILER_PH_ELEM      = "ph"_u;
+UString const TMXCompiler::TMX_COMPILER_XMLLANG_ATTR = "xml:lang"_u;
+UString const TMXCompiler::TMX_COMPILER_LANG_ATTR    = "lang"_u;
+UString const TMXCompiler::TMX_COMPILER_SEG_ELEM     = "seg"_u;
+UString const TMXCompiler::TMX_COMPILER_PROP_ELEM    = "prop"_u;
+UString const TMXCompiler::TMX_COMPILER_TEXT_NODE    = "#text"_u;
+UString const TMXCompiler::TMX_COMPILER_COMMENT_NODE = "#comment"_u;
+UString const TMXCompiler::TMX_COMPILER_NUMBER_TAG   = "<n>"_u;
+UString const TMXCompiler::TMX_COMPILER_BLANK_TAG    = "<b>"_u;
 
 TMXCompiler::TMXCompiler() :
 reader(0),
 default_weight(0.0000)
 {
   LtLocale::tryToSetLocale();
-  alphabet.includeSymbol(L"<n>"); // -1 -> numbers
-  alphabet.includeSymbol(L"<b>"); // -2 -> blanks
+  alphabet.includeSymbol(TMX_COMPILER_NUMBER_TAG); // -1 -> numbers
+  alphabet.includeSymbol(TMX_COMPILER_BLANK_TAG); // -2 -> blanks
+  number_tag = alphabet(TMX_COMPILER_NUMBER_TAG);
+  blank_tag = alphabet(TMX_COMPILER_BLANK_TAG);
 }
 
 TMXCompiler::~TMXCompiler()
@@ -57,14 +58,14 @@ TMXCompiler::~TMXCompiler()
 }
 
 void
-TMXCompiler::parse(string const &file, wstring const &lo, wstring const &lm)
+TMXCompiler::parse(string const &file, UString const &lo, UString const &lm)
 {
   origin_language = lo;
   meta_language = lm;
   reader = xmlReaderForFile(file.c_str(), NULL, 0);
   if(reader == NULL)
   {
-    wcerr << "Error: Cannot open '" << file << "'." << endl;
+    cerr << "Error: Cannot open '" << file << "'." << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -77,7 +78,7 @@ TMXCompiler::parse(string const &file, wstring const &lo, wstring const &lm)
 
   if(ret != 0)
   {
-    wcerr << L"Error: Parse error at the end of input." << endl;
+    cerr << "Error: Parse error at the end of input." << endl;
   }
 
   xmlFreeTextReader(reader);
@@ -88,12 +89,12 @@ TMXCompiler::parse(string const &file, wstring const &lo, wstring const &lm)
 }
 
 void
-TMXCompiler::requireEmptyError(wstring const &name)
+TMXCompiler::requireEmptyError(UString const &name)
 {
   if(!xmlTextReaderIsEmptyElement(reader))
   {
-    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << L"): Non-empty element '<" << name << L">' should be empty." << endl;
+    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    cerr << "): Non-empty element '<" << name << ">' should be empty." << endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -101,91 +102,91 @@ TMXCompiler::requireEmptyError(wstring const &name)
 bool
 TMXCompiler::allBlanks()
 {
-  bool flag = true;
-  wstring text = XMLParseUtil::towstring(xmlTextReaderConstValue(reader));
+  UString text = XMLParseUtil::readValue(reader);
 
   for(auto c : text)
   {
-    flag = flag && iswspace(c);
+    if (!u_isspace(c)) {
+      return false;
+    }
   }
-
-  return flag;
+  return true;
 }
 
 void
-TMXCompiler::skipBlanks(wstring &name)
+TMXCompiler::skipBlanks(UString &name)
 {
-  while(name == L"#text" || name == L"#comment")
+  while(name == TMX_COMPILER_TEXT_NODE || name == TMX_COMPILER_COMMENT_NODE)
   {
-    if(name != L"#comment")
+    if(name != TMX_COMPILER_COMMENT_NODE)
     {
       if(!allBlanks())
       {
-        wcerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        wcerr << "): Invalid construction." << endl;
+        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+        cerr << "): Invalid construction." << endl;
         exit(EXIT_FAILURE);
       }
     }
 
     xmlTextReaderRead(reader);
-    name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+    name = XMLParseUtil::readName(reader);
   }
 }
 
 void
-TMXCompiler::skip(wstring &name, wstring const &elem)
+TMXCompiler::skip(UString &name, UString const &elem)
 {
   xmlTextReaderRead(reader);
-  name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+  name = XMLParseUtil::readName(reader);
 
-  while(name == L"#text" || name == L"#comment")
+  while(name == TMX_COMPILER_TEXT_NODE || name == TMX_COMPILER_COMMENT_NODE)
   {
-    if(name != L"#comment")
+    if(name != TMX_COMPILER_COMMENT_NODE)
     {
       if(!allBlanks())
       {
-        wcerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        wcerr << "): Invalid construction." << endl;
+        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+        cerr << "): Invalid construction." << endl;
         exit(EXIT_FAILURE);
       }
     }
     xmlTextReaderRead(reader);
-    name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+    name = XMLParseUtil::readName(reader);
   }
 
   if(name != elem)
   {
-    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << L"): Expected '<" << elem << L">'." << endl;
+    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    cerr << "): Expected '<" << elem << ">'." << endl;
     exit(EXIT_FAILURE);
   }
 }
 
-wstring
-TMXCompiler::attrib(wstring const &name)
+UString
+TMXCompiler::attrib(UString const &name)
 {
   return XMLParseUtil::attrib(reader, name);
 }
 
 void
-TMXCompiler::requireAttribute(wstring const &value, wstring const &attrname,
-                           wstring const &elemname)
+TMXCompiler::requireAttribute(UString const &value, UString const &attrname,
+                           UString const &elemname)
 {
-  if(value == L"")
+  if(value.empty())
   {
-    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << L"): '<" << elemname;
-    wcerr << L"' element must specify non-void '";
-    wcerr << attrname << L"' attribute." << endl;
+    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    cerr << "): '<" << elemname;
+    cerr << "' element must specify non-void '";
+    cerr << attrname << "' attribute." << endl;
     exit(EXIT_FAILURE);
   }
 }
 
-wstring
+UString
 TMXCompiler::getTag(size_t const &val) const
 {
-  wchar_t cad[32];
-  swprintf(cad, 32, L"<%d>", val);
+  UChar cad[32];
+  u_snprintf(cad, 32, "<%d>", val);
   return cad;
 }
 
@@ -197,7 +198,7 @@ TMXCompiler::insertTU(vector<int> const &origin, vector<int> const &meta)
     return;
   }
 
-  if(origin[0] == alphabet(L"<b>") || meta[0] == alphabet(L"<b>"))
+  if(origin[0] == blank_tag || meta[0] == blank_tag)
   {
     return;
   }
@@ -273,12 +274,10 @@ TMXCompiler::align_blanks(vector<int> &o, vector<int> &m)
   vector<unsigned int> puntos;
   vector<int> resultado_o, resultado_m;
 
-  int const symbol = alphabet(L"<b>");
-
   vector<vector<int> > so, sm;
 
-  split(o, so, symbol);
-  split(m, sm, symbol);
+  split(o, so, blank_tag);
+  split(m, sm, blank_tag);
 
   if(so.size() == sm.size())
   {
@@ -288,8 +287,8 @@ TMXCompiler::align_blanks(vector<int> &o, vector<int> &m)
       trim(sm[i]);
       if(sm.size() - 1 != i)
       {
-        sm[i].push_back(L'(');
-        sm[i].push_back(L'#');
+        sm[i].push_back('(');
+        sm[i].push_back('#');
       }
     /*
       while(so[i].size() < sm[i].size())
@@ -301,8 +300,8 @@ TMXCompiler::align_blanks(vector<int> &o, vector<int> &m)
         sm[i].push_back(0);
       }*/
     }
-    o = join(so, L' ');
-    m = join(sm, L')');
+    o = join(so, ' ');
+    m = join(sm, ')');
   }
   else
   {
@@ -315,19 +314,19 @@ TMXCompiler::align_blanks(vector<int> &o, vector<int> &m)
       trim(sm[i]);
       if(sm.size() - 1 != i)
       {
-        sm[i].push_back(L'(');
-        sm[i].push_back(L'#');
+        sm[i].push_back('(');
+        sm[i].push_back('#');
       }
     }
-    o = join(so, L' ');
-    m = join(sm, L')');
+    o = join(so, ' ');
+    m = join(sm, ')');
   }
 }
 
 void
 TMXCompiler::procTU()
 {
-  wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+  UString name = XMLParseUtil::readName(reader);
   int type = xmlTextReaderNodeType(reader);
   vector<int> origin;
   vector<int> meta;
@@ -337,9 +336,8 @@ TMXCompiler::procTU()
   {
     if(name == TMX_COMPILER_TUV_ELEM && type != XML_READER_TYPE_END_ELEMENT)
     {
-      wstring l = attrib(TMX_COMPILER_XMLLANG_ATTR);
-      if(l == L"")
-      {
+      UString l = attrib(TMX_COMPILER_XMLLANG_ATTR);
+      if(l.empty()) {
         l = attrib(TMX_COMPILER_LANG_ATTR);
       }
 
@@ -360,57 +358,43 @@ TMXCompiler::procTU()
       while(name != TMX_COMPILER_TUV_ELEM || type != XML_READER_TYPE_END_ELEMENT)
       {
         xmlTextReaderRead(reader);
-        name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+        name = XMLParseUtil::readName(reader);
         type = xmlTextReaderNodeType(reader);
 
-        if(name == L"#text")
+        if(name == TMX_COMPILER_TEXT_NODE)
         {
-          wstring l = XMLParseUtil::towstring(xmlTextReaderConstValue(reader));
-          for(size_t i = 0, limit = l.size(); i != limit; i++)
-          {
-            ref->push_back(l[i]);
-          }
+          XMLParseUtil::readValueInto32(reader, *ref);
         }
         else if(name == TMX_COMPILER_HI_ELEM || name == TMX_COMPILER_PH_ELEM)
         {
           if(type != XML_READER_TYPE_END_ELEMENT)
           {
-            ref->push_back(alphabet(L"<b>"));
+            ref->push_back(blank_tag);
           }
         }
       }
     }
     xmlTextReaderRead(reader);
-    name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+    name = XMLParseUtil::readName(reader);
     type = xmlTextReaderNodeType(reader);
   }
 
   trim(origin);
   trim(meta);
-//  wcout << L"DESPUES DE TRIM\n";
-//  printvector(origin);
-//  printvector(meta);
 
   align(origin, meta);
-//  wcout << L"DESPUES DE ALIGN\n";
-//  printvector(origin);
-//  printvector(meta);
   align_blanks(origin, meta);
-//  wcout << L"DESPUES DE ALIGNBLANKS\n";
-//  printvector(origin);
-//  printvector(meta);
   insertTU(origin, meta);
 }
 
 void
 TMXCompiler::procNode()
 {
-  xmlChar const *xname = xmlTextReaderConstName(reader);
-  wstring name = XMLParseUtil::towstring(xname);
+  UString name = XMLParseUtil::readName(reader);
 
   // HACER: optimizar el orden de ejecución de esta ristra de "ifs"
 
-  if(name == L"#text")
+  if(name == TMX_COMPILER_TEXT_NODE)
   {
     /* ignorar */
   }
@@ -434,14 +418,14 @@ TMXCompiler::procNode()
   {
     procTU();
   }
-  else if(name== L"#comment")
+  else if(name== TMX_COMPILER_COMMENT_NODE)
   {
     /* ignorar */
   }
   else
   {
-    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << L"): Invalid node '<" << name << L">'." << endl;
+    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    cerr << "): Invalid node '<" << name << ">'." << endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -449,24 +433,24 @@ TMXCompiler::procNode()
 void
 TMXCompiler::write(FILE *output)
 {
-  fwrite(HEADER_LTTOOLBOX, 1, 4, output);
+  fwrite_unlocked(HEADER_LTTOOLBOX, 1, 4, output);
   uint64_t features = 0;
   write_le(output, features);
 
   // letters (empty to keep the file format)
-  Compression::wstring_write(L"", output);
+  Compression::multibyte_write(0, output);
 
   // symbols
   alphabet.write(output);
 
-  // transducers
+  // transducers (1, with empty name)
   Compression::multibyte_write(1, output); // keeping file format
-  Compression::wstring_write(L"", output); // keeping file format
+  Compression::multibyte_write(0, output); // keeping file format
   transducer.write(output);
 
-  wcout << origin_language << L"->" << meta_language << L" ";
-  wcout << transducer.size() << L" " << transducer.numberOfTransitions();
-  wcout << endl;
+  cout << origin_language << "->" << meta_language << " ";
+  cout << transducer.size() << " " << transducer.numberOfTransitions();
+  cout << endl;
 }
 
 void
@@ -474,7 +458,7 @@ TMXCompiler::trim(vector<int> &v) const
 {
   while(v.size() > 0)
   {
-    if(iswspace(v[v.size()-1]))
+    if(u_isspace(v[v.size()-1]))
     {
       v.pop_back();
     }
@@ -488,7 +472,7 @@ TMXCompiler::trim(vector<int> &v) const
   vector<int> aux;
   for(auto c : v)
   {
-    if(!iswspace(c) || !principio)
+    if(!u_isspace(c) || !principio)
     {
       principio = false;
       aux.push_back(c);
@@ -514,7 +498,7 @@ TMXCompiler::align(vector<int> &origin, vector<int> &meta)
       numbers_origin_start.push_back(i);
       numbers_origin_length.push_back(nl);
       i += nl-1;
-      modified_origin.push_back(alphabet(L"<n>"));
+      modified_origin.push_back(number_tag);
     }
     else
     {
@@ -536,16 +520,15 @@ TMXCompiler::align(vector<int> &origin, vector<int> &meta)
           if(vectorcmp(origin, numbers_origin_start[j],
                        meta, i, nl))
           {
-            modified_meta.push_back(L'@');
-            modified_meta.push_back(L'(');
-            wchar_t *valor = new wchar_t[8];
-            swprintf(valor, 8, L"%d", j+1);
-            for(int k = 0, limit3 = wcslen(valor); k != limit3; k++)
+            modified_meta.push_back('@');
+            modified_meta.push_back('(');
+            UChar valor[8]{};
+            int limit3 = u_snprintf(valor, 8, "%d", j+1);
+            for(int k = 0; k != limit3; k++)
             {
               modified_meta.push_back(valor[k]);
             }
-            delete[] valor;
-            modified_meta.push_back(L')');
+            modified_meta.push_back(')');
             i += nl-1;
             tocado = true;
             break;
@@ -582,7 +565,7 @@ TMXCompiler::numberLength(vector<int> &v, unsigned int const position) const
 {
   for(unsigned int i = position, limit = v.size(); i < limit; i++)
   {
-    if(!iswdigit(v[i]) && (v[i] != L'.' || i == position) && (v[i] != L',' || i == position))
+    if(!u_isdigit(v[i]) && (v[i] != '.' || i == position) && (v[i] != ',' || i == position))
     {
       if(i == position)
       {
@@ -593,7 +576,7 @@ TMXCompiler::numberLength(vector<int> &v, unsigned int const position) const
         while(i != position)
         {
           i--;
-          if(iswdigit(v[i]))
+          if(u_isdigit(v[i]))
           {
             return i - position + 1;
           }
@@ -607,7 +590,7 @@ TMXCompiler::numberLength(vector<int> &v, unsigned int const position) const
   while(i != position)
   {
     i--;
-    if(iswdigit(v[i]))
+    if(u_isdigit(v[i]))
     {
       return i - position + 1;
     }
@@ -634,34 +617,13 @@ TMXCompiler::vectorcmp(vector<int> const &orig, unsigned int const begin_orig,
 }
 
 void
-TMXCompiler::printvector(vector<int> const &v, wostream &os)
-{
-  for(unsigned int i = 0, limit = v.size(); i != limit; i++)
-  {
-    if(i != 0)
-    {
-      os << L" ";
-    }
-    if(v[i] > 31)
-    {
-      os << v[i] << L" ('" << wchar_t(v[i]) << L"')";
-    }
-    else
-    {
-      os << v[i];
-    }
-  }
-  os << endl;
-}
-
-void
-TMXCompiler::setOriginLanguageCode(wstring const &code)
+TMXCompiler::setOriginLanguageCode(UString const &code)
 {
   // nada
 }
 
 void
-TMXCompiler::setMetaLanguageCode(wstring const &code)
+TMXCompiler::setMetaLanguageCode(UString const &code)
 {
   // nada
 }

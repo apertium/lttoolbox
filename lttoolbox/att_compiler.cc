@@ -19,21 +19,24 @@
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
-#include <lttoolbox/string_to_wostream.h>
+#include <lttoolbox/string_utils.h>
 #include <algorithm>
 #include <stack>
+#include <unicode/uchar.h>
+#include <unicode/ustring.h>
+#include <utf8.h>
+#include <unicode/utf16.h>
 
 using namespace std;
+using namespace icu;
 
 AttCompiler::AttCompiler() :
 starting_state(0),
 default_weight(0.0000)
-{
-}
+{}
 
 AttCompiler::~AttCompiler()
-{
-}
+{}
 
 void
 AttCompiler::clear()
@@ -52,21 +55,24 @@ AttCompiler::clear()
  *       for conversion?
  */
 void
-AttCompiler::convert_hfst(wstring& symbol)
+AttCompiler::convert_hfst(UString& symbol)
 {
-  if (symbol == L"@0@" || symbol == L"ε")
-  {
-    symbol = L"";
-  }
-  else if (symbol == L"@_SPACE_@")
-  {
-    symbol = L" ";
+  if (symbol == Transducer::HFST_EPSILON_SYMBOL_SHORT ||
+      symbol == Transducer::HFST_EPSILON_SYMBOL_LONG ||
+      symbol == Transducer::LTTB_EPSILON_SYMBOL) {
+    symbol.clear();
+  } else if (symbol == Transducer::HFST_SPACE_SYMBOL) {
+    symbol = " "_u;
+  } else if (symbol == Transducer::HFST_TAB_SYMBOL) {
+    symbol = "\t"_u;
   }
 }
 
 bool
-AttCompiler::is_word_punct(wchar_t symbol)
+AttCompiler::is_word_punct(UChar32 symbol)
 {
+  // this version isn't quite right, but something like it should be possible
+  //return u_charType(symbol) & (U_NON_SPACING_MARK | U_ENCLOSING_MARK | U_COMBINING_SPACING_MARK);
   // https://en.wikipedia.org/wiki/Combining_character#Unicode_ranges
   if((symbol >= 0x0300 && symbol <= 0x036F) // Combining Diacritics
   || (symbol >= 0x1AB0 && symbol <= 0x1AFF) // ... Extended
@@ -90,115 +96,108 @@ AttCompiler::is_word_punct(wchar_t symbol)
  *         only) character otherwise.
  */
 int
-AttCompiler::symbol_code(const wstring& symbol)
+AttCompiler::symbol_code(const UString& symbol)
 {
-  if (symbol.length() > 1) {
+  if (u_strHasMoreChar32Than(symbol.c_str(), -1, 1)) {
     alphabet.includeSymbol(symbol);
     return alphabet(symbol);
-  } else if (symbol == L"") {
+  } else if (symbol.empty()) {
     return 0;
-  } else if ((iswpunct(symbol[0]) || iswspace(symbol[0])) && !is_word_punct(symbol[0])) {
-    return symbol[0];
   } else {
-    letters.insert(symbol[0]);
-    if(iswlower(symbol[0]))
-    {
-      letters.insert(towupper(symbol[0]));
+    UChar32 c;
+    U16_GET(symbol, 0, 0, symbol.size(), c);
+    if ((u_ispunct(c) || u_isspace(c)) && !is_word_punct(c)) {
+      return c;
+    } else {
+      letters.insert(c);
+      if(u_islower(c)) {
+        letters.insert(u_toupper(c));
+      } else if(u_isupper(c)) {
+        letters.insert(u_tolower(c));
+      }
+      return c;
     }
-    else if(iswupper(symbol[0]))
-    {
-      letters.insert(towlower(symbol[0]));
-    }
-    return symbol[0];
   }
-}
-
-bool
-AttCompiler::has_multiple_fsts(string const &file_name)
-{
-  wifstream infile(file_name.c_str());  // TODO: error checking
-  wstring line;
-
-  while(getline(infile, line)){
-    if (line.find('-') == 0)
-      return true;
-  }
-
-  return false;
 }
 
 void
-AttCompiler::parse(string const &file_name, wstring const &dir)
+AttCompiler::parse(string const &file_name, bool read_rl)
 {
   clear();
 
-  wifstream infile(file_name.c_str());  // TODO: error checking
-  vector<wstring> tokens;
-  wstring line;
-  bool first_line_in_fst = true;       // First line -- see below
-  int state_id_offset = 0;
-  int largest_seen_state_id = 0;
-
-  if (has_multiple_fsts(file_name)){
-    wcerr << "Warning: Multiple fsts in '" << file_name << "' will be disjuncted." << endl;
-
-    // Set the starting state to 0 (Epsilon transtions will be added later)
-    starting_state = 0;
-    state_id_offset = 1;
+  UFILE* infile = u_fopen(file_name.c_str(), "r", NULL, NULL);
+  if (infile == NULL) {
+    cerr << "Error: unable to open '" << file_name << "' for reading." << endl;
   }
+  vector<UString> tokens;
+  bool first_line_in_fst = true;       // First line -- see below
+  bool multiple_transducers = false;
+  int state_id_offset = 1;
+  int largest_seen_state_id = 0;
+  int line_number = 0;
 
-  while (getline(infile, line))
+  while (!u_feof(infile))
   {
+    line_number++;
     tokens.clear();
+    tokens.push_back(""_u);
+    do {
+      UChar c = u_fgetc(infile);
+      if (c == '\n') {
+        break;
+      } else if (c == '\t') {
+        tokens.push_back(""_u);
+      } else {
+        tokens.back() += c;
+      }
+    } while (!u_feof(infile));
+
     int from, to;
-    wstring upper, lower;
+    UString upper, lower;
     double weight;
 
-    if (line.length() == 0 && first_line_in_fst)
+    if (tokens[0].length() == 0 && first_line_in_fst)
     {
-      wcerr << "Error: empty file '" << file_name << "'." << endl;
+      cerr << "Error: empty file '" << file_name << "'." << endl;
       exit(EXIT_FAILURE);
     }
-    if (first_line_in_fst && line.find(L"\t") == wstring::npos)
+    if (first_line_in_fst && tokens.size() == 1)
     {
-      wcerr << "Error: invalid format '" << file_name << "'." << endl;
+      cerr << "Error: invalid format in file '" << file_name << "' on line " << line_number << "." << endl;
       exit(EXIT_FAILURE);
     }
 
     /* Empty line. */
-    if (line.length() == 0)
+    if (tokens.size() == 1 && tokens[0].length() == 0)
     {
       continue;
     }
-    split(line, L'\t', tokens);
 
     if (tokens[0].find('-') == 0)
     {
+      if (state_id_offset == 1) {
+        // this is the first split we've seen
+        cerr << "Warning: Multiple fsts in '" << file_name << "' will be disjuncted." << endl;
+        multiple_transducers = true;
+      }
       // Update the offset for the new FST
       state_id_offset = largest_seen_state_id + 1;
       first_line_in_fst = true;
       continue;
     }
 
-    from = stoi(tokens[0]) + state_id_offset;
+    from = StringUtils::stoi(tokens[0]) + state_id_offset;
     largest_seen_state_id = max(largest_seen_state_id, from);
 
     AttNode* source = get_node(from);
     /* First line: the initial state is of both types. */
     if (first_line_in_fst)
     {
-      // If the file has a single FST - No need for state id mapping
-      if (state_id_offset == 0)
-        starting_state = from;
-      else{
-        AttNode * starting_node = get_node(starting_state);
+      AttNode * starting_node = get_node(starting_state);
 
-        // Add an Epsilon transition from the new starting state
-        starting_node->transductions.push_back(
-          Transduction(from, L"", L"",
-            alphabet(symbol_code(L""), symbol_code(L"")),
-            default_weight));
-      }
+      // Add an Epsilon transition from the new starting state
+      starting_node->transductions.push_back(
+                     Transduction(from, ""_u, ""_u, 0, default_weight));
       first_line_in_fst = false;
     }
 
@@ -207,7 +206,7 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
     {
       if (tokens.size() > 1)
       {
-        weight = stod(tokens[1]);
+        weight = StringUtils::stod(tokens[1]);
       }
       else
       {
@@ -217,9 +216,9 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
     }
     else
     {
-      to = stoi(tokens[1]) + state_id_offset;
+      to = StringUtils::stoi(tokens[1]) + state_id_offset;
       largest_seen_state_id = max(largest_seen_state_id, to);
-      if(dir == L"RL")
+      if(read_rl)
       {
         upper = tokens[3];
         lower = tokens[2];
@@ -234,7 +233,7 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
       int tag = alphabet(symbol_code(upper), symbol_code(lower));
       if(tokens.size() > 4)
       {
-        weight = stod(tokens[4]);
+        weight = StringUtils::stod(tokens[4]);
       }
       else
       {
@@ -247,12 +246,19 @@ AttCompiler::parse(string const &file_name, wstring const &dir)
     }
   }
 
+  if (!multiple_transducers) {
+    starting_state = 1;
+    // if we aren't disjuncting multiple transducers
+    // then we have an extra epsilon transduction at the beginning
+    // so skip it
+  }
+
   /* Classify the nodes of the graph. */
   classify_forwards();
   set<int> path;
   classify_backwards(starting_state, path);
 
-  infile.close();
+  u_fclose(infile);
 }
 
 /** Extracts the sub-transducer made of states of type @p type. */
@@ -268,27 +274,27 @@ AttCompiler::extract_transducer(TransducerType type)
   _extract_transducer(type, starting_state, transducer, corr, visited);
 
   /* The final states. */
-  bool noFinals = true;
+  //bool noFinals = true;
   for (auto& f : finals)
   {
     if (corr.find(f.first) != corr.end())
     {
       transducer.setFinal(corr[f.first], f.second);
-      noFinals = false;
+      //noFinals = false;
     }
   }
 
 /*
   if(noFinals)
   {
-    wcerr << L"No final states (" << type << ")" << endl;
-    wcerr << L"  were:" << endl;
-    wcerr << L"\t" ;
+    cerr << "No final states (" << type << ")" << endl;
+    cerr << "  were:" << endl;
+    cerr << "\t" ;
     for (auto& f : finals)
     {
-      wcerr << f.first << L" ";
+      cerr << f.first << " ";
     }
-    wcerr << endl;
+    cerr << endl;
   }
 */
   return transducer;
@@ -353,11 +359,12 @@ AttCompiler::_extract_transducer(TransducerType type, int from,
 void
 AttCompiler::classify_single_transition(Transduction& t)
 {
-  if (t.upper.length() == 1) {
-    if (letters.find(t.upper[0]) != letters.end()) {
+  int32_t sym = alphabet.decode(t.tag).first;
+  if (sym > 0) {
+    if (letters.find(sym) != letters.end()) {
       t.type |= WORD;
     }
-    if (iswpunct(t.upper[0])) {
+    if (u_ispunct(sym)) {
       t.type |= PUNCT;
     }
   }
@@ -380,10 +387,10 @@ AttCompiler::classify_forwards()
     for(auto& t1 : n1->transductions) {
       AttNode* n2 = get_node(t1.to);
       for(auto& t2 : n2->transductions) {
-	t2.type |= t1.type;
+        t2.type |= t1.type;
       }
       if(done.find(t1.to) == done.end()) {
-	todo.push(t1.to);
+        todo.push(t1.to);
       }
     }
     done.insert(next);
@@ -400,7 +407,7 @@ TransducerType
 AttCompiler::classify_backwards(int state, set<int>& path)
 {
   if(finals.find(state) != finals.end()) {
-    wcerr << L"ERROR: Transducer contains epsilon transition to a final state. Aborting." << endl;
+    cerr << "ERROR: Transducer contains epsilon transition to a final state. Aborting." << endl;
     exit(EXIT_FAILURE);
   }
   AttNode* node = get_node(state);
@@ -409,7 +416,7 @@ AttCompiler::classify_backwards(int state, set<int>& path)
     if(t1.type != UNDECIDED) {
       type |= t1.type;
     } else if(path.find(t1.to) != path.end()) {
-      wcerr << L"ERROR: Transducer contains initial epsilon loop. Aborting." << endl;
+      cerr << "ERROR: Transducer contains initial epsilon loop. Aborting." << endl;
       exit(EXIT_FAILURE);
     } else {
       path.insert(t1.to);
@@ -429,14 +436,14 @@ void
 AttCompiler::write(FILE *output)
 {
 //  FILE* output = fopen(file_name, "wb");
-  fwrite(HEADER_LTTOOLBOX, 1, 4, output);
+  fwrite_unlocked(HEADER_LTTOOLBOX, 1, 4, output);
   uint64_t features = 0;
   write_le(output, features);
 
   Transducer punct_fst = extract_transducer(PUNCT);
 
   /* Non-multichar symbols. */
-  Compression::wstring_write(wstring(letters.begin(), letters.end()), output);
+  Compression::string_write(UString(letters.begin(), letters.end()), output);
   /* Multichar symbols. */
   alphabet.write(output);
   /* And now the FST. */
@@ -448,17 +455,17 @@ AttCompiler::write(FILE *output)
   {
     Compression::multibyte_write(2, output);
   }
-  Compression::wstring_write(L"main@standard", output);
+  Compression::string_write("main@standard"_u, output);
   Transducer word_fst = extract_transducer(WORD);
   word_fst.write(output);
-  wcout << L"main@standard" << " " << word_fst.size();
-  wcout << " " << word_fst.numberOfTransitions() << endl;
-  Compression::wstring_write(L"final@inconditional", output);
+  cout << "main@standard" << " " << word_fst.size();
+  cout << " " << word_fst.numberOfTransitions() << endl;
+  Compression::string_write("final@inconditional"_u, output);
   if(punct_fst.numberOfTransitions() != 0)
   {
     punct_fst.write(output);
-    wcout << L"final@inconditional" << " " << punct_fst.size();
-    wcout << " " << punct_fst.numberOfTransitions() << endl;
+    cout << "final@inconditional" << " " << punct_fst.size();
+    cout << " " << punct_fst.numberOfTransitions() << endl;
   }
 //  fclose(output);
 }

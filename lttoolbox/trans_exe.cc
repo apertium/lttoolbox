@@ -18,6 +18,7 @@
 #include <lttoolbox/trans_exe.h>
 #include <lttoolbox/compression.h>
 #include <lttoolbox/my_stdio.h>
+#include <cstring>
 
 TransExe::TransExe():
 initial_id(0),
@@ -70,7 +71,7 @@ TransExe::read(FILE *input, Alphabet const &alphabet)
   fpos_t pos;
   if (fgetpos(input, &pos) == 0) {
       char header[4]{};
-      fread(header, 1, 4, input);
+      fread_unlocked(header, 1, 4, input);
       if (strncmp(header, HEADER_TRANSDUCER, 4) == 0) {
           auto features = read_le<uint64_t>(input);
           if (features >= TDF_UNKNOWN) {

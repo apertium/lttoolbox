@@ -45,29 +45,29 @@ private:
 
   void copy(PatternList const &o);
   void destroy();
-  void insertOutOfSequence(wstring const &lemma, wstring const &tags,
+  void insertOutOfSequence(UString const &lemma, UString const &tags,
                            vector<int> &result);
-  void insertIntoSequence(int const id, wstring const &lemma,
-                          wstring const &tags);
+  void insertIntoSequence(int const id, UString const &lemma,
+                          UString const &tags);
 
-  static int tagCount(wstring const &tags);
-  static wstring tagAt(wstring const &tags, int const index);
+  static int tagCount(UString const &tags);
+  static UString tagAt(UString const &tags, int const index);
 
 public:
   /**
    * This symbol stands for any char
    */
-  static wstring const ANY_CHAR;
+  static UString const ANY_CHAR;
 
   /**
    * This symbol stands for any tag
    */
-  static wstring const ANY_TAG;
+  static UString const ANY_TAG;
 
   /**
    * This symbol marks a word queue
    */
-  static wstring const QUEUE;
+  static UString const QUEUE;
 
   /**
    * Constructor
@@ -106,7 +106,7 @@ public:
    * @param lemma
    * @param tags
    */
-  void insert(int const id, wstring const &lemma, wstring const &tags);
+  void insert(int const id, UString const &lemma, UString const &tags);
 
   /**
    * Insertion method
