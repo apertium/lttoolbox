@@ -21,6 +21,7 @@
 #include <unicode/ustdio.h>
 #include <cstring>
 #include <iostream>
+#include <lttoolbox/my_stdio.h>
 
 InputFile::InputFile()
   : infile(stdin), buffer_size(0)
