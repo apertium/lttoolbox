@@ -36,7 +36,7 @@ UString to_ustring(const uint8_t* str);
 void ustring_to_vec32(const UString& str, std::vector<int32_t>& vec);
 
 inline std::ostream&
-operator<<(std::ostream& ostr, UChar c)
+operator<<(std::ostream& ostr, char16_t c)
 {
   ostr << std::hex << static_cast<uint16_t>(c);
   return ostr;
