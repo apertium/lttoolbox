@@ -23,6 +23,7 @@
 #include <utf8.h>
 #include <vector>
 #include <cstdint>
+#include <ios>
 
 typedef std::basic_string<UChar> UString;
 

@@ -15,7 +15,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 #include <lttoolbox/compression.h>
-#include <lttoolbox/my_stdio.h>
 
 #include <cstdlib>
 #include <cmath>

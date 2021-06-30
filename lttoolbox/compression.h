@@ -22,6 +22,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <lttoolbox/ustring.h>
+#include <lttoolbox/my_stdio.h>
 
 using namespace std;
 
