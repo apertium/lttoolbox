@@ -81,26 +81,29 @@ InputFile::internal_read()
     ubuffer[buffer_size++] = U_EOF;
     return;
   }
-  int i = 1;
-  cbuffer[0] = fgetc_unlocked(infile);
-  if (cbuffer[0] == EOF) {
+
+  int first = fgetc_unlocked(infile);
+  if (first == EOF) {
     ubuffer[buffer_size++] = U_EOF;
     return;
-  } else if (cbuffer[0] == '\0') {
+  } else if (first == '\0') {
     ubuffer[buffer_size++] = '\0';
     return;
   }
-  if ((cbuffer[0] & 0xF0) == 0xF0) {
+
+  int i = 1;
+  cbuffer[0] = static_cast<char>(first);
+  if ((first & 0xF0) == 0xF0) {
     i += 3;
     if (fread_unlocked(cbuffer+1, 1, 3, infile) != 3) {
       throw std::runtime_error("Could not read 3 expected bytes from stream");
     }
-  } else if ((cbuffer[0] & 0xE0) == 0xE0) {
+  } else if ((first & 0xE0) == 0xE0) {
     i += 2;
     if (fread_unlocked(cbuffer+1, 1, 2, infile) != 2) {
       throw std::runtime_error("Could not read 2 expected bytes from stream");
     }
-  } else if ((cbuffer[0] & 0xC0) == 0xC0) {
+  } else if ((first & 0xC0) == 0xC0) {
     i += 1;
     if (fread_unlocked(cbuffer+1, 1, 1, infile) != 1) {
       throw std::runtime_error("Could not read 1 expected byte from stream");
