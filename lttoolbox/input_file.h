@@ -49,6 +49,10 @@ public:
   // assumes [[ has already been read, reads to ]]
   // returns entire string, including brackets
   UString finishWBlank();
+  // read until ^ or \0
+  // if readwblank == false, also stop at [[
+  // Note: relies on the fact that ubuffer has length >= 2
+  UString readBlank(bool readwblank = false);
 };
 
 #endif

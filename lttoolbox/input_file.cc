@@ -197,3 +197,41 @@ InputFile::finishWBlank()
   }
   return ret;
 }
+
+UString
+InputFile::readBlank(bool readwblank)
+{
+  UString ret;
+  while (!eof()) {
+    UChar32 c = get();
+    if (c == '^' || c == '\0' || c == U_EOF) {
+      unget(c);
+      break;
+    } else if (c == '[') {
+      UChar32 c2 = get();
+      if (c2 == '[') {
+        if (readwblank) {
+          ret += finishWBlank();
+        } else {
+          // buffer size is 3, so we should be ok here
+          unget(c2);
+          unget(c);
+          break;
+        }
+      } else {
+        unget(c2);
+        ret += readBlock(c2, ']');
+      }
+    } else {
+      ret += c;
+      if (c == '\\') {
+        if (eof() || peek() == '\0') {
+          std::cerr << "Unexpected trailing backslash" << std::endl;
+          exit(EXIT_FAILURE);
+        }
+        ret += get();
+      }
+    }
+  }
+  return ret;
+}
