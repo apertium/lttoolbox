@@ -220,7 +220,7 @@ InputFile::readBlank(bool readwblank)
         }
       } else {
         unget(c2);
-        ret += readBlock(c2, ']');
+        ret += readBlock(c, ']');
       }
     } else {
       ret += c;
