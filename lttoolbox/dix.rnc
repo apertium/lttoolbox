@@ -65,7 +65,8 @@ attlist.e &=
   attribute alt { text }?,
   attribute v { text }?,
   attribute vl { text }?,
-  attribute vr { text }?
+  attribute vr { text }?,
+  attribute w { text }?
 # r: restriction LR: left-to-right,
 # RL: right-to-left
 
