@@ -657,6 +657,101 @@ Transducer::read(FILE *input, int const decalage)
 }
 
 void
+Transducer::read_mmap(FILE* in, Alphabet& alpha)
+{
+  read_le<uint64_t>(in); // total size
+  initial = read_le<uint64_t>(in);
+  uint64_t state_count = read_le<uint64_t>(in);
+  uint64_t final_count = read_le<uint64_t>(in);
+  uint64_t trans_count = read_le<uint64_t>(in);
+
+  if (transitions.size() > state_count) {
+    transitions.clear();
+    // if transitions.size() <= state_count, they'll get cleared
+    // when we read in the offsets, so don't bother here
+  }
+  finals.clear();
+
+  for (uint64_t i = 0; i < final_count; i++) {
+    uint64_t s = read_le<uint64_t>(in);
+    uint64_t w = read_le<uint64_t>(in);
+    finals.insert(make_pair(s, *reinterpret_cast<double*>(&w)));
+  }
+
+  vector<uint64_t> offsets;
+  offsets.reserve(state_count);
+  for (uint64_t i = 0; i < state_count; i++) {
+    transitions[i].clear();
+    offsets.push_back(read_le<uint64_t>(in));
+  }
+  offsets.push_back(0);
+
+  uint64_t state = 0;
+  for (uint64_t i = 0; i < trans_count; i++) {
+    if (i == offsets[state+1]) {
+      state++;
+    }
+    uint64_t isym = read_le<uint64_t>(in);
+    uint64_t osym = read_le<uint64_t>(in);
+    int32_t sym = alpha((int32_t)isym, (int32_t)osym);
+    uint64_t dest = read_le<uint64_t>(in);
+    uint64_t wght = read_le<uint64_t>(in);
+    transitions[state].insert(make_pair(sym, make_pair(dest, wght)));
+  }
+}
+
+void
+Transducer::write_mmap(FILE* out, const Alphabet& alpha)
+{
+  fwrite_unlocked(HEADER_TRANSDUCER, 1, 4, out);
+  uint64_t features = 0;
+  features |= TDF_WEIGHTS;
+  features |= TDF_MMAP;
+  write_le(out, features);
+
+  uint64_t tr_count = 0;
+  vector<uint64_t> offsets;
+  offsets.reserve(transitions.size());
+  for (auto& it : transitions) {
+    offsets.push_back(tr_count);
+    tr_count += it.second.size();
+  }
+
+  // TODO: which things should be smaller than u64?
+
+  uint64_t total_size =
+    ( transitions.size() +  // offset of each state
+      (tr_count * 4) +      // each transition
+      (finals.size() * 2) + // final states
+      4 );                  // initial state + length of each section
+
+  write_le(out, total_size*8);       // number of bytes after this
+  write_le(out, initial);            // initial state
+  write_le(out, transitions.size()); // number of states
+  write_le(out, finals.size());      // number of finals
+  write_le(out, tr_count);           // number of transitions
+
+  for (auto& it : finals) {
+    write_le(out, it.first);
+    write_le(out, *reinterpret_cast<uint64_t*>(&it.second));
+  }
+
+  for (auto& it : offsets) {
+    write_le(out, it);
+  }
+
+  for (auto& it : transitions) {
+    for (auto& it2 : it.second) {
+      auto sym = alpha.decode(it2.first);
+      write_le(out, sym.first); // input symbol
+      write_le(out, sym.second); // output symbol
+      write_le(out, it2.second.first); // destination
+      write_le(out, *reinterpret_cast<uint64_t*>(&it2.second.second)); // weight
+    }
+  }
+}
+
+void
 Transducer::serialise(std::ostream &serialised) const
 {
   Serialiser<int>::serialise(initial, serialised);

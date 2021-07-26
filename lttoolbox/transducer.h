@@ -340,6 +340,9 @@ public:
    */
   void read(FILE *input, int const decalage = 0);
 
+  void read_mmap(FILE* input, Alphabet& alpha);
+  void write_mmap(FILE* output, const Alphabet& alpha);
+
   void serialise(std::ostream &serialised) const;
   void deserialise(std::istream &serialised);
 
