@@ -24,8 +24,10 @@
 #include <vector>
 #include <cstdint>
 #include <iomanip>
+#include <string_view>
 
 typedef std::basic_string<UChar> UString;
+typedef std::basic_string_view<UChar> UString_view;
 
 void write(const UString& str, UFILE* output);
 
@@ -43,7 +45,7 @@ operator<<(std::ostream& ostr, char16_t c)
 }
 
 inline std::ostream&
-operator<<(std::ostream& ostr, const UString& str)
+operator<<(std::ostream& ostr, UString_view str)
 {
   std::string res;
   utf8::utf16to8(str.begin(), str.end(), std::back_inserter(res));
