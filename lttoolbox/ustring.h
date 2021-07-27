@@ -24,7 +24,7 @@
 #include <vector>
 #include <cstdint>
 #include <iomanip>
-#include <string_view>
+#include <lttoolbox/string_view.h>
 
 typedef std::basic_string<UChar> UString;
 typedef std::basic_string_view<UChar> UString_view;
