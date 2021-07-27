@@ -7,8 +7,8 @@ from sys import platform
 from distutils.core import Extension, setup
 import shlex
 
-compile_args = '@CXXFLAGS@'.split() + shlex.split('@DEFS@') + '@LIBXML_CFLAGS@'.split()
-link_args = []
+compile_args = '@CXXFLAGS@'.split() + shlex.split('@DEFS@') + '@LIBXML_CFLAGS@'.split() + '@ICU_CFLAGS@'.split()
+link_args = '@LIBS@'.split() + '@ICU_LIBS@'.split()
 if platform == 'darwin':
 	compile_args += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
 	link_args.append('-mmacosx-version-min=10.7')
