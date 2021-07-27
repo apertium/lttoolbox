@@ -3,36 +3,26 @@
 """
 Setup for SWIG Python bindings for lttoolbox
 """
-from os import path
+from sys import platform
 from distutils.core import Extension, setup
-from distutils.command.build import build
+import shlex
 
-
-class CustomBuild(build):
-    sub_commands = [
-        ('build_ext', build.has_ext_modules),
-        ('build_py', build.has_pure_modules),
-        ('build_clib', build.has_c_libraries),
-        ('build_scripts', build.has_scripts),
-    ]
-
-
-def get_sources():
-    sources = ['lttoolbox.i']
-    cc_sources = ['alphabet.cc', 'compression.cc', 'fst_processor.cc', 'lt_locale.cc',
-                  'node.cc', 'state.cc', 'trans_exe.cc', 'xml_parse_util.cc']
-    rel_path = '@top_srcdir@/lttoolbox/'
-    sources.extend(path.join(rel_path, f) for f in cc_sources)
-    return sources
+compile_args = ['-std=c++0x'] + shlex.split('@DEFS@') + '@LIBXML_CFLAGS@'.split()
+link_args = ['-lxml2']
+if platform == 'darwin':
+	compile_args += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
+	link_args.append('-mmacosx-version-min=10.7')
 
 lttoolbox_module = Extension(
     name='_lttoolbox',
-    sources=get_sources(),
+	language = 'c++',
+    sources=['lttoolbox.i'],
     swig_opts = ["-c++", "-I@top_srcdir@", "-Wall"],
-    include_dirs=['@top_srcdir@', '/usr/include/libxml2'],
-    library_dirs=['/usr/include/libxml2'],
-    extra_compile_args='@CXXFLAGS@'.split(),
-    extra_link_args=['-lxml2'],
+    include_dirs=['@top_srcdir@', '@top_srcdir@/lttoolbox'],
+    library_dirs=['@top_srcdir@/lttoolbox/.libs'],
+	libraries = ['lttoolbox'],
+    extra_compile_args = compile_args,
+    extra_link_args = link_args
 )
 
 setup(
@@ -44,7 +34,8 @@ setup(
     author_email='@PACKAGE_BUGREPORT@',
     license='GPL-3.0+',
     maintainer_email='@PACKAGE_BUGREPORT@',
-    cmdclass={'build': CustomBuild},
     ext_modules=[lttoolbox_module],
     py_modules=['lttoolbox'],
+#	packages = ['lttoolbox'],
+	data_files = []
 )
