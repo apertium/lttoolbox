@@ -7,7 +7,7 @@ from sys import platform
 from distutils.core import Extension, setup
 import shlex
 
-compile_args = ['-std=c++0x'] + shlex.split('@DEFS@') + '@LIBXML_CFLAGS@'.split()
+compile_args = '@CXXFLAGS@'.split() + shlex.split('@DEFS@') + '@LIBXML_CFLAGS@'.split()
 link_args = ['-lxml2']
 if platform == 'darwin':
 	compile_args += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
@@ -20,7 +20,7 @@ lttoolbox_module = Extension(
     swig_opts = ["-c++", "-I@top_srcdir@", "-Wall"],
     include_dirs=['@top_srcdir@', '@top_srcdir@/lttoolbox'],
     library_dirs=['@top_srcdir@/lttoolbox/.libs'],
-	libraries = ['lttoolbox'],
+	libraries = ['lttoolbox@VERSION_MAJOR@'],
     extra_compile_args = compile_args,
     extra_link_args = link_args
 )
@@ -36,6 +36,5 @@ setup(
     maintainer_email='@PACKAGE_BUGREPORT@',
     ext_modules=[lttoolbox_module],
     py_modules=['lttoolbox'],
-#	packages = ['lttoolbox'],
 	data_files = []
 )
