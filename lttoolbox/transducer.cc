@@ -741,12 +741,23 @@ Transducer::write_mmap(FILE* out, const Alphabet& alpha)
   }
 
   for (auto& it : transitions) {
+    // we want to make sure the transitions are sorted by input symbol
+    map<int, set<int>> symbols;
     for (auto& it2 : it.second) {
-      auto sym = alpha.decode(it2.first);
-      write_le(out, sym.first); // input symbol
-      write_le(out, sym.second); // output symbol
-      write_le(out, it2.second.first); // destination
-      write_le(out, *reinterpret_cast<uint64_t*>(&it2.second.second)); // weight
+      symbols[alpha.decode(it2.first).first].insert(it2.first);
+    }
+    for (auto& s_in : symbols) {
+      for (auto& s : s_in.second) {
+        auto range = it.second.equal_range(s);
+        for (auto tr = range.first; tr != range.second; ++tr) {
+          auto sym = alpha.decode(tr->first);
+          write_le(out, sym.first); // input symbol
+          write_le(out, sym.second); // output symbol
+          write_le(out, tr->second.first); // destination
+          uint64_t w = *reinterpret_cast<uint64_t*>(&tr->second.second);
+          write_le(out, w); // weight
+        }
+      }
     }
   }
 }
