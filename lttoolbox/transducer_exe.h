@@ -33,7 +33,12 @@ struct Final {
   double weight;
 };
 
+class MatchState2;
+class TransState;
+
 class TransducerExe {
+  friend MatchState2;
+  friend TransState;
 private:
   uint64_t initial;
   uint64_t state_count;
@@ -42,6 +47,9 @@ private:
   Final* finals;
   uint64_t* offsets;
   Transition* transitions;
+
+  void get_range(const uint64_t state, const int32_t sym,
+                 uint64_t& start, uint64_t& end);
 public:
   TransducerExe();
   ~TransducerExe();

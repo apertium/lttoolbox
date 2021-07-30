@@ -1,0 +1,138 @@
+/*
+ * Copyright (C) 2021 Apertium
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include <lttoolbox/match_state2.h>
+
+#include <climits>
+
+MatchState2::MatchState2(TransducerExe* t) :
+  trans(t)
+{
+  buffer[0] = trans->initial;
+  last = 1;
+}
+
+MatchState2::~MatchState2()
+{}
+
+void
+MatchState2::copy(const MatchState2& o)
+{
+  trans = o.trans;
+  first = o.first;
+  last = o.last;
+  for (uint16_t i = first; i != last; i = (i + 1) % BUF_LIMIT) {
+    buffer[i] = o.buffer[i];
+  }
+}
+
+MatchState2::MatchState2(const MatchState2& o)
+{
+  copy(o);
+}
+
+MatchState2&
+MatchState2::operator=(const MatchState2& o)
+{
+  if (this != &o) {
+    copy(o);
+  }
+  return *this;
+}
+
+uint16_t
+MatchState2::size() const
+{
+  return (last + BUF_LIMIT - first) % BUF_LIMIT;
+}
+
+bool
+MatchState2::empty() const
+{
+  return last == first;
+}
+
+void
+MatchState2::applySymbol(const uint64_t state, const int32_t symbol)
+{
+  uint64_t start = 0;
+  uint64_t end = 0;
+  trans->get_range(state, symbol, start, end);
+  for (uint64_t i = start; i < end; i++) {
+    buffer[last] = trans->transitions[i].dest;
+    last = (last + 1) % BUF_LIMIT;
+  }
+}
+
+void
+MatchState2::step(const int32_t input)
+{
+  uint16_t temp_last = last;
+  for (uint16_t i = first; i != temp_last; i = (i+1)%BUF_LIMIT) {
+    applySymbol(buffer[i], input);
+  }
+  first = temp_last;
+}
+
+void
+MatchState2::step(const int32_t input, const int32_t alt)
+{
+  uint16_t temp_last = last;
+  for (uint16_t i = first; i != temp_last; i = (i+1)%BUF_LIMIT) {
+    applySymbol(buffer[i], input);
+    applySymbol(buffer[i], alt);
+  }
+  first = temp_last;
+}
+
+void
+MatchState2::step(UString_view input, const Alphabet& alpha, bool foldcase)
+{
+  // TODO
+}
+
+int
+MatchState2::classifyFinals(const std::map<uint64_t, int>& finals,
+                            const std::set<int>& banned_rules) const
+{
+  int ret = INT_MAX;
+  for (uint16_t i = first; i != last; i = (i+1)%BUF_LIMIT) {
+    auto it = finals.find(buffer[i]);
+    if (it != finals.end()) {
+      if (it->second < ret &&
+          banned_rules.find(it->second) == banned_rules.end()) {
+        ret = it->second;
+      }
+    }
+  }
+  return (ret < INT_MAX) ? ret : -1;
+}
+
+int
+MatchState2::classifyFinals(const std::map<uint64_t, int>& finals) const
+{
+  set<int> empty;
+  return classifyFinals(finals, empty);
+}
+
+void
+MatchState2::clear()
+{
+  first = 0;
+  last = 1;
+  buffer[0] = trans->initial;
+}

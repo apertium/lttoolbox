@@ -142,3 +142,43 @@ TransducerExe::read(FILE* input, Alphabet& alphabet)
     }
   }
 }
+
+void
+TransducerExe::get_range(const uint64_t state, const int32_t symbol,
+                         uint64_t& start, uint64_t& end)
+{
+  uint64_t l = offsets[state];
+  uint64_t r = offsets[state+1];
+  uint64_t m;
+  if (l == r) {
+    start = end = 0;
+    return;
+  }
+  while (l < r) {
+    m = (l + r) / 2;
+    if (transitions[m].isym < symbol) {
+      l = m + 1;
+    } else {
+      r = m;
+    }
+  }
+  if (transitions[l].isym != symbol) {
+    end = start = 0;
+    return;
+  } else {
+    start = l;
+  }
+  // there's probably a way to do this with 1 loop
+  // but I'd have to be very sure of what I was doing to write that loop -DGS
+  l = start;
+  r = offsets[state+1];
+  while (l < r) {
+    m = (l + r) / 2;
+    if (transitions[m].isym < symbol) {
+      r = m;
+    } else {
+      l = m + 1;
+    }
+  }
+  end = l;
+}
