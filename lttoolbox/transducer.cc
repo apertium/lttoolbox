@@ -674,8 +674,8 @@ Transducer::read_mmap(FILE* in, Alphabet& alpha)
 
   for (uint64_t i = 0; i < final_count; i++) {
     uint64_t s = read_le<uint64_t>(in);
-    uint64_t w = read_le<uint64_t>(in);
-    finals.insert(make_pair(s, *reinterpret_cast<double*>(&w)));
+    double w = read_double_le(in);
+    finals.insert(make_pair(s, w));
   }
 
   vector<uint64_t> offsets;
@@ -695,7 +695,7 @@ Transducer::read_mmap(FILE* in, Alphabet& alpha)
     uint64_t osym = read_le<uint64_t>(in);
     int32_t sym = alpha((int32_t)isym, (int32_t)osym);
     uint64_t dest = read_le<uint64_t>(in);
-    uint64_t wght = read_le<uint64_t>(in);
+    double wght = read_double_le(in);
     transitions[state].insert(make_pair(sym, make_pair(dest, wght)));
   }
 }
@@ -754,8 +754,7 @@ Transducer::write_mmap(FILE* out, const Alphabet& alpha)
           write_le(out, sym.first); // input symbol
           write_le(out, sym.second); // output symbol
           write_le(out, tr->second.first); // destination
-          uint64_t w = *reinterpret_cast<uint64_t*>(&tr->second.second);
-          write_le(out, w); // weight
+          write_double_le(out, tr->second.second); // weight
         }
       }
     }

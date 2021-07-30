@@ -1,0 +1,143 @@
+/*
+ * Copyright (C) 2021 Apertium
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include <lttoolbox/transducer_exe.h>
+
+#include <cstring>
+
+// includes needed for reading non-mmap files
+#include <lttoolbox/compression.h>
+#include <map>
+#include <vector>
+
+TransducerExe::TransducerExe() :
+  initial(0), state_count(0), final_count(0), transition_count(0),
+  finals(nullptr), offsets(nullptr), transitions(nullptr)
+{}
+
+TransducerExe::~TransducerExe()
+{
+  delete[] finals;
+  delete[] offsets;
+  delete[] transitions;
+}
+
+void
+TransducerExe::read(FILE* input, Alphabet& alphabet)
+{
+  bool read_weights = false; // only matters for pre-mmap
+  bool mmap = false;
+  fpos_t pos;
+  fgetpos(input, &pos);
+  char header[4]{};
+  fread_unlocked(header, 1, 4, input);
+  if (strncmp(header, HEADER_TRANSDUCER, 4) == 0) {
+    auto features = read_le<uint64_t>(input);
+    if (features >= TDF_UNKNOWN) {
+      throw std::runtime_error("Transducer has features that are unknown to this version of lttoolbox - upgrade!");
+    }
+    read_weights = (features & TDF_WEIGHTS);
+    mmap = (features & TDF_MMAP);
+  } else {
+    // no header
+    fsetpos(input, &pos);
+  }
+
+  if (mmap) {
+    read_le<uint64_t>(input); // total size
+    initial          = read_le<uint64_t>(input);
+    state_count      = read_le<uint64_t>(input);
+    final_count      = read_le<uint64_t>(input);
+    transition_count = read_le<uint64_t>(input);
+
+    finals = new Final[final_count];
+    for (uint64_t i = 0; i < final_count; i++) {
+      finals[i].state = read_le<uint64_t>(input);
+      finals[i].weight = read_double_le(input);
+    }
+
+    offsets = new uint64_t[state_count+1];
+    for (uint64_t i = 0; i < state_count; i++) {
+      offsets[i] = read_le<uint64_t>(input);
+    }
+    offsets[state_count] = transition_count;
+
+    transitions = new Transition[transition_count];
+    for (uint64_t i = 0; i < transition_count; i++) {
+      transitions[i].isym = read_le<uint64_t>(input);
+      transitions[i].osym = read_le<uint64_t>(input);
+      transitions[i].dest = read_le<uint64_t>(input);
+      transitions[i].weight = read_double_le(input);
+    }
+  } else {
+    initial = Compression::multibyte_read(input);
+    final_count = Compression::multibyte_read(input);
+
+    uint64_t base_state = 0;
+    double base_weight = 0.0;
+    finals = new Final[final_count];
+    for (uint64_t i = 0; i < final_count; i++) {
+      base_state += Compression::multibyte_read(input);
+      if (read_weights) {
+        base_weight += Compression::long_multibyte_read(input);
+      }
+      finals[i].state = base_state;
+      finals[i].weight = base_weight;
+    }
+
+    state_count = Compression::multibyte_read(input);
+    offsets = new uint64_t[state_count+1];
+    transition_count = 0;
+    std::vector<uint64_t> isyms, osyms, dests;
+    std::vector<double> weights;
+    for (uint64_t i = 0; i < state_count; i++) {
+      offsets[i] = transition_count;
+      std::map<uint64_t,
+               std::vector<std::pair<uint64_t,
+                                     std::pair<uint64_t, double>>>> temp;
+      uint64_t count = Compression::multibyte_read(input);
+      transition_count += count;
+      int32_t tag_base = 0;
+      for (uint64_t i = 0; i < count; i++) {
+        tag_base += Compression::multibyte_read(input);
+        uint64_t dest = (i + Compression::multibyte_read(input)) % state_count;
+        if (read_weights) {
+          base_weight = Compression::multibyte_read(input);
+        }
+        auto sym = alphabet.decode(tag_base);
+        temp[sym.first].push_back(make_pair(sym.second,
+                                            make_pair(dest, base_weight)));
+      }
+      for (auto& it : temp) {
+        for (auto& it2 : it.second) {
+          isyms.push_back(it.first);
+          osyms.push_back(it2.first);
+          dests.push_back(it2.second.first);
+          weights.push_back(it2.second.second);
+        }
+      }
+    }
+    offsets[state_count] = transition_count;
+    transitions = new Transition[transition_count];
+    for (uint64_t i = 0; i < transition_count; i++) {
+      transitions[i].isym = isyms[i];
+      transitions[i].osym = osyms[i];
+      transitions[i].dest = dests[i];
+      transitions[i].weight = weights[i];
+    }
+  }
+}

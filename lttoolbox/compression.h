@@ -77,6 +77,11 @@ inline auto write_le(Stream& out, uint64_t value) {
   return write_u64_le(out, value);
 }
 
+template<typename Stream>
+inline auto write_double_le(Stream& out, double value) {
+  return write_u64_le(out, *reinterpret_cast<uint64_t*>(&value));
+}
+
 
 inline auto read_u64(FILE *in) {
   uint64_t value = 0;
@@ -121,6 +126,11 @@ inline auto read_le(FILE *in) {
 template<typename Value = void>
 inline auto read_le(std::istream& in) {
   return read_le(in, Value{});
+}
+
+inline double read_double_le(FILE* in) {
+  uint64_t val = read_le<uint64_t>(in);
+  return *reinterpret_cast<double*>(&val);
 }
 
 /**
