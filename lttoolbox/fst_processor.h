@@ -23,7 +23,7 @@
 #include <lttoolbox/buffer.h>
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/state.h>
-#include <lttoolbox/trans_exe.h>
+#include <lttoolbox/transducer_exe.h>
 #include <lttoolbox/input_file.h>
 #include <libxml/xmlreader.h>
 
@@ -57,7 +57,7 @@ private:
   /**
    * Transducers in FSTP
    */
-  map<UString, TransExe> transducers;
+  map<UString, TransducerExe> transducers;
 
   /**
    * Current state of lexical analysis
@@ -77,27 +77,27 @@ private:
   /**
    * The final states of inconditional sections in the dictionaries
    */
-  map<Node *, double> inconditional;
+  set<TransducerExe*> inconditional;
 
   /**
    * The final states of standard sections in the dictionaries
    */
-  map<Node *, double> standard;
+  set<TransducerExe*> standard;
 
   /**
    * The final states of postblank sections in the dictionaries
    */
-  map<Node *, double> postblank;
+  set<TransducerExe*> postblank;
 
   /**
    * The final states of preblank sections in the dictionaries
    */
-  map<Node *, double> preblank;
+  set<TransducerExe*> preblank;
 
   /**
    * Merge of 'inconditional', 'standard', 'postblank' and 'preblank' sets
    */
-  map<Node *, double> all_finals;
+  set<TransducerExe*> all_finals;
 
   /**
    * Queue of blanks, used in reading methods

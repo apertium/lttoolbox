@@ -15,6 +15,9 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef _LT_TRANSDUCER_EXE_
+#define _LT_TRANSDUCER_EXE_
+
 #include <cstdint>
 #include <cstdio>
 
@@ -34,11 +37,11 @@ struct Final {
 };
 
 class MatchState2;
-class TransState;
+class State;
 
 class TransducerExe {
   friend MatchState2;
-  friend TransState;
+  friend State;
 private:
   uint64_t initial;
   uint64_t state_count;
@@ -50,8 +53,12 @@ private:
 
   void get_range(const uint64_t state, const int32_t sym,
                  uint64_t& start, uint64_t& end);
+  bool find_final(const uint64_t state, double& weight);
+  bool is_final(const uint64_t state);
 public:
   TransducerExe();
   ~TransducerExe();
   void read(FILE* input, Alphabet& alphabet);
 };
+
+#endif

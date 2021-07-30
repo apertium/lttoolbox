@@ -29,10 +29,12 @@
 #include <lttoolbox/match_exe.h>
 #include <lttoolbox/match_state.h>
 #include <lttoolbox/transducer.h>
-
+#include <lttoolbox/transducer_exe.h>
 #include <lttoolbox/ustring.h>
 
 using namespace std;
+
+typedef vector<pair<int32_t, double>> TPath;
 
 /**
  * Class to represent the current state of transducer processing
@@ -45,22 +47,24 @@ private:
    */
   struct TNodeState
   {
-    Node *where;
-    vector<pair<int, double>> *sequence;
+    TransducerExe* where;
+    uint64_t state;
+    TPath* sequence;
     // a state is "dirty" if it was introduced at runtime (case variants, etc.)
     bool dirty;
 
-    TNodeState(Node * const &w, vector<pair<int, double>> * const &s, bool const &d): where(w), sequence(s), dirty(d){}
+    TNodeState(TransducerExe* w, uint64_t i, TPath* s, bool d)
+      : where(w), state(i), sequence(s), dirty(d){}
 
     TNodeState(const TNodeState& other)
-      : where(other.where)
-      , sequence(other.sequence)
-      , dirty(other.dirty)
+      : where(other.where), state(other.state),
+        sequence(other.sequence), dirty(other.dirty)
     {}
 
     TNodeState & operator=(TNodeState const &other)
     {
       where = other.where;
+      state = other.state;
       sequence = other.sequence;
       dirty = other.dirty;
       return *this;
@@ -204,7 +208,7 @@ public:
    * Init the state with the initial node and empty output
    * @param initial the initial node of the transducer
    */
-  void init(Node *initial);
+  void init(const set<TransducerExe*>& exes);
 
   /**
     * Remove states not containing a specific symbol in their last 'part', and states
@@ -254,7 +258,7 @@ public:
    * @param firstchar first character of the word
    * @return the result of the transduction
    */
-  UString filterFinals(map<Node *, double> const &finals,
+  UString filterFinals(const set<TransducerExe*>& finals,
                        Alphabet const &a,
                        set<UChar32> const &escaped_chars,
                        bool display_weights = false,
@@ -275,7 +279,7 @@ public:
    * @param firstchar first character of the word
    * @return the result of the transduction
    */
-  UString filterFinalsSAO(map<Node *, double> const &finals,
+  UString filterFinalsSAO(const set<TransducerExe*>& finals,
                           Alphabet const &a,
                           set<UChar32> const &escaped_chars,
                           bool uppercase = false,
@@ -295,7 +299,7 @@ public:
    * @return the result of the transduction
    */
 
-  set<pair<UString, vector<UString> > > filterFinalsLRX(map<Node *, double> const &finals,
+  set<pair<UString, vector<UString> > > filterFinalsLRX(const set<TransducerExe*>& finals,
                                                         Alphabet const &a,
                                                         set<UChar32> const &escaped_chars,
                                                         bool uppercase = false,
@@ -314,7 +318,7 @@ public:
    * @param restart_state
    * @param separationSymbol
    */
-    void restartFinals(const map<Node *, double> &finals, int requiredSymbol, State *restart_state, int separationSymbol);
+  void restartFinals(const set<TransducerExe*>& finals, int requiredSymbol, State *restart_state, int separationSymbol);
 
 
   /**
@@ -323,14 +327,14 @@ public:
    * @param finals set of final nodes @return
    * @true if the state is final
    */
-  bool isFinal(map<Node *, double> const &finals) const;
+  bool isFinal(const set<TransducerExe*>& finals) const;
 
   /**
    * Return the full states string (to allow debuging...) using a Java ArrayList.toString style
    */
   UString getReadableString(const Alphabet &a);
 
-  UString filterFinalsTM(map<Node *, double> const &finals,
+  UString filterFinalsTM(const set<TransducerExe*>& finals,
                          Alphabet const &alphabet,
                          set<UChar32> const &escaped_chars,
                          queue<UString> &blanks,

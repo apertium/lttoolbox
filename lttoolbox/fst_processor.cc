@@ -741,11 +741,12 @@ FSTProcessor::combineWblanks()
 void
 FSTProcessor::calcInitial()
 {
+  set<TransducerExe*> temp;
   for(auto& it : transducers) {
-    root.addTransition(0, 0, it.second.getInitial(), default_weight);
+    temp.insert(&it.second);
   }
 
-  initial_state.init(&root);
+  initial_state.init(temp);
 }
 
 bool
@@ -767,23 +768,19 @@ FSTProcessor::classifyFinals()
   for(auto& it : transducers) {
     if(endsWith(it.first, "@inconditional"_u))
     {
-      inconditional.insert(it.second.getFinals().begin(),
-                           it.second.getFinals().end());
+      inconditional.insert(&it.second);
     }
     else if(endsWith(it.first, "@standard"_u))
     {
-      standard.insert(it.second.getFinals().begin(),
-                      it.second.getFinals().end());
+      standard.insert(&it.second);
     }
     else if(endsWith(it.first, "@postblank"_u))
     {
-      postblank.insert(it.second.getFinals().begin(),
-                       it.second.getFinals().end());
+      postblank.insert(&it.second);
     }
     else if(endsWith(it.first, "@preblank"_u))
     {
-      preblank.insert(it.second.getFinals().begin(),
-                      it.second.getFinals().end());
+      preblank.insert(&it.second);
     }
     else
     {
@@ -930,6 +927,7 @@ FSTProcessor::isAlphabetic(UChar32 const c) const
 void
 FSTProcessor::load(FILE *input)
 {
+  bool mmap = false;
   fpos_t pos;
   if (fgetpos(input, &pos) == 0) {
       char header[4]{};
@@ -939,6 +937,7 @@ FSTProcessor::load(FILE *input)
           if (features >= LTF_UNKNOWN) {
               throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
           }
+          mmap = features & LTF_MMAP;
       }
       else {
           // Old binary format
@@ -946,24 +945,26 @@ FSTProcessor::load(FILE *input)
       }
   }
 
-  // letters
-  int len = Compression::multibyte_read(input);
-  while(len > 0)
-  {
-    alphabetic_chars.insert(static_cast<UChar32>(Compression::multibyte_read(input)));
-    len--;
-  }
+  if (mmap) {
+  } else {
 
-  // symbols
-  alphabet.read(input);
+    // letters
+    int len = Compression::multibyte_read(input);
+    while(len > 0) {
+      alphabetic_chars.insert(static_cast<UChar32>(Compression::multibyte_read(input)));
+      len--;
+    }
 
-  len = Compression::multibyte_read(input);
+    // symbols
+    alphabet.read(input);
 
-  while(len > 0)
-  {
-    UString name = Compression::string_read(input);
-    transducers[name].read(input, alphabet);
-    len--;
+    len = Compression::multibyte_read(input);
+
+    while(len > 0) {
+      UString name = Compression::string_read(input);
+      transducers[name].read(input, alphabet);
+      len--;
+    }
   }
 }
 
@@ -984,8 +985,7 @@ FSTProcessor::initTMAnalysis()
   calcInitial();
 
   for(auto& it : transducers) {
-    all_finals.insert(it.second.getFinals().begin(),
-                      it.second.getFinals().end());
+    all_finals.insert(&it.second);
   }
 }
 
@@ -995,8 +995,7 @@ FSTProcessor::initGeneration()
   setIgnoredChars(false);
   calcInitial();
   for(auto& it : transducers) {
-    all_finals.insert(it.second.getFinals().begin(),
-                      it.second.getFinals().end());
+    all_finals.insert(&it.second);
   }
 }
 

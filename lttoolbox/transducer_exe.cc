@@ -103,21 +103,22 @@ TransducerExe::read(FILE* input, Alphabet& alphabet)
     state_count = Compression::multibyte_read(input);
     offsets = new uint64_t[state_count+1];
     transition_count = 0;
-    std::vector<uint64_t> isyms, osyms, dests;
+    std::vector<int32_t> isyms, osyms;
+    std::vector<uint64_t> dests;
     std::vector<double> weights;
     for (uint64_t i = 0; i < state_count; i++) {
       offsets[i] = transition_count;
-      std::map<uint64_t,
-               std::vector<std::pair<uint64_t,
+      std::map<int32_t,
+               std::vector<std::pair<int32_t,
                                      std::pair<uint64_t, double>>>> temp;
       uint64_t count = Compression::multibyte_read(input);
       transition_count += count;
       int32_t tag_base = 0;
-      for (uint64_t i = 0; i < count; i++) {
+      for (uint64_t t = 0; t < count; t++) {
         tag_base += Compression::multibyte_read(input);
         uint64_t dest = (i + Compression::multibyte_read(input)) % state_count;
         if (read_weights) {
-          base_weight = Compression::multibyte_read(input);
+          base_weight = Compression::long_multibyte_read(input);
         }
         auto sym = alphabet.decode(tag_base);
         temp[sym.first].push_back(make_pair(sym.second,
@@ -174,11 +175,38 @@ TransducerExe::get_range(const uint64_t state, const int32_t symbol,
   r = offsets[state+1];
   while (l < r) {
     m = (l + r) / 2;
-    if (transitions[m].isym < symbol) {
+    if (transitions[m].isym > symbol) {
       r = m;
     } else {
       l = m + 1;
     }
   }
   end = l;
+}
+
+bool
+TransducerExe::find_final(const uint64_t state, double& weight)
+{
+  int64_t l = 0;
+  int64_t r = final_count - 1;
+  int64_t m;
+  while (l <= r) {
+    m = (l + r) / 2;
+    if (finals[m].state == state) {
+      weight = finals[m].weight;
+      return true;
+    } else if (finals[m].state < state) {
+      l = m + 1;
+    } else {
+      r = m - 1;
+    }
+  }
+  return false;
+}
+
+bool
+TransducerExe::is_final(const uint64_t state)
+{
+  double x;
+  return find_final(state, x);
 }
