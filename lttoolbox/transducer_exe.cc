@@ -18,6 +18,7 @@
 #include <lttoolbox/transducer_exe.h>
 
 #include <cstring>
+#include <lttoolbox/endian_util.h>
 
 // includes needed for reading non-mmap files
 #include <lttoolbox/compression.h>
@@ -58,30 +59,30 @@ TransducerExe::read(FILE* input, Alphabet& alphabet)
   }
 
   if (mmap) {
-    read_le<uint64_t>(input); // total size
-    initial          = read_le<uint64_t>(input);
-    state_count      = read_le<uint64_t>(input);
-    final_count      = read_le<uint64_t>(input);
-    transition_count = read_le<uint64_t>(input);
+    read_le_64(input); // total size
+    initial          = read_le_64(input);
+    state_count      = read_le_64(input);
+    final_count      = read_le_64(input);
+    transition_count = read_le_64(input);
 
     finals = new Final[final_count];
     for (uint64_t i = 0; i < final_count; i++) {
-      finals[i].state = read_le<uint64_t>(input);
-      finals[i].weight = read_double_le(input);
+      finals[i].state = read_le_64(input);
+      finals[i].weight = read_le_double(input);
     }
 
     offsets = new uint64_t[state_count+1];
     for (uint64_t i = 0; i < state_count; i++) {
-      offsets[i] = read_le<uint64_t>(input);
+      offsets[i] = read_le_64(input);
     }
     offsets[state_count] = transition_count;
 
     transitions = new Transition[transition_count];
     for (uint64_t i = 0; i < transition_count; i++) {
-      transitions[i].isym = read_le<uint64_t>(input);
-      transitions[i].osym = read_le<uint64_t>(input);
-      transitions[i].dest = read_le<uint64_t>(input);
-      transitions[i].weight = read_double_le(input);
+      transitions[i].isym = read_le_s32(input);
+      transitions[i].osym = read_le_s32(input);
+      transitions[i].dest = read_le_64(input);
+      transitions[i].weight = read_le_double(input);
     }
   } else {
     initial = Compression::multibyte_read(input);

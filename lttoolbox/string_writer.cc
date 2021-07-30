@@ -17,6 +17,7 @@
 
 #include <lttoolbox/string_writer.h>
 
+#include <lttoolbox/endian_util.h>
 #include <stdexcept>
 
 UString_view
@@ -41,7 +42,7 @@ StringWriter::get(const uint32_t start, const uint32_t count)
 void
 StringWriter::read(FILE* in)
 {
-  uint64_t len = read_u64_le(in);
+  uint64_t len = read_le_64(in);
   buffer.clear();
   buffer.reserve(len);
   uint8_t temp[len*2]{};
@@ -57,7 +58,7 @@ StringWriter::read(FILE* in)
 void
 StringWriter::write(FILE* out)
 {
-  write_u64_le(out, buffer.size());
+  write_le_64(out, buffer.size());
   uint8_t temp[buffer.size()*2]{};
   for (uint64_t i = 0; i < buffer.size(); i++) {
     temp[2*i] = buffer[i] & 0xFF;

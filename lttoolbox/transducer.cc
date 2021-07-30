@@ -20,6 +20,7 @@
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/deserialiser.h>
 #include <lttoolbox/serialiser.h>
+#include <lttoolbox/endian_util.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -659,11 +660,11 @@ Transducer::read(FILE *input, int const decalage)
 void
 Transducer::read_mmap(FILE* in, Alphabet& alpha)
 {
-  read_le<uint64_t>(in); // total size
-  initial = read_le<uint64_t>(in);
-  uint64_t state_count = read_le<uint64_t>(in);
-  uint64_t final_count = read_le<uint64_t>(in);
-  uint64_t trans_count = read_le<uint64_t>(in);
+  read_le_64(in); // total size
+  initial = read_le_64(in);
+  uint64_t state_count = read_le_64(in);
+  uint64_t final_count = read_le_64(in);
+  uint64_t trans_count = read_le_64(in);
 
   if (transitions.size() > state_count) {
     transitions.clear();
@@ -673,8 +674,8 @@ Transducer::read_mmap(FILE* in, Alphabet& alpha)
   finals.clear();
 
   for (uint64_t i = 0; i < final_count; i++) {
-    uint64_t s = read_le<uint64_t>(in);
-    double w = read_double_le(in);
+    uint64_t s = read_le_64(in);
+    double w = read_le_double(in);
     finals.insert(make_pair(s, w));
   }
 
@@ -682,7 +683,7 @@ Transducer::read_mmap(FILE* in, Alphabet& alpha)
   offsets.reserve(state_count);
   for (uint64_t i = 0; i < state_count; i++) {
     transitions[i].clear();
-    offsets.push_back(read_le<uint64_t>(in));
+    offsets.push_back(read_le_64(in));
   }
   offsets.push_back(0);
 
@@ -691,11 +692,11 @@ Transducer::read_mmap(FILE* in, Alphabet& alpha)
     if (i == offsets[state+1]) {
       state++;
     }
-    uint64_t isym = read_le<uint64_t>(in);
-    uint64_t osym = read_le<uint64_t>(in);
-    int32_t sym = alpha((int32_t)isym, (int32_t)osym);
-    uint64_t dest = read_le<uint64_t>(in);
-    double wght = read_double_le(in);
+    int32_t isym = read_le_s32(in);
+    int32_t osym = read_le_s32(in);
+    int32_t sym = alpha(isym, osym);
+    uint64_t dest = read_le_64(in);
+    double wght = read_le_double(in);
     transitions[state].insert(make_pair(sym, make_pair(dest, wght)));
   }
 }
@@ -707,7 +708,7 @@ Transducer::write_mmap(FILE* out, const Alphabet& alpha)
   uint64_t features = 0;
   features |= TDF_WEIGHTS;
   features |= TDF_MMAP;
-  write_le(out, features);
+  write_le_64(out, features);
 
   uint64_t tr_count = 0;
   vector<uint64_t> offsets;
@@ -725,19 +726,19 @@ Transducer::write_mmap(FILE* out, const Alphabet& alpha)
       (finals.size() * 2) + // final states
       4 );                  // initial state + length of each section
 
-  write_le(out, total_size*8);       // number of bytes after this
-  write_le(out, initial);            // initial state
-  write_le(out, transitions.size()); // number of states
-  write_le(out, finals.size());      // number of finals
-  write_le(out, tr_count);           // number of transitions
+  write_le_64(out, total_size*8);       // number of bytes after this
+  write_le_64(out, initial);            // initial state
+  write_le_64(out, transitions.size()); // number of states
+  write_le_64(out, finals.size());      // number of finals
+  write_le_64(out, tr_count);           // number of transitions
 
   for (auto& it : finals) {
-    write_le(out, it.first);
-    write_le(out, *reinterpret_cast<uint64_t*>(&it.second));
+    write_le_64(out, it.first);
+    write_le_double(out, it.second);
   }
 
   for (auto& it : offsets) {
-    write_le(out, it);
+    write_le_64(out, it);
   }
 
   for (auto& it : transitions) {
@@ -751,10 +752,10 @@ Transducer::write_mmap(FILE* out, const Alphabet& alpha)
         auto range = it.second.equal_range(s);
         for (auto tr = range.first; tr != range.second; ++tr) {
           auto sym = alpha.decode(tr->first);
-          write_le(out, sym.first); // input symbol
-          write_le(out, sym.second); // output symbol
-          write_le(out, tr->second.first); // destination
-          write_double_le(out, tr->second.second); // weight
+          write_le_s32(out, sym.first); // input symbol
+          write_le_s32(out, sym.second); // output symbol
+          write_le_64(out, tr->second.first); // destination
+          write_le_double(out, tr->second.second); // weight
         }
       }
     }

@@ -18,11 +18,9 @@
 #ifndef _LT_STRING_WRITER_
 #define _LT_STRING_WRITER_
 
-// TODO: merge compression.h write_u64_le() and friends to here
-// when we drop compressed formats
-#include <lttoolbox/compression.h>
 #include <lttoolbox/ustring.h>
 #include <cstdint>
+#include <cstdio>
 
 class StringWriter {
 public:

@@ -22,8 +22,8 @@
 #include <lttoolbox/alphabet.h>
 
 struct Transition {
-  uint64_t isym; // TODO: should be int32_t
-  uint64_t osym;
+  int32_t isym;
+  int32_t osym;
   uint64_t dest;
   double weight;
 };
