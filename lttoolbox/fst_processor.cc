@@ -16,6 +16,7 @@
  */
 #include <lttoolbox/fst_processor.h>
 #include <lttoolbox/compression.h>
+#include <lttoolbox/endian_util.h>
 #include <lttoolbox/exception.h>
 #include <lttoolbox/xml_parse_util.h>
 
@@ -947,6 +948,25 @@ FSTProcessor::load(FILE *input)
   }
 
   if (mmap) {
+    str_write.read(input);
+
+    uint32_t s = read_le_32(input);
+    uint32_t c = read_le_32(input);
+    vector<int32_t> vec;
+    ustring_to_vec32(str_write.get(s, c), vec);
+    alphabetic_chars.insert(vec.begin(), vec.end());
+    // alphabetic_chars
+
+    alphabet.read(input, true);
+
+    uint64_t tr_count = read_le_64(input);
+    Alphabet temp;
+    for (uint64_t i = 0; i < tr_count; i++) {
+      uint32_t s = read_le_32(input);
+      uint32_t c = read_le_32(input);
+      UString name = UString{str_write.get(s, c)};
+      transducers[name].read(input, temp);
+    }
   } else {
 
     // letters

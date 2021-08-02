@@ -55,7 +55,7 @@ StringWriter::read(FILE* in)
   buffer.clear();
   buffer.reserve(len);
   uint8_t temp[len*2]{};
-  if (fread_unlocked(&temp, 1, len*2, in) != len) {
+  if (fread_unlocked(&temp, 1, len*2, in) != len*2) {
     throw std::runtime_error("Failed to read strings");
   }
   uint16_t c;

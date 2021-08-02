@@ -19,6 +19,7 @@
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/serialiser.h>
 #include <lttoolbox/deserialiser.h>
+#include <lttoolbox/endian_util.h>
 
 #include <cctype>
 #include <cstdlib>
@@ -179,6 +180,30 @@ Alphabet::read(FILE *input)
   }
 
   *this = a_new;
+}
+
+void
+Alphabet::write_mmap(FILE* output, StringWriter& sw)
+{
+  write_le_64(output, slexicinv.size());
+  for (auto& it : slexicinv) {
+    StringRef r = sw.add(it);
+    write_le_32(output, r.start);
+    write_le_32(output, r.count);
+  }
+}
+
+void
+Alphabet::read_mmap(FILE* input, StringWriter& sw)
+{
+  int64_t count = read_le_64(input);
+  for (int64_t i = 0; i < count; i++) {
+    uint32_t s = read_le_32(input);
+    uint32_t c = read_le_32(input);
+    UString t = UString{sw.get(s, c)};
+    slexicinv.push_back(t);
+    slexic[t] = -i-1;
+  }
 }
 
 void

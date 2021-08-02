@@ -16,10 +16,12 @@
  */
 #include <lttoolbox/compiler.h>
 #include <lttoolbox/compression.h>
+#include <lttoolbox/endian_util.h>
 #include <lttoolbox/entry_token.h>
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/string_utils.h>
+#include <lttoolbox/string_writer.h>
 
 #include <string>
 #include <cstdlib>
@@ -946,25 +948,37 @@ Compiler::write(FILE *output)
 {
   fwrite_unlocked(HEADER_LTTOOLBOX, 1, 4, output);
   uint64_t features = 0;
-  write_le(output, features);
+  features |= LTF_MMAP;
+  write_le_64(output, features);
+
+  StringWriter sw;
+  StringRef letter_loc = sw.add(letters);
+  for (auto& it : alphabet.getTags()) {
+    sw.add(it);
+  }
+  for (auto& it : sections) {
+    sw.add(it.first);
+  }
+
+  sw.write(output);
 
   // letters
-  Compression::string_write(letters, output);
+  write_le_32(output, letter_loc.start);
+  write_le_32(output, letter_loc.count);
 
   // symbols
-  alphabet.write(output);
+  alphabet.write_mmap(output, sw);
 
   // transducers
-  Compression::multibyte_write(sections.size(), output);
+  write_le_64(output, sections.size());
 
-  int count=0;
-  for(auto& it : sections)
-  {
-    count++;
+  for(auto& it : sections) {
     cout << it.first << " " << it.second.size();
     cout << " " << it.second.numberOfTransitions() << endl;
-    Compression::string_write(it.first, output);
-    it.second.write(output);
+    StringRef loc = sw.add(it.first);
+    write_le_32(output, loc.start);
+    write_le_32(output, loc.count);
+    it.second.write_mmap(output, alphabet);
   }
 }
 

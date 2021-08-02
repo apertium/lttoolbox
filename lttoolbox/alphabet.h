@@ -23,7 +23,8 @@
 #include <set>
 #include <vector>
 #include <cstdint>
-#include "ustring.h"
+#include <lttoolbox/string_writer.h>
+#include <lttoolbox/ustring.h>
 
 using namespace std;
 using namespace icu;
@@ -134,6 +135,9 @@ public:
    * @param input input stream.
    */
   void read(FILE *input);
+
+  void write_mmap(FILE* output, StringWriter& sw);
+  void read_mmap(FILE* input, StringWriter& sw);
 
   void serialise(std::ostream &serialised) const;
   void deserialise(std::istream &serialised);

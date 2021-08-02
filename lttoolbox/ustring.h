@@ -35,7 +35,7 @@ UString to_ustring(const char* str);
 UString to_ustring(const uint8_t* str);
 
 // append UTF-16 string to UTF-32 vector of symbols
-void ustring_to_vec32(const UString& str, std::vector<int32_t>& vec);
+void ustring_to_vec32(UString_view str, std::vector<int32_t>& vec);
 
 inline std::ostream&
 operator<<(std::ostream& ostr, char16_t c)

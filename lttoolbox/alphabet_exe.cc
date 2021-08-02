@@ -18,6 +18,7 @@
 #include <lttoolbox/alphabet_exe.h>
 
 #include <lttoolbox/compression.h>
+#include <lttoolbox/endian_util.h>
 
 AlphabetExe::AlphabetExe(StringWriter* sw_)
   : sw(sw_), tag_count(0), tags(nullptr)
@@ -32,6 +33,13 @@ void
 AlphabetExe::read(FILE* input, bool mmap)
 {
   if (mmap) {
+    tag_count = read_le_64(input);
+    tags = new StringRef[tag_count];
+    for (uint64_t i = 0; i < tag_count; i++) {
+      tags[i].start = read_le_32(input);
+      tags[i].count = read_le_32(input);
+      symbol_map[sw->get(tags[i])] = -static_cast<int32_t>(i) - 1;
+    }
   } else {
     tag_count = Compression::multibyte_read(input);
     tags = new StringRef[tag_count];

@@ -48,7 +48,7 @@ to_ustring(const uint8_t* s)
 }
 
 void
-ustring_to_vec32(const UString& str, std::vector<int32_t>& vec)
+ustring_to_vec32(UString_view str, std::vector<int32_t>& vec)
 {
   if (str.empty()) {
     return;
