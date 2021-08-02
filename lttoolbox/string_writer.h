@@ -30,7 +30,7 @@ struct StringRef {
 class StringWriter {
 public:
   UString buffer;
-  StringRef add(const UString& s);
+  StringRef add(UString_view s);
   UString_view get(const uint32_t start, const uint32_t count);
   UString_view get(const StringRef& ref);
   void read(FILE* in);

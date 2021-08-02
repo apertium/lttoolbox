@@ -21,7 +21,7 @@
 #include <stdexcept>
 
 StringRef
-StringWriter::add(const UString& s)
+StringWriter::add(UString_view s)
 {
   auto start = buffer.find(s);
   if (start == UString::npos) {

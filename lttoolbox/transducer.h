@@ -421,4 +421,11 @@ public:
 
 };
 
+void read_transducer_set(FILE* input, UString& letters, Alphabet& alpha,
+                         map<UString, Transducer>& trans);
+uint64_t write_transducer_set(FILE* output,
+                              UString_view letters, Alphabet& alpha,
+                              map<UString, Transducer>& trans,
+                              bool skip_empty=false);
+
 #endif

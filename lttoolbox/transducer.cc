@@ -1374,3 +1374,114 @@ Transducer::intersect(Transducer &trimmer,
   // (instead of exiting the whole program) if no finals.
   return trimmed;
 }
+
+void
+read_transducer_set(FILE* input, UString& letters, Alphabet& alpha,
+                    map<UString, Transducer>& trans)
+{
+  fpos_t pos;
+  bool mmap = false;
+  if (fgetpos(input, &pos) == 0) {
+    char header[4]{};
+    auto r = fread_unlocked(header, 1, 4, input);
+    if (r == 4 && strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
+      auto features = read_le_64(input);
+      if (features >= LTF_UNKNOWN) {
+        throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
+      }
+      mmap = features & LTF_MMAP;
+    }
+    else {
+      // Old binary format
+      fsetpos(input, &pos);
+    }
+  }
+
+  if (mmap) {
+    // make copies of all the strings we get from StringWriter
+    // because it gets deallocated when the function returns
+    StringWriter sw;
+    sw.read(input);
+
+    // letters
+    uint32_t s = read_le_32(input);
+    uint32_t c = read_le_32(input);
+    letters = UString{sw.get(s, c)};
+
+    // symbols
+    alpha.read_mmap(input, sw);
+
+    uint64_t tr_count = read_le_64(input);
+    for (uint64_t i = 0; i < tr_count; i++) {
+      uint32_t s = read_le_32(input);
+      uint32_t c = read_le_32(input);
+      UString name = UString{sw.get(s, c)};
+      trans[name].read_mmap(input, alpha);
+    }
+  } else {
+    // letters
+    letters = Compression::string_read(input);
+
+    // symbols
+    alpha.read(input);
+
+    int len = Compression::multibyte_read(input);
+
+    while(len > 0) {
+      UString name = Compression::string_read(input);
+      trans[name].read(input);
+
+      len--;
+    }
+  }
+}
+
+uint64_t
+write_transducer_set(FILE* output, UString_view letters, Alphabet& alpha,
+                     map<UString, Transducer>& trans,
+                     bool skip_empty)
+{
+  fwrite_unlocked(HEADER_LTTOOLBOX, 1, 4, output);
+  uint64_t features = 0;
+  features |= LTF_MMAP;
+  write_le_64(output, features);
+
+  uint64_t transducer_count = trans.size();
+
+  StringWriter sw;
+  StringRef letter_loc = sw.add(letters);
+  for (auto& it : alpha.getTags()) {
+    sw.add(it);
+  }
+  for (auto& it : trans) {
+    if (skip_empty && it.second.isEmpty()) {
+      transducer_count--;
+      continue;
+    }
+    sw.add(it.first);
+  }
+  sw.write(output);
+
+  // letters
+  write_le_32(output, letter_loc.start);
+  write_le_32(output, letter_loc.count);
+
+  // symbols
+  alpha.write_mmap(output, sw);
+
+  // transducers
+  write_le_64(output, transducer_count);
+  for (auto& it : trans) {
+    if (skip_empty && it.second.isEmpty()) {
+      continue;
+    }
+    cout << it.first << " " << it.second.size();
+    cout << " " << it.second.numberOfTransitions() << endl;
+    StringRef loc = sw.add(it.first);
+    write_le_32(output, loc.start);
+    write_le_32(output, loc.count);
+    it.second.write_mmap(output, alpha);
+  }
+
+  return transducer_count;
+}

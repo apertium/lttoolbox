@@ -435,37 +435,11 @@ AttCompiler::classify_backwards(int state, set<int>& path)
 void
 AttCompiler::write(FILE *output)
 {
-//  FILE* output = fopen(file_name, "wb");
-  fwrite_unlocked(HEADER_LTTOOLBOX, 1, 4, output);
-  uint64_t features = 0;
-  write_le(output, features);
+  UString letters = UString(letters.begin(), letters.end());
+  map<UString, Transducer> trans;
 
-  Transducer punct_fst = extract_transducer(PUNCT);
+  trans["main@standard"_u] = extract_transducer(WORD);
+  trans["final@inconditional"_u] = extract_transducer(PUNCT);
 
-  /* Non-multichar symbols. */
-  Compression::string_write(UString(letters.begin(), letters.end()), output);
-  /* Multichar symbols. */
-  alphabet.write(output);
-  /* And now the FST. */
-  if(punct_fst.numberOfTransitions() == 0)
-  {
-    Compression::multibyte_write(1, output);
-  }
-  else
-  {
-    Compression::multibyte_write(2, output);
-  }
-  Compression::string_write("main@standard"_u, output);
-  Transducer word_fst = extract_transducer(WORD);
-  word_fst.write(output);
-  cout << "main@standard" << " " << word_fst.size();
-  cout << " " << word_fst.numberOfTransitions() << endl;
-  Compression::string_write("final@inconditional"_u, output);
-  if(punct_fst.numberOfTransitions() != 0)
-  {
-    punct_fst.write(output);
-    cout << "final@inconditional" << " " << punct_fst.size();
-    cout << " " << punct_fst.numberOfTransitions() << endl;
-  }
-//  fclose(output);
+  write_transducer_set(output, letters, alphabet, trans, true);
 }
