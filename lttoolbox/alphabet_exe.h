@@ -15,26 +15,26 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _LT_STRING_WRITER_
-#define _LT_STRING_WRITER_
+#ifndef _LT_ALPHABET_EXE_
+#define _LT_ALPHABET_EXE_
 
-#include <lttoolbox/ustring.h>
-#include <cstdint>
-#include <cstdio>
+#include <lttoolbox/string_writer.h>
+#include <map>
 
-struct StringRef {
-  uint32_t start;
-  uint32_t count;
-};
-
-class StringWriter {
+class AlphabetExe {
+private:
+  StringWriter* sw;
+  uint64_t tag_count;
+  StringRef* tags;
+  std::map<UString_view, int32_t> symbol_map;
 public:
-  UString buffer;
-  StringRef add(const UString& s);
-  UString_view get(const uint32_t start, const uint32_t count);
-  UString_view get(const StringRef& ref);
-  void read(FILE* in);
-  void write(FILE* out);
+  AlphabetExe(StringWriter* sw_);
+  ~AlphabetExe();
+  void read(FILE* in, bool mmap);
+  int32_t operator()(UString_view sv);
+  void getSymbol(UString& result, int32_t symbol, bool uppercase = false) const;
+  bool isTag(const int32_t symbol) const;
+  void clearSymbol(const int32_t symbol);
 };
 
 #endif

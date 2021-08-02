@@ -24,7 +24,7 @@
 #include <queue>
 #include <climits>
 
-#include <lttoolbox/alphabet.h>
+#include <lttoolbox/alphabet_exe.h>
 #include <lttoolbox/node.h>
 #include <lttoolbox/match_exe.h>
 #include <lttoolbox/match_state.h>
@@ -259,7 +259,7 @@ public:
    * @return the result of the transduction
    */
   UString filterFinals(const set<TransducerExe*>& finals,
-                       Alphabet const &a,
+                       AlphabetExe const &a,
                        set<UChar32> const &escaped_chars,
                        bool display_weights = false,
                        int max_analyses = INT_MAX,
@@ -280,7 +280,7 @@ public:
    * @return the result of the transduction
    */
   UString filterFinalsSAO(const set<TransducerExe*>& finals,
-                          Alphabet const &a,
+                          AlphabetExe const &a,
                           set<UChar32> const &escaped_chars,
                           bool uppercase = false,
                           bool firstupper = false,
@@ -300,7 +300,7 @@ public:
    */
 
   set<pair<UString, vector<UString> > > filterFinalsLRX(const set<TransducerExe*>& finals,
-                                                        Alphabet const &a,
+                                                        AlphabetExe const &a,
                                                         set<UChar32> const &escaped_chars,
                                                         bool uppercase = false,
                                                         bool firstupper = false,
@@ -332,10 +332,10 @@ public:
   /**
    * Return the full states string (to allow debuging...) using a Java ArrayList.toString style
    */
-  UString getReadableString(const Alphabet &a);
+  UString getReadableString(const AlphabetExe &a);
 
   UString filterFinalsTM(const set<TransducerExe*>& finals,
-                         Alphabet const &alphabet,
+                         AlphabetExe const &alphabet,
                          set<UChar32> const &escaped_chars,
                          queue<UString> &blanks,
                          vector<UString> &numbers) const;

@@ -20,7 +20,7 @@
 #include <lttoolbox/endian_util.h>
 #include <stdexcept>
 
-UString_view
+StringRef
 StringWriter::add(const UString& s)
 {
   auto start = buffer.find(s);
@@ -28,8 +28,10 @@ StringWriter::add(const UString& s)
     start = buffer.size();
     buffer += s;
   }
-  UString_view ret(buffer);
-  return ret.substr(start, s.size());
+  StringRef ret;
+  ret.start = start;
+  ret.count = s.size();
+  return ret;
 }
 
 UString_view
@@ -37,6 +39,13 @@ StringWriter::get(const uint32_t start, const uint32_t count)
 {
   UString_view ret(buffer);
   return ret.substr(start, count);
+}
+
+UString_view
+StringWriter::get(const StringRef& ref)
+{
+  UString_view ret(buffer);
+  return ret.substr(ref.start, ref.count);
 }
 
 void

@@ -452,7 +452,7 @@ State::NFinals(vector<pair<UString, double>> lf, int maxAnalyses, int maxWeightC
 
 UString
 State::filterFinals(const set<TransducerExe*>& finals,
-                    Alphabet const &alphabet,
+                    AlphabetExe const &alphabet,
                     set<UChar32> const &escaped_chars,
                     bool display_weights, int max_analyses, int max_weight_classes,
                     bool uppercase, bool firstupper, int firstchar) const
@@ -537,7 +537,7 @@ State::filterFinals(const set<TransducerExe*>& finals,
 
 set<pair<UString, vector<UString> > >
 State::filterFinalsLRX(const set<TransducerExe*>& finals,
-                       Alphabet const &alphabet,
+                       AlphabetExe const &alphabet,
                        set<UChar32> const &escaped_chars,
                        bool uppercase, bool firstupper, int firstchar) const
 {
@@ -584,7 +584,7 @@ State::filterFinalsLRX(const set<TransducerExe*>& finals,
 
 UString
 State::filterFinalsSAO(const set<TransducerExe*>& finals,
-                       Alphabet const &alphabet,
+                       AlphabetExe const &alphabet,
                        set<UChar32> const &escaped_chars,
                        bool uppercase, bool firstupper, int firstchar) const
 {
@@ -635,7 +635,7 @@ State::filterFinalsSAO(const set<TransducerExe*>& finals,
 
 UString
 State::filterFinalsTM(const set<TransducerExe*>& finals,
-                      Alphabet const &alphabet,
+                      AlphabetExe const &alphabet,
                       set<UChar32> const &escaped_chars,
                       queue<UString> &blankqueue, vector<UString> &numbers) const
 {
@@ -749,12 +749,12 @@ State::pruneCompounds(int requiredSymbol, int separationSymbol, int compound_max
 
   for(unsigned int i = 0; i<state.size(); i++)
   {
-    vector<pair<int, double>> seq = *state.at(i).sequence;
+    vector<pair<int, double>> seq = *state[i].sequence;
 
     if(lastPartHasRequiredSymbol(seq, requiredSymbol, separationSymbol))
     {
       int this_noOfCompoundElements = 0;
-      for (int j = seq.size()-2; j>0; j--) if ((seq.at(j)).first==separationSymbol) this_noOfCompoundElements++;
+      for (int j = seq.size()-2; j>0; j--) if ((seq[j]).first==separationSymbol) this_noOfCompoundElements++;
       noOfCompoundElements[i] = this_noOfCompoundElements;
       minNoOfCompoundElements = (minNoOfCompoundElements < this_noOfCompoundElements) ?
                         minNoOfCompoundElements : this_noOfCompoundElements;
@@ -862,7 +862,7 @@ State::restartFinals(const set<TransducerExe*>& finals, int requiredSymbol, Stat
 
 
 UString
-State::getReadableString(const Alphabet &a)
+State::getReadableString(const AlphabetExe &a)
 {
   UString retval;
   retval += '[';

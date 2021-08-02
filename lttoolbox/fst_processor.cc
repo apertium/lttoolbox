@@ -40,6 +40,7 @@ UString const FSTProcessor::WBLANK_FINAL            = "[[/]]"_u;
 
 
 FSTProcessor::FSTProcessor()
+  : alphabet(AlphabetExe(&str_write))
 {
   // escaped_chars chars
   escaped_chars.insert('[');
@@ -956,13 +957,17 @@ FSTProcessor::load(FILE *input)
     }
 
     // symbols
-    alphabet.read(input);
+    fgetpos(input, &pos);
+    alphabet.read(input, false);
+    fsetpos(input, &pos);
+    Alphabet temp;
+    temp.read(input);
 
     len = Compression::multibyte_read(input);
 
     while(len > 0) {
       UString name = Compression::string_read(input);
-      transducers[name].read(input, alphabet);
+      transducers[name].read(input, temp);
       len--;
     }
   }
@@ -1067,7 +1072,7 @@ FSTProcessor::initDecompositionSymbols()
   }
   else if(!showControlSymbols)
   {
-    alphabet.setSymbol(compoundOnlyLSymbol, ""_u);
+    alphabet.clearSymbol(compoundOnlyLSymbol);
   }
 
   if((compoundRSymbol=alphabet("<:co:R>"_u)) == 0
@@ -1080,7 +1085,7 @@ FSTProcessor::initDecompositionSymbols()
   }
   else if(!showControlSymbols)
   {
-    alphabet.setSymbol(compoundRSymbol, ""_u);
+    alphabet.clearSymbol(compoundRSymbol);
   }
 }
 

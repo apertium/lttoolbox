@@ -316,3 +316,9 @@ Alphabet::createLoopbackSymbols(set<int32_t> &symbols, Alphabet &basis, Side s, 
     }
   }
 }
+
+vector<UString>&
+Alphabet::getTags()
+{
+  return slexicinv;
+}

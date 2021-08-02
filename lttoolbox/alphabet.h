@@ -197,6 +197,11 @@ public:
    * @param nonTagsToo by default only tags are included, but if this is true we include all symbols
    */
   void createLoopbackSymbols(set<int32_t> &symbols, Alphabet &basis, Side s = right, bool nonTagsToo = false);
+
+  /**
+   * Return a reference to the array of tags
+   */
+  vector<UString>& getTags();
 };
 
 #endif

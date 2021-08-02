@@ -19,10 +19,11 @@
 #define _FSTPROCESSOR_
 
 #include <lttoolbox/ustring.h>
-#include <lttoolbox/alphabet.h>
+#include <lttoolbox/alphabet_exe.h>
 #include <lttoolbox/buffer.h>
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/state.h>
+#include <lttoolbox/string_writer.h>
 #include <lttoolbox/transducer_exe.h>
 #include <lttoolbox/input_file.h>
 #include <libxml/xmlreader.h>
@@ -135,9 +136,14 @@ private:
   int rcx_current_char;
 
   /**
+   * String manager
+   */
+  StringWriter str_write;
+
+  /**
    * Alphabet
    */
-  Alphabet alphabet;
+  AlphabetExe alphabet;
 
   /**
    * Input buffer
