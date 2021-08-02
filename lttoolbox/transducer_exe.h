@@ -59,7 +59,8 @@ private:
 public:
   TransducerExe();
   ~TransducerExe();
-  void read(FILE* input, Alphabet& alphabet);
+  void read_compressed(FILE* input, Alphabet& alphabet);
+  void read(FILE* input);
   void* init(void* ptr);
 };
 
