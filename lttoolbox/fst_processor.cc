@@ -18,6 +18,7 @@
 #include <lttoolbox/compression.h>
 #include <lttoolbox/endian_util.h>
 #include <lttoolbox/exception.h>
+#include <lttoolbox/mmap.h>
 #include <lttoolbox/xml_parse_util.h>
 
 #include <iostream>
@@ -59,6 +60,13 @@ FSTProcessor::FSTProcessor()
   if(useDefaultIgnoredChars)
   {
     initDefaultIgnoredCharacters();
+  }
+}
+
+FSTProcessor::~FSTProcessor()
+{
+  if (mmapping) {
+    munmap(mmap_pointer, mmap_len);
   }
 }
 
@@ -935,7 +943,7 @@ FSTProcessor::load(FILE *input)
       char header[4]{};
       fread_unlocked(header, 1, 4, input);
       if (strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
-          auto features = read_le<uint64_t>(input);
+          auto features = read_le_64(input);
           if (features >= LTF_UNKNOWN) {
               throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
           }
@@ -948,24 +956,50 @@ FSTProcessor::load(FILE *input)
   }
 
   if (mmap) {
-    str_write.read(input);
+    fgetpos(input, &pos);
+    rewind(input);
+    mmapping = mmap_file(input, mmap_pointer, mmap_len);
+    if (mmapping) {
+      void* ptr = mmap_pointer + 12;
+      ptr = str_write.init(ptr);
 
-    uint32_t s = read_le_32(input);
-    uint32_t c = read_le_32(input);
-    vector<int32_t> vec;
-    ustring_to_vec32(str_write.get(s, c), vec);
-    alphabetic_chars.insert(vec.begin(), vec.end());
-    // alphabetic_chars
+      StringRef let_loc = reinterpret_cast<StringRef*>(ptr)[0];
+      vector<int32_t> vec;
+      ustring_to_vec32(str_write.get(let_loc), vec);
+      alphabetic_chars.insert(vec.begin(), vec.end());
+      ptr += sizeof(StringRef);
 
-    alphabet.read(input, true);
+      ptr = alphabet.init(ptr);
 
-    uint64_t tr_count = read_le_64(input);
-    Alphabet temp;
-    for (uint64_t i = 0; i < tr_count; i++) {
+      uint64_t tr_count = reinterpret_cast<uint64_t*>(ptr)[0];
+      ptr += sizeof(uint64_t);
+      for (uint64_t i = 0; i < tr_count; i++) {
+        StringRef tn = reinterpret_cast<StringRef*>(ptr)[0];
+        ptr += sizeof(StringRef);
+        UString name = UString{str_write.get(tn)};
+        ptr = transducers[name].init(ptr);
+      }
+    } else {
+      fsetpos(input, &pos);
+
+      str_write.read(input);
+
       uint32_t s = read_le_32(input);
       uint32_t c = read_le_32(input);
-      UString name = UString{str_write.get(s, c)};
-      transducers[name].read(input, temp);
+      vector<int32_t> vec;
+      ustring_to_vec32(str_write.get(s, c), vec);
+      alphabetic_chars.insert(vec.begin(), vec.end());
+
+      alphabet.read(input, true);
+
+      uint64_t tr_count = read_le_64(input);
+      Alphabet temp;
+      for (uint64_t i = 0; i < tr_count; i++) {
+        uint32_t s = read_le_32(input);
+        uint32_t c = read_le_32(input);
+        UString name = UString{str_write.get(s, c)};
+        transducers[name].read(input, temp);
+      }
     }
   } else {
 

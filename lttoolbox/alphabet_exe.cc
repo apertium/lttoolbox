@@ -26,7 +26,9 @@ AlphabetExe::AlphabetExe(StringWriter* sw_)
 
 AlphabetExe::~AlphabetExe()
 {
-  delete[] tags;
+  if (!mmapping) {
+    delete[] tags;
+  }
 }
 
 void
@@ -61,6 +63,18 @@ AlphabetExe::read(FILE* input, bool mmap)
       Compression::multibyte_read(input);
     }
   }
+}
+
+void*
+AlphabetExe::init(void* ptr)
+{
+  mmapping = true;
+  tag_count = from_le_64(reinterpret_cast<uint64_t*>(ptr)[0]);
+  tags = reinterpret_cast<StringRef*>(ptr + sizeof(uint64_t));
+  for (uint64_t i = 0; i < tag_count; i++) {
+    symbol_map[sw->get(tags[i])] = -static_cast<int32_t>(i) - 1;
+  }
+  return ptr + sizeof(uint64_t) + tag_count*sizeof(StringRef);
 }
 
 int32_t

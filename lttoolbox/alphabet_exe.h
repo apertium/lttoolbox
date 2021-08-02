@@ -27,10 +27,12 @@ private:
   uint64_t tag_count;
   StringRef* tags;
   std::map<UString_view, int32_t> symbol_map;
+  bool mmapping = false;
 public:
   AlphabetExe(StringWriter* sw_);
   ~AlphabetExe();
   void read(FILE* in, bool mmap);
+  void* init(void* ptr);
   int32_t operator()(UString_view sv);
   void getSymbol(UString& result, int32_t symbol, bool uppercase = false) const;
   bool isTag(const int32_t symbol) const;

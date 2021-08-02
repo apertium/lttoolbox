@@ -259,6 +259,10 @@ private:
    */
   int maxWeightClasses = INT_MAX;
 
+  bool mmapping = false;
+  void* mmap_pointer = nullptr;
+  int mmap_len = 0;
+
   /**
    * Prints an error of input stream and exits
    */
@@ -498,6 +502,7 @@ public:
   static UString const WBLANK_FINAL;
 
   FSTProcessor();
+  ~FSTProcessor();
 
   void initAnalysis();
   void initTMAnalysis();

@@ -691,12 +691,12 @@ Transducer::read_mmap(FILE* in, Alphabet& alpha)
   }
 
   vector<uint64_t> offsets;
-  offsets.reserve(state_count);
+  offsets.reserve(state_count+1);
   for (uint64_t i = 0; i < state_count; i++) {
     transitions[i].clear();
     offsets.push_back(read_le_64(in));
   }
-  offsets.push_back(0);
+  offsets.push_back(read_le_64(in));
 
   uint64_t state = 0;
   for (uint64_t i = 0; i < trans_count; i++) {
@@ -723,19 +723,20 @@ Transducer::write_mmap(FILE* out, const Alphabet& alpha)
 
   uint64_t tr_count = 0;
   vector<uint64_t> offsets;
-  offsets.reserve(transitions.size());
+  offsets.reserve(transitions.size()+1);
   for (auto& it : transitions) {
     offsets.push_back(tr_count);
     tr_count += it.second.size();
   }
+  offsets.push_back(tr_count);
 
   // TODO: which things should be smaller than u64?
 
   uint64_t total_size =
-    ( transitions.size() +  // offset of each state
-      (tr_count * 4) +      // each transition
-      (finals.size() * 2) + // final states
-      4 );                  // initial state + length of each section
+    ( transitions.size() + 1 +  // offset of each state
+      (tr_count * 3) +          // each transition
+      (finals.size() * 2) +     // final states
+      4 );                      // initial state + length of each section
 
   write_le_64(out, total_size*8);       // number of bytes after this
   write_le_64(out, initial);            // initial state

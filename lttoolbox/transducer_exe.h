@@ -50,6 +50,7 @@ private:
   Final* finals;
   uint64_t* offsets;
   Transition* transitions;
+  bool mmapping = false;
 
   void get_range(const uint64_t state, const int32_t sym,
                  uint64_t& start, uint64_t& end);
@@ -59,6 +60,7 @@ public:
   TransducerExe();
   ~TransducerExe();
   void read(FILE* input, Alphabet& alphabet);
+  void* init(void* ptr);
 };
 
 #endif

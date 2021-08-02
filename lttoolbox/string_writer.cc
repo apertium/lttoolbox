@@ -23,10 +23,10 @@
 StringRef
 StringWriter::add(UString_view s)
 {
-  auto start = buffer.find(s);
+  auto start = edit_buffer.find(s);
   if (start == UString::npos) {
-    start = buffer.size();
-    buffer += s;
+    start = edit_buffer.size();
+    edit_buffer += s;
   }
   StringRef ret;
   ret.start = start;
@@ -37,43 +37,58 @@ StringWriter::add(UString_view s)
 UString_view
 StringWriter::get(const uint32_t start, const uint32_t count)
 {
-  UString_view ret(buffer);
-  return ret.substr(start, count);
+  if (mmapping) {
+    UString_view ret(mmap_buffer, mmap_size);
+    return ret.substr(start, count);
+  } else {
+    UString_view ret(edit_buffer);
+    return ret.substr(start, count);
+  }
 }
 
 UString_view
 StringWriter::get(const StringRef& ref)
 {
-  UString_view ret(buffer);
-  return ret.substr(ref.start, ref.count);
+  return get(ref.start, ref.count);
 }
 
 void
 StringWriter::read(FILE* in)
 {
   uint64_t len = read_le_64(in);
-  buffer.clear();
-  buffer.reserve(len);
+  edit_buffer.clear();
+  edit_buffer.reserve(len);
   uint8_t temp[len*2]{};
   if (fread_unlocked(&temp, 1, len*2, in) != len*2) {
     throw std::runtime_error("Failed to read strings");
   }
   uint16_t c;
   for (uint64_t i = 0; i < len*2; i += 2) {
-    buffer += static_cast<UChar>(temp[i] | (temp[i+1] << 8));
+    edit_buffer += static_cast<UChar>(temp[i] | (temp[i+1] << 8));
   }
 }
 
 void
 StringWriter::write(FILE* out)
 {
-  write_le_64(out, buffer.size());
-  uint8_t temp[buffer.size()*2]{};
-  for (uint64_t i = 0; i < buffer.size(); i++) {
-    temp[2*i] = buffer[i] & 0xFF;
-    temp[2*i+1] = (buffer[i] >> 8) & 0xFF;
+  write_le_64(out, edit_buffer.size());
+  uint8_t temp[edit_buffer.size()*2]{};
+  for (uint64_t i = 0; i < edit_buffer.size(); i++) {
+    temp[2*i] = edit_buffer[i] & 0xFF;
+    temp[2*i+1] = (edit_buffer[i] >> 8) & 0xFF;
   }
-  if (fwrite_unlocked(&temp, 1, buffer.size()*2, out) != buffer.size()*2) {
+  if (fwrite_unlocked(&temp, 1, edit_buffer.size()*2, out) != edit_buffer.size()*2) {
     throw std::runtime_error("Failed to write strings");
   }
+}
+
+void*
+StringWriter::init(void* ptr)
+{
+  mmapping = true;
+  mmap_size = reinterpret_cast<uint64_t*>(ptr)[0];
+  ptr += sizeof(uint64_t);
+  mmap_buffer = reinterpret_cast<UChar*>(ptr);
+  get(0, mmap_size);
+  return ptr + sizeof(UChar)*mmap_size;
 }

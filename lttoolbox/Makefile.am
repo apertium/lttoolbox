@@ -1,7 +1,7 @@
 
 h_sources = alphabet.h alphabet_exe.h att_compiler.h buffer.h compiler.h compression.h  \
             deserialiser.h endian_util.h entry_token.h expander.h fst_processor.h input_file.h lt_locale.h \
-            match_exe.h match_node.h match_state.h match_state2.h my_stdio.h node.h \
+            match_exe.h match_node.h match_state.h match_state2.h mmap.h my_stdio.h node.h \
             pattern_list.h regexp_compiler.h serialiser.h sorted_vector.h state.h string_utils.h string_view.h string_writer.h \
             transducer.h transducer_exe.h trans_exe.h xml_parse_util.h xml_walk_util.h exception.h tmx_compiler.h \
             ustring.h

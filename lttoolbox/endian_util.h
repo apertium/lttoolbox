@@ -23,40 +23,48 @@
 #include <cstdint>
 #include <stdexcept>
 
-inline uint32_t to_le_32(uint32_t v) {
-  return (((v & 0xFF) << 24) |
-          ((v & 0xFF00) << 8) |
-          ((v & 0xFF0000) >> 8) |
-          ((v & 0xFF000000) >> 24));
+inline uint32_t to_le_32(uint32_t& v) {
+  uint8_t* bytes = reinterpret_cast<uint8_t*>(&v);
+  bytes[3] = (v >> 24) & 0xFF;
+  bytes[2] = (v >> 16) & 0xFF;
+  bytes[1] = (v >> 8) & 0xFF;
+  bytes[0] = v & 0xFF;
+  return v;
 }
 
-inline uint32_t from_le_32(uint32_t v) {
-  return (((v & 0xFF000000) >> 24) |
-          ((v & 0xFF0000) >> 8) |
-          ((v & 0xFF00) << 8) |
-          ((v & 0xFF) << 24));
+inline uint32_t from_le_32(uint32_t& v) {
+  uint8_t* bytes = reinterpret_cast<uint8_t*>(&v);
+  v = ((bytes[3] << 24) |
+       (bytes[2] << 16) |
+       (bytes[1] << 8) |
+       bytes[0]);
+  return v;
 }
 
-inline uint64_t to_le_64(uint64_t v) {
-  return (((v & 0xFF) << 56) |
-          ((v & 0xFF00) << 40) |
-          ((v & 0xFF0000) << 24) |
-          ((v & 0xFF000000) << 8) |
-          ((v & 0xFF00000000) >> 8) |
-          ((v & 0xFF0000000000) >> 24) |
-          ((v & 0xFF000000000000) >> 40) |
-          ((v & 0xFF00000000000000) >> 56));
+inline uint64_t to_le_64(uint64_t& v) {
+  uint8_t* bytes = reinterpret_cast<uint8_t*>(&v);
+  bytes[7] = (v >> 56) & 0xFF;
+  bytes[6] = (v >> 48) & 0xFF;
+  bytes[5] = (v >> 40) & 0xFF;
+  bytes[4] = (v >> 32) & 0xFF;
+  bytes[3] = (v >> 24) & 0xFF;
+  bytes[2] = (v >> 16) & 0xFF;
+  bytes[1] = (v >> 8) & 0xFF;
+  bytes[0] = v & 0xFF;
+  return v;
 }
 
-inline uint64_t from_le_64(uint64_t v) {
-  return (((v & 0xFF00000000000000) >> 56) |
-          ((v & 0xFF000000000000) >> 40) |
-          ((v & 0xFF0000000000) >> 24) |
-          ((v & 0xFF00000000) >> 8) |
-          ((v & 0xFF000000) << 8) |
-          ((v & 0xFF0000) << 24) |
-          ((v & 0xFF00) << 40) |
-          ((v & 0xFF) << 56));
+inline uint64_t from_le_64(uint64_t& v) {
+  uint8_t* bytes = reinterpret_cast<uint8_t*>(&v);
+  v = ((static_cast<uint64_t>(bytes[7]) << 56ull) |
+       (static_cast<uint64_t>(bytes[6]) << 48ull) |
+       (static_cast<uint64_t>(bytes[5]) << 40ull) |
+       (static_cast<uint64_t>(bytes[4]) << 32ull) |
+       (static_cast<uint64_t>(bytes[3]) << 24ull) |
+       (static_cast<uint64_t>(bytes[2]) << 16ull) |
+       (static_cast<uint64_t>(bytes[1]) << 8ull) |
+       (static_cast<uint64_t>(bytes[0])));
+  return v;
 }
 
 inline auto write_le_32(FILE* out, uint32_t value) {

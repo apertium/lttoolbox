@@ -28,13 +28,18 @@ struct StringRef {
 };
 
 class StringWriter {
+private:
+  bool mmapping = false;
+  UString edit_buffer;
+  uint64_t mmap_size;
+  UChar* mmap_buffer;
 public:
-  UString buffer;
   StringRef add(UString_view s);
   UString_view get(const uint32_t start, const uint32_t count);
   UString_view get(const StringRef& ref);
   void read(FILE* in);
   void write(FILE* out);
+  void* init(void* ptr);
 };
 
 #endif

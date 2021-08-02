@@ -32,9 +32,11 @@ TransducerExe::TransducerExe() :
 
 TransducerExe::~TransducerExe()
 {
-  delete[] finals;
-  delete[] offsets;
-  delete[] transitions;
+  if (!mmapping) {
+    delete[] finals;
+    delete[] offsets;
+    delete[] transitions;
+  }
 }
 
 void
@@ -72,10 +74,9 @@ TransducerExe::read(FILE* input, Alphabet& alphabet)
     }
 
     offsets = new uint64_t[state_count+1];
-    for (uint64_t i = 0; i < state_count; i++) {
+    for (uint64_t i = 0; i < state_count+1; i++) {
       offsets[i] = read_le_64(input);
     }
-    offsets[state_count] = transition_count;
 
     transitions = new Transition[transition_count];
     for (uint64_t i = 0; i < transition_count; i++) {
@@ -142,6 +143,32 @@ TransducerExe::read(FILE* input, Alphabet& alphabet)
       transitions[i].weight = weights[i];
     }
   }
+}
+
+void*
+TransducerExe::init(void* ptr)
+{
+  mmapping = true;
+
+  ptr += 4 + sizeof(uint64_t); // skip header
+  uint64_t* arr = reinterpret_cast<uint64_t*>(ptr);
+  uint64_t total_size = arr[0];
+  initial = arr[1];
+  state_count = arr[2];
+  final_count = arr[3];
+  transition_count = arr[4];
+  ptr += sizeof(uint64_t)*5;
+
+  finals = reinterpret_cast<Final*>(ptr);
+  ptr += sizeof(Final)*final_count;
+
+  offsets = reinterpret_cast<uint64_t*>(ptr);
+  ptr += sizeof(uint64_t)*(state_count+1);
+
+  transitions = reinterpret_cast<Transition*>(ptr);
+  ptr += sizeof(Transition)*transition_count;
+
+  return ptr;
 }
 
 void
