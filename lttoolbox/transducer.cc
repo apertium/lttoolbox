@@ -660,6 +660,17 @@ Transducer::read(FILE *input, int const decalage)
 void
 Transducer::read_mmap(FILE* in, Alphabet& alpha)
 {
+  char header[4]{};
+  auto r = fread_unlocked(header, 1, 4, in);
+  if (r == 4 && strncmp(header, HEADER_TRANSDUCER, 4) == 0) {
+    auto features = read_le_64(in);
+    if (features >= TDF_UNKNOWN) {
+      throw std::runtime_error("Transducer has features that are unknown to this version of lttoolbox - upgrade!");
+    }
+  } else {
+    throw std::runtime_error("Unable to read transducer header!");
+  }
+
   read_le_64(in); // total size
   initial = read_le_64(in);
   uint64_t state_count = read_le_64(in);
@@ -689,7 +700,7 @@ Transducer::read_mmap(FILE* in, Alphabet& alpha)
 
   uint64_t state = 0;
   for (uint64_t i = 0; i < trans_count; i++) {
-    if (i == offsets[state+1]) {
+    while (i == offsets[state+1]) {
       state++;
     }
     int32_t isym = read_le_s32(in);

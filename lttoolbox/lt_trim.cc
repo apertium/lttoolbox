@@ -16,6 +16,8 @@
  */
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
+#include <lttoolbox/endian_util.h>
+#include <lttoolbox/string_writer.h>
 
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/lt_locale.h>
@@ -44,6 +46,7 @@ read_fst(FILE *bin_file)
   std::map<UString, Transducer> transducers;
 
   fpos_t pos;
+  bool mmap = false;
   if (fgetpos(bin_file, &pos) == 0) {
       char header[4]{};
       fread_unlocked(header, 1, 4, bin_file);
@@ -52,6 +55,7 @@ read_fst(FILE *bin_file)
           if (features >= LTF_UNKNOWN) {
               throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
           }
+          mmap = features & LTF_MMAP;
       }
       else {
           // Old binary format
@@ -59,26 +63,43 @@ read_fst(FILE *bin_file)
       }
   }
 
-  // letters
-  UString letters = Compression::string_read(bin_file);
+  UString letters;
 
-  // symbols
-  new_alphabet.read(bin_file);
+  if (mmap) {
+    StringWriter sw;
+    sw.read(bin_file);
 
-  int len = Compression::multibyte_read(bin_file);
+    uint32_t s = read_le_32(bin_file);
+    uint32_t c = read_le_32(bin_file);
+    letters = UString{sw.get(s, c)};
 
-  while(len > 0)
-  {
-    UString name = Compression::string_read(bin_file);
-    transducers[name].read(bin_file);
+    new_alphabet.read_mmap(bin_file, sw);
 
-    len--;
+    uint64_t tr_count = read_le_64(bin_file);
+    for (uint64_t i = 0; i < tr_count; i++) {
+      uint32_t s = read_le_32(bin_file);
+      uint32_t c = read_le_32(bin_file);
+      UString name = UString{sw.get(s, c)};
+      transducers[name].read_mmap(bin_file, new_alphabet);
+    }
+  } else {
+    // letters
+    letters = Compression::string_read(bin_file);
+
+    // symbols
+    new_alphabet.read(bin_file);
+
+    int len = Compression::multibyte_read(bin_file);
+
+    while(len > 0) {
+      UString name = Compression::string_read(bin_file);
+      transducers[name].read(bin_file);
+
+      len--;
+    }
   }
 
-  std::pair<Alphabet, UString> alph_letters;
-  alph_letters.first = new_alphabet;
-  alph_letters.second = letters;
-  return std::pair<std::pair<Alphabet, UString>, std::map<UString, Transducer> > (alph_letters, transducers);
+  return make_pair(make_pair(new_alphabet, letters), transducers);
 }
 
 std::pair<std::pair<Alphabet, UString>, std::map<UString, Transducer> >

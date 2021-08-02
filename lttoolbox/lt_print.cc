@@ -16,6 +16,8 @@
  */
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
+#include <lttoolbox/endian_util.h>
+#include <lttoolbox/string_writer.h>
 
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/lt_locale.h>
@@ -128,10 +130,11 @@ int main(int argc, char *argv[])
   }
 
   Alphabet alphabet;
-  set<UChar> alphabetic_chars;
+  set<UChar32> alphabetic_chars;
 
   map<UString, Transducer> transducers;
 
+  bool mmap = false;
   fpos_t pos;
   if (fgetpos(input, &pos) == 0) {
       char header[4]{};
@@ -141,6 +144,7 @@ int main(int argc, char *argv[])
           if (features >= LTF_UNKNOWN) {
               throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
           }
+          mmap = features & LTF_MMAP;
       }
       else {
           // Old binary format
@@ -148,25 +152,44 @@ int main(int argc, char *argv[])
       }
   }
 
-  // letters
-  int len = Compression::multibyte_read(input);
-  while(len > 0)
-  {
-    alphabetic_chars.insert(static_cast<UChar32>(Compression::multibyte_read(input)));
-    len--;
-  }
+  if (mmap) {
+    StringWriter sw;
+    sw.read(input);
 
-  // symbols
-  alphabet.read(input);
+    uint32_t s = read_le_32(input);
+    uint32_t c = read_le_32(input);
+    vector<int32_t> vec;
+    ustring_to_vec32(sw.get(s, c), vec);
+    alphabetic_chars.insert(vec.begin(), vec.end());
 
-  len = Compression::multibyte_read(input);
+    alphabet.read_mmap(input, sw);
 
-  while(len > 0)
-  {
-    UString name = Compression::string_read(input);
-    transducers[name].read(input);
+    uint64_t tr_count = read_le_64(input);
+    for (uint64_t i = 0; i < tr_count; i++) {
+      uint32_t s = read_le_32(input);
+      uint32_t c = read_le_32(input);
+      UString name = UString{sw.get(s, c)};
+      transducers[name].read_mmap(input, alphabet);
+    }
+  } else {
+    // letters
+    int len = Compression::multibyte_read(input);
+    while(len > 0) {
+      alphabetic_chars.insert(static_cast<UChar32>(Compression::multibyte_read(input)));
+      len--;
+    }
 
-    len--;
+    // symbols
+    alphabet.read(input);
+
+    len = Compression::multibyte_read(input);
+
+    while(len > 0) {
+      UString name = Compression::string_read(input);
+      transducers[name].read(input);
+
+      len--;
+    }
   }
 
   /////////////////////
