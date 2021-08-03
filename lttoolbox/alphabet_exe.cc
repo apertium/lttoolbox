@@ -94,7 +94,12 @@ AlphabetExe::getSymbol(UString& result, int32_t symbol, bool uppercase) const
   if (symbol == 0) {
     return;
   } else if (symbol < 0) {
-    result.append(sw->get(tags[-symbol-1]));
+    int idx = -symbol-1;
+    if (idx < tag_count) {
+      result.append(sw->get(tags[idx]));
+    } else {
+      result.append(dynamic_symbols[idx-tag_count]);
+    }
   } else if (uppercase) {
     result += u_toupper(static_cast<UChar32>(symbol));
   } else {
@@ -115,4 +120,36 @@ AlphabetExe::clearSymbol(const int32_t symbol)
     tags[-symbol-1].start = 0;
     tags[-symbol-1].count = 0;
   }
+}
+
+int32_t
+AlphabetExe::lookupDynamic(const UString& symbol)
+{
+  int32_t ret;
+  auto it = symbol_map.find(symbol);
+  if (it == symbol_map.end()) {
+    if (dynamic_symbols.empty()) {
+      // should be able to usually avoid reindexing with this
+      dynamic_symbols.reserve(32);
+    }
+    ret = -tag_count -dynamic_symbols.size() -1;
+    bool rebuild = (dynamic_symbols.size() == dynamic_symbols.capacity());
+    dynamic_symbols.push_back(symbol);
+    symbol_map[dynamic_symbols.back()] = ret;
+    if (rebuild) {
+      // moderately horrible, but that's what we get for invalidating
+      // all the views when dynamic_symbols gets reallocated
+      symbol_map.clear();
+      for (uint64_t i = 0; i < tag_count; i++) {
+        symbol_map[sw->get(tags[i])] = -static_cast<int32_t>(i) - 1;
+      }
+      int32_t n = -tag_count-1;
+      for (auto& ds : dynamic_symbols) {
+        symbol_map[ds] = n--;
+      }
+    }
+  } else {
+    ret = it->second;
+  }
+  return ret;
 }

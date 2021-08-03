@@ -20,6 +20,7 @@
 
 #include <lttoolbox/string_writer.h>
 #include <map>
+#include <vector>
 
 class AlphabetExe {
 private:
@@ -28,6 +29,8 @@ private:
   StringRef* tags;
   std::map<UString_view, int32_t> symbol_map;
   bool mmapping = false;
+  // tags added at runtime - used by apertium-separable
+  std::vector<UString> dynamic_symbols;
 public:
   AlphabetExe(StringWriter* sw_);
   ~AlphabetExe();
@@ -37,6 +40,8 @@ public:
   void getSymbol(UString& result, int32_t symbol, bool uppercase = false) const;
   bool isTag(const int32_t symbol) const;
   void clearSymbol(const int32_t symbol);
+  // like operator() but add symbol to dynamic_symbols if not found
+  int32_t lookupDynamic(const UString& symbol);
 };
 
 #endif
