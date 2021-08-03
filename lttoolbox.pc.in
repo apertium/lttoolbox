@@ -7,4 +7,4 @@ Name: lttoolbox
 Description: Augmented letter transducer tools for natural language processing
 Version: @VERSION@
 Libs: -L${libdir} -llttoolbox@VERSION_MAJOR@
-Cflags: -I${includedir}/lttoolbox-@VERSION_API@
+Cflags: -I${includedir}/lttoolbox-@VERSION_API@ @have_sv@

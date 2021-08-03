@@ -47,6 +47,11 @@ AC_CHECK_LIB(xml2, xmlReaderForFile)
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h string.h unistd.h stddef.h string_view])
+
+have_sv=""
+AC_CHECK_HEADERS([string_view], [have_sv="-DHAVE_STRING_VIEW"], [have_sv=""])
+AC_SUBST([have_sv])
+
 AC_CHECK_HEADER([utf8.h], [], [AC_MSG_ERROR([You don't have utfcpp installed.])])
 
 # Checks for typedefs, structures, and compiler characteristics.
