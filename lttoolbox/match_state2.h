@@ -18,7 +18,7 @@
 #ifndef _LT_MATCH_STATE_
 #define _LT_MATCH_STATE_
 
-#include <lttoolbox/alphabet.h>
+#include <lttoolbox/alphabet_exe.h>
 #include <lttoolbox/transducer_exe.h>
 #include <lttoolbox/ustring.h>
 
@@ -44,7 +44,8 @@ public:
   bool empty() const;
   void step(const int32_t input);
   void step(const int32_t input, const int32_t alt);
-  void step(UString_view input, const Alphabet& alpha, bool foldcase = true);
+  void step(const int32_t input, const int32_t alt1, const int32_t alt2);
+  void step(UString_view input, const AlphabetExe& alpha, bool foldcase = true);
   int classifyFinals(const std::map<uint64_t, int>& finals,
                      const std::set<int>& banned_rules) const;
   int classifyFinals(const std::map<uint64_t, int>& finals) const;

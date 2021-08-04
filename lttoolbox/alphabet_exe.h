@@ -36,7 +36,7 @@ public:
   ~AlphabetExe();
   void read(FILE* in, bool mmap);
   void* init(void* ptr);
-  int32_t operator()(UString_view sv);
+  int32_t operator()(UString_view sv) const;
   void getSymbol(UString& result, int32_t symbol, bool uppercase = false) const;
   bool isTag(const int32_t symbol) const;
   void clearSymbol(const int32_t symbol);

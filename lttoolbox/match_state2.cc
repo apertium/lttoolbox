@@ -100,9 +100,49 @@ MatchState2::step(const int32_t input, const int32_t alt)
 }
 
 void
-MatchState2::step(UString_view input, const Alphabet& alpha, bool foldcase)
+MatchState2::step(const int32_t input, const int32_t alt1, int32_t alt2)
 {
-  // TODO
+  uint16_t temp_last = last;
+  for (uint16_t i = first; i != temp_last; i = (i+1)%BUF_LIMIT) {
+    applySymbol(buffer[i], input);
+    applySymbol(buffer[i], alt1);
+    applySymbol(buffer[i], alt2);
+  }
+  first = temp_last;
+}
+
+void
+MatchState2::step(UString_view input, const AlphabetExe& alpha, bool foldcase)
+{
+  int32_t any_char = alpha("<ANY_CHAR>"_u);
+  int32_t any_tag = alpha("<ANY_TAG>"_u);
+  for (uint64_t i = 0; i < input.size(); i++) {
+    if (input[i] == '<') {
+      for (uint64_t j = i+1; j < input.size(); j++) {
+        if (input[j] == '\\') {
+          j++;
+        } else if (input[j] == '>') {
+          int32_t sym = alpha(input.substr(i, j-i+1));
+          if (sym) {
+            step(sym, any_tag);
+          } else {
+            step(any_tag);
+          }
+          i = j;
+          break;
+        }
+      }
+    } else {
+      if (input[i] == '\\') {
+        i++;
+      }
+      if (foldcase && u_isupper(input[i])) {
+        step(input[i], u_tolower(input[i]), any_char);
+      } else {
+        step(input[i], any_char);
+      }
+    }
+  }
 }
 
 int

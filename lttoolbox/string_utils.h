@@ -11,6 +11,8 @@ public:
 
   // split string on delimiter
   static std::vector<UString> split(const UString& str, const UString& delim);
+  // split, but respect \ escapes
+  static std::vector<UString_view> split_escape(UString_view str, const UChar delim);
 
   // inverse of split
   static UString join(const std::vector<UString>& vec, const UString& delim);

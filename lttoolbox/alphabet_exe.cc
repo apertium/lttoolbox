@@ -78,7 +78,7 @@ AlphabetExe::init(void* ptr)
 }
 
 int32_t
-AlphabetExe::operator()(UString_view sv)
+AlphabetExe::operator()(UString_view sv) const
 {
   auto it = symbol_map.find(sv);
   if (it != symbol_map.end()) {
