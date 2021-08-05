@@ -40,7 +40,7 @@ TransducerExe::~TransducerExe()
 }
 
 void
-TransducerExe::read_compressed(FILE* input, Alphabet& alphabet)
+TransducerExe::read_compressed(FILE* input, Alphabet& alphabet, bool match)
 {
   bool read_weights = false; // only matters for pre-mmap
   fpos_t pos;
@@ -89,13 +89,21 @@ TransducerExe::read_compressed(FILE* input, Alphabet& alphabet)
     int32_t tag_base = 0;
     for (uint64_t t = 0; t < count; t++) {
       tag_base += Compression::multibyte_read(input);
+      if (match) {
+        tag_base -= alphabet.size();
+      }
       uint64_t dest = (i + Compression::multibyte_read(input)) % state_count;
       if (read_weights) {
         base_weight = Compression::long_multibyte_read(input);
       }
-      auto sym = alphabet.decode(tag_base);
-      temp[sym.first].push_back(make_pair(sym.second,
-                                          make_pair(dest, base_weight)));
+      if (match) {
+        temp[tag_base].push_back(make_pair(tag_base,
+                                           make_pair(dest, base_weight)));
+      } else {
+        auto sym = alphabet.decode(tag_base);
+        temp[sym.first].push_back(make_pair(sym.second,
+                                            make_pair(dest, base_weight)));
+      }
     }
     for (auto& it : temp) {
       for (auto& it2 : it.second) {
