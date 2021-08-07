@@ -34,6 +34,26 @@ StringWriter::add(UString_view s)
   return ret;
 }
 
+StringRef
+StringWriter::find(UString_view s) const
+{
+  StringRef ret;
+  ret.start = 0;
+  ret.count = 0;
+  UString_view buf;
+  if (mmapping) {
+    buf = UString_view(mmap_buffer, mmap_size);
+  } else {
+    buf = UString_view(edit_buffer);
+  }
+  auto start = buf.find(s);
+  if (start != UString_view::npos) {
+    ret.start = start;
+    ret.count = s.size();
+  }
+  return ret;
+}
+
 UString_view
 StringWriter::get(const uint32_t start, const uint32_t count)
 {

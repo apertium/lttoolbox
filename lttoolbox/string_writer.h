@@ -35,6 +35,7 @@ private:
   UChar* mmap_buffer;
 public:
   StringRef add(UString_view s);
+  StringRef find(UString_view s) const;
   UString_view get(const uint32_t start, const uint32_t count);
   UString_view get(const StringRef& ref);
   void read(FILE* in);
