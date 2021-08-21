@@ -17,8 +17,8 @@
 
 #include <lttoolbox/alphabet_exe.h>
 
-#include <lttoolbox/compression.h>
 #include <lttoolbox/endian_util.h>
+#include <lttoolbox/old_binary.h>
 
 AlphabetExe::AlphabetExe(StringWriter* sw_)
   : sw(sw_), tag_count(0), tags(nullptr)
@@ -43,12 +43,12 @@ AlphabetExe::read(FILE* input, bool mmap)
       symbol_map[sw->get(tags[i])] = -static_cast<int32_t>(i) - 1;
     }
   } else {
-    tag_count = Compression::multibyte_read(input);
+    tag_count = OldBinary::read_int(input);
     tags = new StringRef[tag_count];
     for (uint32_t i = 0; i < tag_count; i++) {
       UString tg;
       tg += '<';
-      tg += Compression::string_read(input);
+      OldBinary::read_ustr(input, tg);
       tg += '>';
       tags[i] = sw->add(tg);
     }
@@ -57,10 +57,10 @@ AlphabetExe::read(FILE* input, bool mmap)
     for (uint32_t i = 0; i < tag_count; i++) {
       symbol_map[sw->get(tags[i])] = -static_cast<int32_t>(i) - 1;
     }
-    int pairs = Compression::multibyte_read(input);
+    int pairs = OldBinary::read_int(input);
     for (int i = 0; i < pairs; i++) {
-      Compression::multibyte_read(input);
-      Compression::multibyte_read(input);
+      OldBinary::read_int(input);
+      OldBinary::read_int(input);
     }
   }
 }

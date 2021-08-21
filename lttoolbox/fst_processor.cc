@@ -15,10 +15,11 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 #include <lttoolbox/fst_processor.h>
-#include <lttoolbox/compression.h>
+#include <lttoolbox/binary_headers.h>
 #include <lttoolbox/endian_util.h>
 #include <lttoolbox/exception.h>
 #include <lttoolbox/mmap.h>
+#include <lttoolbox/old_binary.h>
 #include <lttoolbox/xml_parse_util.h>
 
 #include <iostream>
@@ -1003,9 +1004,9 @@ FSTProcessor::load(FILE *input)
   } else {
 
     // letters
-    int len = Compression::multibyte_read(input);
+    uint64_t len = OldBinary::read_int(input);
     while(len > 0) {
-      alphabetic_chars.insert(static_cast<UChar32>(Compression::multibyte_read(input)));
+      alphabetic_chars.insert(static_cast<UChar32>(OldBinary::read_int(input)));
       len--;
     }
 
@@ -1016,10 +1017,11 @@ FSTProcessor::load(FILE *input)
     Alphabet temp;
     temp.read(input);
 
-    len = Compression::multibyte_read(input);
+    len = OldBinary::read_int(input);
 
     while(len > 0) {
-      UString name = Compression::string_read(input);
+      UString name;
+      OldBinary::read_ustr(input, name);
       transducers[name].read_compressed(input, temp);
       len--;
     }
