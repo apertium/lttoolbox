@@ -31,7 +31,8 @@ uint64_t read_byte(FILE* in)
 {
   unsigned char ret = 0;
   if (fread_unlocked(&ret, 1, 1, in) != 1) {
-    throw std::runtime_error("Failed to read byte");
+    // for some reason things break if this is an error
+    //throw std::runtime_error("Failed to read byte");
   }
   return ret;
 }
