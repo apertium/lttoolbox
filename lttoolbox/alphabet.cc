@@ -20,6 +20,7 @@
 #include <lttoolbox/serialiser.h>
 #include <lttoolbox/deserialiser.h>
 #include <lttoolbox/endian_util.h>
+#include <lttoolbox/old_binary.h>
 
 #include <cctype>
 #include <cstdlib>
@@ -153,26 +154,21 @@ Alphabet::read(FILE *input)
   a_new.spair.clear();
 
   // Reading of taglist
-  int32_t tam = Compression::multibyte_read(input);
   map<int32_t, string> tmp;
-  while(tam > 0)
-  {
-    tam--;
-    UString mytag = "<"_u;
-    mytag += Compression::string_read(input);
-    mytag += ">"_u;
+  for (uint64_t tam = OldBinary::read_int(input, true); tam > 0; tam--) {
+    UString mytag;
+    mytag += '<';
+    OldBinary::read_ustr(input, mytag, true);
+    mytag += '>';
     a_new.slexicinv.push_back(mytag);
     a_new.slexic[mytag]= -a_new.slexicinv.size(); // ToDo: This does not turn the result negative due to unsigned semantics
   }
 
   // Reading of pairlist
   size_t bias = a_new.slexicinv.size();
-  tam = Compression::multibyte_read(input);
-  while(tam > 0)
-  {
-    tam--;
-    int32_t first = Compression::multibyte_read(input);
-    int32_t second = Compression::multibyte_read(input);
+  for (uint64_t tam = OldBinary::read_int(input, true); tam > 0; tam--) {
+    int32_t first = OldBinary::read_int(input, true);
+    int32_t second = OldBinary::read_int(input, true);
     pair<int32_t, int32_t> tmp(first - bias, second - bias);
     int32_t spair_size = a_new.spair.size();
     a_new.spair[tmp] = spair_size;
@@ -227,6 +223,30 @@ Alphabet::deserialise(std::istream &serialised)
   spairinv = Deserialiser<vector<pair<int32_t, int32_t> > >::deserialise(serialised);
   for (size_t i = 0; i < slexicinv.size(); i++) {
     spair[spairinv[i]] = i;
+  }
+}
+
+void
+Alphabet::read_serialised(FILE* in)
+{
+  slexicinv.clear();
+  slexic.clear();
+  spairinv.clear();
+  spair.clear();
+  uint64_t len = OldBinary::read_int(in, false);
+  for (uint64_t i = 0; i < len; i++) {
+    UString t;
+    OldBinary::read_ustr(in, t, false);
+    slexicinv.push_back(t);
+    slexic[t] = -(int)i - 1;
+  }
+  len = OldBinary::read_int(in, false);
+  for (uint64_t i = 0; i < len; i++) {
+    int32_t a = OldBinary::read_int(in, false);
+    int32_t b = OldBinary::read_int(in, false);
+    auto p = make_pair(a, b);
+    spairinv.push_back(p);
+    spair[p] = i;
   }
 }
 

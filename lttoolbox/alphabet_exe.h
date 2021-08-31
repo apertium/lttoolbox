@@ -34,7 +34,7 @@ private:
 public:
   AlphabetExe(StringWriter* sw_);
   ~AlphabetExe();
-  void read(FILE* in, bool mmap);
+  void read(FILE* in, bool mmap, bool compressed=true);
   void* init(void* ptr);
   int32_t operator()(UString_view sv) const;
   void getSymbol(UString& result, int32_t symbol, bool uppercase = false) const;

@@ -32,7 +32,7 @@ AlphabetExe::~AlphabetExe()
 }
 
 void
-AlphabetExe::read(FILE* input, bool mmap)
+AlphabetExe::read(FILE* input, bool mmap, bool compressed)
 {
   if (mmap) {
     tag_count = read_le_64(input);
@@ -43,13 +43,17 @@ AlphabetExe::read(FILE* input, bool mmap)
       symbol_map[sw->get(tags[i])] = -static_cast<int32_t>(i) - 1;
     }
   } else {
-    tag_count = OldBinary::read_int(input);
+    tag_count = OldBinary::read_int(input, compressed);
     tags = new StringRef[tag_count];
     for (uint32_t i = 0; i < tag_count; i++) {
       UString tg;
-      tg += '<';
-      OldBinary::read_ustr(input, tg);
-      tg += '>';
+      if (compressed) {
+        tg += '<';
+        OldBinary::read_ustr(input, tg, compressed);
+        tg += '>';
+      } else {
+        OldBinary::read_ustr(input, tg, compressed);
+      }
       tags[i] = sw->add(tg);
     }
     // has to be a separate loop, otherwise the string_views get
@@ -59,8 +63,8 @@ AlphabetExe::read(FILE* input, bool mmap)
     }
     int pairs = OldBinary::read_int(input);
     for (int i = 0; i < pairs; i++) {
-      OldBinary::read_int(input);
-      OldBinary::read_int(input);
+      OldBinary::read_int(input, compressed);
+      OldBinary::read_int(input, compressed);
     }
   }
 }

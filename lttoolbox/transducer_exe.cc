@@ -18,10 +18,11 @@
 #include <lttoolbox/transducer_exe.h>
 
 #include <cstring>
+#include <lttoolbox/binary_headers.h>
 #include <lttoolbox/endian_util.h>
 
 // includes needed for reading non-mmap files
-#include <lttoolbox/compression.h>
+#include <lttoolbox/old_binary.h>
 #include <map>
 #include <vector>
 
@@ -48,7 +49,7 @@ TransducerExe::read_compressed(FILE* input, Alphabet& alphabet, bool match)
   char header[4]{};
   fread_unlocked(header, 1, 4, input);
   if (strncmp(header, HEADER_TRANSDUCER, 4) == 0) {
-    auto features = read_le<uint64_t>(input);
+    auto features = read_le_64(input);
     if (features >= TDF_UNKNOWN) {
       throw std::runtime_error("Transducer has features that are unknown to this version of lttoolbox - upgrade!");
     }
@@ -58,22 +59,22 @@ TransducerExe::read_compressed(FILE* input, Alphabet& alphabet, bool match)
     fsetpos(input, &pos);
   }
 
-  initial = Compression::multibyte_read(input);
-  final_count = Compression::multibyte_read(input);
+  initial = OldBinary::read_int(input, true);
+  final_count = OldBinary::read_int(input, true);
 
   uint64_t base_state = 0;
   double base_weight = 0.0;
   finals = new Final[final_count];
   for (uint64_t i = 0; i < final_count; i++) {
-    base_state += Compression::multibyte_read(input);
+    base_state += OldBinary::read_int(input, true);
     if (read_weights) {
-      base_weight += Compression::long_multibyte_read(input);
+      base_weight += OldBinary::read_double(input, true);
     }
     finals[i].state = base_state;
     finals[i].weight = base_weight;
   }
 
-  state_count = Compression::multibyte_read(input);
+  state_count = OldBinary::read_int(input, true);
   offsets = new uint64_t[state_count+1];
   transition_count = 0;
   std::vector<int32_t> isyms, osyms;
@@ -84,17 +85,17 @@ TransducerExe::read_compressed(FILE* input, Alphabet& alphabet, bool match)
     std::map<int32_t,
              std::vector<std::pair<int32_t,
                                    std::pair<uint64_t, double>>>> temp;
-    uint64_t count = Compression::multibyte_read(input);
+    uint64_t count = OldBinary::read_int(input, true);
     transition_count += count;
     int32_t tag_base = 0;
     for (uint64_t t = 0; t < count; t++) {
-      tag_base += Compression::multibyte_read(input);
+      tag_base += OldBinary::read_int(input, true);
       if (match) {
         tag_base -= alphabet.size();
       }
-      uint64_t dest = (i + Compression::multibyte_read(input)) % state_count;
+      uint64_t dest = (i + OldBinary::read_int(input, true)) % state_count;
       if (read_weights) {
-        base_weight = Compression::long_multibyte_read(input);
+        base_weight = OldBinary::read_double(input, true);
       }
       if (match) {
         temp[tag_base].push_back(make_pair(tag_base,
@@ -103,6 +104,66 @@ TransducerExe::read_compressed(FILE* input, Alphabet& alphabet, bool match)
         auto sym = alphabet.decode(tag_base);
         temp[sym.first].push_back(make_pair(sym.second,
                                             make_pair(dest, base_weight)));
+      }
+    }
+    for (auto& it : temp) {
+      for (auto& it2 : it.second) {
+        isyms.push_back(it.first);
+        osyms.push_back(it2.first);
+        dests.push_back(it2.second.first);
+        weights.push_back(it2.second.second);
+      }
+    }
+  }
+  offsets[state_count] = transition_count;
+  transitions = new Transition[transition_count];
+  for (uint64_t i = 0; i < transition_count; i++) {
+    transitions[i].isym = isyms[i];
+    transitions[i].osym = osyms[i];
+    transitions[i].dest = dests[i];
+    transitions[i].weight = weights[i];
+  }
+}
+
+void
+TransducerExe::read_serialised(FILE* input, Alphabet& alphabet, bool match)
+{
+  initial = OldBinary::read_int(input, false);
+  final_count = OldBinary::read_int(input, false);
+
+  finals = new Final[final_count];
+  for (uint64_t i = 0; i < final_count; i++) {
+    finals[i].state = OldBinary::read_int(input, false);
+    finals[i].weight = OldBinary::read_double(input, false);
+  }
+
+  state_count = OldBinary::read_int(input, false);
+  offsets = new uint64_t[state_count+1];
+  transition_count = 0;
+  std::vector<int32_t> isyms, osyms;
+  std::vector<uint64_t> dests;
+  std::vector<double> weights;
+  for (uint64_t i = 0; i < state_count; i++) {
+    offsets[i] = transition_count;
+    std::map<int32_t,
+             std::vector<std::pair<int32_t,
+                                   std::pair<uint64_t, double>>>> temp;
+    OldBinary::read_int(input, false); // src state, should == i
+    uint64_t count = OldBinary::read_int(input, false);
+    transition_count += count;
+    for (uint64_t t = 0; t < count; t++) {
+      int32_t tag = OldBinary::read_int(input, false);
+      if (match) {
+        tag -= alphabet.size();
+      }
+      uint64_t dest = OldBinary::read_int(input, false);
+      double weight = OldBinary::read_double(input, false);
+      if (match) {
+        temp[tag].push_back(make_pair(tag, make_pair(dest, weight)));
+      } else {
+        auto sym = alphabet.decode(tag);
+        temp[sym.first].push_back(make_pair(sym.second,
+                                            make_pair(dest, weight)));
       }
     }
     for (auto& it : temp) {

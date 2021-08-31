@@ -346,6 +346,8 @@ public:
   void serialise(std::ostream &serialised) const;
   void deserialise(std::istream &serialised);
 
+  void read_serialised(FILE* in);
+
   /**
    * Insert another transducer into this, unifying source and targets.
    * Does not minimize.

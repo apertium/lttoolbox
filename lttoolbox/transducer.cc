@@ -21,6 +21,7 @@
 #include <lttoolbox/deserialiser.h>
 #include <lttoolbox/serialiser.h>
 #include <lttoolbox/endian_util.h>
+#include <lttoolbox/old_binary.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -611,8 +612,8 @@ Transducer::read(FILE *input, int const decalage)
       }
   }
 
-  new_t.initial = Compression::multibyte_read(input);
-  int finals_size = Compression::multibyte_read(input);
+  new_t.initial = OldBinary::read_int(input, true);
+  int finals_size = OldBinary::read_int(input, true);
 
   int base = 0;
   double base_weight = default_weight;
@@ -620,29 +621,29 @@ Transducer::read(FILE *input, int const decalage)
   {
     finals_size--;
 
-    base += Compression::multibyte_read(input);
+    base += OldBinary::read_int(input, true);
     if(read_weights)
     {
-      base_weight = Compression::long_multibyte_read(input);
+      base_weight = OldBinary::read_double(input, true);
     }
     new_t.finals.insert(make_pair(base, base_weight));
   }
 
-  base = Compression::multibyte_read(input);
+  base = OldBinary::read_int(input, true);
   int number_of_states = base;
   int current_state = 0;
   while(number_of_states > 0)
   {
-    int number_of_local_transitions = Compression::multibyte_read(input);
+    int number_of_local_transitions = OldBinary::read_int(input, true);
     int tagbase = 0;
     while(number_of_local_transitions > 0)
     {
       number_of_local_transitions--;
-      tagbase += Compression::multibyte_read(input) - decalage;
-      int state = (current_state + Compression::multibyte_read(input)) % base;
+      tagbase += OldBinary::read_int(input, true) - decalage;
+      int state = (current_state + OldBinary::read_int(input, true)) % base;
       if(read_weights)
       {
-        base_weight = Compression::long_multibyte_read(input);
+        base_weight = OldBinary::read_double(input, true);
       }
       if(new_t.transitions.find(state) == new_t.transitions.end())
       {
@@ -788,6 +789,27 @@ Transducer::deserialise(std::istream &serialised)
   initial = Deserialiser<int>::deserialise(serialised);
   finals = Deserialiser<map<int, double> >::deserialise(serialised);
   transitions = Deserialiser<map<int, multimap<int, pair<int, double> > > >::deserialise(serialised);
+}
+
+void
+Transducer::read_serialised(FILE* in)
+{
+  initial = OldBinary::read_int(in, false);
+  for (uint64_t i = OldBinary::read_int(in, false); i > 0; i--) {
+    int s = OldBinary::read_int(in, false);
+    finals.insert(make_pair(s, OldBinary::read_double(in, false)));
+  }
+  for (uint64_t i = OldBinary::read_int(in, false); i > 0; i--) {
+    int src = OldBinary::read_int(in, false);
+    multimap<int, pair<int, double> > st;
+    for (uint64_t j = OldBinary::read_int(in, false); j > 0; j--) {
+      int sym = OldBinary::read_int(in, false);
+      int dest = OldBinary::read_int(in, false);
+      double w = OldBinary::read_double(in, false);
+      st.insert(make_pair(sym, make_pair(dest, w)));
+    }
+    transitions.insert(make_pair(src, st));
+  }
 }
 
 void
@@ -1421,15 +1443,16 @@ read_transducer_set(FILE* input, UString& letters, Alphabet& alpha,
     }
   } else {
     // letters
-    letters = Compression::string_read(input);
+    OldBinary::read_ustr(input, letters, true);
 
     // symbols
     alpha.read(input);
 
-    int len = Compression::multibyte_read(input);
+    int len = OldBinary::read_int(input, true);
 
     while(len > 0) {
-      UString name = Compression::string_read(input);
+      UString name;
+      OldBinary::read_ustr(input, name, true);
       trans[name].read(input);
 
       len--;

@@ -60,6 +60,7 @@ public:
   TransducerExe();
   ~TransducerExe();
   void read_compressed(FILE* input, Alphabet& alphabet, bool match = false);
+  void read_serialised(FILE* input, Alphabet& alphabet, bool match = false);
   void read(FILE* input);
   void* init(void* ptr);
 };
