@@ -15,6 +15,7 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 #include <lttoolbox/lt_locale.h>
+#include <unicode/uloc.h>
 
 #include <clocale>
 #include <iostream>
@@ -34,6 +35,9 @@ LtLocale::tryToSetLocale()
   catch (...) {
     // Nothing
   }
+
+  UErrorCode status = U_ZERO_ERROR;
+  uloc_setDefault("en_US_POSIX", &status);
 
 #if !defined(__CYGWIN__) && !defined (__MINGW32__)
   if(setlocale(LC_CTYPE, "") != NULL)

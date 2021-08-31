@@ -101,6 +101,8 @@ void checkValidity(FSTProcessor const &fstp)
 
 int main(int argc, char *argv[])
 {
+  LtLocale::tryToSetLocale();
+
   int cmd = 0;
   int maxAnalyses;
   int maxWeightClasses;
@@ -251,7 +253,6 @@ int main(int argc, char *argv[])
 
   InputFile input;
   UFILE* output = u_finit(stdout, NULL, NULL);
-  LtLocale::tryToSetLocale();
 
   if(optind == (argc - 3))
   {

@@ -149,12 +149,12 @@ trim(FILE *file_mono, FILE *file_bi)
 
 int main(int argc, char *argv[])
 {
+  LtLocale::tryToSetLocale();
+
   if(argc != 4)
   {
     endProgram(argv[0]);
   }
-
-  LtLocale::tryToSetLocale();
 
   FILE *analyser = fopen(argv[1], "rb");
   if(!analyser)
