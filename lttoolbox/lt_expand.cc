@@ -16,6 +16,7 @@
  */
 
 #include <lttoolbox/expander.h>
+#include <lttoolbox/lt_locale.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -55,6 +56,8 @@ void endProgram(char *name)
 
 int main(int argc, char *argv[])
 {
+  LtLocale::tryToSetLocale();
+
   FILE* input = NULL;
   UFILE* output = NULL;
   Expander e;

@@ -43,9 +43,10 @@ void checkValidity(FSTProcessor const &fstp)
 
 int main(int argc, char *argv[])
 {
+  LtLocale::tryToSetLocale();
+
   InputFile input;
   UFILE* output = u_finit(stdout, NULL, NULL);
-  LtLocale::tryToSetLocale();
   FSTProcessor fstp;
   FILE *aux;
 

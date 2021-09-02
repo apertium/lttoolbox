@@ -65,6 +65,8 @@ void endProgram(char *name)
 
 int main(int argc, char *argv[])
 {
+  LtLocale::tryToSetLocale();
+
   char ttype = 'x';
   Compiler c;
   AttCompiler a;
@@ -190,12 +192,10 @@ int main(int argc, char *argv[])
     }
     if(ttype == 'a')
     {
-      LtLocale::tryToSetLocale();
       a.parse(infile, false);
     }
     else
     {
-      LtLocale::tryToSetLocale();
       if(acxfile != "")
       {
         c.parseACX(acxfile, Compiler::COMPILER_RESTRICTION_LR_VAL);
@@ -212,12 +212,10 @@ int main(int argc, char *argv[])
     }
     if(ttype == 'a')
     {
-      LtLocale::tryToSetLocale();
       a.parse(infile, true);
     }
     else
     {
-      LtLocale::tryToSetLocale();
       c.parse(infile, Compiler::COMPILER_RESTRICTION_RL_VAL);
     }
   }

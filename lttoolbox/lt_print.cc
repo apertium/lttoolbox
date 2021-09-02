@@ -51,11 +51,11 @@ void endProgram(char *name)
 
 int main(int argc, char *argv[])
 {
+  LtLocale::tryToSetLocale();
+
   bool hfst = false;
   FILE* input = NULL;
   UFILE* output = u_finit(stdout, NULL, NULL);
-
-  LtLocale::tryToSetLocale();
 
 #ifdef _MSC_VER
   _setmode(_fileno(output), _O_U8TEXT);
