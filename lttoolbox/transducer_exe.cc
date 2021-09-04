@@ -49,7 +49,7 @@ TransducerExe::read_compressed(FILE* input, Alphabet& alphabet, bool match)
   char header[4]{};
   fread_unlocked(header, 1, 4, input);
   if (strncmp(header, HEADER_TRANSDUCER, 4) == 0) {
-    auto features = read_le_64(input);
+    auto features = OldBinary::read_u64(input);
     if (features >= TDF_UNKNOWN) {
       throw std::runtime_error("Transducer has features that are unknown to this version of lttoolbox - upgrade!");
     }
@@ -153,9 +153,6 @@ TransducerExe::read_serialised(FILE* input, Alphabet& alphabet, bool match)
     transition_count += count;
     for (uint64_t t = 0; t < count; t++) {
       int32_t tag = OldBinary::read_int(input, false);
-      if (match) {
-        tag -= alphabet.size();
-      }
       uint64_t dest = OldBinary::read_int(input, false);
       double weight = OldBinary::read_double(input, false);
       if (match) {
