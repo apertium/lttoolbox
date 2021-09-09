@@ -40,6 +40,8 @@ public:
   void getSymbol(UString& result, int32_t symbol, bool uppercase = false) const;
   bool isTag(const int32_t symbol) const;
   void clearSymbol(const int32_t symbol);
+  // call this after StringWriter buffer gets updated
+  void reindex();
   // like operator() but add symbol to dynamic_symbols if not found
   int32_t lookupDynamic(const UString& symbol);
 };

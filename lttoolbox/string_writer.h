@@ -35,6 +35,9 @@ private:
   UChar* mmap_buffer;
 public:
   StringRef add(UString_view s);
+  // don't check for duplicates
+  // faster if you're not going to compare the StringRefs
+  StringRef add_new(UString_view s);
   StringRef find(UString_view s) const;
   UString_view get(const uint32_t start, const uint32_t count);
   UString_view get(const StringRef& ref);

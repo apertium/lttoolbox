@@ -35,6 +35,16 @@ StringWriter::add(UString_view s)
 }
 
 StringRef
+StringWriter::add_new(UString_view s)
+{
+  StringRef ret;
+  ret.start = edit_buffer.size();
+  ret.count = s.size();
+  edit_buffer += s;
+  return ret;
+}
+
+StringRef
 StringWriter::find(UString_view s) const
 {
   StringRef ret;

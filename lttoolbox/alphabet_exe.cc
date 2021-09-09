@@ -58,9 +58,7 @@ AlphabetExe::read(FILE* input, bool mmap, bool compressed)
     }
     // has to be a separate loop, otherwise the string_views get
     // invalidated when the StringWriter buffer expands
-    for (uint32_t i = 0; i < tag_count; i++) {
-      symbol_map[sw->get(tags[i])] = -static_cast<int32_t>(i) - 1;
-    }
+    reindex();
     int pairs = OldBinary::read_int(input);
     for (int i = 0; i < pairs; i++) {
       OldBinary::read_int(input, compressed);
@@ -126,6 +124,19 @@ AlphabetExe::clearSymbol(const int32_t symbol)
   }
 }
 
+void
+AlphabetExe::reindex()
+{
+  symbol_map.clear();
+  for (uint64_t i = 0; i < tag_count; i++) {
+    symbol_map[sw->get(tags[i])] = -static_cast<int32_t>(i) - 1;
+  }
+  int32_t n = -tag_count-1;
+  for (auto& ds : dynamic_symbols) {
+    symbol_map[ds] = n--;
+  }
+}
+
 int32_t
 AlphabetExe::lookupDynamic(const UString& symbol)
 {
@@ -143,14 +154,7 @@ AlphabetExe::lookupDynamic(const UString& symbol)
     if (rebuild) {
       // moderately horrible, but that's what we get for invalidating
       // all the views when dynamic_symbols gets reallocated
-      symbol_map.clear();
-      for (uint64_t i = 0; i < tag_count; i++) {
-        symbol_map[sw->get(tags[i])] = -static_cast<int32_t>(i) - 1;
-      }
-      int32_t n = -tag_count-1;
-      for (auto& ds : dynamic_symbols) {
-        symbol_map[ds] = n--;
-      }
+      reindex();
     }
   } else {
     ret = it->second;
