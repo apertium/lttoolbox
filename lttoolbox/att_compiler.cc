@@ -59,7 +59,7 @@ AttCompiler::convert_hfst(UString& symbol)
 {
   if (symbol == Transducer::HFST_EPSILON_SYMBOL_SHORT ||
       symbol == Transducer::HFST_EPSILON_SYMBOL_LONG ||
-      symbol == Transducer::LTTB_EPSILON_SYMBOL) {
+      (!hfstSymbols && symbol == Transducer::LTTB_EPSILON_SYMBOL)) {
     symbol.clear();
   } else if (symbol == Transducer::HFST_SPACE_SYMBOL) {
     symbol = " "_u;
@@ -442,4 +442,10 @@ AttCompiler::write(FILE *output)
   trans["final@inconditional"_u] = extract_transducer(PUNCT);
 
   write_transducer_set(output, letters, alphabet, trans, true);
+}
+
+void
+AttCompiler::setHfstSymbols(bool b)
+{
+  hfstSymbols = b;
 }

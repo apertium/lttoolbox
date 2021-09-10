@@ -84,7 +84,11 @@ public:
 
   void write(FILE *fd) ;
 
+  void setHfstSymbols(bool b);
+
 private:
+
+  bool hfstSymbols = false;
 
   /** The final state(s). */
   map<int, double> finals;
