@@ -48,12 +48,14 @@ void endProgram(char *name)
     cout << "  -a, --alt:                 set alternative (monodix)" << endl;
     cout << "  -l, --var-left:            set left language variant (bidix)" << endl;
     cout << "  -r, --var-right:           set right language variant (bidix)" << endl;
+    cout << "  -H, --hfst:                expect HFST symbols" << endl;
 #else
     cout << "  -m:     keep morpheme boundaries" << endl;
     cout << "  -v:     set language variant" << endl;
     cout << "  -a:     set alternative (monodix)" << endl;
     cout << "  -l:     set left language variant (bidix)" << endl;
     cout << "  -r:     set right language variant (bidix)" << endl;
+    cout << "  -H:     expect HFST symbols" << endl;
 #endif
     cout << "Modes:" << endl;
     cout << "  lr:     left-to-right compilation" << endl;
@@ -89,14 +91,15 @@ int main(int argc, char *argv[])
       {"var-left",  required_argument, 0, 'l'},
       {"var-right", required_argument, 0, 'r'},
       {"keep-boundaries",      no_argument,       0, 'm'},
+      {"hfst",      no_argument,       0, 'H'},
       {"help",      no_argument,       0, 'h'},
       {"verbose",   no_argument,       0, 'V'},
       {0, 0, 0, 0}
     };
 
-    int cnt=getopt_long(argc, argv, "a:v:l:r:mhV", long_options, &option_index);
+    int cnt=getopt_long(argc, argv, "a:v:l:r:mHhV", long_options, &option_index);
 #else
-    int cnt=getopt(argc, argv, "a:v:l:r:mhV");
+    int cnt=getopt(argc, argv, "a:v:l:r:mHhV");
 #endif
     if (cnt==-1)
       break;
@@ -123,6 +126,10 @@ int main(int argc, char *argv[])
 
       case 'm':
         c.setKeepBoundaries(true);
+        break;
+
+      case 'H':
+        a.setHfstSymbols(true);
         break;
 
       case 'V':

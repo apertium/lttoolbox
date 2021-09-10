@@ -59,7 +59,7 @@ AttCompiler::convert_hfst(UString& symbol)
 {
   if (symbol == Transducer::HFST_EPSILON_SYMBOL_SHORT ||
       symbol == Transducer::HFST_EPSILON_SYMBOL_LONG ||
-      symbol == Transducer::LTTB_EPSILON_SYMBOL) {
+      (!hfstSymbols && symbol == Transducer::LTTB_EPSILON_SYMBOL)) {
     symbol.clear();
   } else if (symbol == Transducer::HFST_SPACE_SYMBOL) {
     symbol = " "_u;
@@ -468,4 +468,10 @@ AttCompiler::write(FILE *output)
     cout << " " << punct_fst.numberOfTransitions() << endl;
   }
 //  fclose(output);
+}
+
+void
+AttCompiler::setHfstSymbols(bool b)
+{
+  hfstSymbols = b;
 }
