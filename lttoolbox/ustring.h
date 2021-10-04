@@ -59,6 +59,14 @@ inline UString operator "" _u(const char* str, std::size_t len) {
 	return us;
 }
 
+inline UString operator "" _u(const char16_t* str, std::size_t len) {
+	UString us(len, 0);
+	for (size_t i = 0; i < len; ++i) {
+		us[i] = str[i];
+	}
+	return us;
+}
+
 inline void operator+=(UString& str, UChar32 c)
 {
   if (c <= 0xFFFF) {
