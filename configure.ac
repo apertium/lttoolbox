@@ -2,7 +2,7 @@ AC_PREREQ(2.52)
 
 m4_define([PKG_VERSION_MAJOR], [3])
 m4_define([PKG_VERSION_MINOR], [5])
-m4_define([PKG_VERSION_PATCH], [3])
+m4_define([PKG_VERSION_PATCH], [4])
 
 AC_INIT([lttoolbox], [PKG_VERSION_MAJOR.PKG_VERSION_MINOR.PKG_VERSION_PATCH], [apertium-stuff@lists.sourceforge.net], [lttoolbox], [https://wiki.apertium.org/wiki/Lttoolbox])
 
