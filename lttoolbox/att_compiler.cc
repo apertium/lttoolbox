@@ -449,3 +449,9 @@ AttCompiler::setHfstSymbols(bool b)
 {
   hfstSymbols = b;
 }
+
+void
+AttCompiler::setHfstSymbols(bool b)
+{
+  hfstSymbols = b;
+}

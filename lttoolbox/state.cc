@@ -139,13 +139,13 @@ State::apply_into_override(std::vector<TNodeState>* new_state,
 void
 State::apply(int const input)
 {
-  vector<TNodeState> new_state;
   if(input == 0)
   {
-    state = new_state;
+    destroy();
     return;
   }
 
+  vector<TNodeState> new_state;
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     apply_into(&new_state, input, i, false);
@@ -158,14 +158,13 @@ State::apply(int const input)
 void
 State::apply_override(int const input, int const old_sym, int const new_sym)
 {
-  vector<TNodeState> new_state;
   if(input == 0 || old_sym == 0)
   {
-    state = new_state;
+    destroy();
     return;
   }
 
-
+  vector<TNodeState> new_state;
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     apply_into_override(&new_state, input, old_sym, new_sym, i, false);
@@ -185,14 +184,13 @@ State::apply_override(int const input, int const alt, int const old_sym, int con
     return;
   }
 
-  vector<TNodeState> new_state;
   if(input == 0 || old_sym == 0)
   {
-    state = new_state;
+    destroy();
     return;
   }
 
-
+  vector<TNodeState> new_state;
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     apply_into_override(&new_state, input, old_sym, new_sym, i, false);
@@ -207,13 +205,13 @@ State::apply_override(int const input, int const alt, int const old_sym, int con
 void
 State::apply(int const input, int const alt)
 {
-  vector<TNodeState> new_state;
   if(input == 0 || alt == 0)
   {
-    state = new_state;
+    destroy();
     return;
   }
 
+  vector<TNodeState> new_state;
   if(input == alt)
   {
     apply(input);
@@ -233,14 +231,13 @@ State::apply(int const input, int const alt)
 void
 State::apply_careful(int const input, int const alt)
 {
-  vector<TNodeState> new_state;
   if(input == 0 || alt == 0)
   {
-    state = new_state;
+    destroy();
     return;
   }
 
-
+  vector<TNodeState> new_state;
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     if(!apply_into(&new_state, input, i, false))

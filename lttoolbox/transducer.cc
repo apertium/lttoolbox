@@ -30,10 +30,7 @@
 
 UString const Transducer::HFST_EPSILON_SYMBOL_SHORT   = "@0@"_u;
 UString const Transducer::HFST_EPSILON_SYMBOL_LONG    = "@_EPSILON_SYMBOL_@"_u;
-// could extend the ""_u helper to include u""_u
-// this is the only place that needs it
-UString const Transducer::LTTB_EPSILON_SYMBOL         = UString(1, (UChar)0x3B5);
-                                                   // = "ε"_u;
+UString const Transducer::LTTB_EPSILON_SYMBOL         = u"ε"_u;
 UString const Transducer::HFST_SPACE_SYMBOL           = "@_SPACE_@"_u;
 UString const Transducer::HFST_TAB_SYMBOL             = "@_TAB_@"_u;
 UString const Transducer::GROUP_SYMBOL                = "#"_u;
