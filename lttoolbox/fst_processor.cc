@@ -3358,13 +3358,15 @@ FSTProcessor::getNullFlush()
 size_t
 FSTProcessor::firstNotAlpha(UString const &sf)
 {
-  for(size_t i = 0, limit = sf.size(); i < limit; i++)
-  {
-    if(!isAlphabetic(sf[i]))
+  UCharCharacterIterator it = UCharCharacterIterator(sf.c_str(), sf.size());
+  size_t i = 0;
+  while (it.hasNext()) {
+    UChar32 c = it.next32PostInc();
+    if(!isAlphabetic(c))
     {
       return i;
     }
+    i += c > UINT16_MAX ? 2 : 1;
   }
-
   return UString::npos;
 }
