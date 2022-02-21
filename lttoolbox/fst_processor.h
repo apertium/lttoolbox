@@ -19,6 +19,7 @@
 #define _FSTPROCESSOR_
 
 #include <lttoolbox/ustring.h>
+#include <unicode/uchriter.h>
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/buffer.h>
 #include <lttoolbox/my_stdio.h>
