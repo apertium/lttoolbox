@@ -254,5 +254,12 @@ class AlphabeticMultibyteTest(ProcTest):
     expectedOutputs = ["^𝜊/*𝜊$"]
 
 
+class AlphabeticMultibyteTestPost(ProcTest):
+    procdix = "data/minimal-mono.dix"
+    inputs = ["𝜊"]  # code point >65535, needs two bytes in utf-8, isAlphabetic
+    procflags = ['-z', '-p']
+    expectedOutputs = ["𝜊"]
+
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *
