@@ -40,7 +40,8 @@ void endProgram(char *name)
   if(name != NULL)
   {
     cout << basename(name) << " v" << PACKAGE_VERSION <<": dump a transducer to text in ATT format" << endl;
-    cout << "USAGE: " << basename(name) << " [-Hh] bin_file [output_file] " << endl;
+    cout << "USAGE: " << basename(name) << " [-aHh] bin_file [output_file] " << endl;
+    cout << "    -a, --alpha:    print transducer alphabet" << endl;
     cout << "    -H, --hfst:     use HFST-compatible character escapes" << endl;
     cout << "    -h, --help:     print this message and exit" << endl;
   }
@@ -52,6 +53,7 @@ int main(int argc, char *argv[])
 {
   LtLocale::tryToSetLocale();
 
+  bool alpha = false;
   bool hfst = false;
 
 #ifdef _MSC_VER
@@ -66,20 +68,25 @@ int main(int argc, char *argv[])
 #if HAVE_GETOPT_LONG
     static struct option long_options[] =
     {
+      {"alpha",     no_argument, 0, 'a'},
       {"hfst",      no_argument, 0, 'H'},
       {"help",      no_argument, 0, 'h'},
       {0, 0, 0, 0}
     };
 
-    int cnt=getopt_long(argc, argv, "Hh", long_options, &option_index);
+    int cnt=getopt_long(argc, argv, "aHh", long_options, &option_index);
 #else
-    int cnt=getopt(argc, argv, "Hh");
+    int cnt=getopt(argc, argv, "aHh");
 #endif
     if (cnt==-1)
       break;
 
     switch (cnt)
     {
+      case 'a':
+        alpha = true;
+        break;
+
       case 'H':
         hfst = true;
         break;
@@ -120,14 +127,24 @@ int main(int argc, char *argv[])
 
   /////////////////////
 
-  bool first = true;
-  for (auto& it : transducers) {
-    if (!first) {
-      u_fprintf(output, "--\n");
-      first = false;
+  if (alpha) {
+    for (auto& it : alphabetic_chars) {
+      u_fprintf(output, "%C\n", it);
     }
-    it.second.joinFinals();
-    it.second.show(alphabet, output, 0, hfst);
+    for (int i = 1; i <= alphabet.size(); i++) {
+      alphabet.writeSymbol(-i, output);
+      u_fprintf(output, "\n");
+    }
+  } else {
+    bool first = true;
+    for (auto& it : transducers) {
+      if (!first) {
+        u_fprintf(output, "--\n");
+        first = false;
+      }
+      it.second.joinFinals();
+      it.second.show(alphabet, output, 0, hfst);
+    }
   }
 
   fclose(input);
