@@ -70,6 +70,9 @@ UString const Compiler::COMPILER_ACX_ANALYSIS_ELEM  = "analysis-chars"_u;
 UString const Compiler::COMPILER_ACX_CHAR_ELEM      = "char"_u;
 UString const Compiler::COMPILER_ACX_EQUIV_CHAR_ELEM= "equiv-char"_u;
 UString const Compiler::COMPILER_ACX_VALUE_ATTR     = "value"_u;
+UString const Compiler::COMPILER_LSX_WB_ELEM        = "d"_u;
+UString const Compiler::COMPILER_LSX_CHAR_ELEM      = "w"_u;
+UString const Compiler::COMPILER_LSX_TAG_ELEM       = "t"_u;
 
 Compiler::Compiler()
 {

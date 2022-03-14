@@ -157,6 +157,15 @@ Expander::readString(UString &result, UString const &name)
     result.append(attrib(Compiler::COMPILER_N_ATTR));
     result += '>';
   }
+  else if(name == Compiler::COMPILER_LSX_WB_ELEM) {
+    result += "<$>"_u;
+  }
+  else if(name == Compiler::COMPILER_LSX_CHAR_ELEM) {
+    result += "<ANY_CHAR>"_u;
+  }
+  else if(name == Compiler::COMPILER_LSX_TAG_ELEM) {
+    result += "<ANY_TAG>"_u;
+  }
   else
   {
     cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
