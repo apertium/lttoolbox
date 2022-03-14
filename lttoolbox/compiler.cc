@@ -20,6 +20,7 @@
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/string_utils.h>
+#include <lttoolbox/file_utils.h>
 
 #include <string>
 #include <cstdlib>
@@ -70,12 +71,7 @@ UString const Compiler::COMPILER_ACX_CHAR_ELEM      = "char"_u;
 UString const Compiler::COMPILER_ACX_EQUIV_CHAR_ELEM= "equiv-char"_u;
 UString const Compiler::COMPILER_ACX_VALUE_ATTR     = "value"_u;
 
-Compiler::Compiler() :
-reader(0),
-verbose(false),
-first_element(false),
-default_weight(0.0000),
-acx_current_char(0)
+Compiler::Compiler()
 {
 }
 
@@ -944,28 +940,7 @@ Compiler::procRegexp()
 void
 Compiler::write(FILE *output)
 {
-  fwrite_unlocked(HEADER_LTTOOLBOX, 1, 4, output);
-  uint64_t features = 0;
-  write_le(output, features);
-
-  // letters
-  Compression::string_write(letters, output);
-
-  // symbols
-  alphabet.write(output);
-
-  // transducers
-  Compression::multibyte_write(sections.size(), output);
-
-  int count=0;
-  for(auto& it : sections)
-  {
-    count++;
-    cout << it.first << " " << it.second.size();
-    cout << " " << it.second.numberOfTransitions() << endl;
-    Compression::string_write(it.first, output);
-    it.second.write(output);
-  }
+  writeTransducerSet(output, letters, alphabet, sections);
 }
 
 void

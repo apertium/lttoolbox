@@ -16,6 +16,7 @@
  */
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
+#include <lttoolbox/file_utils.h>
 
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/lt_locale.h>
@@ -52,8 +53,6 @@ int main(int argc, char *argv[])
   LtLocale::tryToSetLocale();
 
   bool hfst = false;
-  FILE* input = NULL;
-  UFILE* output = u_finit(stdout, NULL, NULL);
 
 #ifdef _MSC_VER
   _setmode(_fileno(output), _O_U8TEXT);
@@ -110,77 +109,25 @@ int main(int argc, char *argv[])
       break;
   }
 
-  input = fopen(infile.c_str(), "rb");
-  if(!input)
-  {
-    cerr << "Error: Cannot open file '" << infile << "' for reading." << endl;
-    exit(EXIT_FAILURE);
-  }
-
-  if(outfile != "")
-  {
-    output = u_fopen(outfile.c_str(), "wb", NULL, NULL);
-    if(!output)
-    {
-      cerr << "Error: Cannot open file '" << outfile << "' for writing." << endl;
-      exit(EXIT_FAILURE);
-    }
-  }
+  FILE* input = openInBinFile(infile);
+  UFILE* output = openOutTextFile(outfile);
 
   Alphabet alphabet;
-  set<UChar> alphabetic_chars;
-
+  set<UChar32> alphabetic_chars;
   map<UString, Transducer> transducers;
 
-  fpos_t pos;
-  if (fgetpos(input, &pos) == 0) {
-      char header[4]{};
-      fread_unlocked(header, 1, 4, input);
-      if (strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
-          auto features = read_le<uint64_t>(input);
-          if (features >= LTF_UNKNOWN) {
-              throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
-          }
-      }
-      else {
-          // Old binary format
-          fsetpos(input, &pos);
-      }
-  }
-
-  // letters
-  int len = Compression::multibyte_read(input);
-  while(len > 0)
-  {
-    alphabetic_chars.insert(static_cast<UChar32>(Compression::multibyte_read(input)));
-    len--;
-  }
-
-  // symbols
-  alphabet.read(input);
-
-  len = Compression::multibyte_read(input);
-
-  while(len > 0)
-  {
-    UString name = Compression::string_read(input);
-    transducers[name].read(input);
-
-    len--;
-  }
+  readTransducerSet(input, alphabetic_chars, alphabet, transducers);
 
   /////////////////////
 
-  map<UString, Transducer>::iterator penum = transducers.end();
-  penum--;
-  for(map<UString, Transducer>::iterator it = transducers.begin(); it != transducers.end(); it++)
-  {
-    it->second.joinFinals();
-    it->second.show(alphabet, output, 0, hfst);
-    if(it != penum)
-    {
+  bool first = true;
+  for (auto& it : transducers) {
+    if (!first) {
       u_fprintf(output, "--\n");
+      first = false;
     }
+    it.second.joinFinals();
+    it.second.show(alphabet, output, 0, hfst);
   }
 
   fclose(input);

@@ -18,6 +18,7 @@
 #include <lttoolbox/compression.h>
 #include <lttoolbox/exception.h>
 #include <lttoolbox/xml_parse_util.h>
+#include <lttoolbox/file_utils.h>
 
 #include <iostream>
 #include <cerrno>
@@ -930,41 +931,7 @@ FSTProcessor::isAlphabetic(UChar32 const c) const
 void
 FSTProcessor::load(FILE *input)
 {
-  fpos_t pos;
-  if (fgetpos(input, &pos) == 0) {
-      char header[4]{};
-      fread_unlocked(header, 1, 4, input);
-      if (strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
-          auto features = read_le<uint64_t>(input);
-          if (features >= LTF_UNKNOWN) {
-              throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
-          }
-      }
-      else {
-          // Old binary format
-          fsetpos(input, &pos);
-      }
-  }
-
-  // letters
-  int len = Compression::multibyte_read(input);
-  while(len > 0)
-  {
-    alphabetic_chars.insert(static_cast<UChar32>(Compression::multibyte_read(input)));
-    len--;
-  }
-
-  // symbols
-  alphabet.read(input);
-
-  len = Compression::multibyte_read(input);
-
-  while(len > 0)
-  {
-    UString name = Compression::string_read(input);
-    transducers[name].read(input, alphabet);
-    len--;
-  }
+  readTransducerSet(input, alphabetic_chars, alphabet, transducers);
 }
 
 void

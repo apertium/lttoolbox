@@ -15,16 +15,13 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 #include <lttoolbox/transducer.h>
-#include <lttoolbox/compression.h>
+#include <lttoolbox/file_utils.h>
 
-#include <lttoolbox/my_stdio.h>
 #include <lttoolbox/lt_locale.h>
 
 #include <cstdlib>
 #include <iostream>
 #include <libgen.h>
-#include <string>
-#include <cstring>
 
 void endProgram(char *name)
 {
@@ -36,60 +33,17 @@ void endProgram(char *name)
   exit(EXIT_FAILURE);
 }
 
-std::pair<std::pair<Alphabet, UString>, std::map<UString, Transducer> >
-read_fst(FILE *bin_file)
+void
+trim(FILE* file_mono, FILE* file_bi, FILE* file_out)
 {
-  Alphabet new_alphabet;
-
-  std::map<UString, Transducer> transducers;
-
-  fpos_t pos;
-  if (fgetpos(bin_file, &pos) == 0) {
-      char header[4]{};
-      fread_unlocked(header, 1, 4, bin_file);
-      if (strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
-          auto features = read_le<uint64_t>(bin_file);
-          if (features >= LTF_UNKNOWN) {
-              throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
-          }
-      }
-      else {
-          // Old binary format
-          fsetpos(bin_file, &pos);
-      }
-  }
-
-  // letters
-  UString letters = Compression::string_read(bin_file);
-
-  // symbols
-  new_alphabet.read(bin_file);
-
-  int len = Compression::multibyte_read(bin_file);
-
-  while(len > 0)
-  {
-    UString name = Compression::string_read(bin_file);
-    transducers[name].read(bin_file);
-
-    len--;
-  }
-
-  std::pair<Alphabet, UString> alph_letters;
-  alph_letters.first = new_alphabet;
-  alph_letters.second = letters;
-  return std::pair<std::pair<Alphabet, UString>, std::map<UString, Transducer> > (alph_letters, transducers);
-}
-
-std::pair<std::pair<Alphabet, UString>, std::map<UString, Transducer> >
-trim(FILE *file_mono, FILE *file_bi)
-{
-  std::pair<std::pair<Alphabet, UString>, std::map<UString, Transducer> > alph_trans_mono = read_fst(file_mono);
-  Alphabet alph_mono = alph_trans_mono.first.first;
-  std::map<UString, Transducer> trans_mono = alph_trans_mono.second;
-  std::pair<std::pair<Alphabet, UString>, std::map<UString, Transducer> > alph_trans_bi = read_fst(file_bi);
-  Alphabet alph_bi = alph_trans_bi.first.first;
-  std::map<UString, Transducer> trans_bi = alph_trans_bi.second;
+  Alphabet alph_mono;
+  std::set<UChar32> letters_mono;
+  std::map<UString, Transducer> trans_mono;
+  readTransducerSet(file_mono, letters_mono, alph_mono, trans_mono);
+  Alphabet alph_bi;
+  std::set<UChar32> letters_bi;
+  std::map<UString, Transducer> trans_bi;
+  readTransducerSet(file_bi, letters_bi, alph_bi, trans_bi);
 
   // The prefix transducer is the union of all transducers from bidix,
   // with a ".*" appended
@@ -100,16 +54,11 @@ trim(FILE *file_mono, FILE *file_bi)
   set<int> loopback_symbols;    // ints refer to alph_prefix
   alph_prefix.createLoopbackSymbols(loopback_symbols, alph_mono, Alphabet::right);
 
-  for(std::map<UString, Transducer>::iterator it = trans_bi.begin(); it != trans_bi.end(); it++)
-  {
-    Transducer union_tmp = it->second;
-    if(union_transducer.isEmpty())
-    {
-      union_transducer = union_tmp;
-    }
-    else
-    {
-      union_transducer.unionWith(alph_bi, union_tmp);
+  for (auto& it : trans_bi) {
+    if (union_transducer.isEmpty()) {
+      union_transducer = it.second;
+    } else {
+      union_transducer.unionWith(alph_bi, it.second);
     }
   }
   union_transducer.minimize();
@@ -118,32 +67,32 @@ trim(FILE *file_mono, FILE *file_bi)
   // prefix_transducer should _not_ be minimized (both useless and takes forever)
   Transducer moved_transducer = prefix_transducer.moveLemqsLast(alph_prefix);
 
+  std::map<UString, Transducer> trans_trim;
 
-  for(std::map<UString, Transducer>::iterator it = trans_mono.begin(); it != trans_mono.end(); it++)
-  {
-    Transducer trimmed = it->second.intersect(moved_transducer,
-                                              alph_mono,
-                                              alph_prefix);
-
-    cout << it->first << " " << it->second.size();
-    cout << " " << it->second.numberOfTransitions() << endl;
-    if(it->second.numberOfTransitions() == 0)
-    {
-      cerr << "Warning: empty section! Skipping it ..."<<endl;
-      trans_mono[it->first].clear();
+  for (auto& it : trans_mono) {
+    if (it.second.numberOfTransitions() == 0) {
+      cerr << "Warning: section " << it.first << " is empty! Skipping it..." << endl;
+      continue;
     }
-    else if(trimmed.hasNoFinals()) {
-      cerr << "Warning: section had no final state after trimming! Skipping it ..."<<endl;
-      trans_mono[it->first].clear();
+    Transducer trimmed = it.second.intersect(moved_transducer,
+                                             alph_mono,
+                                             alph_prefix);
+    if (trimmed.hasNoFinals()) {
+      cerr << "Warning: section " << it.first << " had no final state after trimming! Skipping it..." << endl;
     }
-    else {
-      trimmed.minimize();
-      trans_mono[it->first] = trimmed;
-    }
+    trimmed.minimize();
+    trans_trim[it.first] = trimmed;
   }
 
-  alph_trans_mono.second = trans_mono;
-  return alph_trans_mono;
+  if (trans_trim.empty()) {
+    cerr << "Error: Trimming gave empty transducer!" << endl;
+    cerr << "Hint: There are no words in bilingual dictionary that match "
+      "words in both monolingual dictionaries?" << endl;
+    exit(EXIT_FAILURE);
+  }
+
+  writeTransducerSet(file_out, UString(letters_mono.begin(), letters_mono.end()),
+                     alph_mono, trans_trim);
 }
 
 
@@ -156,63 +105,11 @@ int main(int argc, char *argv[])
     endProgram(argv[0]);
   }
 
-  FILE *analyser = fopen(argv[1], "rb");
-  if(!analyser)
-  {
-    cerr << "Error: Cannot open file '" << argv[1] << "'." << endl << endl;
-    exit(EXIT_FAILURE);
-  }
-  FILE *bidix = fopen(argv[2], "rb");
-  if(!bidix)
-  {
-    cerr << "Error: Cannot open file '" << argv[2] << "'." << endl << endl;
-    exit(EXIT_FAILURE);
-  }
+  FILE* analyser = openInBinFile(argv[1]);
+  FILE* bidix = openInBinFile(argv[2]);
+  FILE* output = openOutBinFile(argv[3]);
 
-  std::pair<std::pair<Alphabet, UString>, std::map<UString, Transducer> > trimmed = trim(analyser, bidix);
-  Alphabet alph_t = trimmed.first.first;
-  UString letters = trimmed.first.second;
-  std::map<UString, Transducer> trans_t = trimmed.second;
-
-  int n_transducers = 0;
-  for(auto& it : trans_t) {
-    if(!(it.second.isEmpty()))
-    {
-      n_transducers++;
-    }
-  }
-
-  if(n_transducers == 0)
-  {
-    cerr << "Error: Trimming gave empty transducer!" << endl;
-    cerr << "Hint: There are no words in bilingual dictionary that match "
-      "words in both monolingual dictionaries?" << endl;
-    exit(EXIT_FAILURE);
-  }
-
-  // Write the file:
-  FILE *output = fopen(argv[3], "wb");
-  if(!output)
-  {
-    cerr << "Error: Cannot open file '" << argv[3] << "'." << endl << endl;
-    exit(EXIT_FAILURE);
-  }
-
-  // letters
-  Compression::string_write(letters, output);
-
-  // symbols
-  alph_t.write(output);
-
-  // transducers
-  Compression::multibyte_write(n_transducers, output);
-  for(auto& it : trans_t) {
-    if(!(it.second.isEmpty()))
-    {
-      Compression::string_write(it.first, output);
-      it.second.write(output);
-    }
-  }
+  trim(analyser, bidix, output);
 
   fclose(analyser);
   fclose(bidix);

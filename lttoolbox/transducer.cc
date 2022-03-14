@@ -513,7 +513,7 @@ Transducer::isEmpty(int const state) const
 }
 
 // Determine whether any weights are non-default (0)
-bool Transducer::weighted() {
+bool Transducer::weighted() const {
   for (auto& it : finals) {
     if (it.second != default_weight) {
       return true;
@@ -530,7 +530,7 @@ bool Transducer::weighted() {
 }
 
 void
-Transducer::write(FILE *output, int const decalage)
+Transducer::write(FILE *output, int const decalage) const
 {
   fwrite_unlocked(HEADER_TRANSDUCER, 1, 4, output);
 

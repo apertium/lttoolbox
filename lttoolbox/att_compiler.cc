@@ -20,6 +20,7 @@
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
 #include <lttoolbox/string_utils.h>
+#include <lttoolbox/file_utils.h>
 #include <algorithm>
 #include <stack>
 #include <unicode/uchar.h>
@@ -254,9 +255,11 @@ AttCompiler::parse(string const &file_name, bool read_rl)
   }
 
   /* Classify the nodes of the graph. */
-  classify_forwards();
-  set<int> path;
-  classify_backwards(starting_state, path);
+  if (splitting) {
+    classify_forwards();
+    set<int> path;
+    classify_backwards(starting_state, path);
+  }
 
   u_fclose(infile);
 }
@@ -435,43 +438,28 @@ AttCompiler::classify_backwards(int state, set<int>& path)
 void
 AttCompiler::write(FILE *output)
 {
-//  FILE* output = fopen(file_name, "wb");
-  fwrite_unlocked(HEADER_LTTOOLBOX, 1, 4, output);
-  uint64_t features = 0;
-  write_le(output, features);
-
-  Transducer punct_fst = extract_transducer(PUNCT);
-
-  /* Non-multichar symbols. */
-  Compression::string_write(UString(letters.begin(), letters.end()), output);
-  /* Multichar symbols. */
-  alphabet.write(output);
-  /* And now the FST. */
-  if(punct_fst.numberOfTransitions() == 0)
-  {
-    Compression::multibyte_write(1, output);
+  map<UString, Transducer> temp;
+  if (splitting) {
+    temp["main@standard"_u] = extract_transducer(WORD);
+    Transducer punct_fst = extract_transducer(PUNCT);
+    if (punct_fst.numberOfTransitions() > 0) {
+      temp["final@inconditional"_u] = punct_fst;
+    }
+  } else {
+    temp["main@standard"_u] = extract_transducer(UNDECIDED);
   }
-  else
-  {
-    Compression::multibyte_write(2, output);
-  }
-  Compression::string_write("main@standard"_u, output);
-  Transducer word_fst = extract_transducer(WORD);
-  word_fst.write(output);
-  cout << "main@standard" << " " << word_fst.size();
-  cout << " " << word_fst.numberOfTransitions() << endl;
-  Compression::string_write("final@inconditional"_u, output);
-  if(punct_fst.numberOfTransitions() != 0)
-  {
-    punct_fst.write(output);
-    cout << "final@inconditional" << " " << punct_fst.size();
-    cout << " " << punct_fst.numberOfTransitions() << endl;
-  }
-//  fclose(output);
+  writeTransducerSet(output, UString(letters.begin(), letters.end()),
+                     alphabet, temp);
 }
 
 void
 AttCompiler::setHfstSymbols(bool b)
 {
   hfstSymbols = b;
+}
+
+void
+AttCompiler::setSplitting(bool b)
+{
+  splitting = b;
 }
