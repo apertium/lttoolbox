@@ -157,6 +157,15 @@ Expander::readString(UString &result, UString const &name)
     result.append(attrib(Compiler::COMPILER_N_ATTR));
     result += '>';
   }
+  else if(name == Compiler::COMPILER_LSX_WB_ELEM) {
+    result += "<$>"_u;
+  }
+  else if(name == Compiler::COMPILER_LSX_CHAR_ELEM) {
+    result += "<ANY_CHAR>"_u;
+  }
+  else if(name == Compiler::COMPILER_LSX_TAG_ELEM) {
+    result += "<ANY_TAG>"_u;
+  }
   else
   {
     cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
@@ -475,15 +484,9 @@ Expander::procEntry(UFILE* output)
           items_rl.insert(items_rl.end(), items.begin(), items.end());
         }
 
-        EntList aux_lr = items_lr;
-        EntList aux_rl = items_rl;
-        append(aux_lr, paradigm[p]);
-        append(aux_rl, paradigm[p]);
         append(items_lr, paradigm_lr[p]);
         append(items_rl, paradigm_rl[p]);
         append(items, paradigm[p]);
-        items_rl.insert(items_rl.end(), aux_rl.begin(), aux_rl.end());
-        items_lr.insert(items_lr.end(), aux_lr.begin(), aux_lr.end());
       }
     }
     else if(name == Compiler::COMPILER_ENTRY_ELEM && type == XML_READER_TYPE_END_ELEMENT)

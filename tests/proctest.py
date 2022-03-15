@@ -27,8 +27,8 @@ class ProcTest(unittest.TestCase, BasicTest):
         retCode = call([os.environ['LTTOOLBOX_PATH']+"/lt-comp",
                         self.procdir,
                         self.procdix,
-                        tmpd+"/compiled.bin"],
-                       stdout=PIPE)
+						tmpd+"/compiled.bin"],
+					   stdout=PIPE, stderr=PIPE)
         if self.expectedCompRetCodeFail:
             self.assertNotEqual(retCode, 0)
         else:
@@ -82,4 +82,3 @@ class ProcTest(unittest.TestCase, BasicTest):
                 self.assertNotEqual(retCode, 0)
             else:
                 self.assertEqual(retCode, 0)
-

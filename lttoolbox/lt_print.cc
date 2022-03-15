@@ -18,6 +18,7 @@
 #include <lttoolbox/compression.h>
 #include <lttoolbox/endian_util.h>
 #include <lttoolbox/string_writer.h>
+#include <lttoolbox/file_utils.h>
 
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/lt_locale.h>
@@ -41,7 +42,8 @@ void endProgram(char *name)
   if(name != NULL)
   {
     cout << basename(name) << " v" << PACKAGE_VERSION <<": dump a transducer to text in ATT format" << endl;
-    cout << "USAGE: " << basename(name) << " [-Hh] bin_file [output_file] " << endl;
+    cout << "USAGE: " << basename(name) << " [-aHh] bin_file [output_file] " << endl;
+    cout << "    -a, --alpha:    print transducer alphabet" << endl;
     cout << "    -H, --hfst:     use HFST-compatible character escapes" << endl;
     cout << "    -h, --help:     print this message and exit" << endl;
   }
@@ -53,9 +55,8 @@ int main(int argc, char *argv[])
 {
   LtLocale::tryToSetLocale();
 
+  bool alpha = false;
   bool hfst = false;
-  FILE* input = NULL;
-  UFILE* output = u_finit(stdout, NULL, NULL);
 
 #ifdef _MSC_VER
   _setmode(_fileno(output), _O_U8TEXT);
@@ -69,20 +70,25 @@ int main(int argc, char *argv[])
 #if HAVE_GETOPT_LONG
     static struct option long_options[] =
     {
+      {"alpha",     no_argument, 0, 'a'},
       {"hfst",      no_argument, 0, 'H'},
       {"help",      no_argument, 0, 'h'},
       {0, 0, 0, 0}
     };
 
-    int cnt=getopt_long(argc, argv, "Hh", long_options, &option_index);
+    int cnt=getopt_long(argc, argv, "aHh", long_options, &option_index);
 #else
-    int cnt=getopt(argc, argv, "Hh");
+    int cnt=getopt(argc, argv, "aHh");
 #endif
     if (cnt==-1)
       break;
 
     switch (cnt)
     {
+      case 'a':
+        alpha = true;
+        break;
+
       case 'H':
         hfst = true;
         break;
@@ -112,40 +118,34 @@ int main(int argc, char *argv[])
       break;
   }
 
-  input = fopen(infile.c_str(), "rb");
-  if(!input)
-  {
-    cerr << "Error: Cannot open file '" << infile << "' for reading." << endl;
-    exit(EXIT_FAILURE);
-  }
-
-  if(outfile != "")
-  {
-    output = u_fopen(outfile.c_str(), "wb", NULL, NULL);
-    if(!output)
-    {
-      cerr << "Error: Cannot open file '" << outfile << "' for writing." << endl;
-      exit(EXIT_FAILURE);
-    }
-  }
+  FILE* input = openInBinFile(infile);
+  UFILE* output = openOutTextFile(outfile);
 
   Alphabet alphabet;
-  UString letters;
+  set<UChar32> alphabetic_chars;
   map<UString, Transducer> transducers;
 
-  read_transducer_set(input, letters, alphabet, transducers);
+  readTransducerSet(input, alphabetic_chars, alphabet, transducers);
 
   /////////////////////
 
-  map<UString, Transducer>::iterator penum = transducers.end();
-  penum--;
-  for(map<UString, Transducer>::iterator it = transducers.begin(); it != transducers.end(); it++)
-  {
-    it->second.joinFinals();
-    it->second.show(alphabet, output, 0, hfst);
-    if(it != penum)
-    {
-      u_fprintf(output, "--\n");
+  if (alpha) {
+    for (auto& it : alphabetic_chars) {
+      u_fprintf(output, "%C\n", it);
+    }
+    for (int i = 1; i <= alphabet.size(); i++) {
+      alphabet.writeSymbol(-i, output);
+      u_fprintf(output, "\n");
+    }
+  } else {
+    bool first = true;
+    for (auto& it : transducers) {
+      if (!first) {
+        u_fprintf(output, "--\n");
+        first = false;
+      }
+      it.second.joinFinals();
+      it.second.show(alphabet, output, 0, hfst);
     }
   }
 

@@ -229,23 +229,37 @@ class SpaceAtEOF(ProcTest):
 
 
 class NonBMPDixTest(ProcTest):
-	procdix = "data/non-bmp.dix"
-	inputs = ['𐅁𐅃𐅅', '𐅂𐅄𐅆']
-	expectedOutputs = ['^𐅁𐅃𐅅/𐅁𐅃𐅅<num>$', '^𐅂𐅄𐅆/𐅂𐅄𐅆<num>$']
+    procdix = "data/non-bmp.dix"
+    inputs = ['𐅁𐅃𐅅', '𐅂𐅄𐅆']
+    expectedOutputs = ['^𐅁𐅃𐅅/𐅁𐅃𐅅<num>$', '^𐅂𐅄𐅆/𐅂𐅄𐅆<num>$']
 
 
 class NonBMPATTTest(ProcTest):
-	procdix = "data/non-bmp.att"
-	inputs = ['𐅁𐅃𐅅', '𐅂𐅄𐅆']
-	expectedOutputs = ['^𐅁𐅃𐅅/𐅁𐅃𐅅<num>$', '^𐅂𐅄𐅆/𐅂𐅄𐅆<num>$']
+    procdix = "data/non-bmp.att"
+    inputs = ['𐅁𐅃𐅅', '𐅂𐅄𐅆']
+    expectedOutputs = ['^𐅁𐅃𐅅/𐅁𐅃𐅅<num>$', '^𐅂𐅄𐅆/𐅂𐅄𐅆<num>$']
 
 
 class NonBMPGeneratorTest(ProcTest):
-	procdix = "data/non-bmp.att"
-	inputs = ['^𐅁𐅃𐅅<num>$', '^𐅂𐅄𐅆<num>$']
-	expectedOutputs = ['𐅁𐅃𐅅', '𐅂𐅄𐅆']
-	procflags = ['-z', '-g']
-	procdir = "rl"
+    procdix = "data/non-bmp.att"
+    inputs = ['^𐅁𐅃𐅅<num>$', '^𐅂𐅄𐅆<num>$']
+    expectedOutputs = ['𐅁𐅃𐅅', '𐅂𐅄𐅆']
+    procflags = ['-z', '-g']
+    procdir = "rl"
+
+
+class AlphabeticMultibyteTest(ProcTest):
+    procdix = "data/minimal-mono.dix"
+    inputs = ["𝜊"]  # code point >65535, needs two bytes in utf-8, isAlphabetic
+    expectedOutputs = ["^𝜊/*𝜊$"]
+
+
+class AlphabeticMultibyteTestPost(ProcTest):
+    procdix = "data/minimal-mono.dix"
+    inputs = ["𝜊"]  # code point >65535, needs two bytes in utf-8, isAlphabetic
+    procflags = ['-z', '-p']
+    expectedOutputs = ["𝜊"]
+
 
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *

@@ -85,10 +85,12 @@ public:
   void write(FILE *fd) ;
 
   void setHfstSymbols(bool b);
+  void setSplitting(bool b);
 
 private:
 
   bool hfstSymbols = false;
+  bool splitting = true;
 
   /** The final state(s). */
   map<int, double> finals;

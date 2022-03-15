@@ -22,6 +22,7 @@
 #include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/string_utils.h>
 #include <lttoolbox/string_writer.h>
+#include <lttoolbox/file_utils.h>
 
 #include <string>
 #include <cstdlib>
@@ -71,13 +72,11 @@ UString const Compiler::COMPILER_ACX_ANALYSIS_ELEM  = "analysis-chars"_u;
 UString const Compiler::COMPILER_ACX_CHAR_ELEM      = "char"_u;
 UString const Compiler::COMPILER_ACX_EQUIV_CHAR_ELEM= "equiv-char"_u;
 UString const Compiler::COMPILER_ACX_VALUE_ATTR     = "value"_u;
+UString const Compiler::COMPILER_LSX_WB_ELEM        = "d"_u;
+UString const Compiler::COMPILER_LSX_CHAR_ELEM      = "w"_u;
+UString const Compiler::COMPILER_LSX_TAG_ELEM       = "t"_u;
 
-Compiler::Compiler() :
-reader(0),
-verbose(false),
-first_element(false),
-default_weight(0.0000),
-acx_current_char(0)
+Compiler::Compiler()
 {
 }
 
@@ -946,7 +945,7 @@ Compiler::procRegexp()
 void
 Compiler::write(FILE *output)
 {
-  write_transducer_set(output, letters, alphabet, sections);
+  writeTransducerSet(output, letters, alphabet, sections);
 }
 
 void

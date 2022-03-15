@@ -20,6 +20,7 @@
 
 #include <lttoolbox/ustring.h>
 #include <lttoolbox/alphabet_exe.h>
+#include <unicode/uchriter.h>
 #include <lttoolbox/buffer.h>
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/state.h>
@@ -461,7 +462,7 @@ private:
    * @param val the space character to use if no blank queue
    * @param output stream where the word is written
    */
-  void printSpace(UChar const val, UFILE *output);
+  void printSpace(UChar32 const val, UFILE *output);
 
   void skipUntil(InputFile& input, UFILE *output, UChar32 const character);
   static UString removeTags(UString const &str);

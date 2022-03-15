@@ -114,7 +114,7 @@ Alphabet::operator()(UString const &s) const
 }
 
 bool
-Alphabet::isSymbolDefined(UString const &s)
+Alphabet::isSymbolDefined(UString const &s) const
 {
   return slexic.find(s) != slexic.end();
 }
@@ -126,7 +126,7 @@ Alphabet::size() const
 }
 
 void
-Alphabet::write(FILE *output)
+Alphabet::write(FILE *output) const
 {
   // First, we write the taglist
   Compression::multibyte_write(slexicinv.size(), output);  // taglist size
@@ -179,7 +179,7 @@ Alphabet::read(FILE *input)
 }
 
 void
-Alphabet::write_mmap(FILE* output, StringWriter& sw)
+Alphabet::write_mmap(FILE* output, StringWriter& sw) const
 {
   write_le_64(output, slexicinv.size());
   for (auto& it : slexicinv) {

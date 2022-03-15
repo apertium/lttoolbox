@@ -17,6 +17,7 @@
 
 #include <lttoolbox/expander.h>
 #include <lttoolbox/lt_locale.h>
+#include <lttoolbox/file_utils.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -123,33 +124,11 @@ int main(int argc, char *argv[])
   {
     case 2:
       infile = argv[argc-1];
-      input = fopen(infile.c_str(), "rb");
-      if(input == NULL)
-      {
-        cerr << "Error: Cannot open file '" << infile << "'." << endl;
-        exit(EXIT_FAILURE);
-      }
-      fclose(input);
-      output = u_finit(stdout, NULL, NULL);
       break;
 
     case 3:
       infile = argv[argc-2];
-      input = fopen(infile.c_str(), "rb");
-      if(input == NULL)
-      {
-        cerr << "Error: Cannot open file '" << infile << "'." << endl;
-        exit(EXIT_FAILURE);
-      }
-      fclose(input);
-
       outfile = argv[argc-1];
-      output = u_fopen(argv[argc-1], "wb", NULL, NULL);
-      if(output == NULL)
-      {
-        cerr << "Error: Cannot open file '" << outfile << "'." << endl;
-        exit(EXIT_FAILURE);
-      }
       break;
 
     default:
@@ -160,6 +139,10 @@ int main(int argc, char *argv[])
 #ifdef _MSC_VER
   _setmode(_fileno(output), _O_U8TEXT);
 #endif
+
+  input = openInBinFile(infile);
+  fclose(input);
+  output = openOutTextFile(outfile);
 
   e.expand(infile, output);
   u_fclose(output);

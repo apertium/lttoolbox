@@ -19,6 +19,7 @@
 #define _LT_USTRING_H_
 
 #include <unicode/ustdio.h>
+#include <unicode/uchar.h>
 #include <string>
 #include <utf8.h>
 #include <vector>

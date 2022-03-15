@@ -21,6 +21,7 @@
 #include <lttoolbox/mmap.h>
 #include <lttoolbox/old_binary.h>
 #include <lttoolbox/xml_parse_util.h>
+#include <lttoolbox/file_utils.h>
 
 #include <iostream>
 #include <cerrno>
@@ -394,7 +395,7 @@ FSTProcessor::readTMAnalysis(InputFile& input)
   return val;
 }
 
-int
+int32_t
 FSTProcessor::readPostgeneration(InputFile& input, UFILE *output)
 {
   if(!input_buffer.isEmpty())
@@ -911,7 +912,7 @@ FSTProcessor::lastBlank(UString const &str)
 }
 
 void
-FSTProcessor::printSpace(UChar const val, UFILE *output)
+FSTProcessor::printSpace(UChar32 const val, UFILE *output)
 {
   if(blankqueue.size() > 0)
   {
@@ -1862,7 +1863,7 @@ FSTProcessor::postgeneration(InputFile& input, UFILE *output)
   int last = 0;
   set<UChar32> empty_escaped_chars;
 
-  while(UChar val = readPostgeneration(input, output))
+  while(UChar32 val = readPostgeneration(input, output))
   {
     if(val == '~')
     {
@@ -2086,7 +2087,7 @@ FSTProcessor::intergeneration(InputFile& input, UFILE *output)
 
   while (true)
   {
-    UChar val = readPostgeneration(input, output);
+    UChar32 val = readPostgeneration(input, output);
 
     if (val == '~')
     {
@@ -2224,7 +2225,7 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
   UString sf;
   int last = 0;
 
-  while(UChar val = readPostgeneration(input, output))
+  while(UChar32 val = readPostgeneration(input, output))
   {
     if(u_ispunct(val) || u_isspace(val))
     {
@@ -3417,13 +3418,15 @@ FSTProcessor::getNullFlush()
 size_t
 FSTProcessor::firstNotAlpha(UString const &sf)
 {
-  for(size_t i = 0, limit = sf.size(); i < limit; i++)
-  {
-    if(!isAlphabetic(sf[i]))
+  UCharCharacterIterator it = UCharCharacterIterator(sf.c_str(), sf.size());
+  size_t i = 0;
+  while (it.hasNext()) {
+    UChar32 c = it.next32PostInc();
+    if(!isAlphabetic(c))
     {
       return i;
     }
+    i += c > UINT16_MAX ? 2 : 1;
   }
-
   return UString::npos;
 }

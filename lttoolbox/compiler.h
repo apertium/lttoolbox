@@ -49,7 +49,7 @@ private:
   /**
    * The libxml2's XML reader
    */
-  xmlTextReaderPtr reader;
+  xmlTextReaderPtr reader = nullptr;
 
   /**
    * The alt value
@@ -95,22 +95,22 @@ private:
   /**
    * Set verbose mode: warnings which may or may not be correct
    */
-  bool verbose;
+  bool verbose = false;
 
   /**
    * First element (of an entry)
    */
-  bool first_element;
+  bool first_element = false;
 
   /**
    * Default value of weight (of a transition)
    */
-  double default_weight;
+  double default_weight = 0.0000;
 
   /**
    * Maintain morpheme boundaries
    */
-  bool keep_boundaries;
+  bool keep_boundaries = false;
 
 
   /**
@@ -151,7 +151,7 @@ private:
   /**
    * Original char being mapped
    */
-  int acx_current_char;
+  int acx_current_char = 0;
 
   /*
   static string range(char const a, char const b);
@@ -336,6 +336,9 @@ public:
   LTTOOLBOX_IMPORTS static UString const COMPILER_ACX_CHAR_ELEM;
   LTTOOLBOX_IMPORTS static UString const COMPILER_ACX_EQUIV_CHAR_ELEM;
   LTTOOLBOX_IMPORTS static UString const COMPILER_ACX_VALUE_ATTR;
+  LTTOOLBOX_IMPORTS static UString const COMPILER_LSX_WB_ELEM;
+  LTTOOLBOX_IMPORTS static UString const COMPILER_LSX_CHAR_ELEM;
+  LTTOOLBOX_IMPORTS static UString const COMPILER_LSX_TAG_ELEM;
 
   /**
    * Constructor

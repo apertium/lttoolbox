@@ -134,7 +134,7 @@ public:
    * Determine whether any weight is non-default
    * @return bool true or false
    */
-  bool weighted();
+  bool weighted() const;
 
   /**
    * Insertion of a single transduction, creating a new target state
@@ -331,7 +331,7 @@ public:
    * @param output the stream to write to
    * @param decalage offset to sum to the tags
    */
-  void write(FILE *output, int const decalage = 0);
+  void write(FILE *output, int const decalage = 0) const;
 
   /**
    * Read method
@@ -341,7 +341,7 @@ public:
   void read(FILE *input, int const decalage = 0);
 
   void read_mmap(FILE* input, Alphabet& alpha);
-  void write_mmap(FILE* output, const Alphabet& alpha);
+  void write_mmap(FILE* output, const Alphabet& alpha) const;
 
   void serialise(std::ostream &serialised) const;
   void deserialise(std::istream &serialised);
@@ -422,12 +422,5 @@ public:
                        int const epsilon_tag = 0);
 
 };
-
-void read_transducer_set(FILE* input, UString& letters, Alphabet& alpha,
-                         map<UString, Transducer>& trans);
-uint64_t write_transducer_set(FILE* output,
-                              UString_view letters, Alphabet& alpha,
-                              map<UString, Transducer>& trans,
-                              bool skip_empty=false);
 
 #endif

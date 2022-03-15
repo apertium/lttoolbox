@@ -116,7 +116,7 @@ public:
    * @param s symbol
    * @return true if defined
    */
-  bool isSymbolDefined(UString const &s);
+  bool isSymbolDefined(UString const &s) const;
 
   /**
    * Returns the size of the alphabet (number of symbols).
@@ -128,7 +128,7 @@ public:
    * Write method.
    * @param output output stream.
    */
-  void write(FILE *output);
+  void write(FILE *output) const;
 
   /**
    * Read method.
@@ -136,7 +136,7 @@ public:
    */
   void read(FILE *input);
 
-  void write_mmap(FILE* output, StringWriter& sw);
+  void write_mmap(FILE* output, StringWriter& sw) const;
   void read_mmap(FILE* input, StringWriter& sw);
 
   void serialise(std::ostream &serialised) const;

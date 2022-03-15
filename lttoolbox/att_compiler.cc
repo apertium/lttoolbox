@@ -20,6 +20,7 @@
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
 #include <lttoolbox/string_utils.h>
+#include <lttoolbox/file_utils.h>
 #include <algorithm>
 #include <stack>
 #include <unicode/uchar.h>
@@ -254,9 +255,11 @@ AttCompiler::parse(string const &file_name, bool read_rl)
   }
 
   /* Classify the nodes of the graph. */
-  classify_forwards();
-  set<int> path;
-  classify_backwards(starting_state, path);
+  if (splitting) {
+    classify_forwards();
+    set<int> path;
+    classify_backwards(starting_state, path);
+  }
 
   u_fclose(infile);
 }
@@ -435,13 +438,18 @@ AttCompiler::classify_backwards(int state, set<int>& path)
 void
 AttCompiler::write(FILE *output)
 {
-  UString letters = UString(letters.begin(), letters.end());
-  map<UString, Transducer> trans;
-
-  trans["main@standard"_u] = extract_transducer(WORD);
-  trans["final@inconditional"_u] = extract_transducer(PUNCT);
-
-  write_transducer_set(output, letters, alphabet, trans, true);
+  map<UString, Transducer> temp;
+  if (splitting) {
+    temp["main@standard"_u] = extract_transducer(WORD);
+    Transducer punct_fst = extract_transducer(PUNCT);
+    if (punct_fst.numberOfTransitions() > 0) {
+      temp["final@inconditional"_u] = punct_fst;
+    }
+  } else {
+    temp["main@standard"_u] = extract_transducer(UNDECIDED);
+  }
+  writeTransducerSet(output, UString(letters.begin(), letters.end()),
+                     alphabet, temp);
 }
 
 void
@@ -451,7 +459,7 @@ AttCompiler::setHfstSymbols(bool b)
 }
 
 void
-AttCompiler::setHfstSymbols(bool b)
+AttCompiler::setSplitting(bool b)
 {
-  hfstSymbols = b;
+  splitting = b;
 }
