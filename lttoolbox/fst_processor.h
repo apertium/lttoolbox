@@ -464,6 +464,8 @@ private:
    */
   void printSpace(UChar32 const val, UFILE *output);
 
+  void writeChar(const UChar32 val, UFILE* output, bool single_blank);
+
   void skipUntil(InputFile& input, UFILE *output, UChar32 const character);
   static UString removeTags(UString const &str);
   UString compoundAnalysis(UString str, bool uppercase, bool firstupper);

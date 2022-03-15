@@ -16,6 +16,7 @@
  */
 
 #include <lttoolbox/match_state2.h>
+#include <lttoolbox/symbol_iter.h>
 
 #include <climits>
 
@@ -116,30 +117,18 @@ MatchState2::step(UString_view input, const AlphabetExe& alpha, bool foldcase)
 {
   int32_t any_char = alpha("<ANY_CHAR>"_u);
   int32_t any_tag = alpha("<ANY_TAG>"_u);
-  for (uint64_t i = 0; i < input.size(); i++) {
-    if (input[i] == '<') {
-      for (uint64_t j = i+1; j < input.size(); j++) {
-        if (input[j] == '\\') {
-          j++;
-        } else if (input[j] == '>') {
-          int32_t sym = alpha(input.substr(i, j-i+1));
-          if (sym) {
-            step(sym, any_tag);
-          } else {
-            step(any_tag);
-          }
-          i = j;
-          break;
-        }
+  for (auto it = symbol_iter(input, &alpha); it != it.end(); it++) {
+    if (it.string()[0] == '<') {
+      if (*it) {
+        step(*it, any_tag);
+      } else {
+        step(any_tag);
       }
     } else {
-      if (input[i] == '\\') {
-        i++;
-      }
-      if (foldcase && u_isupper(input[i])) {
-        step(input[i], u_tolower(input[i]), any_char);
+      if (foldcase && u_isupper(*it)) {
+        step(*it, u_tolower(*it), any_char);
       } else {
-        step(input[i], any_char);
+        step(*it, any_char);
       }
     }
   }
