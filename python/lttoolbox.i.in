@@ -39,6 +39,15 @@
 
 #include <getopt.h>
 
+	// no idea why this is required, but apparently it is
+	int32_t u_sprintf(UChar* buf, const char* pat, ...) {
+		va_list arg;
+		va_start(arg, pat);
+		int32_t ret = u_vsprintf(buf, pat, arg);
+		va_end(arg);
+		return ret;
+	}
+
 class FST: public FSTProcessor
 {
 public:

@@ -3,36 +3,25 @@
 """
 Setup for SWIG Python bindings for lttoolbox
 """
-from os import path
 from distutils.core import Extension, setup
-from distutils.command.build import build
+from sys import platform
 
-
-class CustomBuild(build):
-    sub_commands = [
-        ('build_ext', build.has_ext_modules),
-        ('build_py', build.has_pure_modules),
-        ('build_clib', build.has_c_libraries),
-        ('build_scripts', build.has_scripts),
-    ]
-
-
-def get_sources():
-    sources = ['lttoolbox.i']
-    cc_sources = ['alphabet.cc', 'compression.cc', 'fst_processor.cc', 'lt_locale.cc',
-                  'node.cc', 'state.cc', 'trans_exe.cc', 'xml_parse_util.cc']
-    rel_path = '@top_srcdir@/lttoolbox/'
-    sources.extend(path.join(rel_path, f) for f in cc_sources)
-    return sources
+compile_args = '@CXXFLAGS@'.split() + '@ICU_CFLAGS@'.split()
+link_args = []
+if platform == 'darwin':
+    compile_args += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
+    link_args.append('-mmacosx-version-min=10.7')
 
 lttoolbox_module = Extension(
     name='_lttoolbox',
-    sources=get_sources(),
-    swig_opts = ["-c++", "-I@top_srcdir@", "-Wall"],
-    include_dirs=['@top_srcdir@', '/usr/include/libxml2'],
-    library_dirs=['/usr/include/libxml2'],
-    extra_compile_args='@CXXFLAGS@'.split(),
-    extra_link_args=['-lxml2'],
+	language='c++',
+    sources=['lttoolbox.i'],
+    swig_opts = ["-c++", '-I..', "-I@top_srcdir@", "-Wall"],
+    include_dirs=['@top_srcdir@', '@top_srcdir@/lttoolbox'] + '@LIBXML_CFLAGS@'.replace('-I', '').split() + '@ICU_CFLAGS@'.replace('-I', '').split(),
+    library_dirs=['@top_srcdir@/lttoolbox/.libs'],
+	libraries=['lttoolbox@VERSION_MAJOR@', 'xml2', 'icuio', 'icui18n', 'icuuc', 'icudata'],
+    extra_compile_args=compile_args,
+    extra_link_args=link_args,
 )
 
 setup(
@@ -44,7 +33,7 @@ setup(
     author_email='@PACKAGE_BUGREPORT@',
     license='GPL-3.0+',
     maintainer_email='@PACKAGE_BUGREPORT@',
-    cmdclass={'build': CustomBuild},
     ext_modules=[lttoolbox_module],
     py_modules=['lttoolbox'],
+	data_files=[],
 )
