@@ -67,8 +67,8 @@ openInBinFile(const string& fname)
 
 void
 writeTransducerSet(FILE* output, const UString& letters,
-                   const Alphabet& alpha,
-                   const map<UString, Transducer>& trans)
+                   Alphabet& alpha,
+                   map<UString, Transducer>& trans)
 {
   fwrite_unlocked(HEADER_LTTOOLBOX, 1, 4, output);
   uint64_t features = 0;

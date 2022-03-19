@@ -28,8 +28,8 @@ FILE* openOutBinFile(const string& fname);
 FILE* openInBinFile(const string& fname);
 
 void writeTransducerSet(FILE* output, const UString& letters,
-                        const Alphabet& alpha,
-                        const map<UString, Transducer>& trans);
+                        Alphabet& alpha,
+                        map<UString, Transducer>& trans);
 void readTransducerSet(FILE* input, set<UChar32>& letters,
                        Alphabet& alpha,
                        map<UString, Transducer>& trans);

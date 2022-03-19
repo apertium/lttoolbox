@@ -127,7 +127,7 @@ public:
    * Write method.
    * @param output output stream.
    */
-  void write(FILE *output) const;
+  void write(FILE *output);
 
   /**
    * Read method.

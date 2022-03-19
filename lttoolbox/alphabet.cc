@@ -124,7 +124,7 @@ Alphabet::size() const
 }
 
 void
-Alphabet::write(FILE *output) const
+Alphabet::write(FILE *output)
 {
   // First, we write the taglist
   Compression::multibyte_write(slexicinv.size(), output);  // taglist size
