@@ -144,7 +144,7 @@ AttCompiler::parse(string const &file_name, bool read_rl)
     tokens.push_back(""_u);
     do {
       UChar c = u_fgetc(infile);
-      if (c == '\n') {
+      if (c == '\n' || c == U_EOF) {
         break;
       } else if (c == '\t') {
         tokens.push_back(""_u);
@@ -157,21 +157,16 @@ AttCompiler::parse(string const &file_name, bool read_rl)
     UString upper, lower;
     double weight;
 
-    if (tokens[0].length() == 0 && first_line_in_fst)
-    {
-      cerr << "Error: empty file '" << file_name << "'." << endl;
-      exit(EXIT_FAILURE);
-    }
-    if (first_line_in_fst && tokens.size() == 1)
-    {
-      cerr << "Error: invalid format in file '" << file_name << "' on line " << line_number << "." << endl;
-      exit(EXIT_FAILURE);
-    }
-
     /* Empty line. */
     if (tokens.size() == 1 && tokens[0].length() == 0)
     {
       continue;
+    }
+
+    if (first_line_in_fst && tokens.size() == 1)
+    {
+      cerr << "Error: invalid format in file '" << file_name << "' on line " << line_number << "." << endl;
+      exit(EXIT_FAILURE);
     }
 
     if (tokens[0].find('-') == 0)

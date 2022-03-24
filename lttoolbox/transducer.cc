@@ -402,6 +402,7 @@ Transducer::determinize(int const epsilon_tag)
 void
 Transducer::minimize(int const epsilon_tag)
 {
+  if (finals.empty()) return;
   reverse(epsilon_tag);
   determinize(epsilon_tag);
   reverse(epsilon_tag);
