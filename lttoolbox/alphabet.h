@@ -23,7 +23,7 @@
 #include <set>
 #include <vector>
 #include <cstdint>
-#include "ustring.h"
+#include <lttoolbox/ustring.h>
 
 using namespace std;
 using namespace icu;

@@ -222,29 +222,14 @@ Alphabet::writeSymbol(int32_t const symbol, UFILE *output) const
 void
 Alphabet::getSymbol(UString &result, int32_t const symbol, bool uppercase) const
 {
-  if(symbol == 0)
-  {
+  if (symbol == 0) {
     return;
-  }
-
-  if(!uppercase)
-  {
-    if(symbol >= 0)
-    {
-      result += static_cast<UChar32>(symbol);
-    }
-    else
-    {
-      result.append(slexicinv[-symbol-1]);
-    }
-  }
-  else if(symbol >= 0)
-  {
-    result += u_toupper(static_cast<UChar32>(symbol));
-  }
-  else
-  {
+  } else if (symbol < 0) {
     result.append(slexicinv[-symbol-1]);
+  } else if (uppercase) {
+    result += u_toupper(static_cast<UChar32>(symbol));
+  } else {
+    result += static_cast<UChar32>(symbol);
   }
 }
 

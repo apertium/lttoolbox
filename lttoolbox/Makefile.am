@@ -14,7 +14,7 @@ cc_sources = alphabet.cc att_compiler.cc compiler.cc compression.cc entry_token.
 library_includedir = $(includedir)/$(PACKAGE_NAME)-$(VERSION_API)/$(PACKAGE_NAME)
 library_include_HEADERS = $(h_sources)
 
-bin_PROGRAMS = lt-comp lt-proc lt-expand lt-tmxcomp lt-tmxproc lt-print lt-trim
+bin_PROGRAMS = lt-comp lt-proc lt-expand lt-tmxcomp lt-tmxproc lt-print lt-trim lt-append
 instdir = lttoolbox
 
 lib_LTLIBRARIES= liblttoolbox3.la
@@ -30,6 +30,7 @@ lttoolbox_DATA = dix.dtd dix.rng dix.rnc acx.rng xsd/dix.xsd xsd/acx.xsd
 LDADD = liblttoolbox$(VERSION_MAJOR).la
 AM_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LIBXML_LIBS) $(ICU_LIBS)
 
+lt_append_SOURCES = lt_append.cc
 lt_print_SOURCES = lt_print.cc
 lt_trim_SOURCES = lt_trim.cc
 lt_comp_SOURCES = lt_comp.cc

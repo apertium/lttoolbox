@@ -416,6 +416,13 @@ public:
                        Alphabet const &t_a,
                        int const epsilon_tag = 0);
 
+  /**
+   * Ensure that new_alpha contains all the symbols in old_alpha
+   * and update all transitions to the symbol numbers of new_alpha.
+   * If has_pairs is false, transition labels will be looked up as
+   * single symbols rather than pairs.
+   */
+  void updateAlphabet(Alphabet& old_alpha, Alphabet& new_alpha, bool has_pairs = true);
 };
 
 #endif

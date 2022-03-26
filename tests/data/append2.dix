@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet>b</alphabet>
+  <sdefs>
+    <sdef n="v"/>
+  </sdefs>
+  <pardefs>
+  </pardefs>
+
+  <section id="main2" type="standard">
+	  <e><p><l>b</l><r>b<s n="v"/></r></p></e>
+  </section>
+
+</dictionary>
