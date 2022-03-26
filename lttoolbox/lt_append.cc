@@ -40,7 +40,8 @@ void endProgram(char *name)
   if(name != NULL)
   {
     cout << basename(name) << " v" << PACKAGE_VERSION <<": add sections to a compiled transducer" << endl;
-    cout << "USAGE: " << basename(name) << " [-sh] bin_file1 bin_file2 output_file" << endl;
+    cout << "USAGE: " << basename(name) << " [-ksh] bin_file1 bin_file2 output_file" << endl;
+    cout << "    -k, --keep:     in case of section name conflicts, keep the one from the first transducer" << endl;
     cout << "    -s, --single:   treat input transducers as one-sided" << endl;
     cout << "    -h, --help:     print this message and exit" << endl;
   }
@@ -53,6 +54,7 @@ int main(int argc, char *argv[])
   LtLocale::tryToSetLocale();
 
   bool pairs = true;
+  bool keep = false;
 
 #ifdef _MSC_VER
   _setmode(_fileno(output), _O_U8TEXT);
@@ -66,20 +68,25 @@ int main(int argc, char *argv[])
 #if HAVE_GETOPT_LONG
     static struct option long_options[] =
     {
+      {"keep",      no_argument, 0, 'k'},
       {"single",    no_argument, 0, 's'},
       {"help",      no_argument, 0, 'h'},
       {0, 0, 0, 0}
     };
 
-    int cnt=getopt_long(argc, argv, "sh", long_options, &option_index);
+    int cnt=getopt_long(argc, argv, "ksh", long_options, &option_index);
 #else
-    int cnt=getopt(argc, argv, "sh");
+    int cnt=getopt(argc, argv, "ksh");
 #endif
     if (cnt==-1)
       break;
 
     switch (cnt)
     {
+      case 'k':
+        keep = true;
+        break;
+
       case 's':
         pairs = false;
         break;
@@ -134,7 +141,11 @@ int main(int argc, char *argv[])
 
   for (auto& it : trans2) {
     if (trans1.find(it.first) != trans1.end()) {
-      cerr << "WARNING: section '" << it.first << "' appears in both transducers and will be overwritten!" << endl;
+      if (keep) {
+        continue;
+      } else {
+        cerr << "WARNING: section '" << it.first << "' appears in both transducers and will be overwritten!" << endl;
+      }
     }
     it.second.updateAlphabet(alpha2, alpha1, pairs);
     trans1[it.first] = it.second;
