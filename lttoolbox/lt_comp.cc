@@ -157,6 +157,10 @@ int main(int argc, char *argv[])
     }
   }
 
+  if(const char* jobs_env = std::getenv("LT_JOBS")) {
+    c.setJobs(true);
+  }
+
   string opc;
   string infile;
   string outfile;
