@@ -129,10 +129,23 @@ Compiler::parse(string const &file, UString const &dir)
   xmlCleanupParser();
 
 
-  // Minimize transducers
-  for(auto& it : sections)
+  // Minimize transducers: For each section, call transducer.minimize() in
+  // its own thread. This is the major bottleneck of lt-comp and sections
+  // are completely independent transducers.
+  std::vector<std::thread> minimisations;
+  for(std::pair<const UString, Transducer>& it : sections)
   {
-    it.second.minimize();
+    if(jobs) {
+      minimisations.push_back(
+        std::thread([](Transducer &t) { t.minimize(); },
+                    std::ref(it.second)));
+    }
+    else {
+      it.second.minimize();
+    }
+  }
+  for (auto &thr : minimisations) {
+    thr.join();
   }
 
   if (!valid(dir)) {
@@ -974,6 +987,12 @@ void
 Compiler::setKeepBoundaries(bool keep)
 {
   keep_boundaries = keep;
+}
+
+void
+Compiler::setJobs(bool j)
+{
+  jobs = j;
 }
 
 void

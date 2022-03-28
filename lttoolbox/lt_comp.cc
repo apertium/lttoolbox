@@ -41,7 +41,7 @@ void endProgram(char *name)
   if(name != NULL)
   {
     cout << basename(name) << " v" << PACKAGE_VERSION <<": build a letter transducer from a dictionary" << endl;
-    cout << "USAGE: " << basename(name) << " [-mavhlr] lr | rl dictionary_file output_file [acx_file]" << endl;
+    cout << "USAGE: " << basename(name) << " [-hmvalrHSj] lr | rl dictionary_file output_file [acx_file]" << endl;
 #if HAVE_GETOPT_LONG
     cout << "  -m, --keep-boundaries:     keep morpheme boundaries" << endl;
     cout << "  -v, --var:                 set language variant" << endl;
@@ -50,6 +50,7 @@ void endProgram(char *name)
     cout << "  -r, --var-right:           set right language variant (bidix)" << endl;
     cout << "  -H, --hfst:                expect HFST symbols" << endl;
     cout << "  -S, --no-split:            don't attempt to split into word and punctuation transducers" << endl;
+    cout << "  -j, --jobs:                use one cpu core per section when minimising" << endl;
 #else
     cout << "  -m:     keep morpheme boundaries" << endl;
     cout << "  -v:     set language variant" << endl;
@@ -58,6 +59,7 @@ void endProgram(char *name)
     cout << "  -r:     set right language variant (bidix)" << endl;
     cout << "  -H:     expect HFST symbols" << endl;
     cout << "  -S:     don't attempt to split into word and punctuation transducers" << endl;
+    cout << "  -j:     use one cpu core per section when minimising" << endl;
 #endif
     cout << "Modes:" << endl;
     cout << "  lr:     left-to-right compilation" << endl;
@@ -97,10 +99,11 @@ int main(int argc, char *argv[])
       {"no-split",  no_argument,       0, 'S'},
       {"help",      no_argument,       0, 'h'},
       {"verbose",   no_argument,       0, 'V'},
+      {"jobs",      no_argument,       0, 'j'},
       {0, 0, 0, 0}
     };
 
-    int cnt=getopt_long(argc, argv, "a:v:l:r:mHShV", long_options, &option_index);
+    int cnt=getopt_long(argc, argv, "a:v:l:r:mHShVj", long_options, &option_index);
 #else
     int cnt=getopt(argc, argv, "a:v:l:r:mHShV");
 #endif
@@ -137,6 +140,10 @@ int main(int argc, char *argv[])
 
       case 'S':
         a.setSplitting(false);
+        break;
+
+      case 'j':
+        c.setJobs(true);
         break;
 
       case 'V':

@@ -23,6 +23,7 @@
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/ustring.h>
 
+#include <thread>
 #include <map>
 #include <string>
 #include <set>
@@ -111,6 +112,11 @@ private:
    * Maintain morpheme boundaries
    */
   bool keep_boundaries = false;
+
+  /**
+   * Allow parallel minimisation jobs
+   */
+  bool jobs = false;
 
 
   /**
@@ -371,6 +377,11 @@ public:
    * Set keep morpheme boundaries
    */
   void setKeepBoundaries(bool keep_boundaries = false);
+
+  /**
+   * Set whether to allow parallel minimisation jobs
+   */
+  void setJobs(bool jobs = false);
 
   /**
    * Set verbose output
