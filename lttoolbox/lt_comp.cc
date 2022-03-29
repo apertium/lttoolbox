@@ -50,7 +50,7 @@ void endProgram(char *name)
     cout << "  -r, --var-right:           set right language variant (bidix)" << endl;
     cout << "  -H, --hfst:                expect HFST symbols" << endl;
     cout << "  -S, --no-split:            don't attempt to split into word and punctuation transducers" << endl;
-    cout << "  -j, --jobs:                use one cpu core per section when minimising" << endl;
+    cout << "  -j, --jobs:                use one cpu core per section when minimising, new section after 50k entries" << endl;
 #else
     cout << "  -m:     keep morpheme boundaries" << endl;
     cout << "  -v:     set language variant" << endl;
@@ -59,7 +59,7 @@ void endProgram(char *name)
     cout << "  -r:     set right language variant (bidix)" << endl;
     cout << "  -H:     expect HFST symbols" << endl;
     cout << "  -S:     don't attempt to split into word and punctuation transducers" << endl;
-    cout << "  -j:     use one cpu core per section when minimising" << endl;
+    cout << "  -j:     use one cpu core per section when minimising, new section after 50k entries" << endl;
 #endif
     cout << "Modes:" << endl;
     cout << "  lr:     left-to-right compilation" << endl;
@@ -144,6 +144,7 @@ int main(int argc, char *argv[])
 
       case 'j':
         c.setJobs(true);
+        c.setMaxSectionEntries(50000);
         break;
 
       case 'V':
@@ -157,8 +158,12 @@ int main(int argc, char *argv[])
     }
   }
 
-  if(const char* jobs_env = std::getenv("LT_JOBS")) {
+  if(std::getenv("LT_JOBS")) {
     c.setJobs(true);
+    c.setMaxSectionEntries(50000);
+  }
+  if(const char* max_section_entries = std::getenv("LT_MAX_SECTION_ENTRIES")) {
+    c.setMaxSectionEntries(stol(max_section_entries));
   }
 
   string opc;

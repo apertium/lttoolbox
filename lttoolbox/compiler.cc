@@ -925,10 +925,17 @@ Compiler::procNode()
   }
   else if(name == COMPILER_ENTRY_ELEM)
   {
+    if(current_paradigm.empty()) {
+      n_section_entries++;
+      if(max_section_entries >0 && n_section_entries % max_section_entries == 0) {
+        current_section = u"+" + current_section; // would be invalid as xml id -- this way we won't clobber existing names
+      }
+    }
     procEntry();
   }
   else if(name == COMPILER_SECTION_ELEM)
   {
+    n_section_entries = 0;
     procSection();
   }
   else if(name== COMPILER_COMMENT_NODE)
@@ -993,6 +1000,12 @@ void
 Compiler::setJobs(bool j)
 {
   jobs = j;
+}
+
+void
+Compiler::setMaxSectionEntries(size_t m)
+{
+  max_section_entries = m;
 }
 
 void

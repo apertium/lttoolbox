@@ -61,6 +61,14 @@ Keep any morpheme boundaries defined by the '<m/>' symbol
 expect HFST symbols
 .It Fl S , Fl Fl no-split
 don't attempt to split into word and punctuation transducers
+.It Fl j , Fl Fl jobs
+Parallelise minimisation by using one cpu core per section. By
+default, this also creates a new section after 50.000 entries. You can
+override this number by setting the environment variable
+LT_MAX_SECTION_ENTRIES to some number. If set to 0, sections are never
+split (but kept exactly as in the dix file). You can also set the
+environment variable LT_JOBS=true if you always want parallel
+minimisation even if lt-comp was called without this option.
 .It Fl h , Fl Fl help
 Prints a short help message.
 .It Cm lr
