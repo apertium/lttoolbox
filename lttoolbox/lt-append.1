@@ -1,0 +1,52 @@
+.Dd March 30, 2022
+.Dt LT-APPEND 1
+.Os Apertium
+.Sh NAME
+.Nm lt-append
+.Nd combine two compiled dictionary transducers
+.Sh SYNOPSIS
+.Nm lt-append
+.Ar input_a
+.Ar input_b
+.Ar output
+.Sh DESCRIPTION
+.Nm lt-append
+will combine two compiled dictionaries as if they had been compiled
+from one big XML file, keeping sections separate. If
+.Ar input_a
+has sections
+.Dq main
+and
+.Dq final
+and
+.Ar input_b
+has section
+.Dq regex
+then
+.Ar output
+will have sections \[lq]main\[rq], \[lq]final\[rq] and \[lq]regex\[rq]
+(there is no cross-section minimisation, so internally there is no
+union, but the behaviour of running the transducer will be as if we
+had done the union).
+.Sh FILES
+.Bl -tag -width Ds
+.It Ar input_transducer_a
+The first input binary (a finite state transducer).
+.It Ar input_transducer_b
+The second input binary (a finite state transducer).
+.It Ar output_transducer
+The output binary with the combination of inputs (a finite state transducer).
+.El
+.Sh SEE ALSO
+.Xr apertium 1 ,
+.Xr lt-comp 1 ,
+.Xr lt-expand 1 ,
+.Xr lt-print 1 ,
+.Xr lt-proc 1
+.Sh AUTHOR
+Copyright \(co 2022 Apertium.
+This is free software.
+You may redistribute copies of it under the terms of
+.Lk https://www.gnu.org/licenses/gpl.html the GNU General Public License .
+.Sh BUGS
+Many... lurking in the dark and waiting for you!
