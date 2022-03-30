@@ -928,7 +928,7 @@ Compiler::procNode()
     if(current_paradigm.empty()) {
       n_section_entries++;
       if(max_section_entries >0 && n_section_entries % max_section_entries == 0) {
-        current_section = u"+" + current_section; // would be invalid as xml id -- this way we won't clobber existing names
+        current_section = "+"_u + current_section; // would be invalid as xml id -- this way we won't clobber existing names
       }
     }
     procEntry();
