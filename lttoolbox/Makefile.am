@@ -49,7 +49,7 @@ lt_tmxproc_SOURCES = lt_tmxproc.cc
 
 
 
-man_MANS = lt-comp.1 lt-expand.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1 lt-print.1 lt-trim.1
+man_MANS = lt-append.1 lt-comp.1 lt-expand.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1 lt-print.1 lt-trim.1
 
 INCLUDES = -I$(top_srcdir) $(LIBXML_CFLAGS) $(ICU_CFLAGS)
 CLEANFILES = *~
