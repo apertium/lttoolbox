@@ -261,5 +261,13 @@ class AlphabeticMultibyteTestPost(ProcTest):
     expectedOutputs = ["𝜊"]
 
 
+class SectionDupes(ProcTest):
+    procdix = "data/sectiondupes.dix"
+    procdir = "rl"
+    inputs = ["^a<n>$"]
+    procflags = ['-z', '-g']
+    expectedOutputs = ["a"]
+
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *

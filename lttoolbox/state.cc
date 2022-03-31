@@ -529,8 +529,13 @@ State::filterFinals(map<Node *, double> const &finals,
   response = NFinals(response, max_analyses, max_weight_classes);
 
   result.clear();
+  set<UString> seen;
   for(vector<pair<UString, double>>::iterator it = response.begin(); it != response.end(); it++)
   {
+    if(seen.find(it->first) != seen.end()) {
+      continue;
+    }
+    seen.insert(it->first);
     result += '/';
     result += it->first;
     if(display_weights)
