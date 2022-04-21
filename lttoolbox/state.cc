@@ -832,6 +832,25 @@ State::pruneStatesWithForbiddenSymbol(int forbiddenSymbol)
 }
 
 
+bool
+State::hasSymbol(int requiredSymbol)
+{
+  for(size_t i = 0; i<state.size(); i++)
+  {
+    // loop through sequence – we can't just check that the last tag is cp-L, there may be other tags after it:
+    vector<pair<int, double>>* seq = state.at(i).sequence;
+    if(seq != NULL) for (unsigned int j=0; j<seq->size(); j++)
+    {
+      int symbol=(seq->at(j)).first;
+      if(symbol == requiredSymbol)
+      {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 
 bool
 State::lastPartHasRequiredSymbol(const vector<pair<int, double>> &seq, int requiredSymbol, int separationSymbol)

@@ -222,6 +222,12 @@ public:
   void pruneStatesWithForbiddenSymbol(int forbiddenSymbol);
 
   /**
+    * Whether any of the analyses contains a certain symbol
+    * @param requiredSymbol the symbol we're looking for
+    */
+  bool hasSymbol(int requiredSymbol);
+
+  /**
    * Returns the lexical form in a sorted by weights manner
    * and restricts to N analyses or N weight classes if those options are provided.
    * @param the original lexical form map

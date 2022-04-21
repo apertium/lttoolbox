@@ -175,6 +175,28 @@ public:
     }
 
   /**
+   * Look at the current element of the buffer without advancing.
+   * @return current element.
+   */
+  T & peek() const
+    {
+      if(currentpos != lastpos)
+      {
+        if(currentpos == size)
+        {
+          return buf[0];
+        }
+        else {
+          return buf[currentpos];
+        }
+      }
+      else
+      {
+        return last();
+      }
+    }
+
+  /**
    * Get the last element of the buffer.
    * @return last element.
    */
@@ -189,6 +211,7 @@ public:
         return buf[size-1];
       }
     }
+
 
   /**
    * Get the current buffer position.
