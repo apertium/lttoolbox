@@ -1075,6 +1075,8 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
   State current_state = initial_state;
   UString lf;   //lexical form
   UString sf;   //surface form
+  UString lf_spcmp;
+  bool seen_cpL = false;
   int last = 0;
   bool firstupper = false, uppercase = false;
   map<int, set<int> >::iterator rcx_map_ptr;
@@ -1164,6 +1166,13 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
         last_incond = false;
         last = input_buffer.getPos();
       }
+      else { // isAlphabetic, standard type section
+        // Record if a compound might be possible
+        if (do_decomposition && compoundOnlyLSymbol != 0
+            && current_state.hasSymbol(compoundOnlyLSymbol)) {
+          seen_cpL = true;
+        }
+      }
     }
     else if(sf.empty() && u_isspace(val))
     {
@@ -1210,7 +1219,39 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
     }
     else
     {
-      if(!isAlphabetic(val) && sf.empty())
+      // First try if blank-crossing compound analysis is possible; have
+      // to fall back on the regular methods if this didn't work:
+      lf_spcmp.clear();
+      if (seen_cpL  // We've seen both a space and a <compund-only-L>
+          && isAlphabetic(val)
+          && !sf.empty()
+          && (sf.size() - input_buffer.diffPrevPos(last)) <= lastBlank(sf)) {
+        int oldval = val;
+        UString oldsf = sf;
+        do {
+          alphabet.getSymbol(sf, val);
+        } while ((val = readAnalysis(input)) && isAlphabetic(val));
+        if (!dictionaryCase) {
+          firstupper = u_isupper(sf[0]);
+          uppercase = firstupper && u_isupper(sf[sf.size() - 1]);
+        }
+        lf_spcmp = compoundAnalysis(sf, uppercase, firstupper);
+        if(lf_spcmp.empty()) {  // didn't work, rewind!
+          input_buffer.back(sf.size() - oldsf.size());
+          val = oldval;
+          sf.swap(oldsf);
+        }
+        else {
+          input_buffer.back(1);
+          val = input_buffer.peek();
+        }
+      }
+      seen_cpL = false;
+
+      if(!lf_spcmp.empty()) {
+        printWordPopBlank(sf, lf_spcmp, output);
+      }
+      else if(!isAlphabetic(val) && sf.empty())
       {
         if(u_isspace(val))
         {
@@ -1260,7 +1301,9 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
         input_buffer.back(1);
       }
       else if(isAlphabetic(val) &&
+               // we can't skip back a blank:
               ((sf.size()-input_buffer.diffPrevPos(last)) > lastBlank(sf) ||
+               // or we've failed to reach an analysis:
                lf.empty()))
       {
         do

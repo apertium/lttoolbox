@@ -269,5 +269,29 @@ class SectionDupes(ProcTest):
     expectedOutputs = ["a"]
 
 
+class SpaceCompound(ProcTest):
+    procdix = "data/spcmp.dix"
+    inputs = ["a 1-b",
+              "a 1-b_",
+              "a 1-b ",
+              "a 1-b a",
+              "a 1-c",
+              "a 1-c_",
+              "a 1-c ",
+              "wy a",
+              ]
+    procflags = ['-z', '-w', '-e']
+    expectedOutputs = [
+        "^a 1-b/a 1<n>+b<n>$",
+        "^a 1-b/a 1<n>+b<n>$_",
+        "^a 1-b/a 1<n>+b<n>$ ",
+        "^a 1-b/a 1<n>+b<n>$ ^a/a<pr>$",
+        "^a 1-c/a 1-c<n>$",
+        "^a 1-c/a 1-c<n>$_",
+        "^a 1-c/a 1-c<n>$ ",
+        "^wy/wy<n>$ ^a/a<pr>$",
+        ]
+
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *
