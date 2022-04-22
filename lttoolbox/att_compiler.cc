@@ -31,9 +31,7 @@
 using namespace std;
 using namespace icu;
 
-AttCompiler::AttCompiler() :
-starting_state(0),
-default_weight(0.0000)
+AttCompiler::AttCompiler()
 {}
 
 AttCompiler::~AttCompiler()
@@ -87,37 +85,60 @@ AttCompiler::is_word_punct(UChar32 symbol)
   return false;
 }
 
-/**
- * Returns the code of the symbol in the alphabet. Run after convert_hfst has
- * run.
- *
- * Also adds all non-multicharacter symbols (letters) to the @p letters set.
- *
- * @return the code of the symbol, if @p symbol is multichar; its first (and
- *         only) character otherwise.
- */
-int
-AttCompiler::symbol_code(const UString& symbol)
+void
+AttCompiler::update_alphabet(UChar32 c)
 {
-  if (u_strHasMoreChar32Than(symbol.c_str(), -1, 1)) {
-    alphabet.includeSymbol(symbol);
-    return alphabet(symbol);
-  } else if (symbol.empty()) {
-    return 0;
-  } else {
-    UChar32 c;
-    U16_GET(symbol, 0, 0, symbol.size(), c);
-    if ((u_ispunct(c) || u_isspace(c)) && !is_word_punct(c)) {
-      return c;
-    } else {
-      letters.insert(c);
-      if(u_islower(c)) {
-        letters.insert(u_toupper(c));
-      } else if(u_isupper(c)) {
-        letters.insert(u_tolower(c));
-      }
-      return c;
+  if (is_word_punct(c) || !(u_ispunct(c) && u_isspace(c))) {
+    letters.insert(c);
+    if(u_islower(c)) {
+      letters.insert(u_toupper(c));
+    } else if(u_isupper(c)) {
+      letters.insert(u_tolower(c));
     }
+  }
+}
+
+void
+AttCompiler::symbol_code(const UString& symbol, vector<int32_t>& split)
+{
+  if (symbol.empty()) {
+    split.push_back(0);
+  } else if (symbol.size() >= 2 && symbol[0] == '<' && symbol.back() == '>') {
+    alphabet.includeSymbol(symbol);
+    split.push_back(alphabet(symbol));
+  } else {
+    size_t i = 0;
+    size_t end = symbol.size();
+    UChar32 c;
+    while (i < end) {
+      U16_NEXT(symbol.c_str(), i, end, c);
+      update_alphabet(c);
+      split.push_back(c);
+    }
+  }
+}
+
+void
+AttCompiler::add_transition(int from, int to,
+                            const UString& upper, const UString& lower,
+                            double weight)
+{
+  AttNode* src = get_node(from);
+  vector<int32_t> lsplit, rsplit;
+  symbol_code(upper, lsplit);
+  symbol_code(lower, rsplit);
+  for (size_t i = 0; i < lsplit.size() || i < rsplit.size(); i++) {
+    int32_t l = (lsplit.size() > i ? lsplit[i] : 0);
+    int32_t r = (rsplit.size() > i ? rsplit[i] : 0);
+    bool last = (i+1 >= lsplit.size() && i+1 >= rsplit.size());
+    int dest = (last ? to : -(++phantom_count));
+    UString ls, rs;
+    alphabet.getSymbol(ls, l);
+    alphabet.getSymbol(rs, r);
+    src->transductions.push_back(Transduction(dest, ls, rs, alphabet(l, r),
+                                              (last ? weight : default_weight)));
+    classify_single_transition(src->transductions.back());
+    src = get_node(dest);
   }
 }
 
@@ -185,7 +206,7 @@ AttCompiler::parse(string const &file_name, bool read_rl)
     from = StringUtils::stoi(tokens[0]) + state_id_offset;
     largest_seen_state_id = max(largest_seen_state_id, from);
 
-    AttNode* source = get_node(from);
+    get_node(from);
     /* First line: the initial state is of both types. */
     if (first_line_in_fst)
     {
@@ -226,7 +247,6 @@ AttCompiler::parse(string const &file_name, bool read_rl)
       }
       convert_hfst(upper);
       convert_hfst(lower);
-      int tag = alphabet(symbol_code(upper), symbol_code(lower));
       if(tokens.size() > 4)
       {
         weight = StringUtils::stod(tokens[4]);
@@ -235,10 +255,7 @@ AttCompiler::parse(string const &file_name, bool read_rl)
       {
         weight = default_weight;
       }
-      source->transductions.push_back(Transduction(to, upper, lower, tag, weight));
-      classify_single_transition(source->transductions.back());
-
-      get_node(to);
+      add_transition(from, to, upper, lower, weight);
     }
   }
 

@@ -19,3 +19,8 @@ class NegativeWeightedFst(unittest.TestCase, PrintTest):
     printdix = "data/cat-weight-negative.att"
     printdir = "lr"
     expectedOutput = "0\t1\tc\tc\t4.567895\t\n1\t2\ta\ta\t0.989532\t\n2\t3\tt\tt\t2.796193\t\n3\t4\tε\t+\t-0.824564\t\n4\t5\tε\tn\t1.824564\t\n4\t5\tε\tv\t2.856296\t\n5\t-0.525487\n"
+
+class MulticharCompFst(unittest.TestCase, PrintTest):
+    printdix = "data/multichar.att"
+    printdir = "lr"
+    expectedOutput = "0\t1\tא\tא\t0.000000\t\n1\t2\tε\tַ\t0.000000\t\n2\t3\tε\tן\t0.000000\t\n3\t4\tε\t<blah>\t0.000000\t\n4\t0.000000\n"

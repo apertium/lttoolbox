@@ -43,3 +43,8 @@ class CompAttEpsilonLoopShouldError(ProcTest):
 class CompAttEpsilonToFinalShouldError(ProcTest):
     procdix = "data/cat-epsilon-to-final.att"
     expectedCompRetCodeFail = True
+
+class CompSplitMultichar(ProcTest):
+    procdix = "data/multichar.att"
+    inputs = ["א"]
+    expectedOutputs = ["^א/אַן<blah>$"]
