@@ -293,5 +293,24 @@ class SpaceCompound(ProcTest):
         ]
 
 
+class ShyCmp(ProcTest):
+    procdix = "data/spcmp.dix"
+    # These examples include soft hyphens (visible in editors like Emacs):
+    inputs = ["ve se­tu",
+              "+ve se­tu",
+              "p­b",
+              "ve p­b",
+              # "p p­b",
+              ]
+    procflags = ['-z', '-w', '-e']
+    expectedOutputs = [
+        "^ve/ve<n>$ ^setu/set<n>+u<n>$",
+        "+^ve/ve<n>$ ^setu/set<n>+u<n>$",
+        "^pb/p<n>+b<n>$",
+        "^ve/ve<n>$ ^pb/p<n>+b<n>$",
+        # "^p/*p$^pb/p<n>+b<n>$ ",  # TODO: why does space get moved when we have an unknown before?
+        ]
+
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *

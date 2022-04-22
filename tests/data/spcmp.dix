@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dictionary>
-	<alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÄÅÆÇÈÉÊËÍÑÒÓÔÕÖØÙÚÜČĐŊŠŦŽabcdefghijklmnopqrstuvwxyzàáâäåæçèéêëíñòóôõöøùúüčđŋšŧž­-</alphabet>
+	<alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÄÅÆÇÈÉÊËÍÑÒÓÔÕÖØÙÚÜČĐŊŠŦŽabcdefghijklmnopqrstuvwxyzàáâäåæçèéêëíñòóôõöøùúüčđŋšŧž-</alphabet>
 	<sdefs>
 	  <sdef n="n"/>
 	  <sdef n="pr"/>
@@ -28,6 +28,17 @@
   <e><p><l>wy<b/>x</l> <r>wy<b/>x<s n="n"/></r></p></e>
 
   <e><p><l>a</l>       <r>a<s n="pr"/></r></p></e>
+
+  <!-- Shared prefixes: -->
+  <e><p><l>p<b/>f</l> <r>p<b/>f<s n="n"/></r></p></e>
+  <e><p><l>p</l>  <r>p<s n="n"/><s n="compound-only-L"/></r></p></e>
+
+  <!-- shy: -->
+  <e><i>ve<b/>se</i> <p><l></l> <r><s n="pr"/></r></p></e> <!-- the garden path -->
+  <e><i>ve</i>       <p><l></l> <r><s n="n"/></r></p></e>
+  <e><i>set</i>      <p><l></l> <r><s n="n"/><s n="compound-only-L"/></r></p></e>
+  <e><i>u</i>        <p><l></l> <r><s n="n"/><s n="compound-R"/></r></p></e>
+
 </section>
 <section id="final" type="inconditional">
   <e><p><l>1</l>       <r>1<s n="det"/></r></p></e>

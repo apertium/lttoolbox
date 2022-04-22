@@ -242,9 +242,13 @@ FSTProcessor::wblankPostGen(InputFile& input, UFILE *output)
 int
 FSTProcessor::readAnalysis(InputFile& input)
 {
-  if(!input_buffer.isEmpty())
+  if (!input_buffer.isEmpty())
   {
-    return input_buffer.next();
+    UChar32 val = input_buffer.next();
+    while ((useIgnoredChars || useDefaultIgnoredChars) && ignored_chars.find(val) != ignored_chars.end()) {
+      val = input_buffer.next();
+    }
+    return val;
   }
 
   UChar32 val = input.get();
@@ -257,7 +261,7 @@ FSTProcessor::readAnalysis(InputFile& input)
     val = 0;
   }
 
-  if((useIgnoredChars || useDefaultIgnoredChars) && ignored_chars.find(val) != ignored_chars.end())
+  while ((useIgnoredChars || useDefaultIgnoredChars) && ignored_chars.find(val) != ignored_chars.end())
   {
     input_buffer.add(val);
     val = input.get();
@@ -1073,11 +1077,12 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
   bool last_postblank = false;
   bool last_preblank = false;
   State current_state = initial_state;
-  UString lf;   //lexical form
-  UString sf;   //surface form
-  UString lf_spcmp;
-  bool seen_cpL = false;
-  int last = 0;
+  UString lf;            // analysis (lexical form and tags)
+  UString sf;            // surface form
+  UString lf_spcmp;      // space compound analysis
+  bool seen_cpL = false; // have we seen a <compound-only-L> tag so far
+  size_t last = 0;       // position in input_buffer after last analysis
+  size_t last_size = 0;  // size of sf at last analysis
   bool firstupper = false, uppercase = false;
   map<int, set<int> >::iterator rcx_map_ptr;
 
@@ -1106,6 +1111,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
                                         uppercase, firstupper);
         last_incond = true;
         last = input_buffer.getPos();
+        last_size = sf.size();
       }
       else if(current_state.isFinal(postblank))
       {
@@ -1125,6 +1131,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
                                         uppercase, firstupper);
         last_postblank = true;
         last = input_buffer.getPos();
+        last_size = sf.size();
       }
       else if(current_state.isFinal(preblank))
       {
@@ -1144,6 +1151,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
                                         uppercase, firstupper);
         last_preblank = true;
         last = input_buffer.getPos();
+        last_size = sf.size();
       }
       else if(!isAlphabetic(val))
       {
@@ -1165,6 +1173,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
         last_preblank = false;
         last_incond = false;
         last = input_buffer.getPos();
+        last_size = sf.size();
       }
       else { // isAlphabetic, standard type section
         // Record if a compound might be possible
@@ -1182,6 +1191,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
       last_preblank = false;
       last_incond = false;
       last = input_buffer.getPos();
+      last_size = sf.size();
     }
 
     if(useRestoreChars && rcx_map.find(val) != rcx_map.end())
@@ -1225,7 +1235,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
       if (seen_cpL  // We've seen both a space and a <compund-only-L>
           && isAlphabetic(val)
           && !sf.empty()
-          && (sf.size() - input_buffer.diffPrevPos(last)) <= lastBlank(sf)) {
+          && last_size <= lastBlank(sf)) {
         int oldval = val;
         UString oldsf = sf;
         do {
@@ -1279,7 +1289,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
       }
       else if(last_postblank)
       {
-        printWordPopBlank(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
+        printWordPopBlank(sf.substr(0, last_size),
                           lf, output);
         u_fputc(' ', output);
         input_buffer.setPos(last);
@@ -1288,21 +1298,21 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
       else if(last_preblank)
       {
         u_fputc(' ', output);
-        printWordPopBlank(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
+        printWordPopBlank(sf.substr(0, last_size),
                           lf, output);
         input_buffer.setPos(last);
         input_buffer.back(1);
       }
       else if(last_incond)
       {
-        printWordPopBlank(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
+        printWordPopBlank(sf.substr(0, last_size),
                           lf, output);
         input_buffer.setPos(last);
         input_buffer.back(1);
       }
       else if(isAlphabetic(val) &&
                // we can't skip back a blank:
-              ((sf.size()-input_buffer.diffPrevPos(last)) > lastBlank(sf) ||
+              (last_size > lastBlank(sf) ||
                // or we've failed to reach an analysis:
                lf.empty()))
       {
@@ -1391,7 +1401,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
       }
       else
       {
-        printWordPopBlank(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
+        printWordPopBlank(sf.substr(0, last_size),
                           lf, output);
         input_buffer.setPos(last);
         input_buffer.back(1);
