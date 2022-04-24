@@ -20,6 +20,7 @@ instdir = lttoolbox
 lib_LTLIBRARIES= liblttoolbox3.la
 liblttoolbox3_la_SOURCES= $(h_sources) $(cc_sources)
 liblttoolbox3_la_LDFLAGS= -version-info $(SOVERSION) -release $(VERSION_API)
+liblttoolbox3_la_LIBADD= $(ICU_LIBS)
 
 lttoolboxdir = $(prefix)/share/lttoolbox
 lttoolboxinclude = $(prefix)/include
