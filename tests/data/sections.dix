@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÄÅÆÇÈÉÊËÍÑÒÓÔÕÖØÙÚÜČĐŊŠŦŽabcdefghijklmnopqrstuvwxyzàáâäåæçèéêëíñòóôõöøùúüčđŋšŧž­-</alphabet>
+  <sdefs>
+    <sdef n="np"/>
+    <sdef n="sent"/>
+  </sdefs>
+  <pardefs>
+  </pardefs>
+
+  <section id="main" type="standard">
+    <e><p><l>X</l> <r>X<s n="np"/></r></p></e>
+  </section>
+
+  <section id="final" type="inconditional">
+    <e><p><l>.</l> <r>.<s n="sent"/></r></p></e>
+  </section>
+
+</dictionary>

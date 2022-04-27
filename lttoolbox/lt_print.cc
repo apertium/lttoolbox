@@ -140,10 +140,10 @@ int main(int argc, char *argv[])
     for (auto& it : transducers) {
       if (!first) {
         u_fprintf(output, "--\n");
-        first = false;
       }
       it.second.joinFinals();
       it.second.show(alphabet, output, 0, hfst);
+      first = false;
     }
   }
 
