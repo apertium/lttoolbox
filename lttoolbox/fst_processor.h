@@ -364,6 +364,12 @@ private:
   void classifyFinals();
 
   /**
+   * Shortcut for filtering on all final states with current settings
+   * Assumes that casefrom is non-empty
+   */
+  UString filterFinals(const State& state, const UString& casefrom);
+
+  /**
    * Write a string to an output stream,
    * @param str the string to write, escaping characters
    * @param output the stream to write in

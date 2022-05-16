@@ -312,5 +312,11 @@ class ShyCmp(ProcTest):
         ]
 
 
+class ApostropheTransliteration(ProcTest):
+    procdix = "data/apostrophe.att"
+    inputs = ["ka'aguy", "ka’aguy"]
+    procflags = ['-z', '-t']
+    expectedOutputs = ["kaʼaguy", "kaʼaguy"]
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *
