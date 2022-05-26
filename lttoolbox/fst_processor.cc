@@ -254,9 +254,13 @@ FSTProcessor::wblankPostGen(InputFile& input, UFILE *output)
 int
 FSTProcessor::readAnalysis(InputFile& input)
 {
-  if(!input_buffer.isEmpty())
+  if (!input_buffer.isEmpty())
   {
-    return input_buffer.next();
+    UChar32 val = input_buffer.next();
+    while ((useIgnoredChars || useDefaultIgnoredChars) && ignored_chars.find(val) != ignored_chars.end()) {
+      val = input_buffer.next();
+    }
+    return val;
   }
 
   UChar32 val = input.get();
@@ -269,7 +273,7 @@ FSTProcessor::readAnalysis(InputFile& input)
     val = 0;
   }
 
-  if((useIgnoredChars || useDefaultIgnoredChars) && ignored_chars.find(val) != ignored_chars.end())
+  while ((useIgnoredChars || useDefaultIgnoredChars) && ignored_chars.find(val) != ignored_chars.end())
   {
     input_buffer.add(val);
     val = input.get();
@@ -804,6 +808,16 @@ FSTProcessor::classifyFinals()
   }
 }
 
+UString
+FSTProcessor::filterFinals(const State& state, const UString& casefrom)
+{
+  bool firstupper = u_isupper(casefrom[0]);
+  bool uppercase = casefrom.size() > 1 && firstupper && u_isupper(casefrom[1]);
+  return state.filterFinals(all_finals, alphabet, escaped_chars,
+                            displayWeightsMode, maxAnalyses, maxWeightClasses,
+                            uppercase, firstupper, 0);
+}
+
 void
 FSTProcessor::writeEscaped(UString const &str, UFILE *output)
 {
@@ -1185,9 +1199,12 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
   bool last_postblank = false;
   bool last_preblank = false;
   State current_state = initial_state;
-  UString lf;   //lexical form
-  UString sf;   //surface form
-  int last = 0;
+  UString lf;            // analysis (lexical form and tags)
+  UString sf;            // surface form
+  UString lf_spcmp;      // space compound analysis
+  bool seen_cpL = false; // have we seen a <compound-only-L> tag so far
+  size_t last = 0;       // position in input_buffer after last analysis
+  size_t last_size = 0;  // size of sf at last analysis
   bool firstupper = false, uppercase = false;
   map<int, set<int> >::iterator rcx_map_ptr;
 
@@ -1216,6 +1233,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
                                         uppercase, firstupper);
         last_incond = true;
         last = input_buffer.getPos();
+        last_size = sf.size();
       }
       else if(current_state.isFinal(postblank))
       {
@@ -1235,6 +1253,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
                                         uppercase, firstupper);
         last_postblank = true;
         last = input_buffer.getPos();
+        last_size = sf.size();
       }
       else if(current_state.isFinal(preblank))
       {
@@ -1254,6 +1273,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
                                         uppercase, firstupper);
         last_preblank = true;
         last = input_buffer.getPos();
+        last_size = sf.size();
       }
       else if(!isAlphabetic(val))
       {
@@ -1275,6 +1295,14 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
         last_preblank = false;
         last_incond = false;
         last = input_buffer.getPos();
+        last_size = sf.size();
+      }
+      else { // isAlphabetic, standard type section
+        // Record if a compound might be possible
+        if (do_decomposition && compoundOnlyLSymbol != 0
+            && current_state.hasSymbol(compoundOnlyLSymbol)) {
+          seen_cpL = true;
+        }
       }
     }
     else if(sf.empty() && u_isspace(val))
@@ -1285,6 +1313,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
       last_preblank = false;
       last_incond = false;
       last = input_buffer.getPos();
+      last_size = sf.size();
     }
 
     if(useRestoreChars && rcx_map.find(val) != rcx_map.end())
@@ -1322,13 +1351,45 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
     }
     else
     {
-      if(!isAlphabetic(val) && sf.empty())
+      // First try if blank-crossing compound analysis is possible; have
+      // to fall back on the regular methods if this didn't work:
+      lf_spcmp.clear();
+      if (seen_cpL  // We've seen both a space and a <compund-only-L>
+          && isAlphabetic(val)
+          && !sf.empty()
+          && last_size <= lastBlank(sf)) {
+        int oldval = val;
+        UString oldsf = sf;
+        do {
+          alphabet.getSymbol(sf, val);
+        } while ((val = readAnalysis(input)) && isAlphabetic(val));
+        if (!dictionaryCase) {
+          firstupper = u_isupper(sf[0]);
+          uppercase = firstupper && u_isupper(sf[sf.size() - 1]);
+        }
+        lf_spcmp = compoundAnalysis(sf, uppercase, firstupper);
+        if(lf_spcmp.empty()) {  // didn't work, rewind!
+          input_buffer.back(sf.size() - oldsf.size());
+          val = oldval;
+          sf.swap(oldsf);
+        }
+        else {
+          input_buffer.back(1);
+          val = input_buffer.peek();
+        }
+      }
+      seen_cpL = false;
+
+      if(!lf_spcmp.empty()) {
+        printWordPopBlank(sf, lf_spcmp, output);
+      }
+      else if(!isAlphabetic(val) && sf.empty())
       {
         writeChar(val, output, true);
       }
       else if(last_postblank)
       {
-        printWordPopBlank(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
+        printWordPopBlank(sf.substr(0, last_size),
                           lf, output);
         u_fputc(' ', output);
         input_buffer.setPos(last);
@@ -1337,20 +1398,22 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
       else if(last_preblank)
       {
         u_fputc(' ', output);
-        printWordPopBlank(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
+        printWordPopBlank(sf.substr(0, last_size),
                           lf, output);
         input_buffer.setPos(last);
         input_buffer.back(1);
       }
       else if(last_incond)
       {
-        printWordPopBlank(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
+        printWordPopBlank(sf.substr(0, last_size),
                           lf, output);
         input_buffer.setPos(last);
         input_buffer.back(1);
       }
       else if(isAlphabetic(val) &&
-              ((sf.size()-input_buffer.diffPrevPos(last)) > lastBlank(sf) ||
+               // we can't skip back a blank:
+              (last_size > lastBlank(sf) ||
+               // or we've failed to reach an analysis:
                lf.empty()))
       {
         do
@@ -1438,7 +1501,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
       }
       else
       {
-        printWordPopBlank(sf.substr(0, sf.size()-input_buffer.diffPrevPos(last)),
+        printWordPopBlank(sf.substr(0, last_size),
                           lf, output);
         input_buffer.setPos(last);
         input_buffer.back(1);
@@ -2171,60 +2234,44 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
   State current_state = initial_state;
   UString lf;
   UString sf;
-  int last = 0;
+  UString last_lf;
+  int rewind_point = 0;
+  int last_match = 0;
+  UChar32 firstchar = 0;
 
-  while(UChar32 val = readPostgeneration(input, output))
-  {
-    if(u_ispunct(val) || u_isspace(val))
-    {
-      bool firstupper = u_isupper(sf[1]);
-      bool uppercase = sf.size() > 1 && firstupper && u_isupper(sf[2]);
-      lf = current_state.filterFinals(all_finals, alphabet, escaped_chars,
-                                      displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                      uppercase, firstupper, 0);
-      if(!lf.empty())
-      {
-        write(lf.substr(1), output);
-        current_state = initial_state;
-        lf.clear();
-        sf.clear();
+  while(UChar32 val = readPostgeneration(input, output)) {
+    if (sf.empty()) {
+      firstchar = val;
+      rewind_point = input_buffer.getPos();
+    } else {
+      lf = filterFinals(current_state, sf);
+      if (!lf.empty()) {
+        last_match = input_buffer.getPos();
+        last_lf.swap(lf);
       }
-      writeChar(val, output, false);
     }
-    else
-    {
-      if(current_state.isFinal(all_finals))
-      {
-        bool firstupper = u_isupper(sf[1]);
-        bool uppercase = sf.size() > 1 && firstupper && u_isupper(sf[2]);
-        lf = current_state.filterFinals(all_finals, alphabet, escaped_chars,
-                                        displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                        uppercase, firstupper, 0);
-        last = input_buffer.getPos();
-      }
-
-      current_state.step(val);
-      if(current_state.size() != 0)
-      {
-        alphabet.getSymbol(sf, val);
-      }
-      else
-      {
-        if(!lf.empty())
-        {
-          write(lf.substr(1), output);
-          input_buffer.setPos(last);
-          input_buffer.back(1);
-          val = lf[lf.size()-1];
+    current_state.step(val);
+    if (current_state.size() != 0) {
+      alphabet.getSymbol(sf, val);
+    } else {
+      if (last_lf.empty()) {
+        input_buffer.setPos(rewind_point);
+        if (u_isspace(firstchar)) {
+          printSpace(firstchar, output);
+        } else {
+          if (isEscaped(firstchar)) {
+            u_fputc('\\', output);
+          }
+          u_fputc(firstchar, output);
         }
-        else
-        {
-          writeChar(val, output, false);
-        }
-        current_state = initial_state;
-        lf.clear();
-        sf.clear();
+      } else {
+        write(last_lf.substr(1), output);
+        last_lf.clear();
+        input_buffer.setPos(last_match);
+        input_buffer.back(1);
       }
+      sf.clear();
+      current_state = initial_state;
     }
   }
   // print remaining blanks

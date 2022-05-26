@@ -23,6 +23,7 @@
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/ustring.h>
 
+#include <thread>
 #include <map>
 #include <string>
 #include <set>
@@ -77,6 +78,17 @@ private:
   UString current_paradigm;
 
   /**
+   * The number of top-level entries read in this section.
+   */
+  size_t n_section_entries = 0;
+
+  /**
+   * The maximum number of top-level entries per section.
+   * If 0, no limit.
+   */
+  size_t max_section_entries = 0;
+
+  /**
    * The dictionary section being compiled
    */
   UString current_section;
@@ -111,6 +123,11 @@ private:
    * Maintain morpheme boundaries
    */
   bool keep_boundaries = false;
+
+  /**
+   * Allow parallel minimisation jobs
+   */
+  bool jobs = false;
 
 
   /**
@@ -371,6 +388,16 @@ public:
    * Set keep morpheme boundaries
    */
   void setKeepBoundaries(bool keep_boundaries = false);
+
+  /**
+   * Set whether to allow parallel minimisation jobs
+   */
+  void setJobs(bool jobs);
+
+  /**
+   * Set how many top-level entries to allow in a section before starting a new one automatically
+   */
+  void setMaxSectionEntries(size_t m);
 
   /**
    * Set verbose output

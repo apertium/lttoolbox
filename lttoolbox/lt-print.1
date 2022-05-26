@@ -6,6 +6,7 @@
 .Nd compiled dictionary printer for Apertium
 .Sh SYNOPSIS
 .Nm lt-print
+.Op Fl a | H
 .Ar bin_file
 .Op Ar output_file
 .Sh DESCRIPTION
@@ -16,6 +17,16 @@ is the application responsible for printing compiled dictionaries in ATT format.
 The compiled input file.
 .It Ar output_file
 The transducer in ATT format.
+.El
+.Sh OPTIONS
+.Bl -tag -width Ds
+.It Fl a, Fl Fl alpha
+print transducer alphabet instead of transducers
+.It
+.It Fl H , Fl Fl hfst
+use HFST-compatible character escapes, e.g. @_SPACE_@ for spaces and @0@ for epsilons.
+.It Fl h , Fl Fl help
+Prints a short help message.
 .El
 .Sh SEE ALSO
 .Xr apertium 1 ,

@@ -37,6 +37,8 @@
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/lt_locale.h>
 
+#include <unicode/ustdio.h>
+
 #include <getopt.h>
 
 class FST: public FSTProcessor

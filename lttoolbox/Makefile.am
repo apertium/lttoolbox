@@ -14,12 +14,13 @@ cc_sources = alphabet.cc alphabet_exe.cc att_compiler.cc compiler.cc compression
 library_includedir = $(includedir)/$(PACKAGE_NAME)-$(VERSION_API)/$(PACKAGE_NAME)
 library_include_HEADERS = $(h_sources)
 
-bin_PROGRAMS = lt-comp lt-proc lt-expand lt-tmxcomp lt-tmxproc lt-print lt-trim
+bin_PROGRAMS = lt-comp lt-proc lt-expand lt-tmxcomp lt-tmxproc lt-print lt-trim lt-append
 instdir = lttoolbox
 
 lib_LTLIBRARIES= liblttoolbox3.la
 liblttoolbox3_la_SOURCES= $(h_sources) $(cc_sources)
 liblttoolbox3_la_LDFLAGS= -version-info $(SOVERSION) -release $(VERSION_API)
+liblttoolbox3_la_LIBADD= $(ICU_LIBS)
 
 lttoolboxdir = $(prefix)/share/lttoolbox
 lttoolboxinclude = $(prefix)/include
@@ -30,6 +31,7 @@ lttoolbox_DATA = dix.dtd dix.rng dix.rnc acx.rng xsd/dix.xsd xsd/acx.xsd
 LDADD = liblttoolbox$(VERSION_MAJOR).la
 AM_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LIBXML_LIBS) $(ICU_LIBS)
 
+lt_append_SOURCES = lt_append.cc
 lt_print_SOURCES = lt_print.cc
 lt_trim_SOURCES = lt_trim.cc
 lt_comp_SOURCES = lt_comp.cc
@@ -48,7 +50,7 @@ lt_tmxproc_SOURCES = lt_tmxproc.cc
 
 
 
-man_MANS = lt-comp.1 lt-expand.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1 lt-print.1 lt-trim.1
+man_MANS = lt-append.1 lt-comp.1 lt-expand.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1 lt-print.1 lt-trim.1
 
 INCLUDES = -I$(top_srcdir) $(LIBXML_CFLAGS) $(ICU_CFLAGS)
 CLEANFILES = *~

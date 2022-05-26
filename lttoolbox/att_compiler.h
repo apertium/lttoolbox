@@ -98,11 +98,14 @@ private:
    * Id of the starting state. We assume it is the source state of the first
    * transduction in the file.
    */
-  int starting_state;
+  int starting_state = 0;
   /**
    * Default value of weight of a transduction unless specified.
    */
-  double default_weight;
+  double default_weight = 0.0000;
+
+  // how many phantom states have we created to split multichar symbols
+  int phantom_count = 0;
 
   Alphabet alphabet;
   /** All non-multicharacter symbols. */
@@ -181,16 +184,13 @@ private:
    */
   void convert_hfst(UString& symbol);
 
-  /**
-   * Returns the code of the symbol in the alphabet. Run after convert_hfst has
-   * run.
-   *
-   * Also adds all non-multicharacter symbols (letters) to the @p letters set.
-   *
-   * @return the code of the symbol, if @p symbol is multichar; its first (and
-   *         only) character otherwise.
-   */
-  int symbol_code(const UString& symbol);
+  // if a character should be in the alphabet, add it
+  void update_alphabet(UChar32 c);
+  // convert a string to a symbol code, splitting non-tag multichars
+  void symbol_code(const UString& symbol, vector<int32_t>& split);
+  void add_transition(int from, int to,
+                      const UString& upper, const UString& lower,
+                      double weight);
 };
 
 #endif /* _MYATT_COMPILER_ */

@@ -134,7 +134,7 @@ public:
    * Determine whether any weight is non-default
    * @return bool true or false
    */
-  bool weighted() const;
+  bool weighted();
 
   /**
    * Insertion of a single transduction, creating a new target state
@@ -331,7 +331,7 @@ public:
    * @param output the stream to write to
    * @param decalage offset to sum to the tags
    */
-  void write(FILE *output, int const decalage = 0) const;
+  void write(FILE *output, int const decalage = 0);
 
   /**
    * Read method
@@ -421,6 +421,13 @@ public:
                        Alphabet const &t_a,
                        int const epsilon_tag = 0);
 
+  /**
+   * Ensure that new_alpha contains all the symbols in old_alpha
+   * and update all transitions to the symbol numbers of new_alpha.
+   * If has_pairs is false, transition labels will be looked up as
+   * single symbols rather than pairs.
+   */
+  void updateAlphabet(Alphabet& old_alpha, Alphabet& new_alpha, bool has_pairs = true);
 };
 
 #endif

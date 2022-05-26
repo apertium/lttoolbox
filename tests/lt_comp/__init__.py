@@ -8,6 +8,12 @@ class CompNormalAndJoin(ProcTest):
     expectedOutputs = ["^abc/ab<n><def>$", "^ab/ab<n><ind>$", "^y/y<n><ind>$", "^n/n<n><ind>$", "^jg/j<pr>+g<n>$", "^jh/j<pr>+h<n>$", "^kg/k<pr>+g<n>$"]
 
 
+class EmptyDixOk(ProcTest):
+	procdix = "data/entirely-empty.dix"
+	inputs = ["abc"]
+	expectedOutputs = ["^abc/*abc$"]
+
+
 class CompEmptyLhsShouldError(ProcTest):
     procdix = "data/lhs-empty-mono.dix"
     expectedCompRetCodeFail = True
@@ -38,3 +44,7 @@ class CompAttEpsilonToFinalShouldError(ProcTest):
     procdix = "data/cat-epsilon-to-final.att"
     expectedCompRetCodeFail = True
 
+class CompSplitMultichar(ProcTest):
+    procdix = "data/multichar.att"
+    inputs = ["א"]
+    expectedOutputs = ["^א/אַן<blah>$"]

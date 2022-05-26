@@ -131,10 +131,23 @@ Compiler::parse(string const &file, UString const &dir)
   xmlCleanupParser();
 
 
-  // Minimize transducers
-  for(auto& it : sections)
+  // Minimize transducers: For each section, call transducer.minimize() in
+  // its own thread. This is the major bottleneck of lt-comp and sections
+  // are completely independent transducers.
+  std::vector<std::thread> minimisations;
+  for(std::pair<const UString, Transducer>& it : sections)
   {
-    it.second.minimize();
+    if(jobs) {
+      minimisations.push_back(
+        std::thread([](Transducer &t) { t.minimize(); },
+                    std::ref(it.second)));
+    }
+    else {
+      it.second.minimize();
+    }
+  }
+  for (auto &thr : minimisations) {
+    thr.join();
   }
 
   if (!valid(dir)) {
@@ -914,10 +927,17 @@ Compiler::procNode()
   }
   else if(name == COMPILER_ENTRY_ELEM)
   {
+    if(current_paradigm.empty()) {
+      n_section_entries++;
+      if(max_section_entries >0 && n_section_entries % max_section_entries == 0) {
+        current_section = "+"_u + current_section; // would be invalid as xml id -- this way we won't clobber existing names
+      }
+    }
     procEntry();
   }
   else if(name == COMPILER_SECTION_ELEM)
   {
+    n_section_entries = 0;
     procSection();
   }
   else if(name== COMPILER_COMMENT_NODE)
@@ -976,6 +996,18 @@ void
 Compiler::setKeepBoundaries(bool keep)
 {
   keep_boundaries = keep;
+}
+
+void
+Compiler::setJobs(bool j)
+{
+  jobs = j;
+}
+
+void
+Compiler::setMaxSectionEntries(size_t m)
+{
+  max_section_entries = m;
 }
 
 void

@@ -37,7 +37,7 @@
 >
         <!-- c: symbol (tag) comment -->
 
-<!ELEMENT pardefs (pardef+)>
+<!ELEMENT pardefs (pardef*)>
 	<!-- paradigm definition section -->
 
 <!ELEMENT pardef (e+)>
@@ -52,7 +52,7 @@
         <!-- c: comment about paradigm -->
 
 
-<!ELEMENT section (e+)>
+<!ELEMENT section (e*)>
 	<!-- dictionary section -->
 <!ATTLIST section
 	id ID #REQUIRED

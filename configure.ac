@@ -2,7 +2,7 @@ AC_PREREQ(2.52)
 
 m4_define([PKG_VERSION_MAJOR], [3])
 m4_define([PKG_VERSION_MINOR], [6])
-m4_define([PKG_VERSION_PATCH], [0])
+m4_define([PKG_VERSION_PATCH], [4])
 
 AC_INIT([lttoolbox], [PKG_VERSION_MAJOR.PKG_VERSION_MINOR.PKG_VERSION_PATCH], [apertium-stuff@lists.sourceforge.net], [lttoolbox], [https://wiki.apertium.org/wiki/Lttoolbox])
 
@@ -52,7 +52,9 @@ have_sv=""
 AC_CHECK_HEADERS([string_view], [have_sv="-DHAVE_STRING_VIEW"], [have_sv=""])
 AC_SUBST([have_sv])
 
-AC_CHECK_HEADER([utf8.h], [], [AC_MSG_ERROR([You don't have utfcpp installed.])])
+AC_CHECK_HEADER([utf8cpp/utf8.h], [CPPFLAGS="-I/usr/include/utf8cpp/ $CPPFLAGS"], [
+  AC_CHECK_HEADER([utf8.h], [], [AC_MSG_ERROR([You don't have utfcpp installed.])])
+])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
@@ -71,19 +73,14 @@ AM_CONDITIONAL([WINDOWS], [test x$version_type = xwindows])
 
 # Require highest supported C++ standard
 AC_LANG(C++)
-AX_CHECK_COMPILE_FLAG([-std=c++20], [CXXFLAGS="$CXXFLAGS -std=c++20"], [
- AX_CHECK_COMPILE_FLAG([-std=c++2a], [CXXFLAGS="$CXXFLAGS -std=c++2a"], [
-  AX_CHECK_COMPILE_FLAG([-std=c++17], [CXXFLAGS="$CXXFLAGS -std=c++17"], [
-   AX_CHECK_COMPILE_FLAG([-std=c++1z], [CXXFLAGS="$CXXFLAGS -std=c++1z"], [
-    AX_CHECK_COMPILE_FLAG([-std=c++14], [CXXFLAGS="$CXXFLAGS -std=c++14"], [
-     AX_CHECK_COMPILE_FLAG([-std=c++1y], [CXXFLAGS="$CXXFLAGS -std=c++1y"], [
-      AC_MSG_ERROR([Could not enable at least C++1y (C++14) - upgrade your compiler])
-     ])
-    ])
-   ])
-  ])
- ])
+for version in 23 2b 20 2a 17 1z 14 1y; do
+  version_flag="-std=c++${version}"
+  AX_CHECK_COMPILE_FLAG([${version_flag}], [break], [version_flag=none])
+done
+AS_IF([test "$version_flag" == none], [
+  AC_MSG_ERROR([Could not enable at least C++1y (C++14) - upgrade your compiler])
 ])
+CXXFLAGS="$CXXFLAGS ${version_flag}"
 
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <cstddef>

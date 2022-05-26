@@ -404,6 +404,7 @@ Transducer::determinize(int const epsilon_tag)
 void
 Transducer::minimize(int const epsilon_tag)
 {
+  if (finals.empty()) return;
   reverse(epsilon_tag);
   determinize(epsilon_tag);
   reverse(epsilon_tag);
@@ -515,7 +516,7 @@ Transducer::isEmpty(int const state) const
 }
 
 // Determine whether any weights are non-default (0)
-bool Transducer::weighted() const {
+bool Transducer::weighted() {
   for (auto& it : finals) {
     if (it.second != default_weight) {
       return true;
@@ -532,7 +533,7 @@ bool Transducer::weighted() const {
 }
 
 void
-Transducer::write(FILE *output, int const decalage) const
+Transducer::write(FILE *output, int const decalage)
 {
   fwrite_unlocked(HEADER_TRANSDUCER, 1, 4, output);
 
@@ -1393,4 +1394,59 @@ Transducer::intersect(Transducer &trimmer,
   // We do not minimize here, in order to let lt_trim print a warning
   // (instead of exiting the whole program) if no finals.
   return trimmed;
+}
+
+void
+Transducer::updateAlphabet(Alphabet& old_alpha, Alphabet& new_alpha,
+                           bool has_pairs)
+{
+  set<int32_t> symbol_pairs;
+  set<int32_t> symbols;
+  for (auto& it : transitions) {
+    for (auto& it2 : it.second) {
+      if (!has_pairs && it2.first < 0) {
+        symbols.insert(it2.first);
+      } else {
+        symbol_pairs.insert(it2.first);
+        int32_t l = old_alpha.decode(it2.first).first;
+        int32_t r = old_alpha.decode(it2.first).second;
+        if (l < 0) {
+          symbols.insert(l);
+        }
+        if (r < 0) {
+          symbols.insert(r);
+        }
+      }
+    }
+  }
+  map<int32_t, int32_t> symbol_update;
+  for (auto& it : symbols) {
+    UString s;
+    old_alpha.getSymbol(s, it);
+    new_alpha.includeSymbol(s);
+    symbol_update[it] = new_alpha(s);
+  }
+  if (has_pairs) {
+    map<int32_t, int32_t> pair_update;
+    for (auto& it : symbol_pairs) {
+      int32_t l1 = old_alpha.decode(it).first;
+      int32_t r1 = old_alpha.decode(it).second;
+      int32_t l2 = (l1 < 0 ? symbol_update[l1] : l1);
+      int32_t r2 = (r1 < 0 ? symbol_update[r1] : r1);
+      pair_update[it] = new_alpha(l2, r2);
+    }
+    symbol_update.swap(pair_update);
+  }
+  map<int, multimap<int, pair<int, double> > > new_trans;
+  for (auto& it : transitions) {
+    new_trans[it.first].clear();
+    for (auto& it2 : it.second) {
+      int32_t s = it2.first;
+      if (symbol_update.find(s) != symbol_update.end()) {
+        s = symbol_update[s];
+      }
+      new_trans[it.first].insert(make_pair(s, make_pair(it2.second.first, it2.second.second)));
+    }
+  }
+  transitions.swap(new_trans);
 }

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import os
-import itertools
 from subprocess import Popen, PIPE, call
 from tempfile import mkdtemp
 from shutil import rmtree
 from basictest import BasicTest
+
 
 class PrintTest(BasicTest):
     """See lt_print test for how to use this. Override runTest if you don't
@@ -13,7 +13,7 @@ class PrintTest(BasicTest):
 
     printdix = "data/minimal-mono.dix"
     printdir = "lr"
-    expectedOutput = itertools.repeat("")
+    expectedOutput = ""
     expectedRetCodeFail = False
 
     def compileTest(self, tmpd):

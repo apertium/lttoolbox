@@ -261,5 +261,62 @@ class AlphabeticMultibyteTestPost(ProcTest):
     expectedOutputs = ["𝜊"]
 
 
+class SectionDupes(ProcTest):
+    procdix = "data/sectiondupes.dix"
+    procdir = "rl"
+    inputs = ["^a<n>$"]
+    procflags = ['-z', '-g']
+    expectedOutputs = ["a"]
+
+
+class SpaceCompound(ProcTest):
+    procdix = "data/spcmp.dix"
+    inputs = ["a 1-b",
+              "a 1-b_",
+              "a 1-b ",
+              "a 1-b a",
+              "a 1-c",
+              "a 1-c_",
+              "a 1-c ",
+              "wy a",
+              ]
+    procflags = ['-z', '-w', '-e']
+    expectedOutputs = [
+        "^a 1-b/a 1<n>+b<n>$",
+        "^a 1-b/a 1<n>+b<n>$_",
+        "^a 1-b/a 1<n>+b<n>$ ",
+        "^a 1-b/a 1<n>+b<n>$ ^a/a<pr>$",
+        "^a 1-c/a 1-c<n>$",
+        "^a 1-c/a 1-c<n>$_",
+        "^a 1-c/a 1-c<n>$ ",
+        "^wy/wy<n>$ ^a/a<pr>$",
+        ]
+
+
+class ShyCmp(ProcTest):
+    procdix = "data/spcmp.dix"
+    # These examples include soft hyphens (visible in editors like Emacs):
+    inputs = ["ve se­tu",
+              "+ve se­tu",
+              "p­b",
+              "ve p­b",
+              # "p p­b",
+              ]
+    procflags = ['-z', '-w', '-e']
+    expectedOutputs = [
+        "^ve/ve<n>$ ^setu/set<n>+u<n>$",
+        "+^ve/ve<n>$ ^setu/set<n>+u<n>$",
+        "^pb/p<n>+b<n>$",
+        "^ve/ve<n>$ ^pb/p<n>+b<n>$",
+        # "^p/*p$^pb/p<n>+b<n>$ ",  # TODO: why does space get moved when we have an unknown before?
+        ]
+
+
+class ApostropheTransliteration(ProcTest):
+    procdix = "data/apostrophe.att"
+    inputs = ["ka'aguy", "ka’aguy"]
+    procflags = ['-z', '-t']
+    expectedOutputs = ["kaʼaguy", "kaʼaguy"]
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+	<alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÄÅÆÇÈÉÊËÍÑÒÓÔÕÖØÙÚÜČĐŊŠŦŽabcdefghijklmnopqrstuvwxyzàáâäåæçèéêëíñòóôõöøùúüčđŋšŧž-</alphabet>
+	<sdefs>
+	  <sdef n="n"/>
+	  <sdef n="pr"/>
+	  <sdef n="det"/>
+	  <sdef n="guio"/>
+	  <sdef n="compound-only-L"/>
+	  <sdef n="compound-R"/>
+        </sdefs>
+<pardefs>
+
+</pardefs>
+
+<section id="cmp" type="standard">
+  <!-- "a 1-b" should (only) be possible as a dynamic compound: -->
+  <e><p><l>a<b/>1-</l> <r>a<b/>1<s n="n"/><s n="compound-only-L"/></r></p></e>
+  <e><p><l>b</l>       <r>b<s n="n"/><s n="compound-R"/></r></p></e>
+  <e><p><l>c</l>       <r>c<s n="n"/><s n="compound-R"/></r></p></e>
+
+  <!-- "a 1-c" is a lexicalised compound: -->
+  <e><p><l>a<b/>1-c</l><r>a<b/>1-c<s n="n"/></r></p></e>
+  <e><p><l>a<b/>1-d</l><r>a<b/>1-d<s n="n"/></r></p></e>
+
+  <e><p><l>w</l>  <r>w<s n="n"/><s n="compound-only-L"/></r></p></e>
+  <e><p><l>wy</l> <r>wy<s n="n"/></r></p></e>
+  <e><p><l>wy<b/>x</l> <r>wy<b/>x<s n="n"/></r></p></e>
+
+  <e><p><l>a</l>       <r>a<s n="pr"/></r></p></e>
+
+  <!-- Shared prefixes: -->
+  <e><p><l>p<b/>f</l> <r>p<b/>f<s n="n"/></r></p></e>
+  <e><p><l>p</l>  <r>p<s n="n"/><s n="compound-only-L"/></r></p></e>
+
+  <!-- shy: -->
+  <e><i>ve<b/>se</i> <p><l></l> <r><s n="pr"/></r></p></e> <!-- the garden path -->
+  <e><i>ve</i>       <p><l></l> <r><s n="n"/></r></p></e>
+  <e><i>set</i>      <p><l></l> <r><s n="n"/><s n="compound-only-L"/></r></p></e>
+  <e><i>u</i>        <p><l></l> <r><s n="n"/><s n="compound-R"/></r></p></e>
+
+</section>
+<section id="final" type="inconditional">
+  <e><p><l>1</l>       <r>1<s n="det"/></r></p></e>
+  <e><p><l>-</l>       <r>-<s n="guio"/></r></p></e>
+</section>
+
+</dictionary>

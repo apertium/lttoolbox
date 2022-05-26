@@ -515,8 +515,13 @@ State::filterFinals(const set<TransducerExe*>& finals,
   response = NFinals(response, max_analyses, max_weight_classes);
 
   result.clear();
+  set<UString> seen;
   for(vector<pair<UString, double>>::iterator it = response.begin(); it != response.end(); it++)
   {
+    if(seen.find(it->first) != seen.end()) {
+      continue;
+    }
+    seen.insert(it->first);
     result += '/';
     result += it->first;
     if(display_weights)
@@ -809,6 +814,25 @@ State::pruneStatesWithForbiddenSymbol(int forbiddenSymbol)
   }
 }
 
+
+bool
+State::hasSymbol(int requiredSymbol)
+{
+  for(size_t i = 0; i<state.size(); i++)
+  {
+    // loop through sequence – we can't just check that the last tag is cp-L, there may be other tags after it:
+    vector<pair<int, double>>* seq = state.at(i).sequence;
+    if(seq != NULL) for (unsigned int j=0; j<seq->size(); j++)
+    {
+      int symbol=(seq->at(j)).first;
+      if(symbol == requiredSymbol)
+      {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 
 bool

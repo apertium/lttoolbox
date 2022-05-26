@@ -79,6 +79,7 @@ trim(FILE* file_mono, FILE* file_bi, FILE* file_out)
                                              alph_prefix);
     if (trimmed.hasNoFinals()) {
       cerr << "Warning: section " << it.first << " had no final state after trimming! Skipping it..." << endl;
+      continue;
     }
     trimmed.minimize();
     trans_trim[it.first] = trimmed;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 Universitat d'Alacant / Universidad de Alicante
+ * Copyright (C) 2022 Apertium
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -16,8 +16,6 @@
  */
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
-#include <lttoolbox/endian_util.h>
-#include <lttoolbox/string_writer.h>
 #include <lttoolbox/file_utils.h>
 
 #include <lttoolbox/my_stdio.h>
@@ -41,10 +39,10 @@ void endProgram(char *name)
 {
   if(name != NULL)
   {
-    cout << basename(name) << " v" << PACKAGE_VERSION <<": dump a transducer to text in ATT format" << endl;
-    cout << "USAGE: " << basename(name) << " [-aHh] bin_file [output_file] " << endl;
-    cout << "    -a, --alpha:    print transducer alphabet" << endl;
-    cout << "    -H, --hfst:     use HFST-compatible character escapes" << endl;
+    cout << basename(name) << " v" << PACKAGE_VERSION <<": add sections to a compiled transducer" << endl;
+    cout << "USAGE: " << basename(name) << " [-ksh] bin_file1 bin_file2 output_file" << endl;
+    cout << "    -k, --keep:     in case of section name conflicts, keep the one from the first transducer" << endl;
+    cout << "    -s, --single:   treat input transducers as one-sided" << endl;
     cout << "    -h, --help:     print this message and exit" << endl;
   }
   exit(EXIT_FAILURE);
@@ -55,8 +53,8 @@ int main(int argc, char *argv[])
 {
   LtLocale::tryToSetLocale();
 
-  bool alpha = false;
-  bool hfst = false;
+  bool pairs = true;
+  bool keep = false;
 
 #ifdef _MSC_VER
   _setmode(_fileno(output), _O_U8TEXT);
@@ -70,27 +68,27 @@ int main(int argc, char *argv[])
 #if HAVE_GETOPT_LONG
     static struct option long_options[] =
     {
-      {"alpha",     no_argument, 0, 'a'},
-      {"hfst",      no_argument, 0, 'H'},
+      {"keep",      no_argument, 0, 'k'},
+      {"single",    no_argument, 0, 's'},
       {"help",      no_argument, 0, 'h'},
       {0, 0, 0, 0}
     };
 
-    int cnt=getopt_long(argc, argv, "aHh", long_options, &option_index);
+    int cnt=getopt_long(argc, argv, "ksh", long_options, &option_index);
 #else
-    int cnt=getopt(argc, argv, "aHh");
+    int cnt=getopt(argc, argv, "ksh");
 #endif
     if (cnt==-1)
       break;
 
     switch (cnt)
     {
-      case 'a':
-        alpha = true;
+      case 'k':
+        keep = true;
         break;
 
-      case 'H':
-        hfst = true;
+      case 's':
+        pairs = false;
         break;
 
       case 'h':
@@ -100,16 +98,23 @@ int main(int argc, char *argv[])
     }
   }
 
-  string infile;
+  string infile1;
+  string infile2;
   string outfile;
   switch(argc - optind)
   {
     case 1:
-      infile = argv[argc-1];
+      infile1 = argv[argc-1];
       break;
 
     case 2:
-      infile = argv[argc-2];
+      infile1 = argv[argc-2];
+      infile2 = argv[argc-1];
+      break;
+
+    case 3:
+      infile1 = argv[argc-3];
+      infile2 = argv[argc-2];
       outfile = argv[argc-1];
       break;
 
@@ -118,39 +123,39 @@ int main(int argc, char *argv[])
       break;
   }
 
-  FILE* input = openInBinFile(infile);
-  UFILE* output = openOutTextFile(outfile);
+  FILE* input1 = openInBinFile(infile1);
+  FILE* input2 = openInBinFile(infile2);
+  FILE* output = openOutBinFile(outfile);
 
-  Alphabet alphabet;
-  set<UChar32> alphabetic_chars;
-  map<UString, Transducer> transducers;
+  Alphabet alpha1, alpha2;
+  set<UChar32> chars1, chars2;
+  map<UString, Transducer> trans1, trans2;
 
-  readTransducerSet(input, alphabetic_chars, alphabet, transducers);
+  readTransducerSet(input1, chars1, alpha1, trans1);
+  readTransducerSet(input2, chars2, alpha2, trans2);
 
-  /////////////////////
+  for (auto& it : chars2) {
+    chars1.insert(it);
+  }
+  UString chars(chars1.begin(), chars1.end());
 
-  if (alpha) {
-    for (auto& it : alphabetic_chars) {
-      u_fprintf(output, "%C\n", it);
-    }
-    for (int i = 1; i <= alphabet.size(); i++) {
-      alphabet.writeSymbol(-i, output);
-      u_fprintf(output, "\n");
-    }
-  } else {
-    bool first = true;
-    for (auto& it : transducers) {
-      if (!first) {
-        u_fprintf(output, "--\n");
+  for (auto& it : trans2) {
+    if (trans1.find(it.first) != trans1.end()) {
+      if (keep) {
+        continue;
+      } else {
+        cerr << "WARNING: section '" << it.first << "' appears in both transducers and will be overwritten!" << endl;
       }
-      it.second.joinFinals();
-      it.second.show(alphabet, output, 0, hfst);
-      first = false;
     }
+    it.second.updateAlphabet(alpha2, alpha1, pairs);
+    trans1[it.first] = it.second;
   }
 
-  fclose(input);
-  u_fclose(output);
+  writeTransducerSet(output, chars, alpha1, trans1);
+
+  fclose(input1);
+  fclose(input2);
+  fclose(output);
 
   return 0;
 }

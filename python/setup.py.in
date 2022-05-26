@@ -3,26 +3,25 @@
 """
 Setup for SWIG Python bindings for lttoolbox
 """
-from sys import platform
 from distutils.core import Extension, setup
-import shlex
+from sys import platform
 
-compile_args = '@CXXFLAGS@'.split() + shlex.split('@DEFS@') + '@LIBXML_CFLAGS@'.split() + '@ICU_CFLAGS@'.split()
-link_args = '@LIBS@'.split() + '@ICU_LIBS@'.split()
+compile_args = '@CXXFLAGS@'.split() + '@ICU_CFLAGS@'.split()
+link_args = []
 if platform == 'darwin':
-	compile_args += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
-	link_args.append('-mmacosx-version-min=10.7')
+    compile_args += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
+    link_args.append('-mmacosx-version-min=10.7')
 
 lttoolbox_module = Extension(
     name='_lttoolbox',
-	language = 'c++',
+	language='c++',
     sources=['lttoolbox.i'],
-    swig_opts = ["-c++", "-I@top_srcdir@", "-Wall"],
-    include_dirs=['@top_srcdir@', '@top_srcdir@/lttoolbox'],
+    swig_opts = ["-c++", '-I..', "-I@top_srcdir@", "-Wall"],
+    include_dirs=['@top_srcdir@', '@top_srcdir@/lttoolbox'] + '@LIBXML_CFLAGS@'.replace('-I', '').split() + '@ICU_CFLAGS@'.replace('-I', '').split(),
     library_dirs=['@top_srcdir@/lttoolbox/.libs'],
-	libraries = ['lttoolbox@VERSION_MAJOR@'],
-    extra_compile_args = compile_args,
-    extra_link_args = link_args
+	libraries=['lttoolbox@VERSION_MAJOR@', 'xml2', 'icuio', 'icui18n', 'icuuc', 'icudata'],
+    extra_compile_args=compile_args,
+    extra_link_args=link_args,
 )
 
 setup(
@@ -36,5 +35,5 @@ setup(
     maintainer_email='@PACKAGE_BUGREPORT@',
     ext_modules=[lttoolbox_module],
     py_modules=['lttoolbox'],
-	data_files = []
+	data_files=[],
 )
