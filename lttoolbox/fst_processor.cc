@@ -802,8 +802,12 @@ FSTProcessor::classifyFinals()
 UString
 FSTProcessor::filterFinals(const State& state, const UString& casefrom)
 {
-  bool firstupper = u_isupper(casefrom[0]);
-  bool uppercase = casefrom.size() > 1 && firstupper && u_isupper(casefrom[1]);
+  bool firstupper = false, uppercase = false;
+  if (!dictionaryCase) {
+    firstupper = u_isupper(casefrom[0]);
+    uppercase = (casefrom.size() > 1 &&
+                 firstupper && u_isupper(casefrom[casefrom.size()-1]));
+  }
   return state.filterFinals(all_finals, alphabet, escaped_chars,
                             displayWeightsMode, maxAnalyses, maxWeightClasses,
                             uppercase, firstupper, 0);
@@ -930,6 +934,26 @@ FSTProcessor::printSpace(UChar32 const val, UFILE *output)
   }
 }
 
+void
+FSTProcessor::printChar(const UChar32 val, UFILE* output)
+{
+  if (u_isspace(val)) {
+    if (blankqueue.size() > 0) {
+      write(blankqueue.front(), output);
+      blankqueue.pop();
+    } else {
+      u_fputc(val, output);
+    }
+  } else {
+    if (isEscaped(val)) {
+      u_fputc('\\', output);
+    }
+    if (val) {
+      u_fputc(val, output);
+    }
+  }
+}
+
 bool
 FSTProcessor::isEscaped(UChar32 const c) const
 {
@@ -995,7 +1019,7 @@ FSTProcessor::initBiltrans()
 
 
 UString
-FSTProcessor::compoundAnalysis(UString input_word, bool uppercase, bool firstupper)
+FSTProcessor::compoundAnalysis(UString input_word)
 {
   const int MAX_COMBINATIONS = 32767;
 
@@ -1029,9 +1053,7 @@ FSTProcessor::compoundAnalysis(UString input_word, bool uppercase, bool firstupp
   }
 
   current_state.pruneCompounds(compoundRSymbol, '+', compound_max_elements);
-  UString result = current_state.filterFinals(all_finals, alphabet, escaped_chars, displayWeightsMode, maxAnalyses, maxWeightClasses, uppercase, firstupper);
-
-  return result;
+  return filterFinals(current_state, input_word);
 }
 
 
@@ -1093,7 +1115,6 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
   bool seen_cpL = false; // have we seen a <compound-only-L> tag so far
   size_t last = 0;       // position in input_buffer after last analysis
   size_t last_size = 0;  // size of sf at last analysis
-  bool firstupper = false, uppercase = false;
   map<int, set<int> >::iterator rcx_map_ptr;
 
   UChar32 val;
@@ -1105,80 +1126,44 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
     {
       if(current_state.isFinal(inconditional))
       {
-        if(!dictionaryCase)
-        {
-          firstupper = u_isupper(sf[0]);
-          uppercase = firstupper && u_isupper(sf[sf.size()-1]);
-        }
-
         if(do_decomposition && compoundOnlyLSymbol != 0)
         {
           current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
         }
-        lf = current_state.filterFinals(all_finals, alphabet,
-                                        escaped_chars,
-                                        displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                        uppercase, firstupper);
+        lf = filterFinals(current_state, sf);
         last_incond = true;
         last = input_buffer.getPos();
         last_size = sf.size();
       }
       else if(current_state.isFinal(postblank))
       {
-        if(!dictionaryCase)
-        {
-          firstupper = u_isupper(sf[0]);
-          uppercase = firstupper && u_isupper(sf[sf.size()-1]);
-        }
-
         if(do_decomposition && compoundOnlyLSymbol != 0)
         {
           current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
         }
-        lf = current_state.filterFinals(all_finals, alphabet,
-                                        escaped_chars,
-                                        displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                        uppercase, firstupper);
+        lf = filterFinals(current_state, sf);
         last_postblank = true;
         last = input_buffer.getPos();
         last_size = sf.size();
       }
       else if(current_state.isFinal(preblank))
       {
-        if(!dictionaryCase)
-        {
-          firstupper = u_isupper(sf[0]);
-          uppercase = firstupper && u_isupper(sf[sf.size()-1]);
-        }
-
         if(do_decomposition && compoundOnlyLSymbol != 0)
         {
           current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
         }
-        lf = current_state.filterFinals(all_finals, alphabet,
-                                        escaped_chars,
-                                        displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                        uppercase, firstupper);
+        lf = filterFinals(current_state, sf);
         last_preblank = true;
         last = input_buffer.getPos();
         last_size = sf.size();
       }
       else if(!isAlphabetic(val))
       {
-        if(!dictionaryCase)
-        {
-          firstupper = u_isupper(sf[0]);
-          uppercase = firstupper && u_isupper(sf[sf.size()-1]);
-        }
-
         if(do_decomposition && compoundOnlyLSymbol != 0)
         {
           current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
         }
-        lf = current_state.filterFinals(all_finals, alphabet,
-                                        escaped_chars,
-                                        displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                        uppercase, firstupper);
+        lf = filterFinals(current_state, sf);
         last_postblank = false;
         last_preblank = false;
         last_incond = false;
@@ -1251,11 +1236,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
         do {
           alphabet.getSymbol(sf, val);
         } while ((val = readAnalysis(input)) && isAlphabetic(val));
-        if (!dictionaryCase) {
-          firstupper = u_isupper(sf[0]);
-          uppercase = firstupper && u_isupper(sf[sf.size() - 1]);
-        }
-        lf_spcmp = compoundAnalysis(sf, uppercase, firstupper);
+        lf_spcmp = compoundAnalysis(sf);
         if(lf_spcmp.empty()) {  // didn't work, rewind!
           input_buffer.back(sf.size() - oldsf.size());
           val = oldval;
@@ -1273,29 +1254,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
       }
       else if(!isAlphabetic(val) && sf.empty())
       {
-        if(u_isspace(val))
-        {
-          if (blankqueue.size() > 0)
-          {
-            write(blankqueue.front(), output);
-            blankqueue.pop();
-          }
-          else
-          {
-            u_fputc(val, output);
-          }
-        }
-        else
-        {
-          if(isEscaped(val))
-          {
-            u_fputc('\\', output);
-          }
-          if(val)
-          {
-            u_fputc(val, output);
-          }
-        }
+        printChar(val, output);
       }
       else if(last_postblank)
       {
@@ -1346,14 +1305,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
           UString unknown_word = sf.substr(0, limit);
           if(do_decomposition)
           {
-            if(!dictionaryCase)
-            {
-              firstupper = u_isupper(sf[0]);
-              uppercase = firstupper && u_isupper(sf[sf.size()-1]);
-            }
-
-            UString compound;
-            compound = compoundAnalysis(unknown_word, uppercase, firstupper);
+            UString compound = compoundAnalysis(unknown_word);
             if(!compound.empty())
             {
               printWord(unknown_word, compound, output);
@@ -1385,14 +1337,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
           UString unknown_word = sf.substr(0, limit);
           if(do_decomposition)
           {
-            if(!dictionaryCase)
-            {
-              firstupper = u_isupper(sf[0]);
-              uppercase = firstupper && u_isupper(sf[sf.size()-1]);
-            }
-
-            UString compound;
-            compound = compoundAnalysis(unknown_word, uppercase, firstupper);
+            UString compound = compoundAnalysis(unknown_word);
             if(!compound.empty())
             {
               printWord(unknown_word, compound, output);
@@ -1406,7 +1351,6 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
           {
             printUnknownWord(unknown_word, output);
           }
-
         }
       }
       else
@@ -1445,6 +1389,10 @@ FSTProcessor::analysis_wrapper_null_flush(InputFile& input, UFILE *output)
     analysis(input, output);
     u_fputc('\0', output);
     u_fflush(output);
+    // analysis() doesn't always leave input_buffer empty
+    // which results in repeatedly analyzing the same string
+    // so clear it here
+    while (!input_buffer.isEmpty()) input_buffer.next();
   }
 }
 

@@ -459,10 +459,16 @@ private:
    * @param output stream where the word is written
    */
   void printSpace(UChar32 const val, UFILE *output);
+  /**
+   * Print one possibly escaped character
+   * if it's a space and the blank queue is non-empty,
+   * pop the first blank and print that instead
+   */
+  void printChar(const UChar32 val, UFILE* output);
 
   void skipUntil(InputFile& input, UFILE *output, UChar32 const character);
   static UString removeTags(UString const &str);
-  UString compoundAnalysis(UString str, bool uppercase, bool firstupper);
+  UString compoundAnalysis(UString str);
   size_t firstNotAlpha(UString const &sf);
 
   void analysis_wrapper_null_flush(InputFile& input, UFILE *output);
