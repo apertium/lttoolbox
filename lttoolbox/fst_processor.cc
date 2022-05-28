@@ -2657,13 +2657,14 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
       }
       else
       { //xxx
+        UString prefix = (mode == gm_tagged ? "/#"_u : "/@"_u);
         if(biltransSurfaceForms)
         {
-          printWordBilingual(surface, "/@"_u + surface, output);
+          printWordBilingual(surface, prefix + surface, output);
         }
         else
         {
-          printWordBilingual(sf, "/@"_u + sf, output);
+          printWordBilingual(sf, prefix + sf, output);
         }
       }
       seensurface = false;
@@ -2707,14 +2708,7 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
       }
       if(current_state.size() != 0)
       {
-        if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
-        {
-          current_state.step(val, u_tolower(val));
-        }
-        else
-        {
-          current_state.step(val);
-        }
+        current_state.step_case(val, caseSensitive);
       }
       if(current_state.isFinal(all_finals))
       {

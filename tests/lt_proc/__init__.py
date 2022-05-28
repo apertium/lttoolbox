@@ -318,5 +318,14 @@ class ApostropheTransliteration(ProcTest):
     procflags = ['-z', '-t']
     expectedOutputs = ["kaʼaguy", "kaʼaguy"]
 
+
+class DebugGen(ProcTest):
+    inputs = ["^ab<n><ind>$",
+              "^ab<n><indic>$"]
+    expectedOutputs = ["^ab<n><ind>/ab$",
+                       "^ab<n><indic>/#ab<n><indic>$"]
+    procflags = ['-d', '-b', '-z']
+    procdir = "rl"
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *

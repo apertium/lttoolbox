@@ -15,6 +15,7 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 #include <lttoolbox/fst_processor.h>
+#include <lttoolbox/file_utils.h>
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/lt_locale.h>
 
@@ -226,6 +227,11 @@ int main(int argc, char *argv[])
         bilmode = gm_clean;
         cmd = 'b';
       }
+      else if ((cmd == 'd' && c == 'b') || (cmd == 'b' && c == 'd')) {
+        // we're generating with prefs and want to keep # debug marks
+        bilmode = gm_tagged;
+        cmd = 'b';
+      }
       else
       {
         endProgram(argv[0]);
@@ -256,53 +262,22 @@ int main(int argc, char *argv[])
 
   if(optind == (argc - 3))
   {
-    FILE *in = fopen(argv[optind], "rb");
-    if(in == NULL || ferror(in))
-    {
-      cerr << "Error: Cannot open file '" << argv[optind] << "'." << endl << endl;
-      exit(EXIT_FAILURE);
-    }
-
-    if (!input.open(argv[optind+1])) {
-      cerr << "Error: Cannot open file '" << argv[optind+1] << "'." << endl << endl;
-      exit(EXIT_FAILURE);
-    }
-
-    output = u_fopen(argv[optind+2], "wb", NULL, NULL);
-    if(output == NULL)
-    {
-      cerr << "Error: Cannot open file '" << argv[optind+2] << "'." << endl << endl;
-      exit(EXIT_FAILURE);
-    }
-
+    FILE* in = openInBinFile(argv[optind]);
+    input.open_or_exit(argv[optind+1]);
+    output = openOutTextFile(argv[optind+2]);
     fstp.load(in);
     fclose(in);
   }
   else if(optind == (argc -2))
   {
-    FILE *in = fopen(argv[optind], "rb");
-    if(in == NULL || ferror(in))
-    {
-      cerr << "Error: Cannot open file '" << argv[optind] << "'." << endl << endl;
-      exit(EXIT_FAILURE);
-    }
-
-    if (!input.open(argv[optind+1])) {
-      cerr << "Error: Cannot open file '" << argv[optind+1] << "'." << endl << endl;
-      exit(EXIT_FAILURE);
-    }
-
+    FILE* in = openInBinFile(argv[optind]);
+    input.open_or_exit(argv[optind+1]);
     fstp.load(in);
     fclose(in);
   }
   else if(optind == (argc - 1))
   {
-    FILE *in = fopen(argv[optind], "rb");
-    if(in == NULL || ferror(in))
-    {
-      cerr << "Error: Cannot open file '" << argv[optind] << "'." << endl << endl;
-      exit(EXIT_FAILURE);
-     }
+    FILE* in = openInBinFile(argv[optind]);
     fstp.load(in);
     fclose(in);
   }
