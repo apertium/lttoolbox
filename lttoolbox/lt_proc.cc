@@ -140,6 +140,8 @@ int main(int argc, char *argv[])
 #endif
 
   GenerationMode bilmode = gm_unknown;
+  // more than one option sets generation mode, but -gb also sets gm_unknown
+  bool really_g = false;
   while(true)
   {
 #if HAVE_GETOPT_LONG
@@ -203,39 +205,50 @@ int main(int argc, char *argv[])
     case 'a':
     case 'b':
     case 'o':
-    case 'l':
-    case 'm':
     case 'g':
-    case 'n':
-    case 'd':
     case 'p':
     case 'x':
     case 't':
     case 's':
-    case 'C':
       if(cmd == 0)
       {
         cmd = c;
+        if (cmd == 'g') really_g = true;
       }
       else if(cmd == 'g' && c == 'b') {
         // "lt-proc -g -b generador.bin" should run biltrans, keeping unknown-marks
-        bilmode = gm_unknown;
-        cmd = 'b';
-      }
-      else if(cmd == 'n' && c == 'b') {
-        // "lt-proc -n -b generador.bin" should run biltrans, stripping unknown-marks
-        bilmode = gm_clean;
-        cmd = 'b';
-      }
-      else if ((cmd == 'd' && c == 'b') || (cmd == 'b' && c == 'd')) {
-        // we're generating with prefs and want to keep # debug marks
-        bilmode = gm_tagged;
+        if (really_g) bilmode = gm_unknown;
         cmd = 'b';
       }
       else
       {
         endProgram(argv[0]);
       }
+      break;
+
+    case 'd':
+      if (cmd == 0) cmd = 'g';
+      bilmode = gm_all;
+      break;
+
+    case 'l':
+      if (cmd == 0) cmd = 'g';
+      bilmode = gm_tagged;
+      break;
+
+    case 'm':
+      if (cmd == 0) cmd = 'g';
+      bilmode = gm_tagged_nm;
+      break;
+
+    case 'n':
+      if (cmd == 0) cmd = 'g';
+      bilmode = gm_clean;
+      break;
+
+    case 'C':
+      if (cmd == 0) cmd = 'g';
+      bilmode = gm_carefulcase;
       break;
 
     case 'z':
@@ -295,40 +308,10 @@ int main(int argc, char *argv[])
   {
     switch(cmd)
     {
-      case 'n':
-        fstp.initGeneration();
-        checkValidity(fstp);
-        fstp.generation(input, output, gm_clean);
-        break;
-
       case 'g':
         fstp.initGeneration();
         checkValidity(fstp);
-        fstp.generation(input, output);
-        break;
-
-      case 'd':
-        fstp.initGeneration();
-        checkValidity(fstp);
-        fstp.generation(input, output, gm_all);
-        break;
-
-      case 'l':
-        fstp.initGeneration();
-        checkValidity(fstp);
-        fstp.generation(input, output, gm_tagged);
-        break;
-
-      case 'm':
-        fstp.initGeneration();
-        checkValidity(fstp);
-        fstp.generation(input, output, gm_tagged_nm);
-        break;
-
-      case 'C':
-        fstp.initGeneration();
-        checkValidity(fstp);
-        fstp.generation(input, output, gm_carefulcase);
+        fstp.generation(input, output, bilmode);
         break;
 
       case 'p':

@@ -2605,7 +2605,7 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
       }
       else
       { //xxx
-        UString prefix = (mode == gm_tagged ? "/#"_u : "/@"_u);
+        UString prefix = (mode == gm_all ? "/#"_u : "/@"_u);
         if(biltransSurfaceForms)
         {
           printWordBilingual(surface, prefix + surface, output);
