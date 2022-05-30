@@ -15,6 +15,7 @@ class PrintTest(BasicTest):
     printdir = "lr"
     expectedOutput = ""
     expectedRetCodeFail = False
+    printflags = []
 
     def compileTest(self, tmpd):
         self.assertEqual(0, call([os.environ['LTTOOLBOX_PATH']+"/lt-comp",
@@ -27,7 +28,7 @@ class PrintTest(BasicTest):
         tmpd = mkdtemp()
         try:
             self.compileTest(tmpd)
-            self.printresult = Popen([os.environ['LTTOOLBOX_PATH']+"/lt-print"] + [tmpd+"/compiled.bin"],
+            self.printresult = Popen([os.environ['LTTOOLBOX_PATH']+"/lt-print"] + self.printflags + [tmpd+"/compiled.bin"],
                               stdout=PIPE,
                               stderr=PIPE)
 

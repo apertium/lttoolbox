@@ -88,7 +88,7 @@ AttCompiler::is_word_punct(UChar32 symbol)
 void
 AttCompiler::update_alphabet(UChar32 c)
 {
-  if (is_word_punct(c) || !(u_ispunct(c) && u_isspace(c))) {
+  if (is_word_punct(c) || !(u_ispunct(c) || u_isspace(c))) {
     letters.insert(c);
     if(u_islower(c)) {
       letters.insert(u_toupper(c));

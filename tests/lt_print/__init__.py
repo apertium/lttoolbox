@@ -40,3 +40,17 @@ class SectionsFst(unittest.TestCase, PrintTest):
 1\t2\tε\t<np>\t0.000000\t
 2\t0.000000
 """
+
+
+class Alphabet(unittest.TestCase, PrintTest):
+    printdix = "data/alphabet.att"
+    printdir = "lr"
+    printflags = ["-a"]
+    expectedOutput = """A
+B
+C
+a
+b
+c
+<h>
+"""
