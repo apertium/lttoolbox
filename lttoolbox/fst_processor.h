@@ -29,6 +29,7 @@
 #include <libxml/xmlreader.h>
 
 #include <map>
+#include <deque>
 #include <queue>
 #include <set>
 #include <string>
@@ -108,7 +109,9 @@ private:
   /**
    * Queue of wordbound blanks, used in reading methods
    */
-  queue<UString> wblankqueue;
+  deque<UString> wblankqueue;
+
+  deque<bool> wblankendqueue;
 
   /**
    * Set of characters being considered alphabetics
@@ -234,6 +237,11 @@ private:
    */
   int maxAnalyses = INT_MAX;
 
+  bool transliteration_reread_suffix = false;
+  bool transliteration_drop_tilde = false;
+  bool transliteration_last_was_space = false;
+  set<unsigned int> wblank_locs;
+
   /**
    * True if a wblank block ([[..]]xyz[[/]]) was just read
    */
@@ -303,6 +311,8 @@ private:
    * @return the next symbol in the stream
    */
   int readPostgeneration(InputFile& input, UFILE *output);
+
+  int32_t readTransliteration(InputFile& input);
 
   /**
    * Read text from stream (generation version)
@@ -458,13 +468,17 @@ private:
    * @param val the space character to use if no blank queue
    * @param output stream where the word is written
    */
-  void printSpace(UChar32 const val, UFILE *output);
+  void printSpace(UChar32 const val, UFILE *output, bool flush=true);
+  /**
+   * Print one possibly escaped character
+   */
+  void putc_esc(const UChar32 val, UFILE* output);
   /**
    * Print one possibly escaped character
    * if it's a space and the blank queue is non-empty,
    * pop the first blank and print that instead
    */
-  void printChar(const UChar32 val, UFILE* output);
+  void printChar(const UChar32 val, UFILE* output, bool flush=false);
 
   void skipUntil(InputFile& input, UFILE *output, UChar32 const character);
   static UString removeTags(UString const &str);

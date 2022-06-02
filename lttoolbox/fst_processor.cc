@@ -19,6 +19,7 @@
 #include <lttoolbox/exception.h>
 #include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/file_utils.h>
+#include <lttoolbox/string_utils.h>
 
 #include <iostream>
 #include <cerrno>
@@ -192,7 +193,7 @@ FSTProcessor::wblankPostGen(InputFile& input, UFILE *output)
     {
       if(result[result.size()-1] == ']') {
         // We just saw the end of a wblank, may want to merge
-        wblankqueue.push(result);
+        wblankqueue.push_back(result);
       }
       else {
         // wake-up-mark happened some characters into the wblanked word
@@ -418,7 +419,7 @@ FSTProcessor::readPostgeneration(InputFile& input, UFILE *output)
       {
         if(collect_wblanks)
         {
-          wblankqueue.push(input.finishWBlank());
+          wblankqueue.push_back(input.finishWBlank());
           is_wblank = true;
           return static_cast<int32_t>(' ');
         }
@@ -450,6 +451,77 @@ FSTProcessor::readPostgeneration(InputFile& input, UFILE *output)
       input_buffer.add(val);
       return val;
   }
+}
+
+int32_t
+FSTProcessor::readTransliteration(InputFile& input)
+{
+  if (!input_buffer.isEmpty()) {
+    //cerr << "checking for wblank loc at " << input_buffer.getPos() << endl;
+    if (wblank_locs.find(input_buffer.getPos()) != wblank_locs.end()) {
+      is_wblank = true;
+    } else {
+      is_wblank = false;
+    }
+    return input_buffer.next();
+  }
+
+  is_wblank = false;
+  UChar32 val = input.get();
+  int32_t sym = 0;
+  if (input.eof()) {
+    return 0;
+  }
+
+  if (val == '\\') {
+    sym = static_cast<int32_t>(input.get());
+  } else if (val == '<') {
+    sym = alphabet(input.readBlock('<', '>'));
+  } else if (val == '[' && input.peek() == '[') {
+    sym = static_cast<int32_t>(' ');
+    //if (!transliteration_last_was_space) {
+    //transliteration_last_was_space = true;
+      //blankqueue.push(""_u);
+      //input.unget(val);
+    //} else {
+      input.get();
+      wblankqueue.push_back(input.finishWBlank());
+      is_wblank = true;
+      //}
+  } else if (val == '[' || u_isspace(val)) {
+    sym = static_cast<int32_t>(' ');
+    UString blank;
+    while (!input.eof()) {
+      if (val == '[') {
+        if (input.peek() == '[') {
+          input.unget(val);
+          break;
+        } else {
+          blank += input.readBlock('[', ']');
+          val = input.get();
+        }
+      } else if (u_isspace(val)) {
+        blank += val;
+        val = input.get();
+      } else {
+        input.unget(val);
+        break;
+      }
+    }
+    blankqueue.push(blank);
+    transliteration_last_was_space = true;
+  } else {
+    sym = val;
+  }
+  if (is_wblank) {
+    //cerr << "adding wblank loc " << (input_buffer.getPos()) << endl;
+    //input_buffer.next();
+    wblank_locs.insert(input_buffer.getPos());
+    //input_buffer.back(1);
+  }
+  input_buffer.add(sym);
+  if (sym != static_cast<int32_t>(' ')) transliteration_last_was_space = false;
+  return sym;
 }
 
 void
@@ -690,7 +762,7 @@ FSTProcessor::flushWblanks(UFILE *output)
   while(wblankqueue.size() > 0)
   {
     write(wblankqueue.front(), output);
-    wblankqueue.pop();
+    wblankqueue.pop_front();
   }
 }
 
@@ -727,12 +799,12 @@ FSTProcessor::combineWblanks()
       seen_wblank = true;
       last_wblank = wblankqueue.front();
     }
-    wblankqueue.pop();
+    wblankqueue.pop_front();
   }
 
   if(!last_wblank.empty())
   {
-    wblankqueue.push(last_wblank);
+    wblankqueue.push_back(last_wblank);
   }
 
   if(!final_wblank.empty())
@@ -816,13 +888,8 @@ FSTProcessor::filterFinals(const State& state, const UString& casefrom)
 void
 FSTProcessor::writeEscaped(UString const &str, UFILE *output)
 {
-  for(unsigned int i = 0, limit = str.size(); i < limit; i++)
-  {
-    if(escaped_chars.find(str[i]) != escaped_chars.end())
-    {
-      u_fputc('\\', output);
-    }
-    u_fputc(str[i], output);
+  for (auto& c : str) {
+    putc_esc(c, output);
   }
 }
 
@@ -830,13 +897,9 @@ size_t
 FSTProcessor::writeEscapedPopBlanks(UString const &str, UFILE *output)
 {
   size_t postpop = 0;
-  for (unsigned int i = 0, limit = str.size(); i < limit; i++)
-  {
-    if (escaped_chars.find(str[i]) != escaped_chars.end()) {
-      u_fputc('\\', output);
-    }
-    u_fputc(str[i], output);
-    if (str[i] == ' ') {
+  for (auto& c : str) {
+    putc_esc(c, output);
+    if (c == ' ') {
       if (blankqueue.front() == " "_u) {
         blankqueue.pop();
       } else {
@@ -858,11 +921,7 @@ FSTProcessor::writeEscapedWithTags(UString const &str, UFILE *output)
       return;
     }
 
-    if(escaped_chars.find(str[i]) != escaped_chars.end())
-    {
-      u_fputc('\\', output);
-    }
-    u_fputc(str[i], output);
+    putc_esc(str[i], output);
   }
 }
 
@@ -922,11 +981,27 @@ FSTProcessor::lastBlank(UString const &str)
 }
 
 void
-FSTProcessor::printSpace(UChar32 const val, UFILE *output)
+FSTProcessor::putc_esc(const UChar32 val, UFILE* output)
+{
+  if (val != '\0') {
+    if (isEscaped(val)) {
+      u_fputc('\\', output);
+    }
+    u_fputc(val, output);
+  }
+}
+
+void
+FSTProcessor::printSpace(UChar32 const val, UFILE *output, bool flush)
 {
   if(blankqueue.size() > 0)
   {
-    flushBlanks(output);
+    if (flush) {
+      flushBlanks(output);
+    } else {
+      write(blankqueue.front(), output);
+      blankqueue.pop();
+    }
   }
   else
   {
@@ -935,22 +1010,12 @@ FSTProcessor::printSpace(UChar32 const val, UFILE *output)
 }
 
 void
-FSTProcessor::printChar(const UChar32 val, UFILE* output)
+FSTProcessor::printChar(const UChar32 val, UFILE* output, bool flush)
 {
   if (u_isspace(val)) {
-    if (blankqueue.size() > 0) {
-      write(blankqueue.front(), output);
-      blankqueue.pop();
-    } else {
-      u_fputc(val, output);
-    }
+    printSpace(val, output, flush);
   } else {
-    if (isEscaped(val)) {
-      u_fputc('\\', output);
-    }
-    if (val) {
-      u_fputc(val, output);
-    }
+    putc_esc(val, output);
   }
 }
 
@@ -1496,18 +1561,7 @@ FSTProcessor::tm_analysis(InputFile& input, UFILE *output)
     {
       if((u_isspace(val) || u_ispunct(val)) && sf.empty())
       {
-        if(u_isspace(val))
-        {
-          printSpace(val, output);
-        }
-        else
-        {
-          if(isEscaped(val))
-          {
-            u_fputc('\\', output);
-          }
-          u_fputc(val, output);
-        }
+        printChar(val, output, true);
       }
       else if(!u_isspace(val) && !u_ispunct(val) &&
               ((sf.size()-input_buffer.diffPrevPos(last)) > lastBlank(sf) ||
@@ -1767,367 +1821,120 @@ FSTProcessor::generation(InputFile& input, UFILE *output, GenerationMode mode)
 void
 FSTProcessor::postgeneration(InputFile& input, UFILE *output)
 {
-  if(getNullFlush())
-  {
-    postgeneration_wrapper_null_flush(input, output);
-  }
-
-  bool skip_mode = true;
-  collect_wblanks = false;
-  need_end_wblank = false;
-  State current_state = initial_state;
-  UString lf;
-  UString sf;
-  int last = 0;
-  set<UChar32> empty_escaped_chars;
-
-  while(UChar32 val = readPostgeneration(input, output))
-  {
-    if(val == '~')
-    {
-      skip_mode = false;
-      collect_wblanks = true;
-    }
-
-    if(is_wblank && skip_mode)
-    {
-      //do nothing
-    }
-    else if(skip_mode)
-    {
-      if(u_isspace(val))
-      {
-        if(need_end_wblank)
-        {
-          write(WBLANK_FINAL, output);
-          need_end_wblank = false;
-        }
-
-        printSpace(val, output);
-      }
-      else
-      {
-        if(!need_end_wblank)
-        {
-          flushWblanks(output);
-        }
-
-        if(isEscaped(val))
-        {
-          u_fputc('\\', output);
-        }
-        u_fputc(val, output);
-
-        if(need_end_wblank)
-        {
-          write(WBLANK_FINAL, output);
-          need_end_wblank = false;
-        }
-      }
-    }
-    else
-    {
-      if(is_wblank)
-      {
-        continue;
-      }
-
-      // test for final states
-      if(current_state.isFinal(all_finals))
-      {
-        bool firstupper = u_isupper(sf[1]);
-        bool uppercase = sf.size() > 1 && firstupper && u_isupper(sf[2]);
-        lf = current_state.filterFinals(all_finals, alphabet,
-                                        empty_escaped_chars,
-                                        displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                        uppercase, firstupper, 0);
-
-        // case of the beggining of the next word
-
-        UString mybuf;
-        for(size_t i = sf.size(); i > 0; --i)
-        {
-          if(!isalpha(sf[i-1]))
-          {
-            break;
-          }
-          else
-          {
-            mybuf = sf[i-1] + mybuf;
-          }
-        }
-
-        if(mybuf.size() > 0)
-        {
-          bool myfirstupper = u_isupper(mybuf[0]);
-          bool myuppercase = mybuf.size() > 1 && u_isupper(mybuf[1]);
-
-          for(size_t i = lf.size(); i > 0; --i)
-          {
-            if(!isalpha(lf[i-1]))
-            {
-              if(myfirstupper && i != lf.size())
-              {
-                lf[i] = u_toupper(lf[i]);
-              }
-              else
-              {
-                lf[i] = u_tolower(lf[i]);
-              }
-              break;
-            }
-            else
-            {
-              if(myuppercase)
-              {
-                lf[i-1] = u_toupper(lf[i-1]);
-              }
-              else
-              {
-                lf[i-1] = u_tolower(lf[i-1]);
-              }
-            }
-          }
-        }
-
-        last = input_buffer.getPos();
-      }
-
-      current_state.step_case(val, caseSensitive);
-
-      if(current_state.size() != 0)
-      {
-        alphabet.getSymbol(sf, val);
-      }
-      else
-      {
-        UString final_wblank = combineWblanks();
-        write(final_wblank, output);
-
-        if(lf.empty())
-        {
-          unsigned int mark = sf.size();
-          unsigned int space_index = sf.size();
-
-          for(unsigned int i = 1, limit = sf.size(); i < limit; i++)
-          {
-            if(sf[i] == '~')
-            {
-              mark = i;
-              break;
-            }
-            else if(sf[i] == ' ')
-            {
-              space_index = i;
-            }
-          }
-
-          if(space_index != sf.size())
-          {
-            write(sf.substr(1, space_index-1), output);
-
-            if(need_end_wblank)
-            {
-              write(WBLANK_FINAL, output);
-              need_end_wblank = false;
-              u_fputc(sf[space_index], output);
-              flushWblanks(output);
-            }
-            else
-            {
-              u_fputc(sf[space_index], output);
-            }
-
-            write(sf.substr(space_index+1, mark-space_index-1), output);
-          }
-          else
-          {
-            flushWblanks(output);
-            write(sf.substr(1, mark-1), output);
-          }
-
-          if(mark == sf.size())
-          {
-            input_buffer.back(1);
-          }
-          else
-          {
-            input_buffer.back(sf.size()-mark);
-          }
-        }
-        else
-        {
-          write(lf.substr(1,lf.size()-3), output);
-          input_buffer.setPos(last);
-          input_buffer.back(2);
-          val = lf[lf.size()-2];
-          if(u_isspace(val))
-          {
-            printSpace(val, output);
-          }
-          else
-          {
-            if(isEscaped(val))
-            {
-              u_fputc('\\', output);
-            }
-            u_fputc(val, output);
-          }
-        }
-
-        current_state = initial_state;
-        lf.clear();
-        sf.clear();
-        skip_mode = true;
-        collect_wblanks = false;
-      }
-    }
-  }
-
-  // print remaining blanks
-  flushBlanks(output);
+  //transliteration_reread_suffix = true;
+  transliteration_drop_tilde = true;
+  transliteration(input, output);
 }
 
 void
 FSTProcessor::intergeneration(InputFile& input, UFILE *output)
 {
-  if (getNullFlush())
-  {
-    intergeneration_wrapper_null_flush(input, output);
-  }
+  transliteration_reread_suffix = false;
+  transliteration_drop_tilde = false;
+  transliteration(input, output);
+}
 
-  bool skip_mode = true;
-  State current_state = initial_state;
-  UString target;
-  UString source;
-  int last = 0;
-  set<UChar32> empty_escaped_chars;
-
-  while (true)
-  {
-    UChar32 val = readPostgeneration(input, output);
-
-    if (val == '~')
-    {
-      skip_mode = false;
-    }
-
-    if (skip_mode)
-    {
-      if (u_isspace(val))
-      {
-        printSpace(val, output);
-      }
-      else
-      {
-        if(val != '\0')
-        {
-          if (isEscaped(val))
-          {
-            u_fputc('\\', output);
-          }
-          u_fputc(val, output);
-        }
-      }
-    }
-    else
-    {
-      // test for final states
-      if (current_state.isFinal(all_finals))
-      {
-        bool firstupper = u_isupper(source[1]);
-        bool uppercase = source.size() > 1 && firstupper && u_isupper(source[2]);
-        target = current_state.filterFinals(all_finals, alphabet,
-                                        empty_escaped_chars,
-                                        displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                        uppercase, firstupper, 0);
-
-        last = input_buffer.getPos();
-      }
-
-      if (val != '\0')
-      {
-        current_state.step_case(val, caseSensitive);
-      }
-
-      if (val != '\0' && current_state.size() != 0)
-      {
-        alphabet.getSymbol(source, val);
-      }
-      else
-      {
-        if (target.empty()) // no match
-        {
-          if (val == '\0')
-          {
-            // flush source
-            write(source, output);
-          }
-          else
-          {
-            u_fputc(source[0], output);
-
-            unsigned int mark, limit;
-            for (mark = 1, limit = source.size(); mark < limit && source[mark] != '~' ; mark++)
-            {
-              u_fputc(source[mark], output);
-            }
-
-            if (mark != source.size())
-            {
-              int back = source.size() - mark;
-              input_buffer.back(back);
-            }
-
-            if (val == '~')
-            {
-              input_buffer.back(1);
-            } else {
-               u_fputc(val, output);
-            }
-          }
-        }
-        else
-        {
-          for(unsigned int i=1; i<target.size(); i++) {
-            UChar c = target[i];
-
-            if (u_isspace(c))
-            {
-              printSpace(c, output);
-            }
-            else
-            {
-              if (isEscaped(c))
-              {
-                u_fputc('\\', output);
-              }
-              u_fputc(c, output);
-            }
-          }
-
-          if (val != '\0')
-          {
-            input_buffer.setPos(last);
-            input_buffer.back(1);
-          }
-        }
-
-        current_state = initial_state;
-        target.clear();
-        source.clear();
-        skip_mode = true;
-      }
-    }
-
-    if (val == '\0')
-    {
+size_t
+common_suffix(const UString& a, const UString& b)
+{
+  size_t ret = 0;
+  while (ret < a.size() && ret < b.size()) {
+    if (a[a.size() - 1 - ret] == b[b.size() - 1 - ret]) {
+      ret++;
+    } else {
+      ret--;
       break;
     }
   }
+  return ret;
+}
 
-  // print remaining blanks
-  flushBlanks(output);
+UString
+merge_wblanks(const UString& a, const UString& b)
+{
+  if (a.empty()) return b;
+  if (b.empty()) return a;
+  UString ret = a.substr(0, a.size()-2);
+  ret += "; "_u;
+  ret += b.substr(2);
+  return ret;
+}
+
+void
+debug_zone(const pair<pair<int, int>, bool>& zone)
+{
+  cerr << "(" << zone.first.first << "," << zone.first.second << "," << zone.second << ")";
+}
+
+bool
+merge_zones(deque<pair<pair<int, int>, bool>>& zones,
+            deque<UString>& wblanks, int cur_pos)
+{
+  //cerr << "  merge_zones(" << cur_pos << ")\n";
+  if (zones.empty()) return false;
+  auto current_zone = zones.front();
+  zones.pop_front();
+  UString wblank;
+  if (current_zone.second) {
+    wblank = wblanks.front();
+    wblanks.pop_front();
+  }
+  //cerr << "    current ";
+  //debug_zone(current_zone);
+  //cerr << " wblank " << wblank << endl;
+  bool skip = false;
+  while (!zones.empty() && zones.front().first.first < cur_pos) {
+    if (current_zone.second &&
+        !zones.front().second &&
+        zones.front().first.second == cur_pos &&
+        zones.front().first.first == cur_pos-1) {
+      //cerr << "    skipping following blank?\n";
+      skip = true;
+      break;
+    }
+    //cerr << "    adding ";
+    //debug_zone(zones.front());
+    //cerr << endl;
+    if (zones.front().second) {
+      wblank = merge_wblanks(wblank, wblanks.front());
+      wblanks.pop_front();
+      current_zone.second = true;
+    }
+    current_zone.first.second = zones.front().first.second;
+    zones.pop_front();
+  }
+  if (current_zone.second) {
+    wblanks.push_front(wblank);
+  }
+  zones.push_front(current_zone);
+  return skip;
+}
+
+int
+count_spaces(const UString& s)
+{
+  int c = 0;
+  for (size_t i = 0; i < s.size(); i++) {
+    if (s[i] == ' ') c++;
+  }
+  return c;
+}
+
+UString
+next_space(queue<UString>& blankqueue, size_t& skip)
+{
+  while (skip > 0 && !blankqueue.empty() && blankqueue.front() == " "_u) {
+    blankqueue.pop();
+    skip--;
+  }
+  if (blankqueue.empty()) return " "_u;
+  UString ret = blankqueue.front();
+  blankqueue.pop();
+  while (skip > 0 && !blankqueue.empty() && blankqueue.front() == " "_u) {
+    blankqueue.pop();
+    skip--;
+  }
+  return ret;
 }
 
 void
@@ -2142,45 +1949,217 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
   UString lf;
   UString sf;
   UString last_lf;
+  UString prefix;
   int rewind_point = 0;
   int last_match = 0;
-  UChar32 firstchar = 0;
+  int32_t firstchar = 0;
+  size_t spaces_to_skip = 0;
+  UString last_sf;
 
-  while(UChar32 val = readPostgeneration(input, output)) {
+  deque<pair<pair<int, int>, bool>> zones;
+  deque<UString> local_wblanks;
+  int last_zone_start = input_buffer.getPos();
+  bool last_zone_is_wblank = false;
+  set<int> wblank_pos;
+  pair<pair<int, int>, bool> prev_zone = make_pair(make_pair(0, 0), false);
+
+  int32_t val = 0;
+  bool has_stepped = false;
+
+  while (true) {
+    val = readTransliteration(input);
+    if (val == 0) {
+      //cerr << "EOF sf.size() == " << sf.size() << " prefix.size() == " << prefix.size() << endl;
+    }
+    if (val == 0 && sf.empty() && prefix.empty()) break;
+    //cerr << "val = " << val << " prefix = " << prefix << " last_sf = " << last_sf << " last_lf = " <<last_lf << " sf = " << sf;
+    //cerr << " rewind = " << rewind_point << " match = " << last_match;
+    //cerr << " pos = " << input_buffer.getPos();
+    //if (!zones.empty()) {
+      //cerr << " zone1 ";
+      //debug_zone(zones.front());
+    //}
+    //cerr << " space_skip = " << spaces_to_skip;
+    //cerr << " blanks = " << blankqueue.size();
+    //cerr << " is_wblank = " << is_wblank;
+    //cerr << " pz "; debug_zone(prev_zone);
+    //cerr << endl;
+    if (val == 0 ||                                      // this is EOF or
+        (val == static_cast<int32_t>(' ') &&             // this is a boundary
+         (int)input_buffer.getPos() > last_zone_start && // and it's new
+         (is_wblank || !last_zone_is_wblank))) {         // and it's not a space
+                                                         // inside a wblank
+      int end = input_buffer.getPos();
+      zones.push_back(make_pair(make_pair(last_zone_start, end),
+                                last_zone_is_wblank));
+      //cerr << "  found end of zone " << last_zone_start << "-" << end << endl;
+      if (!last_lf.empty() && last_match > last_zone_start) {
+        merge_zones(zones, local_wblanks, last_match);
+      }
+      last_zone_start = end;
+      if (is_wblank) {
+        if (last_zone_is_wblank) {
+          last_zone_is_wblank = false;
+          if (wblankqueue.front() == WBLANK_FINAL) {
+            wblankqueue.pop_front();
+          } else {
+            // there should have been a [[/]] in this situation, so just
+            // pretend there's one immediately before the new wblank
+            last_zone_is_wblank = true;
+            local_wblanks.push_back(wblankqueue.front());
+            wblankqueue.pop_front();
+          }
+        } else {
+          last_zone_is_wblank = true;
+          local_wblanks.push_back(wblankqueue.front());
+          wblankqueue.pop_front();
+        }
+      }
+    } else if (last_zone_start == -1) {
+      last_zone_start = input_buffer.getPos();
+    }
+
     if (sf.empty()) {
-      firstchar = val;
-      rewind_point = input_buffer.getPos();
+      if (!is_wblank) {
+        firstchar = val;
+      }
+        rewind_point = input_buffer.getPos();
     } else {
       lf = filterFinals(current_state, sf);
-      if (!lf.empty()) {
+      if (!lf.empty() && !(lf.substr(1) == sf) && sf != last_sf) {
         last_match = input_buffer.getPos();
         last_lf.swap(lf);
+        last_sf = sf;
+        merge_zones(zones, local_wblanks, last_match);
       }
     }
-    current_state.step(val);
-    if (current_state.size() != 0) {
+    if (val != 0 && !is_wblank) {
+      current_state.step(val);
+      has_stepped = true;
       alphabet.getSymbol(sf, val);
-    } else {
+    }
+    if (current_state.size() == 0 ||
+        val == 0 ||
+        (!has_stepped && is_wblank)
+        ) {
+      //cerr << "  done with something\n";
       if (last_lf.empty()) {
-        input_buffer.setPos(rewind_point);
-        if (u_isspace(firstchar)) {
-          printSpace(firstchar, output);
-        } else {
-          if (isEscaped(firstchar)) {
-            u_fputc('\\', output);
+        bool at_boundary = false;
+        if (val == static_cast<int32_t>(' ')) {
+          //cerr << "    rewind = " << rewind_point << endl;
+          for (auto& it : zones) {
+            //cerr << "    "; debug_zone(it); cerr<<endl;
+            if (it.first.second == rewind_point) {
+              at_boundary = true;
+              break;
+            }
           }
-          u_fputc(firstchar, output);
+        } else if (val == 0) {
+          at_boundary = true;
         }
+        if (is_wblank && prefix.empty()) continue;
+        if (at_boundary && !(is_wblank && prefix.empty())) {
+          //cerr << "  and we're at a boundary\n";
+          //cerr << "    prefix = " << prefix << endl;
+          bool add_blank = merge_zones(zones, local_wblanks, rewind_point);
+          int len = zones.front().first.second - zones.front().first.first;
+          bool has_wblank = zones.front().second;
+          if (len > 1 || (len == 1 && !blankqueue.empty() && prefix.empty()) || !prefix.empty()) {
+            if (is_wblank && rewind_point < zones.front().first.first) rewind_point = input_buffer.getPos();
+            prev_zone = zones.front();
+            add_blank = (prev_zone.first.second == input_buffer.getPos() &&
+                         prev_zone.second && !is_wblank);
+            zones.pop_front();
+            if (has_wblank) {
+              write(local_wblanks.front(), output);
+              local_wblanks.pop_front();
+            }
+            write(prefix, output);
+            prefix.clear();
+            if (has_wblank) {
+              write(WBLANK_FINAL, output);
+              if (add_blank) {
+                write(next_space(blankqueue, spaces_to_skip), output);
+                prev_zone = zones.front();
+                zones.pop_front();
+              }
+            } else {
+              if (!(is_wblank && blankqueue.empty())) {
+                write(next_space(blankqueue, spaces_to_skip), output);
+              }
+            }
+          }
+        } else {
+          if (firstchar != static_cast<int32_t>('~') ||
+              !transliteration_drop_tilde) {
+            if (firstchar != static_cast<int32_t>(' ')) {
+              if (isEscaped(firstchar)) {
+                prefix += '\\';
+              }
+              alphabet.getSymbol(prefix, firstchar);
+            } else if (!is_wblank) {
+              prefix += next_space(blankqueue, spaces_to_skip);
+            }
+          }
+        }
+        input_buffer.setPos(rewind_point);
       } else {
-        write(last_lf.substr(1), output);
-        last_lf.clear();
+        merge_zones(zones, local_wblanks, last_match);
         input_buffer.setPos(last_match);
         input_buffer.back(1);
+        if (transliteration_reread_suffix) {
+          size_t suf_len = common_suffix(last_lf, last_sf);
+          //cerr << "    suf_len = " << suf_len <<endl;
+          last_lf = last_lf.substr(0, last_lf.size()-suf_len);
+          last_sf = last_sf.substr(0, last_sf.size()-suf_len);
+          input_buffer.back(suf_len);
+        }
+        //cerr << "  moving rewind_point from " << rewind_point;
+        rewind_point = input_buffer.getPos();
+        //cerr << " to " << rewind_point << endl;
+        if (last_sf[last_sf.size()-1] == ' ' &&
+            last_lf[last_lf.size()-1] == ' ') {
+          last_sf = last_sf.substr(0, last_sf.size()-1);
+          last_lf = last_lf.substr(0, last_lf.size()-1);
+          last_match--;
+          input_buffer.back(1);
+        }
+        int sf_space_count = count_spaces(last_sf);
+        int lf_space_count = count_spaces(last_lf);
+        int spaces_printed = 0;
+        if (sf_space_count > lf_space_count) {
+          spaces_to_skip += (sf_space_count - lf_space_count);
+        }
+        //cerr << "    spaces: sf " << sf_space_count << " lf " <<lf_space_count << endl;
+        for (auto c : last_lf.substr(1)) {
+          if (c == '~' && transliteration_drop_tilde) {
+            continue;
+          }
+          if (u_isspace(c)) {
+            if (spaces_printed >= sf_space_count) {
+              prefix += c;
+            } else {
+              prefix += next_space(blankqueue, spaces_to_skip);
+            }
+            spaces_printed++;
+          } else {
+            if (isEscaped(c)) prefix += '\\';
+            prefix += c;
+          }
+        }
       }
-      sf.clear();
       current_state = initial_state;
+      has_stepped = false;
+      sf.clear();
+      lf.clear();
+      last_lf.clear();
+      last_sf.clear();
+      if (wblankqueue.empty() && local_wblanks.empty()) {
+        wblank_locs.clear();
+      }
     }
   }
+
   // print remaining blanks
   flushBlanks(output);
 }
@@ -3133,18 +3112,7 @@ FSTProcessor::SAO(InputFile& input, UFILE *output)
     {
       if(!isAlphabetic(val) && sf.empty())
       {
-        if(u_isspace(val))
-        {
-          printSpace(val, output);
-        }
-        else
-        {
-          if(isEscaped(val))
-          {
-            u_fputc('\\', output);
-          }
-          u_fputc(val, output);
-        }
+        printChar(val, output, true);
       }
       else if(last_incond)
       {
