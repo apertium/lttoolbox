@@ -1960,7 +1960,6 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
   deque<UString> local_wblanks;
   int last_zone_start = input_buffer.getPos();
   bool last_zone_is_wblank = false;
-  set<int> wblank_pos;
   pair<pair<int, int>, bool> prev_zone = make_pair(make_pair(0, 0), false);
 
   int32_t val = 0;
@@ -1971,7 +1970,9 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
     if (val == 0) {
       //cerr << "EOF sf.size() == " << sf.size() << " prefix.size() == " << prefix.size() << endl;
     }
-    if (val == 0 && sf.empty() && prefix.empty()) {
+    if (val == 0 && sf.empty()) {
+      write(prefix, output);
+      prefix.clear();
       while (!blankqueue.empty()) {
         if (blankqueue.front() != " "_u) {
           write(blankqueue.front(), output);
@@ -1983,6 +1984,22 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
       else {
         u_fputc('\0', output);
         u_fflush(output);
+        lf.clear();
+        sf.clear();
+        last_lf.clear();
+        last_sf.clear();
+        current_state = initial_state;
+        rewind_point = input_buffer.getPos();
+        last_match = input_buffer.getPos();
+        firstchar = 0;
+        spaces_to_skip = 0;
+        zones.clear();
+        local_wblanks.clear();
+        last_zone_start = input_buffer.getPos();
+        last_zone_is_wblank = false;
+        prev_zone = make_pair(make_pair(last_zone_start, last_zone_start),
+                              false);
+        has_stepped = false;
         continue;
       }
     }
@@ -2098,7 +2115,7 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
                 zones.pop_front();
               }
             } else {
-              if (!(is_wblank && blankqueue.empty())) {
+              if (!((is_wblank || val == 0) && blankqueue.empty())) {
                 write(next_space(blankqueue, spaces_to_skip), output);
               }
             }
