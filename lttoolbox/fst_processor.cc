@@ -1971,7 +1971,21 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
     if (val == 0) {
       //cerr << "EOF sf.size() == " << sf.size() << " prefix.size() == " << prefix.size() << endl;
     }
-    if (val == 0 && sf.empty() && prefix.empty()) break;
+    if (val == 0 && sf.empty() && prefix.empty()) {
+      while (!blankqueue.empty()) {
+        if (blankqueue.front() != " "_u) {
+          write(blankqueue.front(), output);
+        }
+        blankqueue.pop();
+      }
+      spaces_to_skip = 0;
+      if (input.eof()) break;
+      else {
+        u_fputc('\0', output);
+        u_fflush(output);
+        continue;
+      }
+    }
     //cerr << "val = " << val << " prefix = " << prefix << " last_sf = " << last_sf << " last_lf = " <<last_lf << " sf = " << sf;
     //cerr << " rewind = " << rewind_point << " match = " << last_match;
     //cerr << " pos = " << input_buffer.getPos();
@@ -2102,7 +2116,12 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
             }
           }
         }
+        //cerr << "  rewinding from " << input_buffer.getPos();
         input_buffer.setPos(rewind_point);
+        //cerr << " to " << input_buffer.getPos() << endl;
+        if (val == 0 && prefix.empty() && sf.empty()) {
+          input_buffer.back(1);
+        }
       } else {
         merge_zones(zones, local_wblanks, last_match);
         input_buffer.setPos(last_match);
