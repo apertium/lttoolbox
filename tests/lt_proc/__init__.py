@@ -167,7 +167,7 @@ class PostgenerationBasicTest(ProcTest):
 
 class PostgenerationWordboundBlankTest(ProcTest):
     procdix = "data/postgen.dix"
-    procflags = ["-t", "-z"]
+    procflags = ["-p", "-z"]
     inputs          = [ "xyz ejemplo [[t:i:123456]]~o[[/]] [[t:b:abc123; t:i:123456]]ho[[/]] [[t:b:iopmnb]]nombre[[/]].",
                         "xyz ejemplo [[t:b:poim230]]~o[[/]] ho [[t:i:mnbj203]]nombre[[/]].",
                         "xyz ejemplo ~o [[t:b:abc123; t:i:123456]]ho[[/]] [[t:b:iopmnb]]nombre[[/]].",
