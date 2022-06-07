@@ -48,6 +48,8 @@ UString const Compiler::COMPILER_REGEXP_ELEM        = "re"_u;
 UString const Compiler::COMPILER_SECTION_ELEM       = "section"_u;
 UString const Compiler::COMPILER_ID_ATTR            = "id"_u;
 UString const Compiler::COMPILER_TYPE_ATTR          = "type"_u;
+UString const Compiler::COMPILER_SEQUENTIAL_VAL     = "sequential"_u;
+UString const Compiler::COMPILER_SEPARABLE_VAL      = "separable"_u;
 UString const Compiler::COMPILER_IDENTITY_ELEM      = "i"_u;
 UString const Compiler::COMPILER_IDENTITYGROUP_ELEM = "ig"_u;
 UString const Compiler::COMPILER_JOIN_ELEM          = "j"_u;
@@ -71,6 +73,9 @@ UString const Compiler::COMPILER_ACX_VALUE_ATTR     = "value"_u;
 UString const Compiler::COMPILER_LSX_WB_ELEM        = "d"_u;
 UString const Compiler::COMPILER_LSX_CHAR_ELEM      = "w"_u;
 UString const Compiler::COMPILER_LSX_TAG_ELEM       = "t"_u;
+UString const Compiler::COMPILER_LSX_SPACE_ATTR     = "space"_u;
+UString const Compiler::COMPILER_LSX_SPACE_YES_VAL  = "yes"_u;
+UString const Compiler::COMPILER_LSX_SPACE_NO_VAL   = "no"_u;
 
 Compiler::Compiler()
 {
@@ -144,6 +149,20 @@ Compiler::parse(std::string const &file, UString const &dir)
   }
   for (auto &thr : minimisations) {
     thr.join();
+  }
+
+  if (is_separable) {
+    // ensure that all paths end in <$>, in case the user forgot to include
+    // <d/>. This will result in some paths ending with multiple finals
+    // and multiple finals, but lsx-proc only checks for finals upon reading
+    // $, so it won't be an issue.
+    int32_t end = alphabet(word_boundary, word_boundary);
+    for (auto& it : sections) {
+      for (auto fin : it.second.getFinals()) {
+        int end_state = it.second.insertSingleTransduction(end, fin.first);
+        it.second.setFinal(end_state);
+      }
+    }
   }
 
   if (!valid(dir)) {
@@ -312,6 +331,21 @@ Compiler::matchTransduction(std::vector<int> const &pi,
 
       int new_state = t.insertSingleTransduction(tag, state, weight_value);
 
+      if (is_separable) {
+        // loop-back symbols for <ANY_TAG> and <ANY_CHAR>
+        if (tag == alphabet(0, any_tag) || tag == alphabet(0, any_char)) {
+          // rl compilation of a badly written rule
+          // having an epsilon with wildcard output will produce
+          // garbage output -- see https://github.com/apertium/apertium-separable/issues/8
+          std::cerr << "Warning: Cannot insert <t/> from empty input. Ignoring. (You probably want to specify exact tags when deleting a word.)" << std::endl;
+        } else if (tag == alphabet(any_tag, any_tag) ||
+                   tag == alphabet(any_char, any_char) ||
+                   tag == alphabet(any_tag, 0) ||
+                   tag == alphabet(any_char, 0)) {
+          t.linkStates(new_state, new_state, tag);
+        }
+      }
+
       if(acx_map_ptr != acx_map.end())
       {
         for(auto& it : acx_map_ptr->second)
@@ -403,6 +437,25 @@ Compiler::readString(std::vector<int> &result, UString const &name)
     }
 
     result.push_back(alphabet(symbol));
+  }
+  else if (is_separable && name == COMPILER_LSX_TAG_ELEM) {
+    requireEmptyError(name);
+    result.push_back(any_tag);
+  }
+  else if (is_separable && name == COMPILER_LSX_CHAR_ELEM) {
+    requireEmptyError(name);
+    result.push_back(any_char);
+  }
+  else if (is_separable && name == COMPILER_LSX_WB_ELEM) {
+    requireEmptyError(name);
+    UString mode = attrib(COMPILER_LSX_SPACE_ATTR);
+    if (mode == COMPILER_LSX_SPACE_YES_VAL) {
+      result.push_back(word_boundary_s);
+    } else if (mode == COMPILER_LSX_SPACE_NO_VAL) {
+      result.push_back(word_boundary_ns);
+    } else {
+      result.push_back(word_boundary);
+    }
   }
   else
   {
@@ -899,7 +952,20 @@ Compiler::procNode()
   }
   else if(name == COMPILER_DICTIONARY_ELEM)
   {
-    /* ignore */
+    if (attrib(COMPILER_TYPE_ATTR) == COMPILER_SEPARABLE_VAL ||
+        attrib(COMPILER_TYPE_ATTR) == COMPILER_SEQUENTIAL_VAL) {
+      is_separable = true;
+      alphabet.includeSymbol(Transducer::ANY_TAG_SYMBOL);
+      alphabet.includeSymbol(Transducer::ANY_CHAR_SYMBOL);
+      alphabet.includeSymbol(Transducer::LSX_BOUNDARY_SYMBOL);
+      alphabet.includeSymbol(Transducer::LSX_BOUNDARY_SPACE_SYMBOL);
+      alphabet.includeSymbol(Transducer::LSX_BOUNDARY_NO_SPACE_SYMBOL);
+      any_tag          = alphabet(Transducer::ANY_TAG_SYMBOL);
+      any_char         = alphabet(Transducer::ANY_CHAR_SYMBOL);
+      word_boundary    = alphabet(Transducer::LSX_BOUNDARY_SYMBOL);
+      word_boundary_s  = alphabet(Transducer::LSX_BOUNDARY_SPACE_SYMBOL);
+      word_boundary_ns = alphabet(Transducer::LSX_BOUNDARY_NO_SPACE_SYMBOL);
+    }
   }
   else if(name == COMPILER_ALPHABET_ELEM)
   {
