@@ -24,8 +24,6 @@
 #include <string>
 #include <getopt.h>
 
-using namespace std;
-
 /*
  * Error function that does nothing so that when we fallback from
  * XML to AT&T, the user doesn't get a message unless it's really
@@ -40,30 +38,30 @@ void endProgram(char *name)
 {
   if(name != NULL)
   {
-    cout << basename(name) << " v" << PACKAGE_VERSION <<": build a letter transducer from a dictionary" << endl;
-    cout << "USAGE: " << basename(name) << " [-hmvalrHSj] lr | rl dictionary_file output_file [acx_file]" << endl;
+    std::cout << basename(name) << " v" << PACKAGE_VERSION <<": build a letter transducer from a dictionary" << std::endl;
+    std::cout << "USAGE: " << basename(name) << " [-hmvalrHSj] lr | rl dictionary_file output_file [acx_file]" << std::endl;
 #if HAVE_GETOPT_LONG
-    cout << "  -m, --keep-boundaries:     keep morpheme boundaries" << endl;
-    cout << "  -v, --var:                 set language variant" << endl;
-    cout << "  -a, --alt:                 set alternative (monodix)" << endl;
-    cout << "  -l, --var-left:            set left language variant (bidix)" << endl;
-    cout << "  -r, --var-right:           set right language variant (bidix)" << endl;
-    cout << "  -H, --hfst:                expect HFST symbols" << endl;
-    cout << "  -S, --no-split:            don't attempt to split into word and punctuation transducers" << endl;
-    cout << "  -j, --jobs:                use one cpu core per section when minimising, new section after 50k entries" << endl;
+    std::cout << "  -m, --keep-boundaries:     keep morpheme boundaries" << std::endl;
+    std::cout << "  -v, --var:                 set language variant" << std::endl;
+    std::cout << "  -a, --alt:                 set alternative (monodix)" << std::endl;
+    std::cout << "  -l, --var-left:            set left language variant (bidix)" << std::endl;
+    std::cout << "  -r, --var-right:           set right language variant (bidix)" << std::endl;
+    std::cout << "  -H, --hfst:                expect HFST symbols" << std::endl;
+    std::cout << "  -S, --no-split:            don't attempt to split into word and punctuation transducers" << std::endl;
+    std::cout << "  -j, --jobs:                use one cpu core per section when minimising, new section after 50k entries" << std::endl;
 #else
-    cout << "  -m:     keep morpheme boundaries" << endl;
-    cout << "  -v:     set language variant" << endl;
-    cout << "  -a:     set alternative (monodix)" << endl;
-    cout << "  -l:     set left language variant (bidix)" << endl;
-    cout << "  -r:     set right language variant (bidix)" << endl;
-    cout << "  -H:     expect HFST symbols" << endl;
-    cout << "  -S:     don't attempt to split into word and punctuation transducers" << endl;
-    cout << "  -j:     use one cpu core per section when minimising, new section after 50k entries" << endl;
+    std::cout << "  -m:     keep morpheme boundaries" << std::endl;
+    std::cout << "  -v:     set language variant" << std::endl;
+    std::cout << "  -a:     set alternative (monodix)" << std::endl;
+    std::cout << "  -l:     set left language variant (bidix)" << std::endl;
+    std::cout << "  -r:     set right language variant (bidix)" << std::endl;
+    std::cout << "  -H:     expect HFST symbols" << std::endl;
+    std::cout << "  -S:     don't attempt to split into word and punctuation transducers" << std::endl;
+    std::cout << "  -j:     use one cpu core per section when minimising, new section after 50k entries" << std::endl;
 #endif
-    cout << "Modes:" << endl;
-    cout << "  lr:     left-to-right compilation" << endl;
-    cout << "  rl:     right-to-left compilation" << endl;
+    std::cout << "Modes:" << std::endl;
+    std::cout << "  lr:     left-to-right compilation" << std::endl;
+    std::cout << "  rl:     right-to-left compilation" << std::endl;
   }
   exit(EXIT_FAILURE);
 }
@@ -83,8 +81,8 @@ int main(int argc, char *argv[])
   int option_index=0;
 #endif
 
-  string vl;
-  string vr;
+  std::string vl;
+  std::string vr;
 
   while (true) {
 #if HAVE_GETOPT_LONG
@@ -163,13 +161,13 @@ int main(int argc, char *argv[])
     c.setMaxSectionEntries(50000);
   }
   if(const char* max_section_entries = std::getenv("LT_MAX_SECTION_ENTRIES")) {
-    c.setMaxSectionEntries(stol(max_section_entries));
+    c.setMaxSectionEntries(std::stol(max_section_entries));
   }
 
-  string opc;
-  string infile;
-  string outfile;
-  string acxfile;
+  std::string opc;
+  std::string infile;
+  std::string outfile;
+  std::string acxfile;
 
   switch(argc - optind + 1)
   {
@@ -207,7 +205,7 @@ int main(int argc, char *argv[])
   }
   else
   {
-    cerr << "Error: Cannot not open file '" << infile << "'." << endl << endl;
+    std::cerr << "Error: Cannot not open file '" << infile << "'." << std::endl << std::endl;
     exit(EXIT_FAILURE);
   }
   initGenericErrorDefaultFunc(NULL);
@@ -217,7 +215,7 @@ int main(int argc, char *argv[])
   {
     if(vr == "" && vl != "")
     {
-      cout << "Error: -l specified, but mode is lr" << endl;
+      std::cout << "Error: -l specified, but mode is lr" << std::endl;
       endProgram(argv[0]);
     }
     if(ttype == 'a')
@@ -237,7 +235,7 @@ int main(int argc, char *argv[])
   {
     if(vl == "" && vr != "")
     {
-      cout << "Error: -r specified, but mode is rl" << endl;
+      std::cout << "Error: -r specified, but mode is rl" << std::endl;
       endProgram(argv[0]);
     }
     if(ttype == 'a')
@@ -257,7 +255,7 @@ int main(int argc, char *argv[])
   FILE *output = fopen(outfile.c_str(), "wb");
   if(!output)
   {
-    cerr << "Error: Cannot open file '" << outfile << "'." << endl;
+    std::cerr << "Error: Cannot open file '" << outfile << "'." << std::endl;
     exit(EXIT_FAILURE);
   }
   if(ttype == 'a')

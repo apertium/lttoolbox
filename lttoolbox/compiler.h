@@ -39,8 +39,6 @@
   #define LTTOOLBOX_IMPORTS
 #endif
 
-using namespace std;
-
 /**
  * A compiler of dictionaries to letter transducers
  */
@@ -138,32 +136,32 @@ private:
   /**
    * List of named transducers-paradigms
    */
-  map<UString, Transducer> paradigms;
+  std::map<UString, Transducer> paradigms;
 
   /**
    * List of named dictionary sections
    */
-  map<UString, Transducer> sections;
+  std::map<UString, Transducer> sections;
 
   /**
    * List of named prefix copy of a paradigm
    */
-  map<UString, map<UString, int> > prefix_paradigms;
+  std::map<UString, std::map<UString, int> > prefix_paradigms;
 
   /**
    * List of named suffix copy of a paradigm
    */
-  map<UString, map<UString, int> > suffix_paradigms;
+  std::map<UString, std::map<UString, int> > suffix_paradigms;
 
   /**
    * List of named endings of a suffix copy of a paradgim
    */
-  map<UString, map<UString, int> > postsuffix_paradigms;
+  std::map<UString, std::map<UString, int> > postsuffix_paradigms;
 
   /**
    * Mapping of aliases of characters specified in ACX files
    */
-  map<int, set<int> > acx_map;
+  std::map<int, std::set<int> > acx_map;
 
   /**
    * Original char being mapped
@@ -171,8 +169,8 @@ private:
   int acx_current_char = 0;
 
   /*
-  static string range(char const a, char const b);
-  string readAlphabet();
+  static std::string range(char const a, char const b);
+  std::string readAlphabet();
   */
 
   /**
@@ -233,7 +231,7 @@ private:
    * @param t the transducer
    * @return the last state of the inserted transduction
    */
-  int matchTransduction(vector<int> const &lp, vector<int> const &rp,
+  int matchTransduction(std::vector<int> const &lp, std::vector<int> const &rp,
                         int state, Transducer &t, double const &entry_weight);
   /**
    * Parse the &lt;p&gt; element
@@ -257,7 +255,7 @@ private:
    * Insert a list of tokens into the paradigm / section being processed
    * @param elements the list
    */
-  void insertEntryTokens(vector<EntryToken> const &elements);
+  void insertEntryTokens(std::vector<EntryToken> const &elements);
 
   /**
    * Skip all document #text nodes before "elem"
@@ -281,7 +279,7 @@ private:
   void skipBlanks(UString &name);
 
 
-  void readString(vector<int> &result, UString const &name);
+  void readString(std::vector<int> &result, UString const &name);
 
   /**
    * Force an element to be empty, and check for it
@@ -370,12 +368,12 @@ public:
   /**
    * Compile dictionary to letter transducers
    */
-  void parse(string const &file, UString const &dir);
+  void parse(std::string const &file, UString const &dir);
 
   /**
    * Read ACX file
    */
-  void parseACX(string const &file, UString const &dir);
+  void parseACX(std::string const &file, UString const &dir);
 
 
   /**

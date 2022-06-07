@@ -25,9 +25,6 @@
 #include <climits>
 
 
-using namespace std;
-
-
 UString const FSTProcessor::XML_TEXT_NODE           = "#text"_u;
 UString const FSTProcessor::XML_COMMENT_NODE        = "#comment"_u;
 UString const FSTProcessor::XML_IGNORED_CHARS_ELEM  = "ignored-chars"_u;
@@ -68,14 +65,14 @@ FSTProcessor::streamError()
 }
 
 void
-FSTProcessor::parseICX(string const &file)
+FSTProcessor::parseICX(std::string const &file)
 {
   if(useIgnoredChars)
   {
     reader = xmlReaderForFile(file.c_str(), NULL, 0);
     if(reader == NULL)
     {
-      cerr << "Error: cannot open '" << file << "'." << endl;
+      std::cerr << "Error: cannot open '" << file << "'." << std::endl;
       exit(EXIT_FAILURE);
     }
     int ret = xmlTextReaderRead(reader);
@@ -93,14 +90,14 @@ FSTProcessor::parseICX(string const &file)
 }
 
 void
-FSTProcessor::parseRCX(string const &file)
+FSTProcessor::parseRCX(std::string const &file)
 {
   if(useRestoreChars)
   {
     reader = xmlReaderForFile(file.c_str(), NULL, 0);
     if(reader == NULL)
     {
-      cerr << "Error: cannot open '" << file << "'." << endl;
+      std::cerr << "Error: cannot open '" << file << "'." << std::endl;
       exit(EXIT_FAILURE);
     }
     int ret = xmlTextReaderRead(reader);
@@ -134,8 +131,8 @@ FSTProcessor::procNodeICX()
   }
   else
   {
-    cerr << "Error in ICX file (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Invalid node '<" << name << ">'." << endl;
+    std::cerr << "Error in ICX file (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Invalid node '<" << name << ">'." << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -172,8 +169,8 @@ FSTProcessor::procNodeRCX()
   }
   else
   {
-    cerr << "Error in RCX file (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Invalid node '<" << name << ">'." << endl;
+    std::cerr << "Error in RCX file (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Invalid node '<" << name << ">'." << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -583,7 +580,7 @@ FSTProcessor::readGeneration(InputFile& input, UFILE *output)
   return 0x7fffffff;
 }
 
-pair<UString, int>
+std::pair<UString, int>
 FSTProcessor::readBilingual(InputFile& input, UFILE *output)
 {
   UChar32 val = input.get();
@@ -591,7 +588,7 @@ FSTProcessor::readBilingual(InputFile& input, UFILE *output)
 
   if(input.eof())
   {
-    return pair<UString, int>(symbol, 0x7fffffff);
+    return std::pair<UString, int>(symbol, 0x7fffffff);
   }
 
   if(outOfWord)
@@ -601,7 +598,7 @@ FSTProcessor::readBilingual(InputFile& input, UFILE *output)
       val = input.get();
       if(input.eof())
       {
-        return pair<UString, int>(symbol, 0x7fffffff);
+        return std::pair<UString, int>(symbol, 0x7fffffff);
       }
     }
     else if(val == '\\')
@@ -610,14 +607,14 @@ FSTProcessor::readBilingual(InputFile& input, UFILE *output)
       val = input.get();
       if(input.eof())
       {
-        return pair<UString, int>(symbol, 0x7fffffff);
+        return std::pair<UString, int>(symbol, 0x7fffffff);
       }
       u_fputc(val,output);
       skipUntil(input, output, '^');
       val = input.get();
       if(input.eof())
       {
-        return pair<UString, int>(symbol, 0x7fffffff);
+        return std::pair<UString, int>(symbol, 0x7fffffff);
       }
     }
     else
@@ -627,7 +624,7 @@ FSTProcessor::readBilingual(InputFile& input, UFILE *output)
       val = input.get();
       if(input.eof())
       {
-        return pair<UString, int>(symbol, 0x7fffffff);
+        return std::pair<UString, int>(symbol, 0x7fffffff);
       }
     }
     outOfWord = false;
@@ -636,12 +633,12 @@ FSTProcessor::readBilingual(InputFile& input, UFILE *output)
   if(val == '\\')
   {
     val = input.get();
-    return pair<UString, int>(symbol, val);
+    return std::pair<UString, int>(symbol, val);
   }
   else if(val == '$')
   {
     outOfWord = true;
-    return pair<UString, int>(symbol, static_cast<int32_t>('$'));
+    return std::pair<UString, int>(symbol, static_cast<int32_t>('$'));
   }
   else if(val == '<')
   {
@@ -653,7 +650,7 @@ FSTProcessor::readBilingual(InputFile& input, UFILE *output)
     {
       symbol = cad;
     }
-    return pair<UString, int>(symbol, res);
+    return std::pair<UString, int>(symbol, res);
   }
   else if(val == '[')
   {
@@ -671,7 +668,7 @@ FSTProcessor::readBilingual(InputFile& input, UFILE *output)
     return readBilingual(input, output);
   }
 
-  return pair<UString, int>(symbol, val);
+  return std::pair<UString, int>(symbol, val);
 }
 
 void
@@ -792,8 +789,8 @@ FSTProcessor::classifyFinals()
     }
     else
     {
-      cerr << "Error: Unsupported transducer type for '";
-      cerr << it.first << "'." << endl;
+      std::cerr << "Error: Unsupported transducer type for '";
+      std::cerr << it.first << "'." << std::endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -1033,8 +1030,8 @@ FSTProcessor::compoundAnalysis(UString input_word)
 
     if(current_state.size() > MAX_COMBINATIONS)
     {
-      cerr << "Warning: compoundAnalysis's MAX_COMBINATIONS exceeded for '" << input_word << "'" << endl;
-      cerr << "         gave up at char " << i << " '" << val << "'." << endl;
+      std::cerr << "Warning: compoundAnalysis's MAX_COMBINATIONS exceeded for '" << input_word << "'" << std::endl;
+      std::cerr << "         gave up at char " << i << " '" << val << "'." << std::endl;
 
       UString nullString;
       return  nullString;
@@ -1067,7 +1064,7 @@ FSTProcessor::initDecompositionSymbols()
      && (compoundOnlyLSymbol=alphabet("<@compound:only-L>"_u)) == 0
      && (compoundOnlyLSymbol=alphabet("<compound-only-L>"_u)) == 0)
   {
-    cerr << "Warning: Decomposition symbol <:compound:only-L> not found" << endl;
+    std::cerr << "Warning: Decomposition symbol <:compound:only-L> not found" << std::endl;
   }
   else if(!showControlSymbols)
   {
@@ -1080,7 +1077,7 @@ FSTProcessor::initDecompositionSymbols()
      && (compoundRSymbol=alphabet("<@compound:R>"_u)) == 0
      && (compoundRSymbol=alphabet("<compound-R>"_u)) == 0)
   {
-    cerr << "Warning: Decomposition symbol <:compound:R> not found" << endl;
+    std::cerr << "Warning: Decomposition symbol <:compound:R> not found" << std::endl;
   }
   else if(!showControlSymbols)
   {
@@ -1115,7 +1112,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
   bool seen_cpL = false; // have we seen a <compound-only-L> tag so far
   size_t last = 0;       // position in input_buffer after last analysis
   size_t last_size = 0;  // size of sf at last analysis
-  map<int, set<int> >::iterator rcx_map_ptr;
+  std::map<int, std::set<int> >::iterator rcx_map_ptr;
 
   UChar32 val;
   do
@@ -1192,7 +1189,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
     if(useRestoreChars && rcx_map.find(val) != rcx_map.end())
     {
       rcx_map_ptr = rcx_map.find(val);
-      set<int> tmpset = rcx_map_ptr->second;
+      std::set<int> tmpset = rcx_map_ptr->second;
       if(!u_isupper(val) || caseSensitive)
       {
         current_state.step(val, tmpset);
@@ -1779,7 +1776,7 @@ FSTProcessor::postgeneration(InputFile& input, UFILE *output)
   UString lf;
   UString sf;
   int last = 0;
-  set<UChar32> empty_escaped_chars;
+  std::set<UChar32> empty_escaped_chars;
 
   while(UChar32 val = readPostgeneration(input, output))
   {
@@ -2001,7 +1998,7 @@ FSTProcessor::intergeneration(InputFile& input, UFILE *output)
   UString target;
   UString source;
   int last = 0;
-  set<UChar32> empty_escaped_chars;
+  std::set<UChar32> empty_escaped_chars;
 
   while (true)
   {
@@ -2540,7 +2537,7 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
   outOfWord = false;
 
   skipUntil(input, output, '^');
-  pair<UString,int> tr;           // readBilingual return value, containing:
+  std::pair<UString,int> tr;           // readBilingual return value, containing:
   int val;                        // the alphabet value of current symbol, and
   UString symbol;           // the current symbol as a string
   bool seentags = false;          // have we seen any tags at all in the analysis?
@@ -2693,7 +2690,7 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
   }
 }
 
-pair<UString, int>
+std::pair<UString, int>
 FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
 {
   State current_state = initial_state;
@@ -2712,7 +2709,7 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
 
   if(input_word[start_point] == '*')
   {
-    return pair<UString, int>(input_word, 0);
+    return std::pair<UString, int>(input_word, 0);
   }
 
   if(input_word[start_point] == '=')
@@ -2796,7 +2793,7 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
         {
           result = "@"_u + input_word;
         }
-        return pair<UString, int>(result, 0);
+        return std::pair<UString, int>(result, 0);
       }
     }
   }
@@ -2815,7 +2812,7 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
     {
       result = "@"_u + input_word;
     }
-    return pair<UString, int>(result, 0);
+    return std::pair<UString, int>(result, 0);
   }
 
 
@@ -2849,7 +2846,7 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
     {
       result_with_queue += '$';
     }
-    return pair<UString, int>(result_with_queue, queue.size());
+    return std::pair<UString, int>(result_with_queue, queue.size());
   }
   else
   {
@@ -2857,7 +2854,7 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
     {
       result += '$';
     }
-    return pair<UString, int>(result, 0);
+    return std::pair<UString, int>(result, 0);
   }
 }
 
@@ -2975,7 +2972,7 @@ FSTProcessor::valid() const
 {
   if(initial_state.isFinal(all_finals))
   {
-    cerr << "Error: Invalid dictionary (hint: the left side of an entry is empty)" << endl;
+    std::cerr << "Error: Invalid dictionary (hint: the left side of an entry is empty)" << std::endl;
     return false;
   }
   else
@@ -2984,7 +2981,7 @@ FSTProcessor::valid() const
     s.step(' ');
     if(s.size() != 0)
     {
-      cerr << "Error: Invalid dictionary (hint: entry beginning with whitespace)" << endl;
+      std::cerr << "Error: Invalid dictionary (hint: entry beginning with whitespace)" << std::endl;
       return false;
     }
   }

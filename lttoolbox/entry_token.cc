@@ -68,7 +68,7 @@ EntryToken::setParadigm(UString const &np)
 }
 
 void
-EntryToken::setSingleTransduction(vector<int> const &pi, vector<int> const &pd, double const ew)
+EntryToken::setSingleTransduction(std::vector<int> const &pi, std::vector<int> const &pd, double const ew)
 {
   weight = ew;
   leftSide = pi;
@@ -115,19 +115,19 @@ EntryToken::paradigmName() const
   return parName;
 }
 
-vector<int> const &
+std::vector<int> const &
 EntryToken::left() const
 {
   return leftSide;
 }
 
-vector<int> const &
+std::vector<int> const &
 EntryToken::right() const
 {
   return rightSide;
 }
 
-vector<int32_t> const &
+std::vector<int32_t> const &
 EntryToken::regExp() const
 {
   return myregexp;

@@ -30,26 +30,24 @@
 #include <fcntl.h>
 #endif
 
-using namespace std;
-
 void endProgram(char *name)
 {
   if(name != NULL)
   {
-    cout << basename(name) << " v" << PACKAGE_VERSION <<": expand the contents of a dictionary file" << endl;
-    cout << "USAGE: " << basename(name) << " [-mavlrh] dictionary_file [output_file]" << endl;
+    std::cout << basename(name) << " v" << PACKAGE_VERSION <<": expand the contents of a dictionary file" << std::endl;
+    std::cout << "USAGE: " << basename(name) << " [-mavlrh] dictionary_file [output_file]" << std::endl;
 #if HAVE_GETOPT_LONG
-    cout << "  -m, --keep-boundaries:     keep morpheme boundaries" << endl;
-    cout << "  -v, --var:                 set language variant" << endl;
-    cout << "  -a, --alt:                 set alternative (monodix)" << endl;
-    cout << "  -l, --var-left:            set left language variant (bidix)" << endl;
-    cout << "  -r, --var-right:           set right language variant (bidix)" << endl;
+    std::cout << "  -m, --keep-boundaries:     keep morpheme boundaries" << std::endl;
+    std::cout << "  -v, --var:                 set language variant" << std::endl;
+    std::cout << "  -a, --alt:                 set alternative (monodix)" << std::endl;
+    std::cout << "  -l, --var-left:            set left language variant (bidix)" << std::endl;
+    std::cout << "  -r, --var-right:           set right language variant (bidix)" << std::endl;
 #else
-    cout << "  -m:     keep morpheme boundaries" << endl;
-    cout << "  -v:     set language variant" << endl;
-    cout << "  -a:     set alternative (monodix)" << endl;
-    cout << "  -l:     set left language variant (bidix)" << endl;
-    cout << "  -r:     set right language variant (bidix)" << endl;
+    std::cout << "  -m:     keep morpheme boundaries" << std::endl;
+    std::cout << "  -v:     set language variant" << std::endl;
+    std::cout << "  -a:     set alternative (monodix)" << std::endl;
+    std::cout << "  -l:     set left language variant (bidix)" << std::endl;
+    std::cout << "  -r:     set right language variant (bidix)" << std::endl;
 #endif
   }
   exit(EXIT_FAILURE);
@@ -117,8 +115,8 @@ int main(int argc, char *argv[])
     }
   }
 
-  string infile;
-  string outfile;
+  std::string infile;
+  std::string outfile;
 
   switch(argc - optind + 1)
   {

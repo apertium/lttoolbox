@@ -27,8 +27,6 @@
 #include <iostream>
 #include <libxml/encoding.h>
 
-using namespace std;
-
 UString const Compiler::COMPILER_DICTIONARY_ELEM    = "dictionary"_u;
 UString const Compiler::COMPILER_ALPHABET_ELEM      = "alphabet"_u;
 UString const Compiler::COMPILER_SDEFS_ELEM         = "sdefs"_u;
@@ -83,14 +81,14 @@ Compiler::~Compiler()
 }
 
 void
-Compiler::parseACX(string const &file, UString const &dir)
+Compiler::parseACX(std::string const &file, UString const &dir)
 {
   if(dir == COMPILER_RESTRICTION_LR_VAL)
   {
     reader = xmlReaderForFile(file.c_str(), NULL, 0);
     if(reader == NULL)
     {
-      cerr << "Error: cannot open '" << file << "'." << endl;
+      std::cerr << "Error: cannot open '" << file << "'." << std::endl;
       exit(EXIT_FAILURE);
     }
     int ret = xmlTextReaderRead(reader);
@@ -103,13 +101,13 @@ Compiler::parseACX(string const &file, UString const &dir)
 }
 
 void
-Compiler::parse(string const &file, UString const &dir)
+Compiler::parse(std::string const &file, UString const &dir)
 {
   direction = dir;
   reader = xmlReaderForFile(file.c_str(), NULL, 0);
   if(reader == NULL)
   {
-    cerr << "Error: Cannot open '" << file << "'." << endl;
+    std::cerr << "Error: Cannot open '" << file << "'." << std::endl;
     exit(EXIT_FAILURE);
   }
 
@@ -122,7 +120,7 @@ Compiler::parse(string const &file, UString const &dir)
 
   if(ret != 0)
   {
-    cerr << "Error: Parse error at the end of input." << endl;
+    std::cerr << "Error: Parse error at the end of input." << std::endl;
   }
 
   xmlFreeTextReader(reader);
@@ -157,19 +155,19 @@ bool
 Compiler::valid(UString const& dir) const
 {
   const char* side = dir == COMPILER_RESTRICTION_RL_VAL ? "right" : "left";
-  const set<int> epsilonSymbols = alphabet.symbolsWhereLeftIs(0);
-  const set<int> spaceSymbols = alphabet.symbolsWhereLeftIs(' ');
+  const std::set<int> epsilonSymbols = alphabet.symbolsWhereLeftIs(0);
+  const std::set<int> spaceSymbols = alphabet.symbolsWhereLeftIs(' ');
   for (auto &section : sections) {
     auto &fst = section.second;
     auto finals = fst.getFinals();
     auto initial = fst.getInitial();
     for(const auto i : fst.closure(initial, epsilonSymbols)) {
       if (finals.count(i)) {
-        cerr << "Error: Invalid dictionary (hint: the " << side << " side of an entry is empty)" << endl;
+        std::cerr << "Error: Invalid dictionary (hint: the " << side << " side of an entry is empty)" << std::endl;
         return false;
       }
       if(fst.closure(i, spaceSymbols).size() > 1) { // >1 since closure always includes self
-        cerr << "Error: Invalid dictionary (hint: entry on the " << side << " beginning with whitespace)" << endl;
+        std::cerr << "Error: Invalid dictionary (hint: entry on the " << side << " beginning with whitespace)" << std::endl;
         return false;
       }
     }
@@ -204,8 +202,8 @@ Compiler::procAlphabet()
     }
     else
     {
-      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << "): Missing alphabet symbols." << endl;
+      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      std::cerr << "): Missing alphabet symbols." << std::endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -238,12 +236,12 @@ Compiler::procParDef()
 }
 
 int
-Compiler::matchTransduction(vector<int> const &pi,
-                           vector<int> const &pd,
+Compiler::matchTransduction(std::vector<int> const &pi,
+                           std::vector<int> const &pd,
                            int state, Transducer &t,
                            double const &entry_weight)
 {
-  vector<int>::const_iterator left, right, limleft, limright;
+  std::vector<int>::const_iterator left, right, limleft, limright;
 
   if(direction == COMPILER_RESTRICTION_LR_VAL)
   {
@@ -267,7 +265,7 @@ Compiler::matchTransduction(vector<int> const &pi,
   }
   else
   {
-    map<int, set<int> >::iterator acx_map_ptr;
+    std::map<int, std::set<int> >::iterator acx_map_ptr;
     int rsymbol = 0;
 
     while(true)
@@ -334,8 +332,8 @@ Compiler::requireEmptyError(UString const &name)
 {
   if(!xmlTextReaderIsEmptyElement(reader))
   {
-    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Non-empty element '<" << name << ">' should be empty." << endl;
+    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Non-empty element '<" << name << ">' should be empty." << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -355,7 +353,7 @@ Compiler::allBlanks()
 }
 
 void
-Compiler::readString(vector<int> &result, UString const &name)
+Compiler::readString(std::vector<int> &result, UString const &name)
 {
   if(name == COMPILER_TEXT_NODE)
   {
@@ -399,8 +397,8 @@ Compiler::readString(vector<int> &result, UString const &name)
 
     if(!alphabet.isSymbolDefined(symbol))
     {
-      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << "): Undefined symbol '" << symbol << "'." << endl;
+      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      std::cerr << "): Undefined symbol '" << symbol << "'." << std::endl;
       exit(EXIT_FAILURE);
     }
 
@@ -408,9 +406,9 @@ Compiler::readString(vector<int> &result, UString const &name)
   }
   else
   {
-    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Invalid specification of element '<" << name;
-    cerr << ">' in this context." << endl;
+    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Invalid specification of element '<" << name;
+    std::cerr << ">' in this context." << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -424,8 +422,8 @@ Compiler::skipBlanks(UString &name)
     {
       if(!allBlanks())
       {
-        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        cerr << "): Invalid construction." << endl;
+        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+        std::cerr << "): Invalid construction." << std::endl;
         exit(EXIT_FAILURE);
       }
     }
@@ -459,8 +457,8 @@ Compiler::skip(UString &name, UString const &elem, bool open)
     {
       if(!allBlanks())
       {
-        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        cerr << "): Invalid construction." << endl;
+        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+        std::cerr << "): Invalid construction." << std::endl;
         exit(EXIT_FAILURE);
       }
     }
@@ -470,8 +468,8 @@ Compiler::skip(UString &name, UString const &elem, bool open)
 
   if(name != elem)
   {
-    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Expected '<" << slash << elem << ">'." << endl;
+    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Expected '<" << slash << elem << ">'." << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -479,7 +477,7 @@ Compiler::skip(UString &name, UString const &elem, bool open)
 EntryToken
 Compiler::procIdentity(double const entry_weight, bool ig)
 {
-  vector<int> both_sides;
+  std::vector<int> both_sides;
 
   if(!xmlTextReaderIsEmptyElement(reader))
   {
@@ -499,14 +497,14 @@ Compiler::procIdentity(double const entry_weight, bool ig)
 
   if(verbose && first_element && (both_sides.front() == (int)' '))
   {
-    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Entry begins with space." << endl;
+    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Entry begins with space." << std::endl;
   }
   first_element = false;
   EntryToken e;
   if(ig)
   {
-    vector<int> right;
+    std::vector<int> right;
     right.push_back(static_cast<int>('#'));
     right.insert(right.end(), both_sides.begin(), both_sides.end());
     e.setSingleTransduction(both_sides, right, entry_weight);
@@ -521,7 +519,7 @@ Compiler::procIdentity(double const entry_weight, bool ig)
 EntryToken
 Compiler::procTransduction(double const entry_weight)
 {
-  vector<int> lhs, rhs;
+  std::vector<int> lhs, rhs;
   UString name;
 
   skip(name, COMPILER_LEFT_ELEM);
@@ -543,8 +541,8 @@ Compiler::procTransduction(double const entry_weight)
 
   if(verbose && first_element && (lhs.front() == (int)' '))
   {
-    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Entry begins with space." << endl;
+    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Entry begins with space." << std::endl;
   }
   first_element = false;
 
@@ -587,15 +585,15 @@ Compiler::procPar()
 
   if(!current_paradigm.empty() && paradigm_name == current_paradigm)
   {
-    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Paradigm refers to itself '" << paradigm_name << "'." <<endl;
+    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Paradigm refers to itself '" << paradigm_name << "'." << std::endl;
     exit(EXIT_FAILURE);
   }
 
   if(paradigms.find(paradigm_name) == paradigms.end())
   {
-    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Undefined paradigm '" << paradigm_name << "'." << endl;
+    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Undefined paradigm '" << paradigm_name << "'." << std::endl;
     exit(EXIT_FAILURE);
   }
   e.setParadigm(paradigm_name);
@@ -603,7 +601,7 @@ Compiler::procPar()
 }
 
 void
-Compiler::insertEntryTokens(vector<EntryToken> const &elements)
+Compiler::insertEntryTokens(std::vector<EntryToken> const &elements)
 {
   if(!current_paradigm.empty())
   {
@@ -631,8 +629,8 @@ Compiler::insertEntryTokens(vector<EntryToken> const &elements)
       }
       else
       {
-        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        cerr << "): Invalid entry token." << endl;
+        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+        std::cerr << "): Invalid entry token." << std::endl;
         exit(EXIT_FAILURE);
       }
     }
@@ -707,10 +705,10 @@ Compiler::requireAttribute(UString const &value, UString const &attrname,
 {
   if(value.empty())
   {
-    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): '<" << elemname;
-    cerr << "' element must specify non-void '";
-    cerr << attrname << "' attribute." << endl;
+    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): '<" << elemname;
+    std::cerr << "' element must specify non-void '";
+    std::cerr << attrname << "' attribute." << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -775,15 +773,15 @@ Compiler::procEntry()
     weight = StringUtils::stod(wsweight);
   }
 
-  vector<EntryToken> elements;
+  std::vector<EntryToken> elements;
 
   while(true)
   {
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << "): Parse error." << endl;
+      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      std::cerr << "): Parse error." << std::endl;
       exit(EXIT_FAILURE);
     }
     UString name = XMLParseUtil::readName(reader);
@@ -821,8 +819,8 @@ Compiler::procEntry()
 
       if(paradigms.find(p) == paradigms.end())
       {
-        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        cerr << "): Undefined paradigm '" << p << "'." <<endl;
+        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+        std::cerr << "): Undefined paradigm '" << p << "'." << std::endl;
         exit(EXIT_FAILURE);
       }
       // discard entries with empty paradigms (by the directions, normally)
@@ -848,9 +846,9 @@ Compiler::procEntry()
     }
     else
     {
-      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << "): Invalid inclusion of '<" << name << ">' into '<" << COMPILER_ENTRY_ELEM;
-      cerr << ">'." << endl;
+      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      std::cerr << "): Invalid inclusion of '<" << name << ">' into '<" << COMPILER_ENTRY_ELEM;
+      std::cerr << ">'." << std::endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -882,8 +880,8 @@ Compiler::procNodeACX()
   }
   else
   {
-    cerr << "Error in ACX file (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Invalid node '<" << name << ">'." << endl;
+    std::cerr << "Error in ACX file (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Invalid node '<" << name << ">'." << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -944,8 +942,8 @@ Compiler::procNode()
   }
   else
   {
-    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Invalid node '<" << name << ">'." << endl;
+    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Invalid node '<" << name << ">'." << std::endl;
     exit(EXIT_FAILURE);
   }
 }

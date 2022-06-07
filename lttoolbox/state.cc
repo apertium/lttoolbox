@@ -22,7 +22,6 @@
 
 //debug//
 //#include <iostream>
-//using namespace std;
 //debug//
 
 State::State()
@@ -75,7 +74,7 @@ State::copy(State const &s)
 
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
-    vector<pair<int, double>> *tmp = new vector<pair<int, double>>();
+    std::vector<std::pair<int, double>> *tmp = new std::vector<std::pair<int, double>>();
     *tmp = *(state[i].sequence);
     state[i].sequence = tmp;
   }
@@ -91,25 +90,25 @@ void
 State::init(Node *initial)
 {
   state.clear();
-  state.push_back(TNodeState(initial, new vector<pair<int, double>>(), false));
+  state.push_back(TNodeState(initial, new std::vector<std::pair<int, double>>(), false));
   state[0].sequence->clear();
   epsilonClosure();
 }
 
 bool
-State::apply_into(vector<TNodeState>* new_state, int const input, int index, bool dirty)
+State::apply_into(std::vector<TNodeState>* new_state, int const input, int index, bool dirty)
 {
-  map<int, Dest>::const_iterator it;
+  std::map<int, Dest>::const_iterator it;
   it = state[index].where->transitions.find(input);
   if(it != state[index].where->transitions.end())
   {
     for(int j = 0; j != it->second.size; j++)
     {
-      vector<pair<int, double>> *new_v = new vector<pair<int, double>>();
+      std::vector<std::pair<int, double>> *new_v = new std::vector<std::pair<int, double>>();
       *new_v = *(state[index].sequence);
       if(it->first != 0)
       {
-        new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
+        new_v->push_back(std::make_pair(it->second.out_tag[j], it->second.out_weight[j]));
       }
       new_state->push_back(TNodeState(it->second.dest[j], new_v, state[index].dirty||dirty));
     }
@@ -119,25 +118,25 @@ State::apply_into(vector<TNodeState>* new_state, int const input, int index, boo
 }
 
 bool
-State::apply_into_override(vector<TNodeState>* new_state, int const input, int const old_sym, int const new_sym, int index, bool dirty)
+State::apply_into_override(std::vector<TNodeState>* new_state, int const input, int const old_sym, int const new_sym, int index, bool dirty)
 {
-  map<int, Dest>::const_iterator it;
+  std::map<int, Dest>::const_iterator it;
   it = state[index].where->transitions.find(input);
   if(it != state[index].where->transitions.end())
   {
     for(int j = 0; j != it->second.size; j++)
     {
-      vector<pair<int, double>> *new_v = new vector<pair<int, double>>();
+      std::vector<std::pair<int, double>> *new_v = new std::vector<std::pair<int, double>>();
       *new_v = *(state[index].sequence);
       if(it->first != 0)
       {
         if(it->second.out_tag[j] == old_sym)
         {
-          new_v->push_back(make_pair(new_sym, it->second.out_weight[j]));
+          new_v->push_back(std::make_pair(new_sym, it->second.out_weight[j]));
         }
         else
         {
-          new_v->push_back(make_pair(it->second.out_tag[j], it->second.out_weight[j]));
+          new_v->push_back(std::make_pair(it->second.out_tag[j], it->second.out_weight[j]));
         }
       }
       new_state->push_back(TNodeState(it->second.dest[j], new_v, state[index].dirty||dirty));
@@ -156,7 +155,7 @@ State::apply(int const input)
     return;
   }
 
-  vector<TNodeState> new_state;
+  std::vector<TNodeState> new_state;
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     apply_into(&new_state, input, i, false);
@@ -175,7 +174,7 @@ State::apply_override(int const input, int const old_sym, int const new_sym)
     return;
   }
 
-  vector<TNodeState> new_state;
+  std::vector<TNodeState> new_state;
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     apply_into_override(&new_state, input, old_sym, new_sym, i, false);
@@ -201,7 +200,7 @@ State::apply_override(int const input, int const alt, int const old_sym, int con
     return;
   }
 
-  vector<TNodeState> new_state;
+  std::vector<TNodeState> new_state;
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     apply_into_override(&new_state, input, old_sym, new_sym, i, false);
@@ -222,7 +221,7 @@ State::apply(int const input, int const alt)
     return;
   }
 
-  vector<TNodeState> new_state;
+  std::vector<TNodeState> new_state;
   if(input == alt)
   {
     apply(input);
@@ -248,7 +247,7 @@ State::apply_careful(int const input, int const alt)
     return;
   }
 
-  vector<TNodeState> new_state;
+  std::vector<TNodeState> new_state;
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     if(!apply_into(&new_state, input, i, false))
@@ -266,17 +265,16 @@ State::epsilonClosure()
 {
   for(size_t i = 0; i != state.size(); i++)
   {
-    map<int, Dest>::iterator it2;
-    it2 = state[i].where->transitions.find(0);
+    auto it2 = state[i].where->transitions.find(0);
     if(it2 != state[i].where->transitions.end())
     {
       for(int j = 0 ; j != it2->second.size; j++)
       {
-        vector<pair<int, double>> *tmp = new vector<pair<int, double>>();
+        std::vector<std::pair<int, double>> *tmp = new std::vector<std::pair<int, double>>();
         *tmp = *(state[i].sequence);
         if(it2->second.out_tag[j] != 0)
         {
-          tmp->push_back(make_pair(it2->second.out_tag[j], it2->second.out_weight[j]));
+          tmp->push_back(std::make_pair(it2->second.out_tag[j], it2->second.out_weight[j]));
         }
         state.push_back(TNodeState(it2->second.dest[j], tmp, state[i].dirty));
       }
@@ -287,7 +285,7 @@ State::epsilonClosure()
 void
 State::apply(int const input, int const alt1, int const alt2)
 {
-  vector<TNodeState> new_state;
+  std::vector<TNodeState> new_state;
   if(input == 0 || alt1 == 0 || alt2 == 0)
   {
     state = new_state;
@@ -317,11 +315,11 @@ State::apply(int const input, int const alt1, int const alt2)
 }
 
 void
-State::apply(int const input, set<int> const alts)
+State::apply(int const input, std::set<int> const alts)
 {
-  vector<TNodeState> new_state;
+  std::vector<TNodeState> new_state;
   bool has_null = false;
-  for(set<int>::iterator sit = alts.begin(); sit != alts.end(); sit++)
+  for(auto sit = alts.begin(); sit != alts.end(); sit++)
   {
     if(*sit == 0)
     {
@@ -337,7 +335,7 @@ State::apply(int const input, set<int> const alts)
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     apply_into(&new_state, input, i, false);
-    for(set<int>::iterator sit = alts.begin(); sit != alts.end(); sit++)
+    for(auto sit = alts.begin(); sit != alts.end(); sit++)
     {
       if(*sit == input) continue;
       apply_into(&new_state, *sit, i, true);
@@ -392,7 +390,7 @@ State::step(int const input, int const alt1, int const alt2)
 }
 
 void
-State::step(int const input, set<int> const alts)
+State::step(int const input, std::set<int> const alts)
 {
   apply(input, alts);
   epsilonClosure();
@@ -423,7 +421,7 @@ State::step_case(UChar32 val, bool caseSensitive)
 
 
 bool
-State::isFinal(map<Node *, double> const &finals) const
+State::isFinal(std::map<Node *, double> const &finals) const
 {
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
@@ -437,14 +435,14 @@ State::isFinal(map<Node *, double> const &finals) const
 }
 
 
-vector<pair< UString, double >>
-State::NFinals(vector<pair<UString, double>> lf, int maxAnalyses, int maxWeightClasses) const
+std::vector<std::pair< UString, double >>
+State::NFinals(std::vector<std::pair<UString, double>> lf, int maxAnalyses, int maxWeightClasses) const
 {
-  vector<pair<UString, double>> result;
+  std::vector<std::pair<UString, double>> result;
 
   sort(lf.begin(), lf.end(), sort_weights<UString, double>());
 
-  for(vector<pair<UString, double> >::iterator it = lf.begin(); it != lf.end(); it++)
+  for(auto it = lf.begin(); it != lf.end(); it++)
   {
     double last_weight = 0.0000;
     if(maxAnalyses > 0 && maxWeightClasses > 0)
@@ -463,13 +461,13 @@ State::NFinals(vector<pair<UString, double>> lf, int maxAnalyses, int maxWeightC
 
 
 UString
-State::filterFinals(map<Node *, double> const &finals,
+State::filterFinals(std::map<Node *, double> const &finals,
                     Alphabet const &alphabet,
-                    set<UChar32> const &escaped_chars,
+                    std::set<UChar32> const &escaped_chars,
                     bool display_weights, int max_analyses, int max_weight_classes,
                     bool uppercase, bool firstupper, int firstchar) const
 {
-  vector<pair< UString, double >> response;
+  std::vector<std::pair< UString, double >> response;
 
   UString result;
   double cost = 0.0000;
@@ -529,8 +527,8 @@ State::filterFinals(map<Node *, double> const &finals,
   response = NFinals(response, max_analyses, max_weight_classes);
 
   result.clear();
-  set<UString> seen;
-  for(vector<pair<UString, double>>::iterator it = response.begin(); it != response.end(); it++)
+  std::set<UString> seen;
+  for(auto it = response.begin(); it != response.end(); it++)
   {
     if(seen.find(it->first) != seen.end()) {
       continue;
@@ -551,15 +549,15 @@ State::filterFinals(map<Node *, double> const &finals,
 }
 
 
-set<pair<UString, vector<UString> > >
-State::filterFinalsLRX(map<Node *, double> const &finals,
+std::set<std::pair<UString, std::vector<UString> > >
+State::filterFinalsLRX(std::map<Node *, double> const &finals,
                        Alphabet const &alphabet,
-                       set<UChar32> const &escaped_chars,
+                       std::set<UChar32> const &escaped_chars,
                        bool uppercase, bool firstupper, int firstchar) const
 {
-  set<pair<UString, vector<UString> > > results;
+  std::set<std::pair<UString, std::vector<UString> > > results;
 
-  vector<UString> current_result;
+  std::vector<UString> current_result;
   UString rule_id;
 
   for(size_t i = 0, limit = state.size(); i != limit; i++)
@@ -600,9 +598,9 @@ State::filterFinalsLRX(map<Node *, double> const &finals,
 
 
 UString
-State::filterFinalsSAO(map<Node *, double> const &finals,
+State::filterFinalsSAO(std::map<Node *, double> const &finals,
                        Alphabet const &alphabet,
-                       set<UChar32> const &escaped_chars,
+                       std::set<UChar32> const &escaped_chars,
                        bool uppercase, bool firstupper, int firstchar) const
 {
   UString result;
@@ -652,10 +650,10 @@ State::filterFinalsSAO(map<Node *, double> const &finals,
 }
 
 UString
-State::filterFinalsTM(map<Node *, double> const &finals,
+State::filterFinalsTM(std::map<Node *, double> const &finals,
                       Alphabet const &alphabet,
-                      set<UChar32> const &escaped_chars,
-                      queue<UString> &blankqueue, vector<UString> &numbers) const
+                      std::set<UChar32> const &escaped_chars,
+                      std::queue<UString> &blankqueue, std::vector<UString> &numbers) const
 {
   UString result;
 
@@ -677,7 +675,7 @@ State::filterFinalsTM(map<Node *, double> const &finals,
 
 
   UString result2;
-  vector<UString> fragment;
+  std::vector<UString> fragment;
   fragment.push_back(""_u);
 
   for(unsigned int i = 0, limit = result.size(); i != limit ; i++)
@@ -768,7 +766,7 @@ State::pruneCompounds(int requiredSymbol, int separationSymbol, int compound_max
 
   for(unsigned int i = 0; i<state.size(); i++)
   {
-    vector<pair<int, double>> seq = *state.at(i).sequence;
+    std::vector<std::pair<int, double>> seq = *state.at(i).sequence;
 
     if(lastPartHasRequiredSymbol(seq, requiredSymbol, separationSymbol))
     {
@@ -785,7 +783,7 @@ State::pruneCompounds(int requiredSymbol, int separationSymbol, int compound_max
   }
 
   // remove states with more than minimum number of compounds (or without the requiered symbol in the last part)
-  vector<TNodeState>::iterator it = state.begin();
+  auto it = state.begin();
   int i=0;
   while(it != state.end())
   {
@@ -809,10 +807,10 @@ State::pruneCompounds(int requiredSymbol, int separationSymbol, int compound_max
 void
 State::pruneStatesWithForbiddenSymbol(int forbiddenSymbol)
 {
-  vector<TNodeState>::iterator it = state.begin();
+  auto it = state.begin();
   while(it != state.end())
   {
-    vector<pair<int, double>> *seq = (*it).sequence;
+    std::vector<std::pair<int, double>> *seq = (*it).sequence;
     bool found = false;
     for(int i = seq->size()-1; i>=0; i--)
     {
@@ -838,7 +836,7 @@ State::hasSymbol(int requiredSymbol)
   for(size_t i = 0; i<state.size(); i++)
   {
     // loop through sequence – we can't just check that the last tag is cp-L, there may be other tags after it:
-    vector<pair<int, double>>* seq = state.at(i).sequence;
+    std::vector<std::pair<int, double>>* seq = state.at(i).sequence;
     if(seq != NULL) for (unsigned int j=0; j<seq->size(); j++)
     {
       int symbol=(seq->at(j)).first;
@@ -853,7 +851,7 @@ State::hasSymbol(int requiredSymbol)
 
 
 bool
-State::lastPartHasRequiredSymbol(const vector<pair<int, double>> &seq, int requiredSymbol, int separationSymbol)
+State::lastPartHasRequiredSymbol(const std::vector<std::pair<int, double>> &seq, int requiredSymbol, int separationSymbol)
 {
   // state is final - it should be restarted it with all elements in stateset restart_state, with old symbols conserved
   bool restart=false;
@@ -875,7 +873,7 @@ State::lastPartHasRequiredSymbol(const vector<pair<int, double>> &seq, int requi
 
 
 void
-State::restartFinals(const map<Node *, double> &finals, int requiredSymbol, State *restart_state, int separationSymbol)
+State::restartFinals(const std::map<Node *, double> &finals, int requiredSymbol, State *restart_state, int separationSymbol)
 {
 
   for(unsigned int i=0;  i<state.size(); i++)
@@ -893,14 +891,14 @@ State::restartFinals(const map<Node *, double> &finals, int requiredSymbol, Stat
           for(unsigned int j=0; j<restart_state->state.size(); j++)
           {
             TNodeState initst = restart_state->state.at(j);
-            vector<pair<int, double>> *tnvec = new vector<pair<int, double>>;
+            std::vector<std::pair<int, double>> *tnvec = new std::vector<std::pair<int, double>>;
 
             for(unsigned int k=0; k < state_i.sequence->size(); k++)
             {
               tnvec->push_back(state_i.sequence->at(k));
             }
             TNodeState tn(initst.where, tnvec, state_i.dirty);
-            tn.sequence->push_back(make_pair(separationSymbol, 0.0000));
+            tn.sequence->push_back(std::make_pair(separationSymbol, 0.0000));
             state.push_back(tn);
           }
         }
@@ -919,7 +917,7 @@ State::getReadableString(const Alphabet &a)
 
   for(unsigned int i=0; i<state.size(); i++)
   {
-    vector<pair<int, double>>* seq = state.at(i).sequence;
+    std::vector<std::pair<int, double>>* seq = state.at(i).sequence;
     if(seq != NULL) for (unsigned int j=0; j<seq->size(); j++)
     {
       UString ws;

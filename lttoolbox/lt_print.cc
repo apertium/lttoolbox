@@ -33,17 +33,15 @@
 #include <fcntl.h>
 #endif
 
-using namespace std;
-
 void endProgram(char *name)
 {
   if(name != NULL)
   {
-    cout << basename(name) << " v" << PACKAGE_VERSION <<": dump a transducer to text in ATT format" << endl;
-    cout << "USAGE: " << basename(name) << " [-aHh] bin_file [output_file] " << endl;
-    cout << "    -a, --alpha:    print transducer alphabet" << endl;
-    cout << "    -H, --hfst:     use HFST-compatible character escapes" << endl;
-    cout << "    -h, --help:     print this message and exit" << endl;
+    std::cout << basename(name) << " v" << PACKAGE_VERSION <<": dump a transducer to text in ATT format" << std::endl;
+    std::cout << "USAGE: " << basename(name) << " [-aHh] bin_file [output_file] " << std::endl;
+    std::cout << "    -a, --alpha:    print transducer alphabet" << std::endl;
+    std::cout << "    -H, --hfst:     use HFST-compatible character escapes" << std::endl;
+    std::cout << "    -h, --help:     print this message and exit" << std::endl;
   }
   exit(EXIT_FAILURE);
 }
@@ -98,8 +96,8 @@ int main(int argc, char *argv[])
     }
   }
 
-  string infile;
-  string outfile;
+  std::string infile;
+  std::string outfile;
   switch(argc - optind)
   {
     case 1:
@@ -120,8 +118,8 @@ int main(int argc, char *argv[])
   UFILE* output = openOutTextFile(outfile);
 
   Alphabet alphabet;
-  set<UChar32> alphabetic_chars;
-  map<UString, Transducer> transducers;
+  std::set<UChar32> alphabetic_chars;
+  std::map<UString, Transducer> transducers;
 
   readTransducerSet(input, alphabetic_chars, alphabet, transducers);
 

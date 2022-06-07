@@ -135,8 +135,7 @@ void Serialiser<std::basic_string<value_type> >::serialise(
     std::ostream &Output) {
   ::serialise(static_cast<uint64_t>(SerialisedType_.size()), Output);
 
-  for (typename std::basic_string<value_type>::const_iterator
-           SerialisedType_iterator = SerialisedType_.begin();
+  for (auto SerialisedType_iterator = SerialisedType_.begin();
        // Call .end() each iteration to save memory.
        SerialisedType_iterator != SerialisedType_.end();
        ++SerialisedType_iterator) {
@@ -240,8 +239,7 @@ void Serialiser<Container>::serialise(
   uint64_t size = SerialisedType_.size();
   ::serialise(size, Output);
 
-  for (typename Container::const_iterator value_type_ =
-           SerialisedType_.begin();
+  for (auto value_type_ = SerialisedType_.begin();
        // Call .end() each iteration to save memory.
        value_type_ != SerialisedType_.end(); ++value_type_) {
     ::serialise(*value_type_, Output);

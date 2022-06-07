@@ -20,8 +20,6 @@
 
 #include <cstdlib>
 
-using namespace std;
-
 class LtLocale
 {
 public:

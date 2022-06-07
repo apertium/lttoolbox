@@ -23,7 +23,6 @@
 
 #include <lttoolbox/alphabet.h>
 
-using namespace std;
 
 /**
   * Default value of weight
@@ -49,13 +48,13 @@ private:
    * Final state set mapped to its weight walues
    * Schema: (state, weight)
    */
-  map<int, double> finals;
+  std::map<int, double> finals;
 
   /**
    * Transitions of the transducer
    * Schema: (source state, tag, target state, weight)
    */
-  map<int, multimap<int, pair<int, double> > > transitions;
+  std::map<int, std::multimap<int, std::pair<int, double> > > transitions;
 
   /**
    * New state creator
@@ -69,7 +68,7 @@ private:
    * @param s2 second set
    * @return true if the intersection is empty
    */
-  static bool isEmptyIntersection(set<int> const &s1, set<int> const &s2);
+  static bool isEmptyIntersection(std::set<int> const &s1, std::set<int> const &s2);
 
   /**
    * Copy function
@@ -210,7 +209,7 @@ public:
    * @param epsilon_tag the tag to take as epsilon
    * @return the epsilon-connected states
    */
-  set<int> closure(int const state, int const epsilon_tag = 0) const;
+  std::set<int> closure(int const state, int const epsilon_tag = 0) const;
 
   /**
    * Returns the epsilon closure of a given state
@@ -218,7 +217,7 @@ public:
    * @param epsilon_tags the tags to treat as epsilon
    * @return the epsilon-connected states
    */
-  set<int> closure(int const state, set<int> const &epsilon_tags) const;
+  std::set<int> closure(int const state, std::set<int> const &epsilon_tags) const;
 
   /**
    * Join all finals in one using epsilon transductions
@@ -230,12 +229,12 @@ public:
   /**
    * Return a copy of the final states
    */
-  map<int, double> getFinals() const;
+  std::map<int, double> getFinals() const;
 
   /**
    * Return reference to the transitions
    */
-  map<int, multimap<int, pair<int, double> > >& getTransitions();
+  std::map<int, std::multimap<int, std::pair<int, double> > >& getTransitions();
 
   /**
    * Reverse all the transductions of a transducer
@@ -367,7 +366,7 @@ public:
    * @param epsilon_tag the tag to take as epsilon
    * @return the prefix transducer
    */
-  Transducer appendDotStar(set<int> const &loopback_symbols,
+  Transducer appendDotStar(std::set<int> const &loopback_symbols,
                            int const epsilon_tag = 0);
 
 

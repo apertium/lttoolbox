@@ -27,8 +27,8 @@ void endProgram(char *name)
 {
   if(name != NULL)
   {
-    cout << basename(name) << " v" << PACKAGE_VERSION <<": trim a transducer to another transducer" << endl;
-    cout << "USAGE: " << basename(name) << " analyser_bin_file bidix_bin_file trimmed_bin_file " << endl;
+    std::cout << basename(name) << " v" << PACKAGE_VERSION <<": trim a transducer to another transducer" << std::endl;
+    std::cout << "USAGE: " << basename(name) << " analyser_bin_file bidix_bin_file trimmed_bin_file " << std::endl;
   }
   exit(EXIT_FAILURE);
 }
@@ -51,7 +51,7 @@ trim(FILE* file_mono, FILE* file_bi, FILE* file_out)
   // The "." in ".*" is a set of equal pairs of the output symbols
   // from the monodix alphabet (<n>:<n> etc.)
   Alphabet alph_prefix = alph_bi;
-  set<int> loopback_symbols;    // ints refer to alph_prefix
+  std::set<int> loopback_symbols;    // ints refer to alph_prefix
   alph_prefix.createLoopbackSymbols(loopback_symbols, alph_mono, Alphabet::right);
 
   for (auto& it : trans_bi) {
@@ -71,14 +71,14 @@ trim(FILE* file_mono, FILE* file_bi, FILE* file_out)
 
   for (auto& it : trans_mono) {
     if (it.second.numberOfTransitions() == 0) {
-      cerr << "Warning: section " << it.first << " is empty! Skipping it..." << endl;
+      std::cerr << "Warning: section " << it.first << " is empty! Skipping it..." << std::endl;
       continue;
     }
     Transducer trimmed = it.second.intersect(moved_transducer,
                                              alph_mono,
                                              alph_prefix);
     if (trimmed.hasNoFinals()) {
-      cerr << "Warning: section " << it.first << " had no final state after trimming! Skipping it..." << endl;
+      std::cerr << "Warning: section " << it.first << " had no final state after trimming! Skipping it..." << std::endl;
       continue;
     }
     trimmed.minimize();
@@ -86,9 +86,9 @@ trim(FILE* file_mono, FILE* file_bi, FILE* file_out)
   }
 
   if (trans_trim.empty()) {
-    cerr << "Error: Trimming gave empty transducer!" << endl;
-    cerr << "Hint: There are no words in bilingual dictionary that match "
-      "words in both monolingual dictionaries?" << endl;
+    std::cerr << "Error: Trimming gave empty transducer!" << std::endl;
+    std::cerr << "Hint: There are no words in bilingual dictionary that match "
+      "words in both monolingual dictionaries?" << std::endl;
     exit(EXIT_FAILURE);
   }
 

@@ -98,14 +98,14 @@ RegexpCompiler::isReserved(int const t)
 void
 RegexpCompiler::error()
 {
-  cerr << "Error parsing regexp" <<endl;
+  std::cerr << "Error parsing regexp" << std::endl;
   exit(EXIT_FAILURE);
 }
 
 void
 RegexpCompiler::errorConsuming(int const t)
 {
-  cerr << "Error parsing regexp" << endl;
+  std::cerr << "Error parsing regexp" << std::endl;
   exit(EXIT_FAILURE);
 }
 
@@ -131,7 +131,7 @@ RegexpCompiler::consume(int const t)
 }
 
 void
-RegexpCompiler::compile(vector<int32_t> const &er)
+RegexpCompiler::compile(std::vector<int32_t> const &er)
 {
   input = er;
   token = input[0];
@@ -334,7 +334,7 @@ RegexpCompiler::Esp()
     consume(']');
     Postop();
 
-    for(set<int>::iterator it = brackets.begin();
+    for(auto it = brackets.begin();
         it != brackets.end(); it++)
     {
       int mystate = t.getInitial();

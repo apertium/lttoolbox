@@ -26,13 +26,12 @@
 
 #include <unicode/uchar.h>
 
-using namespace std;
 using namespace icu;
 
 Alphabet::Alphabet()
 {
-  spair[pair<int32_t, int32_t>(0,0)] = 0;
-  spairinv.push_back(pair<int32_t, int32_t>(0,0));
+  spair[std::pair<int32_t, int32_t>(0,0)] = 0;
+  spairinv.push_back(std::pair<int32_t, int32_t>(0,0));
 }
 
 Alphabet::~Alphabet()
@@ -84,7 +83,7 @@ Alphabet::includeSymbol(UString const &s)
 int32_t
 Alphabet::operator()(int32_t const c1, int32_t const c2)
 {
-  auto tmp = make_pair(c1, c2);
+  auto tmp = std::make_pair(c1, c2);
   if(spair.find(tmp) == spair.end())
   {
     int32_t spair_size = spair.size();
@@ -153,7 +152,7 @@ Alphabet::read(FILE *input)
 
   // Reading of taglist
   int32_t tam = Compression::multibyte_read(input);
-  map<int32_t, string> tmp;
+  std::map<int32_t, std::string> tmp;
   while(tam > 0)
   {
     tam--;
@@ -172,7 +171,7 @@ Alphabet::read(FILE *input)
     tam--;
     int32_t first = Compression::multibyte_read(input);
     int32_t second = Compression::multibyte_read(input);
-    pair<int32_t, int32_t> tmp(first - bias, second - bias);
+    std::pair<int32_t, int32_t> tmp(first - bias, second - bias);
     int32_t spair_size = a_new.spair.size();
     a_new.spair[tmp] = spair_size;
     a_new.spairinv.push_back(tmp);
@@ -184,8 +183,8 @@ Alphabet::read(FILE *input)
 void
 Alphabet::serialise(std::ostream &serialised) const
 {
-  Serialiser<const vector<UString> >::serialise(slexicinv, serialised);
-  Serialiser<vector<pair<int32_t, int32_t> > >::serialise(spairinv, serialised);
+  Serialiser<const std::vector<UString> >::serialise(slexicinv, serialised);
+  Serialiser<std::vector<std::pair<int32_t, int32_t> > >::serialise(spairinv, serialised);
 }
 
 void
@@ -195,11 +194,11 @@ Alphabet::deserialise(std::istream &serialised)
   slexic.clear();
   spairinv.clear();
   spair.clear();
-  slexicinv = Deserialiser<vector<UString> >::deserialise(serialised);
+  slexicinv = Deserialiser<std::vector<UString> >::deserialise(serialised);
   for (size_t i = 0; i < slexicinv.size(); i++) {
     slexic[slexicinv[i]] = -i - 1; // ToDo: This does not turn the result negative due to unsigned semantics
   }
-  spairinv = Deserialiser<vector<pair<int32_t, int32_t> > >::deserialise(serialised);
+  spairinv = Deserialiser<std::vector<std::pair<int32_t, int32_t> > >::deserialise(serialised);
   for (size_t i = 0; i < slexicinv.size(); i++) {
     spair[spairinv[i]] = i;
   }
@@ -239,15 +238,15 @@ Alphabet::isTag(int32_t const symbol) const
   return symbol < 0;
 }
 
-pair<int32_t, int32_t> const &
+std::pair<int32_t, int32_t> const &
 Alphabet::decode(int32_t const code) const
 {
   return spairinv[code];
 }
 
-set<int32_t>
+std::set<int32_t>
 Alphabet::symbolsWhereLeftIs(UChar32 l) const {
-  set<int32_t> eps;
+  std::set<int32_t> eps;
   for(const auto& sp: spair) {  // [(l, r) : tag]
     if(sp.first.first == l) {
       eps.insert(sp.second);
@@ -262,11 +261,11 @@ void Alphabet::setSymbol(int32_t symbol, UString newSymbolString) {
 }
 
 void
-Alphabet::createLoopbackSymbols(set<int32_t> &symbols, Alphabet &basis, Side s, bool nonTagsToo)
+Alphabet::createLoopbackSymbols(std::set<int32_t> &symbols, Alphabet &basis, Side s, bool nonTagsToo)
 {
   // Non-tag letters get the same int32_t in spairinv across alphabets,
   // but tags may differ, so do those separately afterwards.
-  set<int32_t> tags;
+  std::set<int32_t> tags;
   for(auto& it : basis.spairinv)
   {
     if(s == left) {

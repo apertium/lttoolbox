@@ -23,13 +23,12 @@
 #include <iostream>
 #include <libgen.h>
 
-using namespace std;
 
 [[noreturn]]
 void endProgram(char *name)
 {
-  cout << basename(name) << ": process a stream with a letter transducer" << endl;
-  cout << "USAGE: " << basename(name) << " fst_file [input_file [output_file]]" << endl;
+  std::cout << basename(name) << ": process a stream with a letter transducer" << std::endl;
+  std::cout << "USAGE: " << basename(name) << " fst_file [input_file [output_file]]" << std::endl;
   exit(EXIT_FAILURE);
 }
 
