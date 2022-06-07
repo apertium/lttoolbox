@@ -804,7 +804,7 @@ Compiler::procEntry()
   if((!attribute.empty() && attribute != direction)
    || ignore == COMPILER_IGNORE_YES_VAL
    || (!altval.empty() && altval != alt)
-   || (direction == COMPILER_RESTRICTION_RL_VAL && !varval.empty() && varval != variant)
+   || (!varval.empty() && varval != variant)
    || (direction == COMPILER_RESTRICTION_RL_VAL && !varl.empty() && varl != variant_left)
    || (direction == COMPILER_RESTRICTION_LR_VAL && !varr.empty() && varr != variant_right))
   {

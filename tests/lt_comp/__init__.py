@@ -51,7 +51,6 @@ class CompSplitMultichar(ProcTest):
     expectedOutputs = ["^א/אַן<blah>$"]
 
 class CompLSX(unittest.TestCase, PrintTest):
-    maxDiff = 100000
     printdix = "data/basic.lsx"
     expectedOutput = '''0	1	<ANY_CHAR>	<ANY_CHAR>	0.000000\t
 1	1	<ANY_CHAR>	<ANY_CHAR>	0.000000\t
