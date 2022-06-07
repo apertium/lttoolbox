@@ -28,7 +28,6 @@
 #include <utf8.h>
 #include <unicode/utf16.h>
 
-using namespace std;
 using namespace icu;
 
 AttCompiler::AttCompiler()
@@ -99,7 +98,7 @@ AttCompiler::update_alphabet(UChar32 c)
 }
 
 void
-AttCompiler::symbol_code(const UString& symbol, vector<int32_t>& split)
+AttCompiler::symbol_code(const UString& symbol, std::vector<int32_t>& split)
 {
   if (symbol.empty()) {
     split.push_back(0);
@@ -124,7 +123,7 @@ AttCompiler::add_transition(int from, int to,
                             double weight)
 {
   AttNode* src = get_node(from);
-  vector<int32_t> lsplit, rsplit;
+  std::vector<int32_t> lsplit, rsplit;
   symbol_code(upper, lsplit);
   symbol_code(lower, rsplit);
   for (size_t i = 0; i < lsplit.size() || i < rsplit.size(); i++) {
@@ -143,15 +142,15 @@ AttCompiler::add_transition(int from, int to,
 }
 
 void
-AttCompiler::parse(string const &file_name, bool read_rl)
+AttCompiler::parse(std::string const &file_name, bool read_rl)
 {
   clear();
 
   UFILE* infile = u_fopen(file_name.c_str(), "r", NULL, NULL);
   if (infile == NULL) {
-    cerr << "Error: unable to open '" << file_name << "' for reading." << endl;
+    std::cerr << "Error: unable to open '" << file_name << "' for reading." << std::endl;
   }
-  vector<UString> tokens;
+  std::vector<UString> tokens;
   bool first_line_in_fst = true;       // First line -- see below
   bool multiple_transducers = false;
   int state_id_offset = 1;
@@ -186,7 +185,7 @@ AttCompiler::parse(string const &file_name, bool read_rl)
 
     if (first_line_in_fst && tokens.size() == 1)
     {
-      cerr << "Error: invalid format in file '" << file_name << "' on line " << line_number << "." << endl;
+      std::cerr << "Error: invalid format in file '" << file_name << "' on line " << line_number << "." << std::endl;
       exit(EXIT_FAILURE);
     }
 
@@ -194,7 +193,7 @@ AttCompiler::parse(string const &file_name, bool read_rl)
     {
       if (state_id_offset == 1) {
         // this is the first split we've seen
-        cerr << "Warning: Multiple fsts in '" << file_name << "' will be disjuncted." << endl;
+        std::cerr << "Warning: Multiple fsts in '" << file_name << "' will be disjuncted." << std::endl;
         multiple_transducers = true;
       }
       // Update the offset for the new FST
@@ -204,7 +203,7 @@ AttCompiler::parse(string const &file_name, bool read_rl)
     }
 
     from = StringUtils::stoi(tokens[0]) + state_id_offset;
-    largest_seen_state_id = max(largest_seen_state_id, from);
+    largest_seen_state_id = std::max(largest_seen_state_id, from);
 
     get_node(from);
     /* First line: the initial state is of both types. */
@@ -229,12 +228,12 @@ AttCompiler::parse(string const &file_name, bool read_rl)
       {
         weight = default_weight;
       }
-      finals.insert(pair <int, double>(from, weight));
+      finals.insert(std::pair <int, double>(from, weight));
     }
     else
     {
       to = StringUtils::stoi(tokens[1]) + state_id_offset;
-      largest_seen_state_id = max(largest_seen_state_id, to);
+      largest_seen_state_id = std::max(largest_seen_state_id, to);
       if(read_rl)
       {
         upper = tokens[3];
@@ -269,7 +268,7 @@ AttCompiler::parse(string const &file_name, bool read_rl)
   /* Classify the nodes of the graph. */
   if (splitting) {
     classify_forwards();
-    set<int> path;
+    std::set<int> path;
     classify_backwards(starting_state, path);
   }
 
@@ -282,8 +281,8 @@ AttCompiler::extract_transducer(TransducerType type)
 {
   Transducer transducer;
   /* Correlation between the graph's state ids and those in the transducer. */
-  map<int, int> corr;
-  set<int> visited;
+  std::map<int, int> corr;
+  std::set<int> visited;
 
   corr[starting_state] = transducer.getInitial();
   _extract_transducer(type, starting_state, transducer, corr, visited);
@@ -302,14 +301,14 @@ AttCompiler::extract_transducer(TransducerType type)
 /*
   if(noFinals)
   {
-    cerr << "No final states (" << type << ")" << endl;
-    cerr << "  were:" << endl;
-    cerr << "\t" ;
+    std::cerr << "No final states (" << type << ")" << std::endl;
+    std::cerr << "  were:" << std::endl;
+    std::cerr << "\t" ;
     for (auto& f : finals)
     {
-      cerr << f.first << " ";
+      std::cerr << f.first << " ";
     }
-    cerr << endl;
+    std::cerr << std::endl;
   }
 */
   return transducer;
@@ -321,8 +320,8 @@ AttCompiler::extract_transducer(TransducerType type)
  */
 void
 AttCompiler::_extract_transducer(TransducerType type, int from,
-                                 Transducer& transducer, map<int, int>& corr,
-                                 set<int>& visited)
+                                 Transducer& transducer, std::map<int, int>& corr,
+                                 std::set<int>& visited)
 {
   if (visited.find(from) != visited.end())
   {
@@ -391,8 +390,8 @@ AttCompiler::classify_single_transition(Transduction& t)
 void
 AttCompiler::classify_forwards()
 {
-  stack<int> todo;
-  set<int> done;
+  std::stack<int> todo;
+  std::set<int> done;
   todo.push(starting_state);
   while(!todo.empty()) {
     int next = todo.top();
@@ -419,10 +418,10 @@ AttCompiler::classify_forwards()
  * @param path the path we took to get here
  */
 TransducerType
-AttCompiler::classify_backwards(int state, set<int>& path)
+AttCompiler::classify_backwards(int state, std::set<int>& path)
 {
   if(finals.find(state) != finals.end()) {
-    cerr << "ERROR: Transducer contains epsilon transition to a final state. Aborting." << endl;
+    std::cerr << "ERROR: Transducer contains epsilon transition to a final state. Aborting." << std::endl;
     exit(EXIT_FAILURE);
   }
   AttNode* node = get_node(state);
@@ -431,7 +430,7 @@ AttCompiler::classify_backwards(int state, set<int>& path)
     if(t1.type != UNDECIDED) {
       type |= t1.type;
     } else if(path.find(t1.to) != path.end()) {
-      cerr << "ERROR: Transducer contains initial epsilon loop. Aborting." << endl;
+      std::cerr << "ERROR: Transducer contains initial epsilon loop. Aborting." << std::endl;
       exit(EXIT_FAILURE);
     } else {
       path.insert(t1.to);
@@ -450,7 +449,7 @@ AttCompiler::classify_backwards(int state, set<int>& path)
 void
 AttCompiler::write(FILE *output)
 {
-  map<UString, Transducer> temp;
+  std::map<UString, Transducer> temp;
   if (splitting) {
     temp["main@standard"_u] = extract_transducer(WORD);
     Transducer punct_fst = extract_transducer(PUNCT);

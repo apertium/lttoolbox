@@ -24,7 +24,6 @@
 #include <iostream>
 #include <libxml/encoding.h>
 
-using namespace std;
 
 UString const TMXCompiler::TMX_COMPILER_TMX_ELEM     = "tmx"_u;
 UString const TMXCompiler::TMX_COMPILER_HEADER_ELEM  = "header"_u;
@@ -58,14 +57,14 @@ TMXCompiler::~TMXCompiler()
 }
 
 void
-TMXCompiler::parse(string const &file, UString const &lo, UString const &lm)
+TMXCompiler::parse(std::string const &file, UString const &lo, UString const &lm)
 {
   origin_language = lo;
   meta_language = lm;
   reader = xmlReaderForFile(file.c_str(), NULL, 0);
   if(reader == NULL)
   {
-    cerr << "Error: Cannot open '" << file << "'." << endl;
+    std::cerr << "Error: Cannot open '" << file << "'." << std::endl;
     exit(EXIT_FAILURE);
   }
 
@@ -78,7 +77,7 @@ TMXCompiler::parse(string const &file, UString const &lo, UString const &lm)
 
   if(ret != 0)
   {
-    cerr << "Error: Parse error at the end of input." << endl;
+    std::cerr << "Error: Parse error at the end of input." << std::endl;
   }
 
   xmlFreeTextReader(reader);
@@ -93,8 +92,8 @@ TMXCompiler::requireEmptyError(UString const &name)
 {
   if(!xmlTextReaderIsEmptyElement(reader))
   {
-    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Non-empty element '<" << name << ">' should be empty." << endl;
+    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Non-empty element '<" << name << ">' should be empty." << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -122,8 +121,8 @@ TMXCompiler::skipBlanks(UString &name)
     {
       if(!allBlanks())
       {
-        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        cerr << "): Invalid construction." << endl;
+        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+        std::cerr << "): Invalid construction." << std::endl;
         exit(EXIT_FAILURE);
       }
     }
@@ -145,8 +144,8 @@ TMXCompiler::skip(UString &name, UString const &elem)
     {
       if(!allBlanks())
       {
-        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        cerr << "): Invalid construction." << endl;
+        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+        std::cerr << "): Invalid construction." << std::endl;
         exit(EXIT_FAILURE);
       }
     }
@@ -156,8 +155,8 @@ TMXCompiler::skip(UString &name, UString const &elem)
 
   if(name != elem)
   {
-    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Expected '<" << elem << ">'." << endl;
+    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Expected '<" << elem << ">'." << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -174,10 +173,10 @@ TMXCompiler::requireAttribute(UString const &value, UString const &attrname,
 {
   if(value.empty())
   {
-    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): '<" << elemname;
-    cerr << "' element must specify non-void '";
-    cerr << attrname << "' attribute." << endl;
+    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): '<" << elemname;
+    std::cerr << "' element must specify non-void '";
+    std::cerr << attrname << "' attribute." << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -191,7 +190,7 @@ TMXCompiler::getTag(size_t const &val) const
 }
 
 void
-TMXCompiler::insertTU(vector<int> const &origin, vector<int> const &meta)
+TMXCompiler::insertTU(std::vector<int> const &origin, std::vector<int> const &meta)
 {
   if(origin.size() < 5 || meta.size() < 5)
   {
@@ -228,7 +227,7 @@ TMXCompiler::insertTU(vector<int> const &origin, vector<int> const &meta)
 }
 
 void
-TMXCompiler::split(vector<int> const &v, vector<vector<int> > &sv, int const symbol) const
+TMXCompiler::split(std::vector<int> const &v, std::vector<std::vector<int> > &sv, int const symbol) const
 {
   sv.clear();
 
@@ -236,7 +235,7 @@ TMXCompiler::split(vector<int> const &v, vector<vector<int> > &sv, int const sym
   {
     if(sv.size() == j)
     {
-      sv.push_back(vector<int>());
+      sv.push_back(std::vector<int>());
     }
     if(v[i] == symbol)
     {
@@ -249,10 +248,10 @@ TMXCompiler::split(vector<int> const &v, vector<vector<int> > &sv, int const sym
   }
 }
 
-vector<int>
-TMXCompiler::join(vector<vector<int> > const &v, int const s) const
+std::vector<int>
+TMXCompiler::join(std::vector<std::vector<int> > const &v, int const s) const
 {
-  vector<int> result;
+  std::vector<int> result;
   for(unsigned int i = 0, limit = v.size(); i != limit; i++)
   {
     for(unsigned int j = 0, limit2 = v[i].size(); j != limit2; j++)
@@ -269,12 +268,12 @@ TMXCompiler::join(vector<vector<int> > const &v, int const s) const
 }
 
 void
-TMXCompiler::align_blanks(vector<int> &o, vector<int> &m)
+TMXCompiler::align_blanks(std::vector<int> &o, std::vector<int> &m)
 {
-  vector<unsigned int> puntos;
-  vector<int> resultado_o, resultado_m;
+  std::vector<unsigned int> puntos;
+  std::vector<int> resultado_o, resultado_m;
 
-  vector<vector<int> > so, sm;
+  std::vector<std::vector<int> > so, sm;
 
   split(o, so, blank_tag);
   split(m, sm, blank_tag);
@@ -328,9 +327,9 @@ TMXCompiler::procTU()
 {
   UString name = XMLParseUtil::readName(reader);
   int type = xmlTextReaderNodeType(reader);
-  vector<int> origin;
-  vector<int> meta;
-  vector<int> foo;
+  std::vector<int> origin;
+  std::vector<int> meta;
+  std::vector<int> foo;
 
   while(name != TMX_COMPILER_TU_ELEM || type != XML_READER_TYPE_END_ELEMENT)
   {
@@ -341,7 +340,7 @@ TMXCompiler::procTU()
         l = attrib(TMX_COMPILER_LANG_ATTR);
       }
 
-      vector<int> *ref;
+      std::vector<int> *ref;
       if(l == meta_language)
       {
         ref = &meta;
@@ -424,8 +423,8 @@ TMXCompiler::procNode()
   }
   else
   {
-    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Invalid node '<" << name << ">'." << endl;
+    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Invalid node '<" << name << ">'." << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -448,13 +447,13 @@ TMXCompiler::write(FILE *output)
   Compression::multibyte_write(0, output); // keeping file format
   transducer.write(output);
 
-  cout << origin_language << "->" << meta_language << " ";
-  cout << transducer.size() << " " << transducer.numberOfTransitions();
-  cout << endl;
+  std::cout << origin_language << "->" << meta_language << " ";
+  std::cout << transducer.size() << " " << transducer.numberOfTransitions();
+  std::cout << std::endl;
 }
 
 void
-TMXCompiler::trim(vector<int> &v) const
+TMXCompiler::trim(std::vector<int> &v) const
 {
   while(v.size() > 0)
   {
@@ -469,7 +468,7 @@ TMXCompiler::trim(vector<int> &v) const
   }
 
   bool principio = true;
-  vector<int> aux;
+  std::vector<int> aux;
   for(auto c : v)
   {
     if(!u_isspace(c) || !principio)
@@ -483,11 +482,11 @@ TMXCompiler::trim(vector<int> &v) const
 }
 
 void
-TMXCompiler::align(vector<int> &origin, vector<int> &meta)
+TMXCompiler::align(std::vector<int> &origin, std::vector<int> &meta)
 {
-  vector<unsigned int> numbers_origin_start,
+  std::vector<unsigned int> numbers_origin_start,
                        numbers_origin_length;
-  vector<int> modified_origin, modified_meta;
+  std::vector<int> modified_origin, modified_meta;
 
   // compile information from origin
   for(unsigned int i = 0, limit = origin.size(); i != limit; i++)
@@ -561,7 +560,7 @@ TMXCompiler::align(vector<int> &origin, vector<int> &meta)
 }
 
 unsigned int
-TMXCompiler::numberLength(vector<int> &v, unsigned int const position) const
+TMXCompiler::numberLength(std::vector<int> &v, unsigned int const position) const
 {
   for(unsigned int i = position, limit = v.size(); i < limit; i++)
   {
@@ -600,8 +599,8 @@ TMXCompiler::numberLength(vector<int> &v, unsigned int const position) const
 }
 
 bool
-TMXCompiler::vectorcmp(vector<int> const &orig, unsigned int const begin_orig,
-                       vector<int> const &meta, unsigned int const begin_meta,
+TMXCompiler::vectorcmp(std::vector<int> const &orig, unsigned int const begin_orig,
+                       std::vector<int> const &meta, unsigned int const begin_meta,
                        unsigned const int length) const
 {
   for(unsigned int i = begin_orig, j = begin_meta, count = 0; count != length;

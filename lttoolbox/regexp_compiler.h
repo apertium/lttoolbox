@@ -25,8 +25,6 @@
 #include <vector>
 #include <cstdint>
 
-using namespace std;
-
 #define FIN_FICHERO - 1
 
 /**
@@ -44,7 +42,7 @@ private:
   /**
    * Input string
    */
-  vector<int32_t> input;
+  std::vector<int32_t> input;
 
   /**
    * Location in the input string
@@ -84,7 +82,7 @@ private:
   /**
    *
    */
-  set<int> brackets;
+  std::set<int> brackets;
 
   /**
    * Copy method
@@ -208,7 +206,7 @@ public:
    * Function that parses a regular expression and produces a transducer
    * @param er the regular expression
    */
-  void compile(vector<int32_t> const &er);
+  void compile(std::vector<int32_t> const &er);
 
   /**
    * Set the decoder of symbols

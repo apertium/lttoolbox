@@ -24,7 +24,6 @@
 #include <cstdint>
 #include <string>
 
-using namespace std;
 
 class XMLParseUtil
 {
@@ -36,11 +35,11 @@ public:
   /* If attrib does not exist (or other error), returns fallback: */
   static UString attrib(xmlTextReaderPtr reader, UString const &name, const UString& fallback);
 
-  static string attrib_str(xmlTextReaderPtr reader, const UString& name);
+  static std::string attrib_str(xmlTextReaderPtr reader, const UString& name);
 
   static UString readName(xmlTextReaderPtr reader);
   static UString readValue(xmlTextReaderPtr reader);
-  static void readValueInto32(xmlTextReaderPtr reader, vector<int32_t>& vec);
+  static void readValueInto32(xmlTextReaderPtr reader, std::vector<int32_t>& vec);
 };
 
 #endif

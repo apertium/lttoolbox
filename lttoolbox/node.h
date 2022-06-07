@@ -25,7 +25,6 @@
 class State;
 class Node;
 
-using namespace std;
 
 class Dest
 {
@@ -118,7 +117,7 @@ private:
    * The outgoing transitions of this node.
    * Schema: (input symbol, (output symbol, destination, weight))
    */
-  map<int, Dest> transitions;
+  std::map<int, Dest> transitions;
 
   /**
    * Copy method

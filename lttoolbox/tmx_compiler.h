@@ -28,7 +28,6 @@
 #include <libxml/xmlreader.h>
 #include <iostream>
 
-using namespace std;
 
 /**
  * A compiler of dictionaries to letter transducers
@@ -95,7 +94,7 @@ private:
    * @param origin left part
    * @param meta right part
    */
-  void insertTU(vector<int> const &origin, vector<int> const &meta);
+  void insertTU(std::vector<int> const &origin, std::vector<int> const &meta);
 
   /**
    * Gets an attribute value with their name and the current context
@@ -139,15 +138,15 @@ private:
   bool allBlanks();
 
   UString getTag(size_t const &val) const;
-  void trim(vector<int> &v) const;
-  void align(vector<int> &origin, vector<int> &meta);
-  unsigned int numberLength(vector<int> &v, unsigned int const position) const;
-  bool vectorcmp(vector<int> const &orig, unsigned int const begin_orig,
-                       vector<int> const &meta, unsigned int const begin_meta,
+  void trim(std::vector<int> &v) const;
+  void align(std::vector<int> &origin, std::vector<int> &meta);
+  unsigned int numberLength(std::vector<int> &v, unsigned int const position) const;
+  bool vectorcmp(std::vector<int> const &orig, unsigned int const begin_orig,
+                       std::vector<int> const &meta, unsigned int const begin_meta,
                        unsigned const int length) const;
-  void split(vector<int> const &v, vector<vector<int> > &sv, int const symbol) const;
-  void align_blanks(vector<int> &o, vector<int> &m);
-  vector<int> join(vector<vector<int> > const &v, int const s) const;
+  void split(std::vector<int> const &v, std::vector<std::vector<int> > &sv, int const symbol) const;
+  void align_blanks(std::vector<int> &o, std::vector<int> &m);
+  std::vector<int> join(std::vector<std::vector<int> > const &v, int const s) const;
 
 public:
 
@@ -185,7 +184,7 @@ public:
   /**
    * Compile dictionary to letter transducers
    */
-  void parse(string const &file, UString const &lo, UString const &lm);
+  void parse(std::string const &file, UString const &lo, UString const &lm);
 
   /**
    * Write the result of compilation

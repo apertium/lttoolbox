@@ -17,7 +17,6 @@
 #include <lttoolbox/sorted_vector.h>
 #include <cstdlib>
 
-using namespace std;
 
 void
 SortedVector::copy(SortedVector const &o)

@@ -24,9 +24,7 @@
 #include <libxml/xmlreader.h>
 #include <string>
 
-using namespace std;
-
-typedef list<pair<UString, UString> > EntList;
+typedef std::list<std::pair<UString, UString> > EntList;
 
 /**
  * An expander of dictionaries
@@ -78,11 +76,11 @@ private:
   /**
    * Paradigms
    */
-  map<UString, EntList> paradigm;
+  std::map<UString, EntList> paradigm;
 
-  map<UString, EntList> paradigm_lr;
+  std::map<UString, EntList> paradigm_lr;
 
-  map<UString, EntList> paradigm_rl;
+  std::map<UString, EntList> paradigm_rl;
 
   /**
    * Method to parse an XML Node
@@ -116,7 +114,7 @@ private:
    * Parse the &lt;p&gt; element
    * @return a pair of strings, left part and right part of a transduction
    */
-  pair<UString, UString> procTransduction();
+  std::pair<UString, UString> procTransduction();
 
   /**
    * Parse the &lt;i&gt; element
@@ -129,7 +127,7 @@ private:
    * @return a pair of strings, whose right part begins with '#'
    * but are otherwise identical
    */
-  pair<UString, UString> procIdentityGroup();
+  std::pair<UString, UString> procIdentityGroup();
 
   /**
    * Parse the &lt;par&gt; element
@@ -180,8 +178,8 @@ private:
    *               this method, the result of concatenations.
    * @param endings the endings to be appended.
    */
-  static void append(list<pair<UString, UString> > &result,
-                     list<pair<UString, UString> > const &endings);
+  static void append(std::list<std::pair<UString, UString> > &result,
+                     std::list<std::pair<UString, UString> > const &endings);
 
   /**
    * Append a list of endings to a list of current transductions.
@@ -189,7 +187,7 @@ private:
    *               this method, the result of concatenations.
    * @param endings the endings to be appended.
    */
-  static void append(list<pair<UString, UString> > &result,
+  static void append(std::list<std::pair<UString, UString> > &result,
                      UString const &endings);
 
   /**
@@ -198,8 +196,8 @@ private:
    *               this method, the result of concatenations.
    * @param endings the endings to be appended.
    */
-  static void append(list<pair<UString, UString> > &result,
-                     pair<UString, UString> const &endings);
+  static void append(std::list<std::pair<UString, UString> > &result,
+                     std::pair<UString, UString> const &endings);
 
 public:
   /**
@@ -215,7 +213,7 @@ public:
   /**
    * Compile dictionary to letter transducers
    */
-  void expand(string const &file, UFILE* output);
+  void expand(std::string const &file, UFILE* output);
 
   /**
    * Set the alt value to use in compilation

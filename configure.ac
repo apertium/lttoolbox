@@ -82,9 +82,8 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <cstdint>
 #include <type_traits>
 ]],[[
-using namespace std;
-static_assert(!is_same<size_t,uint32_t>::value, "size_t == uint32_t");
-static_assert(!is_same<size_t,uint64_t>::value, "size_t == uint64_t");
+static_assert(!std::is_same<size_t,uint32_t>::value, "size_t == uint32_t");
+static_assert(!std::is_same<size_t,uint64_t>::value, "size_t == uint64_t");
    ]])], [AC_DEFINE([SIZET_NOT_CSTDINT], [1], [size_t != (uint32_t, uint64_t)])])
 
 AM_PATH_PYTHON([3.4], [], [AC_MSG_WARN([Can't generate SWIG wrapper or run tests without Python])])

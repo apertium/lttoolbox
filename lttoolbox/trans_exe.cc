@@ -93,7 +93,7 @@ TransExe::read(FILE *input, Alphabet const &alphabet)
   int base = 0;
   double base_weight = default_weight;
 
-  map<int, double> myfinals;
+  std::map<int, double> myfinals;
 
   while(finals_size > 0)
   {
@@ -104,7 +104,7 @@ TransExe::read(FILE *input, Alphabet const &alphabet)
     {
       base_weight = Compression::long_multibyte_read(input);
     }
-    myfinals.insert(make_pair(base, base_weight));
+    myfinals.insert(std::make_pair(base, base_weight));
   }
 
 
@@ -114,10 +114,10 @@ TransExe::read(FILE *input, Alphabet const &alphabet)
   int current_state = 0;
   new_t.node_list.resize(number_of_states);
 
-  for(map<int, double>::iterator it = myfinals.begin(), limit = myfinals.end();
+  for(auto it = myfinals.begin(), limit = myfinals.end();
       it != limit; it++)
   {
-    new_t.finals.insert(make_pair(&new_t.node_list[it->first], it->second));
+    new_t.finals.insert(std::make_pair(&new_t.node_list[it->first], it->second));
   }
 
   while(number_of_states > 0)
@@ -158,7 +158,7 @@ TransExe::unifyFinals()
   }
 
   finals.clear();
-  finals.insert(make_pair(newfinal, default_weight));
+  finals.insert(std::make_pair(newfinal, default_weight));
 }
 
 Node *
@@ -167,7 +167,7 @@ TransExe::getInitial()
   return &node_list[initial_id];
 }
 
-map<Node *, double> &
+std::map<Node *, double> &
 TransExe::getFinals()
 {
   return finals;

@@ -32,7 +32,6 @@
 
 #include <lttoolbox/ustring.h>
 
-using namespace std;
 
 /**
  * Class to represent the current state of transducer processing
@@ -46,11 +45,11 @@ private:
   struct TNodeState
   {
     Node *where;
-    vector<pair<int, double>> *sequence;
+    std::vector<std::pair<int, double>> *sequence;
     // a state is "dirty" if it was introduced at runtime (case variants, etc.)
     bool dirty;
 
-    TNodeState(Node * const &w, vector<pair<int, double>> * const &s, bool const &d): where(w), sequence(s), dirty(d){}
+    TNodeState(Node * const &w, std::vector<std::pair<int, double>> * const &s, bool const &d): where(w), sequence(s), dirty(d){}
 
     TNodeState(const TNodeState& other)
       : where(other.where)
@@ -67,7 +66,7 @@ private:
     }
   };
 
-  vector<TNodeState> state;
+  std::vector<TNodeState> state;
 
   /**
    * Destroy function
@@ -78,9 +77,9 @@ private:
    * Helper functions for the various apply()s to reduce code duplication
    * @return whether any transitions were made
    */
-  bool apply_into(vector<TNodeState>* new_state, int const input, int index, bool dirty);
+  bool apply_into(std::vector<TNodeState>* new_state, int const input, int index, bool dirty);
 
-  bool apply_into_override(vector<TNodeState>* new_state, int const input, int const old_sym, int const new_sym, int index, bool dirty);
+  bool apply_into_override(std::vector<TNodeState>* new_state, int const input, int const old_sym, int const new_sym, int index, bool dirty);
 
   /**
    * Make a transition, version for lowercase letters and symbols
@@ -102,7 +101,7 @@ private:
    * @param input the input symbol
    * @param alts set of alternative input symbols
    */
-  void apply(int const input, set<int> const alts);
+  void apply(int const input, std::set<int> const alts);
 
   /**
    * Make a transition, only applying lowercase version if
@@ -128,7 +127,7 @@ private:
    */
   void epsilonClosure();
 
-  bool lastPartHasRequiredSymbol(const vector<pair<int, double>> &seq, int requiredSymbol, int separationSymbol);
+  bool lastPartHasRequiredSymbol(const std::vector<std::pair<int, double>> &seq, int requiredSymbol, int separationSymbol);
 
 public:
 
@@ -188,7 +187,7 @@ public:
    * @param input the input symbol
    * @param alt the alternative input symbols
    */
-  void step(int const input, set<int> const alts);
+  void step(int const input, std::set<int> const alts);
 
   void step_case(UChar32 val, bool caseSensitive);
 
@@ -238,13 +237,13 @@ public:
 
   template <typename T1, typename T2>
   struct sort_weights {
-      typedef pair<T1, T2> type;
+      typedef std::pair<T1, T2> type;
       bool operator ()(type const& a, type const& b) const {
           return a.second < b.second;
       }
   };
 
-  vector<pair< UString, double >> NFinals(vector<pair<UString, double>> lf,
+  std::vector<std::pair< UString, double >> NFinals(std::vector<std::pair<UString, double>> lf,
                                           int maxAnalyses,
                                           int maxWeightClasses) const;
 
@@ -260,9 +259,9 @@ public:
    * @param firstchar first character of the word
    * @return the result of the transduction
    */
-  UString filterFinals(map<Node *, double> const &finals,
+  UString filterFinals(std::map<Node *, double> const &finals,
                        Alphabet const &a,
-                       set<UChar32> const &escaped_chars,
+                       std::set<UChar32> const &escaped_chars,
                        bool display_weights = false,
                        int max_analyses = INT_MAX,
                        int max_weight_classes = INT_MAX,
@@ -281,9 +280,9 @@ public:
    * @param firstchar first character of the word
    * @return the result of the transduction
    */
-  UString filterFinalsSAO(map<Node *, double> const &finals,
+  UString filterFinalsSAO(std::map<Node *, double> const &finals,
                           Alphabet const &a,
-                          set<UChar32> const &escaped_chars,
+                          std::set<UChar32> const &escaped_chars,
                           bool uppercase = false,
                           bool firstupper = false,
                           int firstchar = 0) const;
@@ -301,9 +300,9 @@ public:
    * @return the result of the transduction
    */
 
-  set<pair<UString, vector<UString> > > filterFinalsLRX(map<Node *, double> const &finals,
+  std::set<std::pair<UString, std::vector<UString> > > filterFinalsLRX(std::map<Node *, double> const &finals,
                                                         Alphabet const &a,
-                                                        set<UChar32> const &escaped_chars,
+                                                        std::set<UChar32> const &escaped_chars,
                                                         bool uppercase = false,
                                                         bool firstupper = false,
                                                         int firstchar = 0) const;
@@ -320,7 +319,7 @@ public:
    * @param restart_state
    * @param separationSymbol
    */
-    void restartFinals(const map<Node *, double> &finals, int requiredSymbol, State *restart_state, int separationSymbol);
+    void restartFinals(const std::map<Node *, double> &finals, int requiredSymbol, State *restart_state, int separationSymbol);
 
 
   /**
@@ -329,18 +328,18 @@ public:
    * @param finals set of final nodes @return
    * @true if the state is final
    */
-  bool isFinal(map<Node *, double> const &finals) const;
+  bool isFinal(std::map<Node *, double> const &finals) const;
 
   /**
    * Return the full states string (to allow debuging...) using a Java ArrayList.toString style
    */
   UString getReadableString(const Alphabet &a);
 
-  UString filterFinalsTM(map<Node *, double> const &finals,
+  UString filterFinalsTM(std::map<Node *, double> const &finals,
                          Alphabet const &alphabet,
-                         set<UChar32> const &escaped_chars,
-                         queue<UString> &blanks,
-                         vector<UString> &numbers) const;
+                         std::set<UChar32> const &escaped_chars,
+                         std::queue<UString> &blanks,
+                         std::vector<UString> &numbers) const;
 
 };
 

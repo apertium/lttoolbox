@@ -35,8 +35,6 @@
 #include <string>
 #include <cstdint>
 
-using namespace std;
-
 /**
  * Kind of output of the generator module
  */
@@ -59,7 +57,7 @@ private:
   /**
    * Transducers in FSTP
    */
-  map<UString, TransExe> transducers;
+  std::map<UString, TransExe> transducers;
 
   /**
    * Current state of lexical analysis
@@ -79,59 +77,57 @@ private:
   /**
    * The final states of inconditional sections in the dictionaries
    */
-  map<Node *, double> inconditional;
+  std::map<Node *, double> inconditional;
 
   /**
    * The final states of standard sections in the dictionaries
    */
-  map<Node *, double> standard;
+  std::map<Node *, double> standard;
 
   /**
    * The final states of postblank sections in the dictionaries
    */
-  map<Node *, double> postblank;
+  std::map<Node *, double> postblank;
 
   /**
    * The final states of preblank sections in the dictionaries
    */
-  map<Node *, double> preblank;
+  std::map<Node *, double> preblank;
 
   /**
    * Merge of 'inconditional', 'standard', 'postblank' and 'preblank' sets
    */
-  map<Node *, double> all_finals;
+  std::map<Node *, double> all_finals;
 
   /**
    * Queue of blanks, used in reading methods
    */
-  queue<UString> blankqueue;
+  std::queue<UString> blankqueue;
 
   /**
    * Queue of wordbound blanks, used in reading methods
    */
-  deque<UString> wblankqueue;
-
-  deque<bool> wblankendqueue;
+  std::deque<UString> wblankqueue;
 
   /**
    * Set of characters being considered alphabetics
    */
-  set<UChar32> alphabetic_chars;
+  std::set<UChar32> alphabetic_chars;
 
   /**
    * Set of characters to escape with a backslash
    */
-  set<UChar32> escaped_chars;
+  std::set<UChar32> escaped_chars;
 
   /**
    * Set of characters to ignore
    */
-  set<UChar32> ignored_chars;
+  std::set<UChar32> ignored_chars;
 
   /**
    * Mapping of characters for simplistic diacritic restoration specified in RCX files
    */
-  map<int, set<int> > rcx_map;
+  std::map<int, std::set<int> > rcx_map;
 
   /**
    * Original char being restored
@@ -240,7 +236,7 @@ private:
   bool transliteration_reread_suffix = false;
   bool transliteration_drop_tilde = false;
   bool transliteration_last_was_space = false;
-  set<unsigned int> wblank_locs;
+  std::set<unsigned int> wblank_locs;
 
   /**
    * True if a wblank block ([[..]]xyz[[/]]) was just read
@@ -328,7 +324,7 @@ private:
    * @param output the stream to write on
    * @return the queue of 0-symbols, and the next symbol in the stream
    */
-  pair<UString, int> readBilingual(InputFile& input, UFILE *output);
+  std::pair<UString, int> readBilingual(InputFile& input, UFILE *output);
 
   /**
    * Read text from stream (SAO version)
@@ -457,7 +453,7 @@ private:
 
   void initDecompositionSymbols();
 
-  vector<UString> numbers;
+  std::vector<UString> numbers;
   int readTMAnalysis(InputFile& input);
 
   unsigned int lastBlank(UString const &str);
@@ -537,11 +533,11 @@ public:
   UString biltrans(UString const &input_word, bool with_delim = true);
   UString biltransfull(UString const &input_word, bool with_delim = true);
   void bilingual(InputFile& input, UFILE *output, GenerationMode mode = gm_unknown);
-  pair<UString, int> biltransWithQueue(UString const &input_word, bool with_delim = true);
+  std::pair<UString, int> biltransWithQueue(UString const &input_word, bool with_delim = true);
   UString biltransWithoutQueue(UString const &input_word, bool with_delim = true);
   void SAO(InputFile& input, UFILE *output);
-  void parseICX(string const &file);
-  void parseRCX(string const &file);
+  void parseICX(std::string const &file);
+  void parseRCX(std::string const &file);
 
   void load(FILE *input);
 

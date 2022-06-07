@@ -24,7 +24,6 @@
 
 #include <lttoolbox/match_node.h>
 
-using namespace std;
 
 /**
  * Class to represent the current state of transducer processing
@@ -104,9 +103,9 @@ public:
    */
   void init(MatchNode *initial);
 
-  int classifyFinals(map<MatchNode *, int> const &final_class, set<int> const &banned_rules) const;
+  int classifyFinals(std::map<MatchNode *, int> const &final_class, std::set<int> const &banned_rules) const;
 
-  int classifyFinals(map<MatchNode *, int> const &final_class) const;
+  int classifyFinals(std::map<MatchNode *, int> const &final_class) const;
 
   void debug();
 

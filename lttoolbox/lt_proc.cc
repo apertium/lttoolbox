@@ -30,64 +30,62 @@
 #endif
 
 
-using namespace std;
-
 void endProgram(char *name)
 {
-  cout << basename(name) << ": process a stream with a letter transducer" << endl;
-  cout << "USAGE: " << basename(name) << " [ -a | -b | -c | -d | -e | -g | -n | -p | -x | -s | -t | -v | -h | -z | -w ] [-W] [-N N] [-L N] [ -i icx_file ] [ -r rcx_file ] fst_file [input_file [output_file]]" << endl;
-  cout << "Options:" << endl;
+  std::cout << basename(name) << ": process a stream with a letter transducer" << std::endl;
+  std::cout << "USAGE: " << basename(name) << " [ -a | -b | -c | -d | -e | -g | -n | -p | -x | -s | -t | -v | -h | -z | -w ] [-W] [-N N] [-L N] [ -i icx_file ] [ -r rcx_file ] fst_file [input_file [output_file]]" << std::endl;
+  std::cout << "Options:" << std::endl;
 #if HAVE_GETOPT_LONG
-  cout << "  -a, --analysis:          morphological analysis (default behavior)" << endl;
-  cout << "  -b, --bilingual:         lexical transfer" << endl;
-  cout << "  -c, --case-sensitive:    use the literal case of the incoming characters" << endl;
-  cout << "  -d, --debugged-gen       morph. generation with all the stuff" << endl;
-  cout << "  -e, --decompose-nouns:   Try to decompound unknown words" << endl;
-  cout << "  -g, --generation:        morphological generation" << endl;
-  cout << "  -i, --ignored-chars:     specify file with characters to ignore" << endl;
-  cout << "  -r, --restore-chars:     specify file with characters to diacritic restoration" << endl;
-  cout << "  -l, --tagged-gen:        morphological generation keeping lexical forms" << endl;
-  cout << "  -m, --tagged-nm-gen:     same as -l but without unknown word marks" << endl;
-  cout << "  -n, --non-marked-gen     morph. generation without unknown word marks" << endl;
-  cout << "  -o, --surf-bilingual:    lexical transfer with surface forms" << endl;
-  cout << "  -p, --post-generation:   post-generation" << endl;
-  cout << "  -x, --inter-generation:  inter-generation" << endl;
-  cout << "  -s, --sao:               SAO annotation system input processing" << endl;
-  cout << "  -t, --transliteration:   apply transliteration dictionary" << endl;
-  cout << "  -v, --version:           version" << endl;
-  cout << "  -z, --null-flush:        flush output on the null character " << endl;
-  cout << "  -w, --dictionary-case:   use dictionary case instead of surface case" << endl;
-  cout << "  -C, --careful-case:      use dictionary case if present, else surface" << endl;
-  cout << "  -I, --no-default-ignore: skips loading the default ignore characters" << endl;
-  cout << "  -W, --show-weights:      Print final analysis weights (if any)" << endl;
-  cout << "  -N, --analyses:          Output no more than N analyses (if the transducer is weighted, the N best analyses)" << endl;
-  cout << "  -L, --weight-classes:    Output no more than N best weight classes (where analyses with equal weight constitute a class)" << endl;
-  cout << "  -h, --help:              show this help" << endl;
+  std::cout << "  -a, --analysis:          morphological analysis (default behavior)" << std::endl;
+  std::cout << "  -b, --bilingual:         lexical transfer" << std::endl;
+  std::cout << "  -c, --case-sensitive:    use the literal case of the incoming characters" << std::endl;
+  std::cout << "  -d, --debugged-gen       morph. generation with all the stuff" << std::endl;
+  std::cout << "  -e, --decompose-nouns:   Try to decompound unknown words" << std::endl;
+  std::cout << "  -g, --generation:        morphological generation" << std::endl;
+  std::cout << "  -i, --ignored-chars:     specify file with characters to ignore" << std::endl;
+  std::cout << "  -r, --restore-chars:     specify file with characters to diacritic restoration" << std::endl;
+  std::cout << "  -l, --tagged-gen:        morphological generation keeping lexical forms" << std::endl;
+  std::cout << "  -m, --tagged-nm-gen:     same as -l but without unknown word marks" << std::endl;
+  std::cout << "  -n, --non-marked-gen     morph. generation without unknown word marks" << std::endl;
+  std::cout << "  -o, --surf-bilingual:    lexical transfer with surface forms" << std::endl;
+  std::cout << "  -p, --post-generation:   post-generation" << std::endl;
+  std::cout << "  -x, --inter-generation:  inter-generation" << std::endl;
+  std::cout << "  -s, --sao:               SAO annotation system input processing" << std::endl;
+  std::cout << "  -t, --transliteration:   apply transliteration dictionary" << std::endl;
+  std::cout << "  -v, --version:           version" << std::endl;
+  std::cout << "  -z, --null-flush:        flush output on the null character " << std::endl;
+  std::cout << "  -w, --dictionary-case:   use dictionary case instead of surface case" << std::endl;
+  std::cout << "  -C, --careful-case:      use dictionary case if present, else surface" << std::endl;
+  std::cout << "  -I, --no-default-ignore: skips loading the default ignore characters" << std::endl;
+  std::cout << "  -W, --show-weights:      Print final analysis weights (if any)" << std::endl;
+  std::cout << "  -N, --analyses:          Output no more than N analyses (if the transducer is weighted, the N best analyses)" << std::endl;
+  std::cout << "  -L, --weight-classes:    Output no more than N best weight classes (where analyses with equal weight constitute a class)" << std::endl;
+  std::cout << "  -h, --help:              show this help" << std::endl;
 #else
-  cout << "  -a:   morphological analysis (default behavior)" << endl;
-  cout << "  -b:   lexical transfer" << endl;
-  cout << "  -c:   use the literal case of the incoming characters" << endl;
-  cout << "  -d:   morph. generation with all the stuff" << endl;
-  cout << "  -e:   try to decompose unknown words as compounds" << endl;
-  cout << "  -g:   morphological generation" << endl;
-  cout << "  -i:   specify file with characters to ignore" << endl;
-  cout << "  -r:   specify file with characters to diacritic restoration" << endl;
-  cout << "  -l:   morphological generation keeping lexical forms" << endl;
-  cout << "  -n:   morph. generation without unknown word marks" << endl;
-  cout << "  -o:   lexical transfer with surface forms" << endl;
-  cout << "  -p:   post-generation" << endl;
-  cout << "  -x:   inter-generation" << endl;
-  cout << "  -s:   SAO annotation system input processing" << endl;
-  cout << "  -t:   apply transliteration dictionary" << endl;
-  cout << "  -v:   version" << endl;
-  cout << "  -z:   flush output on the null character " << endl;
-  cout << "  -C:   use dictionary case if present, else surface" << endl;
-  cout << "  -W:   Print final analysis weights (if any)" << endl;
-  cout << "  -N:   Output no more than N analyses" << endl;
-  cout << "  -L:   Output no more than N best weight classes" << endl;
-  cout << "  -I:   skips loading the default ignore characters" << endl;
-  cout << "  -w:   use dictionary case instead of surface case" << endl;
-  cout << "  -h:   show this help" << endl;
+  std::cout << "  -a:   morphological analysis (default behavior)" << std::endl;
+  std::cout << "  -b:   lexical transfer" << std::endl;
+  std::cout << "  -c:   use the literal case of the incoming characters" << std::endl;
+  std::cout << "  -d:   morph. generation with all the stuff" << std::endl;
+  std::cout << "  -e:   try to decompose unknown words as compounds" << std::endl;
+  std::cout << "  -g:   morphological generation" << std::endl;
+  std::cout << "  -i:   specify file with characters to ignore" << std::endl;
+  std::cout << "  -r:   specify file with characters to diacritic restoration" << std::endl;
+  std::cout << "  -l:   morphological generation keeping lexical forms" << std::endl;
+  std::cout << "  -n:   morph. generation without unknown word marks" << std::endl;
+  std::cout << "  -o:   lexical transfer with surface forms" << std::endl;
+  std::cout << "  -p:   post-generation" << std::endl;
+  std::cout << "  -x:   inter-generation" << std::endl;
+  std::cout << "  -s:   SAO annotation system input processing" << std::endl;
+  std::cout << "  -t:   apply transliteration dictionary" << std::endl;
+  std::cout << "  -v:   version" << std::endl;
+  std::cout << "  -z:   flush output on the null character " << std::endl;
+  std::cout << "  -C:   use dictionary case if present, else surface" << std::endl;
+  std::cout << "  -W:   Print final analysis weights (if any)" << std::endl;
+  std::cout << "  -N:   Output no more than N analyses" << std::endl;
+  std::cout << "  -L:   Output no more than N best weight classes" << std::endl;
+  std::cout << "  -I:   skips loading the default ignore characters" << std::endl;
+  std::cout << "  -w:   use dictionary case instead of surface case" << std::endl;
+  std::cout << "  -h:   show this help" << std::endl;
 #endif
   exit(EXIT_FAILURE);
 }
@@ -185,7 +183,7 @@ int main(int argc, char *argv[])
       maxAnalyses = atoi(optarg);
       if (maxAnalyses < 1)
       {
-        cerr << "Invalid or no argument for analyses count" << endl;
+        std::cerr << "Invalid or no argument for analyses count" << std::endl;
         exit(EXIT_FAILURE);
       }
       fstp.setMaxAnalysesValue(maxAnalyses);
@@ -195,7 +193,7 @@ int main(int argc, char *argv[])
       maxWeightClasses = atoi(optarg);
       if (maxWeightClasses < 1)
       {
-        cerr << "Invalid or no argument for weight class count" << endl;
+        std::cerr << "Invalid or no argument for weight class count" << std::endl;
         exit(EXIT_FAILURE);
       }
       fstp.setMaxWeightClassesValue(maxWeightClasses);
@@ -260,7 +258,7 @@ int main(int argc, char *argv[])
       break;
 
     case 'v':
-      cout << basename(argv[0]) << " version " << PACKAGE_VERSION << endl;
+      std::cout << basename(argv[0]) << " version " << PACKAGE_VERSION << std::endl;
       exit(EXIT_SUCCESS);
       break;
     case 'h':
@@ -365,9 +363,9 @@ int main(int argc, char *argv[])
         break;
     }
   }
-  catch (exception& e)
+  catch (std::exception& e)
   {
-    cerr << e.what();
+    std::cerr << e.what();
     if (fstp.getNullFlush()) {
       u_fputc('\0', output);
     }

@@ -28,7 +28,7 @@ Compression::writeByte(unsigned char byte, FILE *output)
 {
   if(fwrite_unlocked(&byte, 1, 1, output) != 1)
   {
-    cerr << "I/O Error writing" << endl;
+    std::cerr << "I/O Error writing" << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -40,7 +40,7 @@ Compression::readByte(FILE *input)
   if(fread_unlocked(&value, 1, 1, input) != 1)
   {
 //    Not uncomment this code since
-//    cerr << "I/O Error reading" << endl;
+//    std::cerr << "I/O Error reading" << std::endl;
 //    exit(EXIT_FAILURE);
   }
 
@@ -87,13 +87,13 @@ Compression::multibyte_write(unsigned int value, FILE *output)
   }
   else
   {
-    cerr << "Out of range: " << value << endl;
+    std::cerr << "Out of range: " << value << std::endl;
     exit(EXIT_FAILURE);
   }
 }
 
 void
-Compression::multibyte_write(unsigned int value, ostream &output)
+Compression::multibyte_write(unsigned int value, std::ostream &output)
 {
   if(value < 0x00000040)
   {
@@ -134,7 +134,7 @@ Compression::multibyte_write(unsigned int value, ostream &output)
   }
   else
   {
-    cerr << "Out of range: " << value << endl;
+    std::cerr << "Out of range: " << value << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -194,7 +194,7 @@ Compression::multibyte_read(FILE *input)
 }
 
 unsigned int
-Compression::multibyte_read(istream &input)
+Compression::multibyte_read(std::istream &input)
 {
   unsigned char up;
   unsigned int result = 0;
@@ -257,7 +257,7 @@ Compression::multibyte_read(istream &input)
 void
 Compression::string_write(UString const &str, FILE *output)
 {
-  vector<int32_t> vec;
+  std::vector<int32_t> vec;
   ustring_to_vec32(str, vec);
   Compression::multibyte_write(vec.size(), output);
   for(auto c : vec)
@@ -319,7 +319,7 @@ Compression::long_multibyte_write(const double& value, FILE *output)
 }
 
 void
-Compression::long_multibyte_write(const double& value, ostream &output)
+Compression::long_multibyte_write(const double& value, std::ostream &output)
 {
   int exp = 0;
 
@@ -399,7 +399,7 @@ Compression::long_multibyte_read(FILE *input)
 }
 
 double
-Compression::long_multibyte_read(istream &input)
+Compression::long_multibyte_read(std::istream &input)
 {
   double result = 0.0;
 

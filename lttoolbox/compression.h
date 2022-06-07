@@ -24,8 +24,6 @@
 #include <lttoolbox/ustring.h>
 #include <lttoolbox/my_stdio.h>
 
-using namespace std;
-
 // Global lttoolbox features
 constexpr char HEADER_LTTOOLBOX[4]{'L', 'T', 'T', 'B'};
 enum LT_FEATURES : uint64_t {
@@ -157,7 +155,7 @@ public:
    * @param value integer to write.
    * @param output output stream.
    */
-  static void multibyte_write(unsigned int value, ostream &os);
+  static void multibyte_write(unsigned int value, std::ostream &os);
 
   /**
    * Read and decode an integer from the input stream.
@@ -173,7 +171,7 @@ public:
    * @param input input stream.
    * @return the integer value readed.
    */
-  static unsigned int multibyte_read(istream &is);
+  static unsigned int multibyte_read(std::istream &is);
 
   /**
    * This method allows to write a plain string to an output stream
@@ -206,7 +204,7 @@ public:
    * @param value double to write.
    * @param output output stream.
    */
-  static void long_multibyte_write(const double& value, ostream &os);
+  static void long_multibyte_write(const double& value, std::ostream &os);
 
   /**
    * Read and decode a double from the input stream.
@@ -222,7 +220,7 @@ public:
    * @param input input stream.
    * @return the double value read.
    */
-  static double long_multibyte_read(istream &is);
+  static double long_multibyte_read(std::istream &is);
 };
 
 #endif
