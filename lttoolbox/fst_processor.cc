@@ -2020,8 +2020,8 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
          (is_wblank || !last_zone_is_wblank))) {         // and it's not a space
                                                          // inside a wblank
       int end = input_buffer.getPos();
-      zones.push_back(make_pair(make_pair(last_zone_start, end),
-                                last_zone_is_wblank));
+      zones.push_back(std::make_pair(std::make_pair(last_zone_start, end),
+                                     last_zone_is_wblank));
       //cerr << "  found end of zone " << last_zone_start << "-" << end << endl;
       if (!last_lf.empty() && last_match > last_zone_start) {
         merge_zones(zones, local_wblanks, last_match);
