@@ -155,7 +155,7 @@ class WordboundBlankNoNestingPostgenTest(ProcTest):
 
 class PostgenerationBasicTest(ProcTest):
     procdix = "data/postgen.dix"
-    procflags = ["-t", "-z"]
+    procflags = ["-p", "-z"]
     inputs          = [ "xyz ejemplo ~o ho nombre.",
                         "xyz ~le la pelota.",
                         "El perro ~de el amigo.",
@@ -219,7 +219,7 @@ class PostgenerationWordboundBlankTest(ProcTest):
 
 class PostgenerationWordboundBlankEscapingTest(ProcTest):
     procdix = "data/postgen.dix"
-    procflags = ["-t", "-z"]
+    procflags = ["-p", "-z"]
     inputs          = [ "Systran ([[t:a:PJD9GA]]http:\/\/www.systran.de\/[[/]]).[] Systran (http:\/\/www.systran.de\/).[]"]
 
     expectedOutputs = [ "Systran ([[t:a:PJD9GA]]http:\/\/www.systran.de\/[[/]]).[] Systran (http:\/\/www.systran.de\/).[]"]
