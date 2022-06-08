@@ -16,6 +16,7 @@
  */
 #include <lttoolbox/lt_locale.h>
 #include <unicode/uloc.h>
+#include <unicode/ucnv.h>
 
 #include <clocale>
 #include <iostream>
@@ -36,6 +37,7 @@ LtLocale::tryToSetLocale()
 
   UErrorCode status = U_ZERO_ERROR;
   uloc_setDefault("en_US_POSIX", &status);
+  ucnv_setDefaultName("UTF-8");
 
 #if !defined(__CYGWIN__) && !defined (__MINGW32__)
   if(setlocale(LC_CTYPE, "") != NULL)
