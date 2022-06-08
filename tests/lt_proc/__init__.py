@@ -131,6 +131,7 @@ class CatMultipleFstsTransducer(ProcTest):
     inputs = ["cat", "cats"]
     expectedOutputs = ["^cat/cat+n/cat+v$", "^cats/cat+n+<pl>$"]
 
+
 class WordboundBlankAnalysisTest(ProcTest):
     procdix = "data/wordbound-blank.dix"
     inputs          = ["x  [[t:i:123456]]opp.",
@@ -139,6 +140,18 @@ class WordboundBlankAnalysisTest(ProcTest):
     expectedOutputs = ["^x/*x$  [[t:i:123456]]^opp/opp<pr>$^./.<sent>$",
                         "[[t:b:456123; t:i:90hfbn]]^legge/legge<vblex><inf>$  [[t:s:xyz789]]^opp/opp<pr>$  ^opp/opp<pr>$ [[t:b:abc124]]^x/*x$ ^opp/opp<pr>$^./.<sent>$",
                        ]
+
+
+class WordboundBlankNoNestingPostgenTest(ProcTest):
+    procdix = "data/postgen.dix"
+    procflags = ["-p", "-z"]
+    inputs = ["[[t:text:SyTAKg]]xyz~le[[/]][[t:text:SyTAKg]]pqr[[/]]",
+              "[[t:text:SyTAKg]]xyz~les[[/]][[t:text:SyTAKg]]pqr[[/]]",
+              ]
+    expectedOutputs = ["[[t:text:SyTAKg]]xyzle[[/]][[t:text:SyTAKg]]pqr[[/]]",
+                       "[[t:text:SyTAKg]]xyzles[[/]][[t:text:SyTAKg]]pqr[[/]]",
+                       ]
+
 
 class PostgenerationBasicTest(ProcTest):
     procdix = "data/postgen.dix"
@@ -326,6 +339,14 @@ class DebugGen(ProcTest):
                        "^ab<n><indic>/#ab<n><indic>$"]
     procflags = ['-d', '-b', '-z']
     procdir = "rl"
+
+
+class PostgenShort(ProcTest):
+    # test for https://github.com/apertium/lttoolbox/issues/123
+    procdix = "data/postgen-short.dix"
+    inputs = ["~e aga", "~E aga"]
+    expectedOutputs = ["aga", "Aga"]
+    procflags = ['-p', '-z']
 
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *

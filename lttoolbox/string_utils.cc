@@ -247,3 +247,21 @@ StringUtils::caseequal(const UString& a, const UString& b)
   }
   return (cmp == 0);
 }
+
+bool
+StringUtils::endswith(const UString& str, const UString& suffix)
+{
+  return (suffix.size() <= str.size() &&
+          str.substr(str.size()-suffix.size()) == suffix);
+}
+
+UString
+StringUtils::merge_wblanks(const UString& w1, const UString& w2)
+{
+  if (w1.empty()) return w2;
+  if (w2.empty()) return w1;
+  UString ret = w1.substr(0, w1.size()-2);
+  ret += "; "_u;
+  ret += w2.substr(2);
+  return ret;
+}
