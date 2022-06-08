@@ -340,5 +340,13 @@ class DebugGen(ProcTest):
     procflags = ['-d', '-b', '-z']
     procdir = "rl"
 
+
+class PostgenShort(ProcTest):
+    # test for https://github.com/apertium/lttoolbox/issues/123
+    procdix = "data/postgen-short.dix"
+    inputs = ["~e aga", "~E aga"]
+    expectedOutputs = ["aga", "Aga"]
+    procflags = ['-p', '-z']
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *
