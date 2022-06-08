@@ -36,6 +36,8 @@ UString const Transducer::JOIN_SYMBOL                 = "+"_u;
 UString const Transducer::ANY_TAG_SYMBOL              = "<ANY_TAG>"_u;
 UString const Transducer::ANY_CHAR_SYMBOL             = "<ANY_CHAR>"_u;
 UString const Transducer::LSX_BOUNDARY_SYMBOL         = "<$>"_u;
+UString const Transducer::LSX_BOUNDARY_SPACE_SYMBOL   = "<$_>"_u;
+UString const Transducer::LSX_BOUNDARY_NO_SPACE_SYMBOL= "<$->"_u;
 UString const Transducer::COMPOUND_ONLY_L_SYMBOL      = "<compound-only-L>"_u;
 UString const Transducer::COMPOUND_R_SYMBOL           = "<compound-R>"_u;
 
@@ -1138,7 +1140,9 @@ Transducer::intersect(Transducer &trimmer,
       UString this_right;
       this_a.getSymbol(this_right, this_a.decode(this_label).second);
 
-      if(this_right == JOIN_SYMBOL || this_right == LSX_BOUNDARY_SYMBOL)
+      if(this_right == JOIN_SYMBOL || this_right == LSX_BOUNDARY_SYMBOL ||
+         this_right == LSX_BOUNDARY_SPACE_SYMBOL ||
+         this_right == LSX_BOUNDARY_NO_SPACE_SYMBOL)
       {
         if(trimmer_preplus == trimmer_src) {
           // Keep the old preplus state if it was set; equal to current trimmer state means unset:
@@ -1159,7 +1163,9 @@ Transducer::intersect(Transducer &trimmer,
                            trimmed_trg, // toState
                            this_label, // symbol-pair, using this alphabet
                            this_wt); //weight of transduction
-        if(this_right == LSX_BOUNDARY_SYMBOL && isFinal(this_trg))
+        if((this_right == LSX_BOUNDARY_SYMBOL ||
+            this_right == LSX_BOUNDARY_SPACE_SYMBOL ||
+            this_right == LSX_BOUNDARY_NO_SPACE_SYMBOL) && isFinal(this_trg))
         {
           trimmed.setFinal(trimmed_trg, default_weight);
         }

@@ -127,6 +127,11 @@ private:
    */
   bool jobs = false;
 
+  /**
+   * Are we compiling an LSX dictionary
+   */
+  bool is_separable = false;
+
 
   /**
    * Identifier of all the symbols during the compilation
@@ -167,6 +172,15 @@ private:
    * Original char being mapped
    */
   int acx_current_char = 0;
+
+  /**
+   * LSX symbols
+   */
+  int32_t any_tag = 0;
+  int32_t any_char = 0;
+  int32_t word_boundary = 0;
+  int32_t word_boundary_s = 0;
+  int32_t word_boundary_ns = 0;
 
   /*
   static std::string range(char const a, char const b);
@@ -331,6 +345,8 @@ public:
   LTTOOLBOX_IMPORTS static UString const COMPILER_SECTION_ELEM;
   LTTOOLBOX_IMPORTS static UString const COMPILER_ID_ATTR;
   LTTOOLBOX_IMPORTS static UString const COMPILER_TYPE_ATTR;
+  LTTOOLBOX_IMPORTS static UString const COMPILER_SEPARABLE_VAL;
+  LTTOOLBOX_IMPORTS static UString const COMPILER_SEQUENTIAL_VAL;
   LTTOOLBOX_IMPORTS static UString const COMPILER_IDENTITY_ELEM;
   LTTOOLBOX_IMPORTS static UString const COMPILER_IDENTITYGROUP_ELEM;
   LTTOOLBOX_IMPORTS static UString const COMPILER_JOIN_ELEM;
@@ -354,6 +370,9 @@ public:
   LTTOOLBOX_IMPORTS static UString const COMPILER_LSX_WB_ELEM;
   LTTOOLBOX_IMPORTS static UString const COMPILER_LSX_CHAR_ELEM;
   LTTOOLBOX_IMPORTS static UString const COMPILER_LSX_TAG_ELEM;
+  LTTOOLBOX_IMPORTS static UString const COMPILER_LSX_SPACE_ATTR;
+  LTTOOLBOX_IMPORTS static UString const COMPILER_LSX_SPACE_YES_VAL;
+  LTTOOLBOX_IMPORTS static UString const COMPILER_LSX_SPACE_NO_VAL;
 
   /**
    * Constructor

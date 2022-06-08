@@ -18,7 +18,13 @@
 -->
 <!ELEMENT dictionary (alphabet?, sdefs?,
 		      pardefs?, section+)>
-	<!-- root element-->
+    <!-- root element-->
+
+<!ATTLIST dictionary
+        type (standard|separable|sequential) #IMPLIED
+>
+    <!-- dictionary type, separable/sequential is lsx compilation
+         (2 names for backwards compatibility) -->
 
 <!ELEMENT alphabet (#PCDATA)>
 	<!-- alphabetic character list -->
@@ -99,7 +105,7 @@
 >
 	<!-- n: paradigm name -->
 
-<!ELEMENT i (#PCDATA | b | s | g | j | a)*>
+<!ELEMENT i (#PCDATA | b | s | g | j | a | d | t | w)*>
 	<!-- identity -->
 
 <!ELEMENT re (#PCDATA)>
@@ -108,13 +114,13 @@
 <!ELEMENT p (l, r)>
 	<!-- pair of strings -->
 
-<!ELEMENT l (#PCDATA | a | b | g | j | s | m)*>
+<!ELEMENT l (#PCDATA | a | b | g | j | s | m | d | t | w)*>
 	<!-- left part of p -->
 <!ATTLIST l
     c CDATA #IMPLIED
 >
 	<!-- c: comment -->
-<!ELEMENT r (#PCDATA | a | b | g | j | s)*>
+<!ELEMENT r (#PCDATA | a | b | g | j | s | d | t | w)*>
 	<!-- right part of p -->
 <!ATTLIST r
     c CDATA #IMPLIED
@@ -130,10 +136,10 @@
 <!ELEMENT m EMPTY>
 	<!-- mark morpheme boundary (left side only) -->
 
-<!ELEMENT ig (#PCDATA | a | b | j | s)*>
+<!ELEMENT ig (#PCDATA | a | b | j | s | d | t | w)*>
 	<!-- 'group identity' - equivalent to <p> where <r> contains <g>, whose contents are the same as those of <l> -->
 
-<!ELEMENT g (#PCDATA | a | b | j | s)*>
+<!ELEMENT g (#PCDATA | a | b | j | s | d | t | w)*>
 	<!-- mark special groups in lemmas -->
 <!ATTLIST g
 	i CDATA #IMPLIED
@@ -151,3 +157,17 @@
 
 >
 	<!-- n: symbol (tag) name -->
+
+<!ELEMENT d EMPTY>
+	<!-- d: LSX word boundary (delimiter) -->
+
+<!ATTLIST d
+    space (auto|yes|no) #IMPLIED
+>
+    <!-- space: whether to ensure a space after word end -->
+
+<!ELEMENT t EMPTY>
+    <!-- t: any tag -->
+
+<!ELEMENT w EMPTY>
+    <!-- w: any word character -->

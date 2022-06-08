@@ -72,6 +72,7 @@
 /lttoolbox/lt-tmxproc
 /lttoolbox/lt-expand
 /lttoolbox/lt-append
+/lttoolbox/lsx-comp
 /python/Makefile
 /python/Makefile.in
 /python/lttoolbox.i

@@ -103,6 +103,8 @@ public:
   static UString const ANY_TAG_SYMBOL;
   static UString const ANY_CHAR_SYMBOL;
   static UString const LSX_BOUNDARY_SYMBOL;
+  static UString const LSX_BOUNDARY_SPACE_SYMBOL;
+  static UString const LSX_BOUNDARY_NO_SPACE_SYMBOL;
   static UString const COMPOUND_ONLY_L_SYMBOL;
   static UString const COMPOUND_R_SYMBOL;
 
