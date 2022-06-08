@@ -33,8 +33,6 @@ UString const FSTProcessor::XML_RESTORE_CHAR_ELEM   = "restore-char"_u;
 UString const FSTProcessor::XML_RESTORE_CHARS_ELEM  = "restore-chars"_u;
 UString const FSTProcessor::XML_VALUE_ATTR          = "value"_u;
 UString const FSTProcessor::XML_CHAR_ELEM           = "char"_u;
-UString const FSTProcessor::WBLANK_START            = "[["_u;
-UString const FSTProcessor::WBLANK_END              = "]]"_u;
 UString const FSTProcessor::WBLANK_FINAL            = "[[/]]"_u;
 
 
@@ -174,67 +172,6 @@ FSTProcessor::procNodeRCX()
     std::cerr << "): Invalid node '<" << name << ">'." << std::endl;
     exit(EXIT_FAILURE);
   }
-}
-
-bool
-FSTProcessor::wblankPostGen(InputFile& input, UFILE *output)
-{
-  UString result = WBLANK_START;
-  UChar32 c = 0;
-  bool in_content = false;
-
-  while(!input.eof())
-  {
-    c = input.get();
-    if(in_content && c == '~')
-    {
-      if(result[result.size()-1] == ']') {
-        // We just saw the end of a wblank, may want to merge
-        wblankqueue.push_back(result);
-      }
-      else {
-        // wake-up-mark happened some characters into the wblanked word
-        write(result, output);
-      }
-      return true;
-    }
-    else
-    {
-      result += c;
-    }
-
-    if(c == '\\')
-    {
-      if (input.eof()) streamError();
-      result += input.get();
-    }
-    else if(c == ']')
-    {
-      c = input.get();
-      result += c;
-
-      if(c == ']')
-      {
-        int resultlen = result.size();
-        if(result[resultlen-5] == '[' && result[resultlen-4] == '[' && result[resultlen-3] == '/') //ending blank [[/]]
-        {
-          write(result, output);
-          break;
-        }
-        else
-        {
-          in_content = true; // Assumption: No nested wblanks, always balanced
-        }
-      }
-    }
-  }
-
-  if(c != ']')
-  {
-    streamError();
-  }
-
-  return false;
 }
 
 int
@@ -387,74 +324,9 @@ FSTProcessor::readTMAnalysis(InputFile& input)
 }
 
 int32_t
-FSTProcessor::readPostgeneration(InputFile& input, UFILE *output)
-{
-  if(!input_buffer.isEmpty())
-  {
-    return input_buffer.next();
-  }
-
-  UChar32 val = input.get();
-  int32_t altval = 0;
-  is_wblank = false;
-  if(input.eof())
-  {
-    return 0;
-  }
-
-  switch(val)
-  {
-    case '<':
-      altval = alphabet(input.readBlock('<', '>'));
-      input_buffer.add(altval);
-      return altval;
-
-    case '[':
-      val = input.get();
-
-      if(val == '[')
-      {
-        if(collect_wblanks)
-        {
-          wblankqueue.push_back(input.finishWBlank());
-          is_wblank = true;
-          return static_cast<int32_t>(' ');
-        }
-        else if(wblankPostGen(input, output))
-        {
-          return static_cast<int32_t>('~');
-        }
-        else
-        {
-          is_wblank = true;
-          return static_cast<int32_t>(' ');
-        }
-      }
-      else
-      {
-        input.unget(val);
-        blankqueue.push(input.readBlock('[', ']'));
-
-        input_buffer.add(static_cast<int32_t>(' '));
-        return static_cast<int32_t>(' ');
-      }
-
-    case '\\':
-      val = input.get();
-      input_buffer.add(static_cast<int32_t>(val));
-      return val;
-
-    default:
-      input_buffer.add(val);
-      return val;
-  }
-}
-
-int32_t
 FSTProcessor::readTransliteration(InputFile& input)
 {
   if (!input_buffer.isEmpty()) {
-    //cerr << "checking for wblank loc at " << input_buffer.getPos() << endl;
     if (wblank_locs.find(input_buffer.getPos()) != wblank_locs.end()) {
       is_wblank = true;
     } else {
@@ -476,15 +348,9 @@ FSTProcessor::readTransliteration(InputFile& input)
     sym = alphabet(input.readBlock('<', '>'));
   } else if (val == '[' && input.peek() == '[') {
     sym = static_cast<int32_t>(' ');
-    //if (!transliteration_last_was_space) {
-    //transliteration_last_was_space = true;
-      //blankqueue.push(""_u);
-      //input.unget(val);
-    //} else {
-      input.get();
-      wblankqueue.push_back(input.finishWBlank());
-      is_wblank = true;
-      //}
+    input.get();
+    wblankqueue.push_back(input.finishWBlank());
+    is_wblank = true;
   } else if (val == '[' || u_isspace(val)) {
     sym = static_cast<int32_t>(' ');
     UString blank;
@@ -506,18 +372,13 @@ FSTProcessor::readTransliteration(InputFile& input)
       }
     }
     blankqueue.push(blank);
-    transliteration_last_was_space = true;
   } else {
     sym = val;
   }
   if (is_wblank) {
-    //cerr << "adding wblank loc " << (input_buffer.getPos()) << endl;
-    //input_buffer.next();
     wblank_locs.insert(input_buffer.getPos());
-    //input_buffer.back(1);
   }
   input_buffer.add(sym);
-  if (sym != static_cast<int32_t>(' ')) transliteration_last_was_space = false;
   return sym;
 }
 
@@ -754,65 +615,6 @@ FSTProcessor::flushBlanks(UFILE *output)
 }
 
 void
-FSTProcessor::flushWblanks(UFILE *output)
-{
-  while(wblankqueue.size() > 0)
-  {
-    write(wblankqueue.front(), output);
-    wblankqueue.pop_front();
-  }
-}
-
-UString
-FSTProcessor::combineWblanks()
-{
-  UString final_wblank;
-  UString last_wblank;
-  bool seen_wblank = false;
-
-  while(wblankqueue.size() > 0)
-  {
-    if(wblankqueue.front().compare(WBLANK_FINAL) == 0)
-    {
-      if(seen_wblank) {
-        if(final_wblank.empty())
-        {
-          final_wblank += WBLANK_START;
-        }
-        else if(final_wblank.size() > 2)
-        {
-          final_wblank += "; "_u;
-        }
-
-        final_wblank += last_wblank.substr(2,last_wblank.size()-4); //add wblank without brackets [[..]]
-      }
-      else {
-        need_end_wblank = true;
-      }
-      last_wblank.clear();
-    }
-    else
-    {
-      seen_wblank = true;
-      last_wblank = wblankqueue.front();
-    }
-    wblankqueue.pop_front();
-  }
-
-  if(!last_wblank.empty())
-  {
-    wblankqueue.push_back(last_wblank);
-  }
-
-  if(!final_wblank.empty())
-  {
-    final_wblank += WBLANK_END;
-    need_end_wblank = true;
-  }
-  return final_wblank;
-}
-
-void
 FSTProcessor::calcInitial()
 {
   for(auto& it : transducers) {
@@ -822,39 +624,26 @@ FSTProcessor::calcInitial()
   initial_state.init(&root);
 }
 
-bool
-FSTProcessor::endsWith(UString const &str, UString const &suffix)
-{
-  if(str.size() < suffix.size())
-  {
-    return false;
-  }
-  else
-  {
-    return str.substr(str.size()-suffix.size()) == suffix;
-  }
-}
-
 void
 FSTProcessor::classifyFinals()
 {
   for(auto& it : transducers) {
-    if(endsWith(it.first, "@inconditional"_u))
+    if(StringUtils::endswith(it.first, "@inconditional"_u))
     {
       inconditional.insert(it.second.getFinals().begin(),
                            it.second.getFinals().end());
     }
-    else if(endsWith(it.first, "@standard"_u))
+    else if(StringUtils::endswith(it.first, "@standard"_u))
     {
       standard.insert(it.second.getFinals().begin(),
                       it.second.getFinals().end());
     }
-    else if(endsWith(it.first, "@postblank"_u))
+    else if(StringUtils::endswith(it.first, "@postblank"_u))
     {
       postblank.insert(it.second.getFinals().begin(),
                        it.second.getFinals().end());
     }
-    else if(endsWith(it.first, "@preblank"_u))
+    else if(StringUtils::endswith(it.first, "@preblank"_u))
     {
       preblank.insert(it.second.getFinals().begin(),
                       it.second.getFinals().end());
@@ -1069,6 +858,12 @@ FSTProcessor::initGeneration()
 
 void
 FSTProcessor::initPostgeneration()
+{
+  initTransliteration();
+}
+
+void
+FSTProcessor::initTransliteration()
 {
   initGeneration();
 }
@@ -1474,42 +1269,6 @@ FSTProcessor::generation_wrapper_null_flush(InputFile& input, UFILE *output,
 }
 
 void
-FSTProcessor::postgeneration_wrapper_null_flush(InputFile& input, UFILE *output)
-{
-  setNullFlush(false);
-  while(!input.eof())
-  {
-    postgeneration(input, output);
-    u_fputc('\0', output);
-    u_fflush(output);
-  }
-}
-
-void
-FSTProcessor::intergeneration_wrapper_null_flush(InputFile& input, UFILE *output)
-{
-  setNullFlush(false);
-  while (!input.eof())
-  {
-    intergeneration(input, output);
-    u_fputc('\0', output);
-    u_fflush(output);
-  }
-}
-
-void
-FSTProcessor::transliteration_wrapper_null_flush(InputFile& input, UFILE *output)
-{
-  setNullFlush(false);
-  while(!input.eof())
-  {
-    transliteration(input, output);
-    u_fputc('\0', output);
-    u_fflush(output);
-  }
-}
-
-void
 FSTProcessor::tm_analysis(InputFile& input, UFILE *output)
 {
   State current_state = initial_state;
@@ -1818,7 +1577,6 @@ FSTProcessor::generation(InputFile& input, UFILE *output, GenerationMode mode)
 void
 FSTProcessor::postgeneration(InputFile& input, UFILE *output)
 {
-  //transliteration_reread_suffix = true;
   transliteration_drop_tilde = true;
   transliteration(input, output);
 }
@@ -1826,48 +1584,14 @@ FSTProcessor::postgeneration(InputFile& input, UFILE *output)
 void
 FSTProcessor::intergeneration(InputFile& input, UFILE *output)
 {
-  transliteration_reread_suffix = false;
   transliteration_drop_tilde = false;
   transliteration(input, output);
-}
-
-size_t
-common_suffix(const UString& a, const UString& b)
-{
-  size_t ret = 0;
-  while (ret < a.size() && ret < b.size()) {
-    if (a[a.size() - 1 - ret] == b[b.size() - 1 - ret]) {
-      ret++;
-    } else {
-      ret--;
-      break;
-    }
-  }
-  return ret;
-}
-
-UString
-merge_wblanks(const UString& a, const UString& b)
-{
-  if (a.empty()) return b;
-  if (b.empty()) return a;
-  UString ret = a.substr(0, a.size()-2);
-  ret += "; "_u;
-  ret += b.substr(2);
-  return ret;
-}
-
-void
-debug_zone(const std::pair<std::pair<int, int>, bool>& zone)
-{
-  std::cerr << "(" << zone.first.first << "," << zone.first.second << "," << zone.second << ")";
 }
 
 bool
 merge_zones(std::deque<std::pair<std::pair<int, int>, bool>>& zones,
             std::deque<UString>& wblanks, int cur_pos)
 {
-  //cerr << "  merge_zones(" << cur_pos << ")\n";
   if (zones.empty()) return false;
   auto current_zone = zones.front();
   zones.pop_front();
@@ -1876,24 +1600,17 @@ merge_zones(std::deque<std::pair<std::pair<int, int>, bool>>& zones,
     wblank = wblanks.front();
     wblanks.pop_front();
   }
-  //cerr << "    current ";
-  //debug_zone(current_zone);
-  //cerr << " wblank " << wblank << endl;
   bool skip = false;
   while (!zones.empty() && zones.front().first.first < cur_pos) {
     if (current_zone.second &&
         !zones.front().second &&
         zones.front().first.second == cur_pos &&
         zones.front().first.first == cur_pos-1) {
-      //cerr << "    skipping following blank?\n";
       skip = true;
       break;
     }
-    //cerr << "    adding ";
-    //debug_zone(zones.front());
-    //cerr << endl;
     if (zones.front().second) {
-      wblank = merge_wblanks(wblank, wblanks.front());
+      wblank = StringUtils::merge_wblanks(wblank, wblanks.front());
       wblanks.pop_front();
       current_zone.second = true;
     }
@@ -1937,11 +1654,6 @@ next_space(std::queue<UString>& blankqueue, size_t& skip)
 void
 FSTProcessor::transliteration(InputFile& input, UFILE *output)
 {
-  if(getNullFlush())
-  {
-    transliteration_wrapper_null_flush(input, output);
-  }
-
   State current_state = initial_state;
   UString lf;
   UString sf;
@@ -1965,9 +1677,6 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
 
   while (true) {
     val = readTransliteration(input);
-    if (val == 0) {
-      //cerr << "EOF sf.size() == " << sf.size() << " prefix.size() == " << prefix.size() << endl;
-    }
     if (val == 0 && sf.empty()) {
       write(prefix, output);
       prefix.clear();
@@ -2002,18 +1711,6 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
         continue;
       }
     }
-    //cerr << "val = " << val << " prefix = " << prefix << " last_sf = " << last_sf << " last_lf = " <<last_lf << " sf = " << sf;
-    //cerr << " rewind = " << rewind_point << " match = " << last_match;
-    //cerr << " pos = " << input_buffer.getPos();
-    //if (!zones.empty()) {
-      //cerr << " zone1 ";
-      //debug_zone(zones.front());
-    //}
-    //cerr << " space_skip = " << spaces_to_skip;
-    //cerr << " blanks = " << blankqueue.size();
-    //cerr << " is_wblank = " << is_wblank;
-    //cerr << " pz "; debug_zone(prev_zone);
-    //cerr << endl;
     if (val == 0 ||                                      // this is EOF or
         (val == static_cast<int32_t>(' ') &&             // this is a boundary
          (int)input_buffer.getPos() > last_zone_start && // and it's new
@@ -2022,7 +1719,6 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
       int end = input_buffer.getPos();
       zones.push_back(std::make_pair(std::make_pair(last_zone_start, end),
                                      last_zone_is_wblank));
-      //cerr << "  found end of zone " << last_zone_start << "-" << end << endl;
       if (!last_lf.empty() && last_match > last_zone_start) {
         merge_zones(zones, local_wblanks, last_match);
       }
@@ -2072,13 +1768,10 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
         val == 0 ||
         (!has_stepped && is_wblank)
         ) {
-      //cerr << "  done with something\n";
       if (last_lf.empty()) {
         bool at_boundary = false;
         if (val == static_cast<int32_t>(' ')) {
-          //cerr << "    rewind = " << rewind_point << endl;
           for (auto& it : zones) {
-            //cerr << "    "; debug_zone(it); cerr<<endl;
             if (it.first.second == rewind_point) {
               at_boundary = true;
               break;
@@ -2089,8 +1782,6 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
         }
         if (is_wblank && prefix.empty()) continue;
         if (at_boundary && !(is_wblank && prefix.empty())) {
-          //cerr << "  and we're at a boundary\n";
-          //cerr << "    prefix = " << prefix << endl;
           bool add_blank = merge_zones(zones, local_wblanks, rewind_point);
           int len = zones.front().first.second - zones.front().first.first;
           bool has_wblank = zones.front().second;
@@ -2132,9 +1823,7 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
             }
           }
         }
-        //cerr << "  rewinding from " << input_buffer.getPos();
         input_buffer.setPos(rewind_point);
-        //cerr << " to " << input_buffer.getPos() << endl;
         if (val == 0 && prefix.empty() && sf.empty()) {
           input_buffer.back(1);
         }
@@ -2142,16 +1831,7 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
         merge_zones(zones, local_wblanks, last_match);
         input_buffer.setPos(last_match);
         input_buffer.back(1);
-        if (transliteration_reread_suffix) {
-          size_t suf_len = common_suffix(last_lf, last_sf);
-          //cerr << "    suf_len = " << suf_len <<endl;
-          last_lf = last_lf.substr(0, last_lf.size()-suf_len);
-          last_sf = last_sf.substr(0, last_sf.size()-suf_len);
-          input_buffer.back(suf_len);
-        }
-        //cerr << "  moving rewind_point from " << rewind_point;
         rewind_point = input_buffer.getPos();
-        //cerr << " to " << rewind_point << endl;
         if (last_sf[last_sf.size()-1] == ' ' &&
             last_lf[last_lf.size()-1] == ' ') {
           last_sf = last_sf.substr(0, last_sf.size()-1);
@@ -2165,7 +1845,6 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
         if (sf_space_count > lf_space_count) {
           spaces_to_skip += (sf_space_count - lf_space_count);
         }
-        //cerr << "    spaces: sf " << sf_space_count << " lf " <<lf_space_count << endl;
         for (auto c : last_lf.substr(1)) {
           if (c == '~' && transliteration_drop_tilde) {
             continue;
