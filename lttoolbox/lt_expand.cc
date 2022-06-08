@@ -25,11 +25,6 @@
 #include <string>
 #include <getopt.h>
 
-#ifdef _MSC_VER
-#include <io.h>
-#include <fcntl.h>
-#endif
-
 void endProgram(char *name)
 {
   if(name != NULL)
@@ -133,10 +128,6 @@ int main(int argc, char *argv[])
       endProgram(argv[0]);
       break;
   }
-
-#ifdef _MSC_VER
-  _setmode(_fileno(output), _O_U8TEXT);
-#endif
 
   input = openInBinFile(infile);
   fclose(input);

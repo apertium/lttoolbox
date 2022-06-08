@@ -28,11 +28,6 @@
 #include <cstring>
 #include <getopt.h>
 
-#ifdef _MSC_VER
-#include <io.h>
-#include <fcntl.h>
-#endif
-
 void endProgram(char *name)
 {
   if(name != NULL)
@@ -53,10 +48,6 @@ int main(int argc, char *argv[])
 
   bool pairs = true;
   bool keep = false;
-
-#ifdef _MSC_VER
-  _setmode(_fileno(output), _O_U8TEXT);
-#endif
 
 #if HAVE_GETOPT_LONG
   int option_index=0;

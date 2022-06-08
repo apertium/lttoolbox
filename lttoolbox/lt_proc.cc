@@ -24,12 +24,6 @@
 #include <iostream>
 #include <libgen.h>
 
-#ifdef _MSC_VER
-#include <io.h>
-#include <fcntl.h>
-#endif
-
-
 void endProgram(char *name)
 {
   std::cout << basename(name) << ": process a stream with a letter transducer" << std::endl;
@@ -296,11 +290,6 @@ int main(int argc, char *argv[])
   {
     endProgram(argv[0]);
   }
-
-#ifdef _MSC_VER
-  _setmode(_fileno(input), _O_U8TEXT);
-  _setmode(_fileno(output), _O_U8TEXT);
-#endif
 
   try
   {
