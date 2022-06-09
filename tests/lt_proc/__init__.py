@@ -348,5 +348,26 @@ class PostgenShort(ProcTest):
     expectedOutputs = ["aga", "Aga"]
     procflags = ['-p', '-z']
 
+
+class PostgenOverlap(ProcTest):
+    # https://github.com/apertium/lttoolbox/issues/123#issuecomment-1150667445
+    procdix = "data/postgen-overlap.dix"
+    inputs = ["~detla",
+              "~a ~detla"]
+    expectedOutputs = ["la",
+                       "a la"]
+    procflags = ['-p', '-z']
+
+
+class PostgenCase(ProcTest):
+    # https://github.com/apertium/lttoolbox/issues/123#issuecomment-1150667445
+    procdix = "data/postgen-overlap.dix"
+    inputs = ["~detla",
+              "~Detla"]
+    expectedOutputs = ["la",
+                       "La"]
+    procflags = ['-p', '-z']
+
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *
