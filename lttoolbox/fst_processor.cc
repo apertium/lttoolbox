@@ -1751,7 +1751,29 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
       }
         rewind_point = input_buffer.getPos();
     } else {
-      lf = filterFinals(current_state, sf);
+      bool firstupper = false, uppercase = false;
+      if (!dictionaryCase) {
+        if (transliteration_drop_tilde) {
+          for (size_t i = 0; i < sf.size(); i++) {
+            if (u_isalpha(sf[i])) {
+              if (!firstupper) {
+                firstupper = u_isupper(sf[i]);
+                if (!firstupper) break;
+              } else {
+                uppercase = u_isupper(sf[i]);
+                break;
+              }
+            }
+          }
+        } else {
+          firstupper = u_isupper(sf[0]);
+          uppercase = (sf.size() > 1 && firstupper && u_isupper(sf[1]));
+        }
+      }
+      lf = current_state.filterFinals(all_finals, alphabet, escaped_chars,
+                                      displayWeightsMode, maxAnalyses,
+                                      maxWeightClasses,
+                                      uppercase, firstupper, 0);
       if (!lf.empty() && !(lf.substr(1) == sf) && sf != last_sf) {
         last_match = input_buffer.getPos();
         last_lf.swap(lf);
@@ -1760,7 +1782,7 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
       }
     }
     if (val != 0 && !is_wblank) {
-      current_state.step(val);
+      current_state.step_case(val, dictionaryCase);
       has_stepped = true;
       alphabet.getSymbol(sf, val);
     }
