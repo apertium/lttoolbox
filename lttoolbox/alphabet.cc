@@ -300,3 +300,29 @@ Alphabet::createLoopbackSymbols(std::set<int32_t> &symbols, Alphabet &basis, Sid
     }
   }
 }
+
+std::vector<int32_t>
+Alphabet::tokenize(const UString& str) const
+{
+  std::vector<int32_t> ret;
+  size_t end = str.size();
+  size_t i = 0;
+  UChar32 c;
+  while (i < end) {
+    U16_NEXT(str.c_str(), i, end, c);
+    if (c == '\\') {
+    } else if (c == '<') {
+      size_t j = i;
+      while (c != '>' && j < end) {
+        U16_NEXT(str.c_str(), j, end, c);
+      }
+      if (c == '>') {
+        ret.push_back(operator()(str.substr(i-1, j-i)));
+        i = j;
+      }
+    } else {
+      ret.push_back(static_cast<int32_t>(c));
+    }
+  }
+  return ret;
+}

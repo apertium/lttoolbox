@@ -196,6 +196,8 @@ public:
    * @param nonTagsToo by default only tags are included, but if this is true we include all symbols
    */
   void createLoopbackSymbols(std::set<int32_t> &symbols, Alphabet &basis, Side s = right, bool nonTagsToo = false);
+
+  std::vector<int32_t> tokenize(const UString& str) const;
 };
 
 #endif
