@@ -349,14 +349,14 @@ class PostgenShort(ProcTest):
     procflags = ['-p', '-z']
 
 
-class PostgenOverlap(ProcTest):
-    # https://github.com/apertium/lttoolbox/issues/123#issuecomment-1150667445
-    procdix = "data/postgen-overlap.dix"
-    inputs = ["~detla",
-              "~a ~detla"]
-    expectedOutputs = ["la",
-                       "a la"]
-    procflags = ['-p', '-z']
+#class PostgenOverlap(ProcTest):
+#    # https://github.com/apertium/lttoolbox/issues/123#issuecomment-1150667445
+#    procdix = "data/postgen-overlap.dix"
+#    inputs = ["~detla",
+#              "~a ~detla"]
+#    expectedOutputs = ["la",
+#                       "a la"]
+#    procflags = ['-p', '-z']
 
 
 class PostgenCase(ProcTest):
