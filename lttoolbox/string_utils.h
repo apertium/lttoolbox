@@ -33,10 +33,6 @@ public:
   static UString copycase(const UString& source, const UString& target);
 
   static bool caseequal(const UString& a, const UString& b);
-
-  static bool endswith(const UString& str, const UString& suffix);
-
-  static UString merge_wblanks(const UString& w1, const UString& w2);
 };
 
 #endif // __LT_STRING_UTILS_H__

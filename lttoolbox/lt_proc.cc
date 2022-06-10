@@ -307,6 +307,12 @@ int main(int argc, char *argv[])
         fstp.postgeneration(input, output);
         break;
 
+      case 'x':
+        fstp.initPostgeneration();
+        checkValidity(fstp);
+        fstp.intergeneration(input, output);
+        break;
+
       case 's':
         fstp.initAnalysis();
         checkValidity(fstp);
@@ -314,8 +320,7 @@ int main(int argc, char *argv[])
         break;
 
       case 't':
-      case 'x':
-        fstp.initTransliteration();
+        fstp.initPostgeneration();
         checkValidity(fstp);
         fstp.transliteration(input, output);
         break;

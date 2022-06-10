@@ -29,7 +29,6 @@
 #include <libxml/xmlreader.h>
 
 #include <map>
-#include <deque>
 #include <queue>
 #include <set>
 #include <string>
@@ -107,7 +106,7 @@ private:
   /**
    * Queue of wordbound blanks, used in reading methods
    */
-  std::deque<UString> wblankqueue;
+  std::queue<UString> wblankqueue;
 
   /**
    * Set of characters being considered alphabetics
@@ -233,13 +232,20 @@ private:
    */
   int maxAnalyses = INT_MAX;
 
-  bool transliteration_drop_tilde = false;
-  std::set<unsigned int> wblank_locs;
-
   /**
    * True if a wblank block ([[..]]xyz[[/]]) was just read
    */
-  bool is_wblank = false;
+  bool is_wblank;
+
+  /**
+   * True if skip_mode is false and need to collect wblanks
+   */
+  bool collect_wblanks;
+
+  /**
+   * True if a wblank has been processed for postgen and we need an ending wblank
+   */
+  bool need_end_wblank;
 
   /**
    * Output no more than 'N' best weight classes
@@ -250,6 +256,14 @@ private:
    * Prints an error of input stream and exits
    */
   void streamError();
+
+  /**
+   * Reads a wordbound blank (opening blank to closing blank) from the stream input -> [[...]]xyz[[/]]
+   * @param input the stream being read
+   * @param output the stream to write on
+   * @return true if the word enclosed by the wordbound blank has a ~ for postgeneration activation
+   */
+  bool wblankPostGen(InputFile& input, UFILE *output);
 
   /**
    * Returns true if the character code is identified as alphabetic
@@ -273,11 +287,20 @@ private:
   int readAnalysis(InputFile& input);
 
   /**
-   * Read text from stream (transliteration version)
+   * Read text from stream (decomposition version)
    * @param input the stream to read
+   * @param output the stream to write on
    * @return the next symbol in the stream
    */
-  int32_t readTransliteration(InputFile& input);
+  int readDecomposition(InputFile& input, UFILE *output);
+
+  /**
+   * Read text from stream (postgeneration version)
+   * @param input the stream to read
+   * @param output the stream to write on
+   * @return the next symbol in the stream
+   */
+  int readPostgeneration(InputFile& input, UFILE *output);
 
   /**
    * Read text from stream (generation version)
@@ -307,6 +330,26 @@ private:
    * @param output stream to write blanks
    */
   void flushBlanks(UFILE *output);
+
+  /**
+   * Flush all the wordbound blanks remaining in the current process
+   * @param output stream to write blanks
+   */
+  void flushWblanks(UFILE *output);
+
+  /**
+   * Combine wordbound blanks in the queue and return them.
+   *
+   * May pop from 'wblankqueue' and set 'need_end_wblank' to true.
+   *
+   * If 'wblankqueue' (see which) is empty, we get an empty string,
+   * otherwise we return a semicolon-separated combination of opening
+   * wblanks in the queue. If there is only a closing wblank, we just
+   * set need_end_wblank.
+   *
+   * @return final wblank string
+  */
+  UString combineWblanks();
 
   /**
    * Calculate the initial state of parsing
@@ -349,6 +392,15 @@ private:
    * @param output the stream to write in
    */
   void writeEscapedWithTags(UString const &str, UFILE *output);
+
+
+  /**
+   * Checks if an string ends with a particular suffix
+   * @param str the string to test
+   * @param the searched suffix
+   * @returns true if 'str' has the suffix 'suffix'
+   */
+  static bool endsWith(UString const &str, UString const &suffix);
 
   /**
    * Prints a word
@@ -404,17 +456,13 @@ private:
    * @param val the space character to use if no blank queue
    * @param output stream where the word is written
    */
-  void printSpace(UChar32 const val, UFILE *output, bool flush=true);
-  /**
-   * Print one possibly escaped character
-   */
-  void putc_esc(const UChar32 val, UFILE* output);
+  void printSpace(UChar32 const val, UFILE *output);
   /**
    * Print one possibly escaped character
    * if it's a space and the blank queue is non-empty,
    * pop the first blank and print that instead
    */
-  void printChar(const UChar32 val, UFILE* output, bool flush=false);
+  void printChar(const UChar32 val, UFILE* output);
 
   void skipUntil(InputFile& input, UFILE *output, UChar32 const character);
   static UString removeTags(UString const &str);
@@ -425,6 +473,9 @@ private:
   void bilingual_wrapper_null_flush(InputFile& input, UFILE *output, GenerationMode mode = gm_unknown);
   void generation_wrapper_null_flush(InputFile& input, UFILE *output,
                                      GenerationMode mode);
+  void postgeneration_wrapper_null_flush(InputFile& input, UFILE *output);
+  void intergeneration_wrapper_null_flush(InputFile& input, UFILE *output);
+  void transliteration_wrapper_null_flush(InputFile& input, UFILE *output);
 
   UString compose(UString const &lexforms, UString const &queue) const;
 
@@ -447,6 +498,8 @@ public:
   static UString const XML_RESTORE_CHARS_ELEM;
   static UString const XML_VALUE_ATTR;
   static UString const XML_CHAR_ELEM;
+  static UString const WBLANK_START;
+  static UString const WBLANK_END;
   static UString const WBLANK_FINAL;
 
   FSTProcessor();
@@ -456,7 +509,6 @@ public:
   void initSAO(){initAnalysis();};
   void initGeneration();
   void initPostgeneration();
-  void initTransliteration();
   void initBiltrans();
   void initDecomposition();
 
@@ -464,8 +516,6 @@ public:
   void tm_analysis(InputFile& input, UFILE *output);
   void generation(InputFile& input, UFILE *output, GenerationMode mode = gm_unknown);
   void postgeneration(InputFile& input, UFILE *output);
-  // intergeneration is a synonym for transliteration
-  // retained for backwards compatibility
   void intergeneration(InputFile& input, UFILE *output);
   void transliteration(InputFile& input, UFILE *output);
   UString biltrans(UString const &input_word, bool with_delim = true);

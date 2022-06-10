@@ -152,9 +152,13 @@ public:
 		break;
 
 	case 't':
-	case 'x':
-		initTransliteration();
+		initPostgeneration();
 		transliteration(input, output);
+		break;
+
+	case 'x':
+		initPostgeneration();
+		intergeneration(input, output);
 		break;
 
 	case 'a':

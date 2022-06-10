@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 import signal
-import sys
-
-
 class Alarm(Exception):
     pass
-
 
 class BasicTest:
     def alarmHandler(self, signum, frame):
@@ -33,16 +29,12 @@ class BasicTest:
         try:
             char = self.withTimeout(2, process.stdout.read, 1)
         except Alarm:
-            print("Timeout before reading a single character!",
-                  file=sys.stderr)
             pass
         while char and char != b'\0':
             output.append(char)
             try:
                 char = self.withTimeout(2, process.stdout.read, 1)
             except Alarm:
-                print("Timeout after reading %s chars" % (len(output)),
-                      file=sys.stderr)
                 break           # send what we got up till now
 
         return b"".join(output).decode('utf-8').replace('\r\n', '\n')
