@@ -327,5 +327,20 @@ class DebugGen(ProcTest):
     procflags = ['-d', '-b', '-z']
     procdir = "rl"
 
+
+class BufferIndex(ProcTest):
+    procdix = "data/underscore.dix"
+    inputs = ["_a",
+              "_n",
+              "_𐐔",
+              "x|x",
+              ]
+    expectedOutputs = ["_^a/*a$",
+                       "^_n/_n<n>$",
+                       "_^𐐔/*𐐔$",
+                       "^x/*x$|^x/*x$",
+                       ]
+
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *

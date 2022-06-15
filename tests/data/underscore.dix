@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+	<alphabet></alphabet>
+	<sdefs>
+	  <sdef n="n"/>
+        </sdefs>
+<pardefs>
+
+</pardefs>
+
+<section id="main" type="standard">
+  <e><p><l>_n</l><r>_n<s n="n"/></r></p></e>
+  <e><p><l>|</l><r>|<s n="n"/></r></p></e>
+</section>
+
+
+
+</dictionary>
