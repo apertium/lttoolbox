@@ -334,11 +334,13 @@ class BufferIndex(ProcTest):
               "_n",
               "_𐐔",
               "x|x",
+              "a­b",
               ]
     expectedOutputs = ["_^a/*a$",
                        "^_n/_n<n>$",
                        "_^𐐔/*𐐔$",
                        "^x/*x$|^x/*x$",
+                       "^ab/*ab$",
                        ]
 
 

@@ -242,9 +242,6 @@ FSTProcessor::readAnalysis(InputFile& input)
   if (!input_buffer.isEmpty())
   {
     UChar32 val = input_buffer.next();
-    while ((useIgnoredChars || useDefaultIgnoredChars) && ignored_chars.find(val) != ignored_chars.end()) {
-      val = input_buffer.next();
-    }
     return val;
   }
 
@@ -260,7 +257,6 @@ FSTProcessor::readAnalysis(InputFile& input)
 
   while ((useIgnoredChars || useDefaultIgnoredChars) && ignored_chars.find(val) != ignored_chars.end())
   {
-    input_buffer.add(val);
     val = input.get();
   }
 
