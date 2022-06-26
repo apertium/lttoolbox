@@ -226,7 +226,7 @@ public:
    */
   void setPos(unsigned int const newpos)
     {
-      currentpos = newpos;
+      currentpos = newpos % size;
     }
 
   /**

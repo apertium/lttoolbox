@@ -415,7 +415,20 @@ private:
   void skipUntil(InputFile& input, UFILE *output, UChar32 const character);
   static UString removeTags(UString const &str);
   UString compoundAnalysis(UString str);
-  size_t firstNotAlpha(UString const &sf);
+
+  struct Indices {
+        size_t i_codepoint;
+        size_t i_utf16; // always >= i_codepoint since some codepoints take up 2 UTF-16's
+  };
+
+  /*
+   * Iterates through unicode characters, returns a Unicode character
+   * index and UTF-16 string index of first non-alphabetic character,
+   * or size of the string (in characters, string size)
+   *
+   * @return index of first non-alpha char, or string size, as a tuple of number of characters and index in string
+   */
+  Indices firstNotAlpha(UString const &sf);
 
   void analysis_wrapper_null_flush(InputFile& input, UFILE *output);
   void bilingual_wrapper_null_flush(InputFile& input, UFILE *output, GenerationMode mode = gm_unknown);

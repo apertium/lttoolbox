@@ -180,9 +180,6 @@ FSTProcessor::readAnalysis(InputFile& input)
   if (!input_buffer.isEmpty())
   {
     UChar32 val = input_buffer.next();
-    while ((useIgnoredChars || useDefaultIgnoredChars) && ignored_chars.find(val) != ignored_chars.end()) {
-      val = input_buffer.next();
-    }
     return val;
   }
 
@@ -198,7 +195,6 @@ FSTProcessor::readAnalysis(InputFile& input)
 
   while ((useIgnoredChars || useDefaultIgnoredChars) && ignored_chars.find(val) != ignored_chars.end())
   {
-    input_buffer.add(val);
     val = input.get();
   }
 
@@ -1001,6 +997,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
   UString sf;            // surface form
   UString lf_spcmp;      // space compound analysis
   bool seen_cpL = false; // have we seen a <compound-only-L> tag so far
+  size_t last_start = input_buffer.getPos(); // position in input_buffer when sf was last cleared
   size_t last = 0;       // position in input_buffer after last analysis
   size_t last_size = 0;  // size of sf at last analysis
   std::map<int, std::set<int> >::iterator rcx_map_ptr;
@@ -1179,18 +1176,16 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
         }
         while((val = readAnalysis(input)) && isAlphabetic(val));
 
-        unsigned int limit = firstNotAlpha(sf);
-        unsigned int size = sf.size();
-        limit = (limit == static_cast<unsigned int>(UString::npos)?size:limit);
-        if(limit == 0)
+        auto limit = firstNotAlpha(sf);
+        if(limit.i_codepoint == 0)
         {
-          input_buffer.back(sf.size());
+          input_buffer.setPos(1 + last_start);
           writeEscaped(sf.substr(0,1), output);
         }
         else
         {
-          input_buffer.back(1+(size-limit));
-          UString unknown_word = sf.substr(0, limit);
+          input_buffer.setPos(last_start + limit.i_codepoint);
+          UString unknown_word = sf.substr(0, limit.i_utf16);
           if(do_decomposition)
           {
             UString compound = compoundAnalysis(unknown_word);
@@ -1211,18 +1206,16 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
       }
       else if(lf.empty())
       {
-        unsigned int limit = firstNotAlpha(sf);
-        unsigned int size = sf.size();
-        limit = (limit == static_cast<unsigned int >(UString::npos)?size:limit);
-        if(limit == 0)
+        auto limit = firstNotAlpha(sf);
+        if(limit.i_codepoint == 0)
         {
-          input_buffer.back(sf.size());
+          input_buffer.setPos(1 + last_start);
           writeEscaped(sf.substr(0,1), output);
         }
         else
         {
-          input_buffer.back(1+(size-limit));
-          UString unknown_word = sf.substr(0, limit);
+          input_buffer.setPos(last_start + limit.i_codepoint);
+          UString unknown_word = sf.substr(0, limit.i_utf16);
           if(do_decomposition)
           {
             UString compound = compoundAnalysis(unknown_word);
@@ -1257,6 +1250,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
       current_state = initial_state;
       lf.clear();
       sf.clear();
+      last_start = input_buffer.getPos();
       last_incond = false;
       last_postblank = false;
       last_preblank = false;
@@ -2806,18 +2800,16 @@ FSTProcessor::SAO(InputFile& input, UFILE *output)
         }
         while((val = readSAO(input)) && isAlphabetic(val));
 
-        unsigned int limit = firstNotAlpha(sf);
-        unsigned int size = sf.size();
-        limit = (limit == static_cast<unsigned int>(UString::npos)?size:limit);
-        input_buffer.back(1+(size-limit));
+        auto limit = firstNotAlpha(sf);
+        unsigned int size = sf.size(); // TODO: change these to character counts
+        input_buffer.back(1+(size-limit.i_utf16));
         u_fprintf(output, "<d>%S</d>", sf.c_str());
       }
       else if(lf.empty())
       {
-        unsigned int limit = firstNotAlpha(sf);
-        unsigned int size = sf.size();
-        limit = (limit == static_cast<unsigned int>(UString::npos)?size:limit);
-        input_buffer.back(1+(size-limit));
+        auto limit = firstNotAlpha(sf);
+        unsigned int size = sf.size(); // TODO: change these to character counts
+        input_buffer.back(1+(size-limit.i_utf16));
         u_fprintf(output, "<d>%S</d>", sf.c_str());
       }
       else
@@ -2926,18 +2918,22 @@ FSTProcessor::getNullFlush()
   return nullFlush;
 }
 
-size_t
+FSTProcessor::Indices
 FSTProcessor::firstNotAlpha(UString const &sf)
 {
+  FSTProcessor::Indices ix = { 0, 0 };
   UCharCharacterIterator it = UCharCharacterIterator(sf.c_str(), sf.size());
-  size_t i = 0;
   while (it.hasNext()) {
     UChar32 c = it.next32PostInc();
     if(!isAlphabetic(c))
     {
-      return i;
+      return ix;
     }
-    i += c > UINT16_MAX ? 2 : 1;
+    ix.i_codepoint++;
+    ix.i_utf16++;
+    if(c > UINT16_MAX) {
+      ix.i_utf16++;
+    }
   }
-  return UString::npos;
+  return ix;
 }

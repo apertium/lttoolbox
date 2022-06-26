@@ -354,5 +354,20 @@ class PostgenBacktrack(ProcTest):
     expectedOutputs = ["xyz"]
     procflags = ['-p', '-z']
 
+class BufferIndex(ProcTest):
+    procdix = "data/underscore.dix"
+    inputs = ["_a",
+              "_n",
+              "_𐐔",
+              "x|x",
+              "a­b",
+              ]
+    expectedOutputs = ["_^a/*a$",
+                       "^_n/_n<n>$",
+                       "_^𐐔/*𐐔$",
+                       "^x/*x$|^x/*x$",
+                       "^ab/*ab$",
+                       ]
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *
