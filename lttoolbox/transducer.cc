@@ -1316,3 +1316,19 @@ Transducer::updateAlphabet(Alphabet& old_alpha, Alphabet& new_alpha,
   }
   transitions.swap(new_trans);
 }
+
+void
+Transducer::invert(Alphabet& alpha)
+{
+  std::map<int, std::multimap<int, std::pair<int, double>>> tmp_trans;
+  for (auto& it : transitions) {
+    std::multimap<int, std::pair<int, double>> tmp_state;
+    for (auto& it2 : it.second) {
+      auto pr = alpha.decode(it2.first);
+      int new_sym = alpha(pr.second, pr.first);
+      tmp_state.insert(std::make_pair(new_sym, it2.second));
+    }
+    tmp_trans.insert(std::make_pair(it.first, tmp_state));
+  }
+  transitions.swap(tmp_trans);
+}

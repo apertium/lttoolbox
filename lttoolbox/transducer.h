@@ -424,6 +424,11 @@ public:
    * single symbols rather than pairs.
    */
   void updateAlphabet(Alphabet& old_alpha, Alphabet& new_alpha, bool has_pairs = true);
+
+  /**
+   * Invert all transitions so x:y becomes y:x (this will update alpha).
+   */
+  void invert(Alphabet& alpha);
 };
 
 #endif
