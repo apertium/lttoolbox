@@ -354,6 +354,61 @@ class PostgenBacktrack(ProcTest):
     expectedOutputs = ["xyz"]
     procflags = ['-p', '-z']
 
+class PostgenOciBacktrack(ProcTest):
+    # data from https://github.com/apertium/lttoolbox/issues/123#issuecomment-1152352856
+    procdix = "data/oci-pgen.dix"
+    inputs = ['[1] ~detlo lièch',
+              '[2] ~Detlo lièch.',
+              '[3] Cap ~a ~detlo lièch.',
+              '[4] Ostal ~de ~detlo lièch.',
+              '[5] ~detlo amic, ~Detlo amic.',
+              '[6] Cap ~a ~detlo amic.',
+              '[7] Ostal ~de ~detlo amic.',
+              '[8] ~detla fin, ~Detla fin.',
+              '[9] Cap ~a ~detla fin.',
+              '[10] Ostal ~de ~detla fin.',
+              '[11] ~detla amiga, ~Detla amiga.',
+              '[12] Cap ~a ~detla amiga.',
+              '[13] Ostal ~de ~detla amiga.',
+              '[14] ~detlos lièchs, ~Detlos lièchs.',
+              '[15] Cap ~a ~detlos lièchs.',
+              '[16] Ostal ~de ~detlos lièchs.',
+              '[17] ~detlos amics, ~Detlos amics.',
+              '[18] Cap ~a ~detlos amics.',
+              '[19] Ostal ~de ~detlos amics.',
+              '[20] ~detlas fins, ~Detlas fins.',
+              '[21] Cap ~a ~detlas fins.',
+              '[22] Ostal ~de ~detlas fins.',
+              '[23] ~detlas amigas, ~Detlas amigas.',
+              '[24] Cap ~a ~detlas amigas.',
+              '[25] Ostal ~de ~detlas amigas.']
+    expectedOutputs = ["[1] lo lièch",
+                       "[2] Lo lièch.",
+                       "[3] Cap al lièch.",
+                       "[4] Ostal del lièch.",
+                       "[5] l'amic, L'amic.",
+                       "[6] Cap a l'amic.",
+                       "[7] Ostal de l'amic.",
+                       "[8] la fin, La fin.",
+                       "[9] Cap a la fin.",
+                       "[10] Ostal de la fin.",
+                       "[11] l'amiga, L'amiga.",
+                       "[12] Cap a l'amiga.",
+                       "[13] Ostal de l'amiga.",
+                       "[14] los lièchs, Los lièchs.",
+                       "[15] Cap als lièchs.",
+                       "[16] Ostal dels lièchs.",
+                       "[17] los amics, Los amics.",
+                       "[18] Cap als amics.",
+                       "[19] Ostal dels amics.",
+                       "[20] las fins, Las fins.",
+                       "[21] Cap a las fins.",
+                       "[22] Ostal de las fins.",
+                       "[23] las amigas, Las amigas.",
+                       "[24] Cap a las amigas.",
+                       "[25] Ostal de las amigas."]
+    procflags = ['-p', '-z']
+
 class BufferIndex(ProcTest):
     procdix = "data/underscore.dix"
     inputs = ["_a",

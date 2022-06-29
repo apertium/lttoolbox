@@ -1734,7 +1734,7 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
         transliteration_queue.pop_front();
         size_t i = 0;
         for (; i < match.size() && i < match_pos - start_pos; i++) {
-          if (match[match.size()-i-1] != word[word.size()-i-1]) {
+          if (match[match.size()-i-1] != word[match_pos-i-1]) {
             break;
           }
         }
