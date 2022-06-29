@@ -63,7 +63,7 @@ void expand(Transducer& inter, int state, const std::set<int>& past_states,
 
 void process(const UString& pattern, std::map<UString, Transducer>& trans,
              Alphabet& alpha,
-             const std::set<UChar32>& letters, const std::set<int32_t> tags,
+             const std::set<UChar32>& letters, const std::set<int32_t>& tags,
              UFILE* output)
 {
   int32_t any_char = static_cast<int32_t>('*');
