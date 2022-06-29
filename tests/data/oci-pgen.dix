@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+	<alphabet/>
+	<pardefs>
+		<pardef n="vocal_general">
+			<e><re>[aeiouàáéèíóòúü]</re></e>
+		</pardef>
+
+		<pardef n="de">
+			<e>
+				<p>
+					<l><b/><a/>detlo<b/></l>
+					<r>del<b/></r>
+				</p>
+			</e>
+			<e>
+				<p>
+					<l><b/><a/>detlo<b/></l>
+					<r>de<b/>l'</r>
+				</p>
+				<par n="vocal_general"/>
+			</e>
+			<e>
+				<p>
+					<l><b/><a/>detla<b/></l>
+					<r>de<b/>l'</r>
+				</p>
+				<par n="vocal_general"/>
+			</e>
+			<e>
+				<p>
+					<l><b/><a/>detla<b/></l>
+					<r>de<b/>la<b/></r>
+				</p>
+			</e>
+			<e>
+				<p>
+					<l><b/><a/>detlos<b/></l>
+					<r>dels<b/></r>
+				</p>
+			</e>
+			<e>
+				<p>
+					<l><b/><a/>detlas<b/></l>
+					<r>de<b/>las<b/></r>
+				</p>
+			</e>
+			<e>
+				<p>
+					<l><b/><a/>lo<b/></l>
+					<r>de<b/>l'</r>
+				</p>
+				<par n="vocal_general"/>
+			</e>
+			<e>
+				<p>
+					<l><b/><a/>la<b/></l>
+					<r>de<b/>l'</r>
+				</p>
+				<par n="vocal_general"/>
+			</e>
+
+			<e>
+				<p>
+					<l><b/><a/>detla<b/></l>
+					<r>de<b/>l'</r>
+				</p>
+				<par n="vocal_general"/>
+			</e>
+		</pardef>
+
+	</pardefs>
+
+	<section id="main" type="standard">
+		<e>
+			<p>
+				<l><a/>de</l>
+				<r/>
+			</p>
+			<par n="de"/>
+		</e>
+
+		<e>
+			<p>
+				<l><a/>a<b/><a/>de</l>
+				<r>a<b/></r>
+			</p>
+			<par n="de"/>
+		</e>
+
+		<e>
+			<p>
+				<l><a/>a<b/><a/>detlo<b/></l>
+				<r>al<b/></r>
+			</p>
+		</e>
+		<e>
+			<p>
+				<l><a/>a<b/><a/>detlos<b/></l>
+				<r>als<b/></r>
+			</p>
+		</e>
+		<e>
+			<p>
+				<l><a/>a<b/><a/>detlo<b/></l>
+				<r>a<b/>l'</r>
+			</p>
+			<par n="vocal_general"/>
+		</e>
+		<e>
+			<p>
+				<l><a/>detla<b/></l>
+				<r>l'</r>
+			</p>
+			<par n="vocal_general"/>
+		</e>
+		<e>
+			<p>
+				<l><a/>detlo<b/></l>
+				<r>l'</r>
+			</p>
+			<par n="vocal_general"/>
+		</e>
+		<e>
+			<p>
+				<l><a/>lo<b/></l>
+				<r>l'</r>
+			</p>
+			<par n="vocal_general"/>
+		</e>
+		<e>
+			<p>
+				<l><a/>la<b/></l>
+				<r>l'</r>
+			</p>
+			<par n="vocal_general"/>
+		</e>
+		<e>
+			<p>
+				<l><a/>detla</l>
+				<r>la</r>
+			</p>
+		</e>
+		<e>
+			<p>
+				<l><a/>detlo</l>
+				<r>lo</r>
+			</p>
+		</e>
+		<e>
+			<p>
+				<l><a/>detlas</l>
+				<r>las</r>
+			</p>
+		</e>
+		<e>
+			<p>
+				<l><a/>detlos</l>
+				<r>los</r>
+			</p>
+		</e>
+
+	</section>
+
+</dictionary>

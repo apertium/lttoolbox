@@ -28,6 +28,7 @@
 #include <lttoolbox/input_file.h>
 #include <libxml/xmlreader.h>
 
+#include <deque>
 #include <map>
 #include <queue>
 #include <set>
@@ -106,7 +107,9 @@ private:
   /**
    * Queue of wordbound blanks, used in reading methods
    */
-  std::queue<UString> wblankqueue;
+  std::deque<UString> wblankqueue;
+
+  std::deque<std::vector<int32_t>> transliteration_queue;
 
   /**
    * Set of characters being considered alphabetics
@@ -232,20 +235,7 @@ private:
    */
   int maxAnalyses = INT_MAX;
 
-  /**
-   * True if a wblank block ([[..]]xyz[[/]]) was just read
-   */
-  bool is_wblank;
-
-  /**
-   * True if skip_mode is false and need to collect wblanks
-   */
-  bool collect_wblanks;
-
-  /**
-   * True if a wblank has been processed for postgen and we need an ending wblank
-   */
-  bool need_end_wblank;
+  bool transliteration_drop_tilde = false;
 
   /**
    * Output no more than 'N' best weight classes
@@ -256,14 +246,6 @@ private:
    * Prints an error of input stream and exits
    */
   void streamError();
-
-  /**
-   * Reads a wordbound blank (opening blank to closing blank) from the stream input -> [[...]]xyz[[/]]
-   * @param input the stream being read
-   * @param output the stream to write on
-   * @return true if the word enclosed by the wordbound blank has a ~ for postgeneration activation
-   */
-  bool wblankPostGen(InputFile& input, UFILE *output);
 
   /**
    * Returns true if the character code is identified as alphabetic
@@ -294,13 +276,8 @@ private:
    */
   int readDecomposition(InputFile& input, UFILE *output);
 
-  /**
-   * Read text from stream (postgeneration version)
-   * @param input the stream to read
-   * @param output the stream to write on
-   * @return the next symbol in the stream
-   */
-  int readPostgeneration(InputFile& input, UFILE *output);
+  bool readTransliterationBlank(InputFile& input);
+  bool readTransliterationWord(InputFile& input);
 
   /**
    * Read text from stream (generation version)
@@ -330,26 +307,6 @@ private:
    * @param output stream to write blanks
    */
   void flushBlanks(UFILE *output);
-
-  /**
-   * Flush all the wordbound blanks remaining in the current process
-   * @param output stream to write blanks
-   */
-  void flushWblanks(UFILE *output);
-
-  /**
-   * Combine wordbound blanks in the queue and return them.
-   *
-   * May pop from 'wblankqueue' and set 'need_end_wblank' to true.
-   *
-   * If 'wblankqueue' (see which) is empty, we get an empty string,
-   * otherwise we return a semicolon-separated combination of opening
-   * wblanks in the queue. If there is only a closing wblank, we just
-   * set need_end_wblank.
-   *
-   * @return final wblank string
-  */
-  UString combineWblanks();
 
   /**
    * Calculate the initial state of parsing
@@ -392,15 +349,6 @@ private:
    * @param output the stream to write in
    */
   void writeEscapedWithTags(UString const &str, UFILE *output);
-
-
-  /**
-   * Checks if an string ends with a particular suffix
-   * @param str the string to test
-   * @param the searched suffix
-   * @returns true if 'str' has the suffix 'suffix'
-   */
-  static bool endsWith(UString const &str, UString const &suffix);
 
   /**
    * Prints a word
@@ -486,10 +434,6 @@ private:
   void bilingual_wrapper_null_flush(InputFile& input, UFILE *output, GenerationMode mode = gm_unknown);
   void generation_wrapper_null_flush(InputFile& input, UFILE *output,
                                      GenerationMode mode);
-  void postgeneration_wrapper_null_flush(InputFile& input, UFILE *output);
-  void intergeneration_wrapper_null_flush(InputFile& input, UFILE *output);
-  void transliteration_wrapper_null_flush(InputFile& input, UFILE *output);
-
   UString compose(UString const &lexforms, UString const &queue) const;
 
   void procNodeICX();
@@ -511,8 +455,6 @@ public:
   static UString const XML_RESTORE_CHARS_ELEM;
   static UString const XML_VALUE_ATTR;
   static UString const XML_CHAR_ELEM;
-  static UString const WBLANK_START;
-  static UString const WBLANK_END;
   static UString const WBLANK_FINAL;
 
   FSTProcessor();
@@ -521,7 +463,8 @@ public:
   void initTMAnalysis();
   void initSAO(){initAnalysis();};
   void initGeneration();
-  void initPostgeneration();
+  void initPostgeneration(){initTransliteration();};
+  void initTransliteration();
   void initBiltrans();
   void initDecomposition();
 
