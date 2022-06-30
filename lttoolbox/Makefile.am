@@ -52,7 +52,7 @@ lsx_comp_SOURCES = lt_comp.cc
 
 
 
-man_MANS = lt-append.1 lt-comp.1 lt-expand.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1 lt-print.1 lt-trim.1 lsx-comp.1
+man_MANS = lt-append.1 lt-comp.1 lt-expand.1 lt-paradigm.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1 lt-print.1 lt-trim.1 lsx-comp.1
 
 INCLUDES = -I$(top_srcdir) $(LIBXML_CFLAGS) $(ICU_CFLAGS)
 CLEANFILES = *~

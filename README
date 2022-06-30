@@ -29,7 +29,14 @@ Executables built by this package:
   would pass through a compiled bidix, creating a new compiled and
   trimmed analyser.
 
-* `lt-print`: print the arcs of a transducer in [ATT format][3].
+* `lt-print`: prints the arcs of a transducer in [ATT format][3].
+
+* `lt-append`: merges two compiled dictionaries.
+
+* `lt-paradigm`: extracts all paths from a compiled dictionary
+  matching an input pattern.
+
+* `lsx-comp`: an alias of `lt-comp`.
 
 There is also a C++ API that you can link to (see how [apertium][1] or
 [apertium-lex-tools][2] do this).

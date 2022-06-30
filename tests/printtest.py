@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
-from subprocess import Popen, PIPE, call
-from tempfile import mkdtemp
-from shutil import rmtree
-from basictest import BasicTest
-
+from basictest import BasicTest, TempDir
 
 class PrintTest(BasicTest):
     """See lt_print test for how to use this. Override runTest if you don't
@@ -18,30 +13,16 @@ class PrintTest(BasicTest):
     printflags = []
 
     def compileTest(self, tmpd):
-        self.assertEqual(0, call([os.environ['LTTOOLBOX_PATH']+"/lt-comp",
-                                  self.printdir,
-                                  self.printdix,
-                                  tmpd+"/compiled.bin"],
-                                 stdout=PIPE))
+        self.compileDix(self.printdir, self.printdix,
+                        binName=tmpd+'/compiled.bin')
 
     def runTest(self):
-        tmpd = mkdtemp()
-        try:
+        with TempDir() as tmpd:
             self.compileTest(tmpd)
-            self.printresult = Popen([os.environ['LTTOOLBOX_PATH']+"/lt-print"] + self.printflags + [tmpd+"/compiled.bin"],
-                              stdout=PIPE,
-                              stderr=PIPE)
+            self.printresult = self.openPipe('lt-print',
+                                             self.printflags
+                                             + [tmpd+'/compiled.bin'])
 
             self.assertEqual(self.communicateFlush(None, self.printresult), self.expectedOutput)
 
-            self.printresult.communicate() # let it terminate
-            self.printresult.stdout.close()
-            self.printresult.stderr.close()
-            retCode = self.printresult.poll()
-            if self.expectedRetCodeFail:
-                self.assertNotEqual(retCode, 0)
-            else:
-                self.assertEqual(retCode, 0)
-
-        finally:
-            rmtree(tmpd)
+            self.closePipe(self.printresult, self.expectedRetCodeFail)
