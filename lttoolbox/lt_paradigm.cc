@@ -36,7 +36,8 @@ void endProgram(char* name)
 }
 
 void expand(Transducer& inter, int state, const std::set<int>& past_states,
-            const std::vector<int32_t>& syms, const Alphabet& alpha, UFILE* out)
+            const std::vector<int32_t>& syms, const Alphabet& alpha, UFILE* out,
+            std::set<std::pair<UString, UString>>& outset)
 {
   if (inter.isFinal(state)) {
     UString l, r;
@@ -46,7 +47,11 @@ void expand(Transducer& inter, int state, const std::set<int>& past_states,
       alpha.getSymbol(r, pr.second);
     }
     if (!l.empty() && !r.empty()) {
-      u_fprintf(out, "%S:%S\n", r.c_str(), l.c_str());
+      if (out != nullptr) {
+        u_fprintf(out, "%S:%S\n", r.c_str(), l.c_str());
+      } else {
+        outset.insert(std::make_pair(r, l));
+      }
     }
   }
   std::set<int> new_states = past_states;
@@ -57,14 +62,14 @@ void expand(Transducer& inter, int state, const std::set<int>& past_states,
     }
     std::vector<int32_t> new_syms = syms;
     new_syms.push_back(it.first);
-    expand(inter, it.second.first, new_states, new_syms, alpha, out);
+    expand(inter, it.second.first, new_states, new_syms, alpha, out, outset);
   }
 }
 
 void process(const UString& pattern, std::map<UString, Transducer>& trans,
              Alphabet& alpha,
              const std::set<UChar32>& letters, const std::set<int32_t>& tags,
-             UFILE* output)
+             UFILE* output, bool sort)
 {
   int32_t any_char = static_cast<int32_t>('*');
   int32_t any_tag = alpha("<*>"_u);
@@ -87,12 +92,19 @@ void process(const UString& pattern, std::map<UString, Transducer>& trans,
     }
   }
   other.setFinal(state);
+  std::set<std::pair<UString, UString>> outset;
   for (auto& it : trans) {
     Transducer inter = it.second.intersect(other, alpha, alpha);
     if (!inter.getFinals().empty()) {
       std::set<int> states;
       std::vector<int32_t> syms;
-      expand(inter, inter.getInitial(), states, syms, alpha, output);
+      expand(inter, inter.getInitial(), states, syms, alpha,
+             (sort ? nullptr : output), outset);
+    }
+  }
+  if (sort) {
+    for (auto& it : outset) {
+      u_fprintf(output, "%S:%S\n", it.first.c_str(), it.second.c_str());
     }
   }
 }
@@ -102,11 +114,15 @@ int main(int argc, char* argv[])
   LtLocale::tryToSetLocale();
 
   bool should_invert = true;
+  bool sort = false;
+  std::set<UString> skip_tags;
 
 #if HAVE_GETOPT_LONG
   static struct option long_options[] =
     {
      {"analyser",     0, 0, 'a'},
+     {"exclude",      1, 0, 'e'},
+     {"sort",         0, 0, 's'},
      {"null-flush",   0, 0, 'z'},
      {"help",         0, 0, 'h'},
      {0,0,0,0}
@@ -115,15 +131,23 @@ int main(int argc, char* argv[])
 
   while (true) {
 #if HAVE_GETOPT_LONG
-    int c = getopt_long(argc, argv, "azh", long_options, &optind);
+    int c = getopt_long(argc, argv, "ae:szh", long_options, &optind);
 #else
-    int c = getopt(argc, argv, "azh");
+    int c = getopt(argc, argv, "ae:szh");
 #endif
     if (c == -1) break;
 
     switch (c) {
     case 'a':
       should_invert = false;
+      break;
+
+    case 'e':
+      skip_tags.insert(to_ustring(optarg));
+      break;
+
+    case 's':
+      sort = true;
       break;
 
     case 'z': // no-op
@@ -150,6 +174,11 @@ int main(int argc, char* argv[])
   alpha.includeSymbol("<*>"_u);
   std::set<int32_t> tags;
   for (int32_t i = 1; i <= alpha.size(); i++) {
+    if (!skip_tags.empty()) {
+      UString t;
+      alpha.getSymbol(t, -i);
+      if (skip_tags.find(t) != skip_tags.end()) continue;
+    }
     tags.insert(-i);
   }
 
@@ -172,7 +201,7 @@ int main(int argc, char* argv[])
   do {
     UChar32 c = input.get();
     if (c == '\n' || c == '\0' || c == U_EOF) {
-      process(cur, trans, alpha, letters, tags, output);
+      process(cur, trans, alpha, letters, tags, output, sort);
       if (c != U_EOF) {
         u_fputc(c, output);
         u_fflush(output);

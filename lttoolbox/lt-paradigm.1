@@ -6,7 +6,8 @@
 .Nd generate listings from a compiled transducer
 .Sh SYNOPSIS
 .Nm lt-paradigm
-.Op Fl a | z | h
+.Op Fl a | s | z | h
+.Op Fl e Ar TAG
 .Ar fst_file
 .Op Ar input_file Op Ar output_file
 .Sh DESCRIPTION
@@ -24,6 +25,11 @@ All paths matching the patterns in input_file. Each path is terminated by a newl
 .Bl -tag -width Ds
 .It Fl a Fl Fl analyser
 Match patterns on the right side of the transducer rather than the left.
+.It Fl e Ar TAG Fl Fl exclude Ar TAG
+When expanding <*>, do use
+.Ar TAG
+.It Fl s Fl Fl sort
+Sort the output for each pattern.
 .It Fl z Fl Fl null-flush
 No-op, included for compatibility.
 .It Fl h Fl Fl help
