@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from proctest import ProcTest
-
-from typing import List
-
 
 class ValidInput(ProcTest):
     inputs = ["ab",
@@ -226,7 +221,7 @@ class SpaceAtEOF(ProcTest):
     procdix = "data/space-eof-incond.dix"
     inputs          = ['. ']
     expectedOutputs = ['^./.<sent>$ ']
-    procflags = []              # type: List[str]
+    procflags = []
     flushing = False
 
 

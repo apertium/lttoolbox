@@ -73,6 +73,7 @@
 /lttoolbox/lt-expand
 /lttoolbox/lt-append
 /lttoolbox/lsx-comp
+/lttoolbox/lt-paradigm
 /python/Makefile
 /python/Makefile.in
 /python/lttoolbox.i

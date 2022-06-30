@@ -317,7 +317,7 @@ Alphabet::tokenize(const UString& str) const
         U16_NEXT(str.c_str(), j, end, c);
       }
       if (c == '>') {
-        ret.push_back(operator()(str.substr(i-1, j-i)));
+        ret.push_back(operator()(str.substr(i-1, j-i+1)));
         i = j;
       }
     } else {
