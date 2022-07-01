@@ -115,22 +115,13 @@ readTransducerSet(FILE* input, std::set<UChar32>& letters,
                   Alphabet& alpha,
                   std::map<UString, Transducer>& trans)
 {
-  fpos_t pos;
+  uint64_t features;
   bool mmap = false;
-  if (fgetpos(input, &pos) == 0) {
-    char header[4]{};
-    auto r = fread_unlocked(header, 1, 4, input);
-    if (r == 4 && strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
-      auto features = read_le_64(input);
-      if (features >= LTF_UNKNOWN) {
-        throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
-      }
-      mmap = features & LTF_MMAP;
+  if (readHeader(input, HEADER_LTTOOLBOX, features)) {
+    if (features >= LTF_UNKNOWN) {
+      throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
     }
-    else {
-      // Old binary format
-      fsetpos(input, &pos);
-    }
+    mmap = features & LTF_MMAP;
   }
 
   UString letters_str;
@@ -176,31 +167,24 @@ readTransducerSet(FILE* input, std::set<UChar32>& letters,
   letters = std::set<int32_t>(letters_str.begin(), letters_str.end());
 }
 
-void readTransducerSet(FILE* input,
-                       bool& mmapping, void* mmap_ptr, int& mmap_len,
-                       StringWriter& str_write,
-                       std::set<UChar32>* letters, AlphabetExe& alpha,
-                       std::map<UString, TransducerExe>& trans)
+void
+readTransducerSet(FILE* input,
+                  bool& mmapping, void* mmap_ptr, int& mmap_len,
+                  StringWriter& str_write,
+                  std::set<UChar32>* letters, AlphabetExe& alpha,
+                  std::map<UString, TransducerExe>& trans)
 {
+  uint64_t features;
   bool mmap = false;
-  fpos_t pos;
-  if (fgetpos(input, &pos) == 0) {
-      char header[4]{};
-      fread_unlocked(header, 1, 4, input);
-      if (strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
-          auto features = read_le_64(input);
-          if (features >= LTF_UNKNOWN) {
-              throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
-          }
-          mmap = features & LTF_MMAP;
-      }
-      else {
-          // Old binary format
-          fsetpos(input, &pos);
-      }
+  if (readHeader(input, HEADER_LTTOOLBOX, features)) {
+    if (features >= LTF_UNKNOWN) {
+      throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
+    }
+    mmap = features & LTF_MMAP;
   }
 
   if (mmap) {
+    fpos_t pos;
     fgetpos(input, &pos);
     rewind(input);
     mmapping = mmap_file(input, mmap_ptr, mmap_len);
@@ -262,6 +246,7 @@ void readTransducerSet(FILE* input,
     }
 
     // symbols
+    fpos_t pos;
     fgetpos(input, &pos);
     alpha.read(input, false);
     fsetpos(input, &pos);

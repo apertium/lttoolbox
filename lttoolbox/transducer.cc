@@ -594,22 +594,12 @@ Transducer::read(FILE *input, int const decalage)
   Transducer new_t;
 
   bool read_weights = false;
-
-  fpos_t pos;
-  if (fgetpos(input, &pos) == 0) {
-      char header[4]{};
-      fread_unlocked(header, 1, 4, input);
-      if (strncmp(header, HEADER_TRANSDUCER, 4) == 0) {
-          auto features = read_le<uint64_t>(input);
-          if (features >= TDF_UNKNOWN) {
-              throw std::runtime_error("Transducer has features that are unknown to this version of lttoolbox - upgrade!");
-          }
-          read_weights = (features & TDF_WEIGHTS);
-      }
-      else {
-          // Old binary format
-          fsetpos(input, &pos);
-      }
+  uint64_t features;
+  if (readHeader(input, HEADER_TRANSDUCER, features)) {
+    if (features >= TDF_UNKNOWN) {
+      throw std::runtime_error("Transducer has features that are unknown to this version of lttoolbox - upgrade!");
+    }
+    read_weights = (features & TDF_WEIGHTS);
   }
 
   new_t.initial = OldBinary::read_int(input, true);
@@ -661,10 +651,8 @@ Transducer::read(FILE *input, int const decalage)
 void
 Transducer::read_mmap(FILE* in, Alphabet& alpha)
 {
-  char header[4]{};
-  auto r = fread_unlocked(header, 1, 4, in);
-  if (r == 4 && strncmp(header, HEADER_TRANSDUCER, 4) == 0) {
-    auto features = read_le_64(in);
+  uint64_t features;
+  if (readHeader(in, HEADER_TRANSDUCER, features)) {
     if (features >= TDF_UNKNOWN) {
       throw std::runtime_error("Transducer has features that are unknown to this version of lttoolbox - upgrade!");
     }
