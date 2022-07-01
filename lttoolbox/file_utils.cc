@@ -17,6 +17,7 @@
 
 #include <lttoolbox/file_utils.h>
 #include <lttoolbox/binary_headers.h>
+#include <lttoolbox/mmap.h>
 #include <lttoolbox/old_binary.h>
 #include <lttoolbox/endian_util.h>
 
@@ -173,4 +174,107 @@ readTransducerSet(FILE* input, std::set<UChar32>& letters,
     }
   }
   letters = std::set<int32_t>(letters_str.begin(), letters_str.end());
+}
+
+void readTransducerSet(FILE* input,
+                       bool& mmapping, void* mmap_ptr, int& mmap_len,
+                       StringWriter& str_write,
+                       std::set<UChar32>* letters, AlphabetExe& alpha,
+                       std::map<UString, TransducerExe>& trans)
+{
+  bool mmap = false;
+  fpos_t pos;
+  if (fgetpos(input, &pos) == 0) {
+      char header[4]{};
+      fread_unlocked(header, 1, 4, input);
+      if (strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
+          auto features = read_le_64(input);
+          if (features >= LTF_UNKNOWN) {
+              throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
+          }
+          mmap = features & LTF_MMAP;
+      }
+      else {
+          // Old binary format
+          fsetpos(input, &pos);
+      }
+  }
+
+  if (mmap) {
+    fgetpos(input, &pos);
+    rewind(input);
+    mmapping = mmap_file(input, mmap_ptr, mmap_len);
+    if (mmapping) {
+      void* ptr = mmap_ptr + 12;
+      ptr = str_write.init(ptr);
+
+      if (letters != nullptr) {
+        StringRef let_loc = reinterpret_cast<StringRef*>(ptr)[0];
+        std::vector<int32_t> vec;
+        ustring_to_vec32(str_write.get(let_loc), vec);
+        letters->insert(vec.begin(), vec.end());
+        ptr += sizeof(StringRef);
+      }
+
+      ptr = alpha.init(ptr);
+
+      uint64_t tr_count = reinterpret_cast<uint64_t*>(ptr)[0];
+      ptr += sizeof(uint64_t);
+      for (uint64_t i = 0; i < tr_count; i++) {
+        StringRef tn = reinterpret_cast<StringRef*>(ptr)[0];
+        ptr += sizeof(StringRef);
+        UString name = UString{str_write.get(tn)};
+        ptr = trans[name].init(ptr);
+      }
+    } else {
+      fsetpos(input, &pos);
+
+      str_write.read(input);
+
+      if (letters != nullptr) {
+        uint32_t s = read_le_32(input);
+        uint32_t c = read_le_32(input);
+        std::vector<int32_t> vec;
+        ustring_to_vec32(str_write.get(s, c), vec);
+        letters->insert(vec.begin(), vec.end());
+      }
+
+      alpha.read(input, true);
+
+      uint64_t tr_count = read_le_64(input);
+      for (uint64_t i = 0; i < tr_count; i++) {
+        uint32_t s = read_le_32(input);
+        uint32_t c = read_le_32(input);
+        UString name = UString{str_write.get(s, c)};
+        trans[name].read(input);
+      }
+    }
+  } else {
+    uint64_t len;
+
+    if (letters != nullptr) {
+      // letters
+      len = OldBinary::read_int(input);
+      while(len > 0) {
+        letters->insert(static_cast<UChar32>(OldBinary::read_int(input)));
+        len--;
+      }
+    }
+
+    // symbols
+    fgetpos(input, &pos);
+    alpha.read(input, false);
+    fsetpos(input, &pos);
+    Alphabet temp;
+    temp.read(input);
+
+    len = OldBinary::read_int(input);
+
+    while(len > 0) {
+      UString name;
+      OldBinary::read_ustr(input, name);
+      trans[name].read_compressed(input, temp);
+      len--;
+    }
+  }
 }
