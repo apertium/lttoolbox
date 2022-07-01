@@ -20,6 +20,8 @@
 #include <lttoolbox/endian_util.h>
 #include <lttoolbox/old_binary.h>
 
+#include <unicode/uchar.h>
+
 AlphabetExe::AlphabetExe(StringWriter* sw_)
   : sw(sw_), tag_count(0), tags(nullptr)
 {}
@@ -158,6 +160,32 @@ AlphabetExe::lookupDynamic(const UString& symbol)
     }
   } else {
     ret = it->second;
+  }
+  return ret;
+}
+
+std::vector<int32_t>
+AlphabetExe::tokenize(const UString& str) const
+{
+  std::vector<int32_t> ret;
+  size_t end = str.size();
+  size_t i = 0;
+  UChar32 c;
+  while (i < end) {
+    U16_NEXT(str.c_str(), i, end, c);
+    if (c == '\\') {
+    } else if (c == '<') {
+      size_t j = i;
+      while (c != '>' && j < end) {
+        U16_NEXT(str.c_str(), j, end, c);
+      }
+      if (c == '>') {
+        ret.push_back(operator()(str.substr(i-1, j-i+1)));
+        i = j;
+      }
+    } else {
+      ret.push_back(static_cast<int32_t>(c));
+    }
   }
   return ret;
 }

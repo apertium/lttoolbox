@@ -28,13 +28,12 @@
 
 #include <unicode/uchar.h>
 
-using namespace std;
 using namespace icu;
 
 Alphabet::Alphabet()
 {
-  spair[pair<int32_t, int32_t>(0,0)] = 0;
-  spairinv.push_back(pair<int32_t, int32_t>(0,0));
+  spair[std::pair<int32_t, int32_t>(0,0)] = 0;
+  spairinv.push_back(std::pair<int32_t, int32_t>(0,0));
 }
 
 Alphabet::~Alphabet()
@@ -86,7 +85,7 @@ Alphabet::includeSymbol(UString const &s)
 int32_t
 Alphabet::operator()(int32_t const c1, int32_t const c2)
 {
-  auto tmp = make_pair(c1, c2);
+  auto tmp = std::make_pair(c1, c2);
   if(spair.find(tmp) == spair.end())
   {
     int32_t spair_size = spair.size();
@@ -154,7 +153,6 @@ Alphabet::read(FILE *input)
   a_new.spair.clear();
 
   // Reading of taglist
-  map<int32_t, string> tmp;
   for (uint64_t tam = OldBinary::read_int(input, true); tam > 0; tam--) {
     UString mytag;
     mytag += '<';
@@ -169,7 +167,7 @@ Alphabet::read(FILE *input)
   for (uint64_t tam = OldBinary::read_int(input, true); tam > 0; tam--) {
     int32_t first = OldBinary::read_int(input, true);
     int32_t second = OldBinary::read_int(input, true);
-    pair<int32_t, int32_t> tmp(first - bias, second - bias);
+    std::pair<int32_t, int32_t> tmp(first - bias, second - bias);
     int32_t spair_size = a_new.spair.size();
     a_new.spair[tmp] = spair_size;
     a_new.spairinv.push_back(tmp);
@@ -205,8 +203,8 @@ Alphabet::read_mmap(FILE* input, StringWriter& sw)
 void
 Alphabet::serialise(std::ostream &serialised) const
 {
-  Serialiser<const vector<UString> >::serialise(slexicinv, serialised);
-  Serialiser<vector<pair<int32_t, int32_t> > >::serialise(spairinv, serialised);
+  Serialiser<const std::vector<UString> >::serialise(slexicinv, serialised);
+  Serialiser<std::vector<std::pair<int32_t, int32_t> > >::serialise(spairinv, serialised);
 }
 
 void
@@ -216,11 +214,11 @@ Alphabet::deserialise(std::istream &serialised)
   slexic.clear();
   spairinv.clear();
   spair.clear();
-  slexicinv = Deserialiser<vector<UString> >::deserialise(serialised);
+  slexicinv = Deserialiser<std::vector<UString> >::deserialise(serialised);
   for (size_t i = 0; i < slexicinv.size(); i++) {
     slexic[slexicinv[i]] = -i - 1; // ToDo: This does not turn the result negative due to unsigned semantics
   }
-  spairinv = Deserialiser<vector<pair<int32_t, int32_t> > >::deserialise(serialised);
+  spairinv = Deserialiser<std::vector<std::pair<int32_t, int32_t> > >::deserialise(serialised);
   for (size_t i = 0; i < slexicinv.size(); i++) {
     spair[spairinv[i]] = i;
   }
@@ -284,15 +282,15 @@ Alphabet::isTag(int32_t const symbol) const
   return symbol < 0;
 }
 
-pair<int32_t, int32_t> const &
+std::pair<int32_t, int32_t> const &
 Alphabet::decode(int32_t const code) const
 {
   return spairinv[code];
 }
 
-set<int32_t>
+std::set<int32_t>
 Alphabet::symbolsWhereLeftIs(UChar32 l) const {
-  set<int32_t> eps;
+  std::set<int32_t> eps;
   for(const auto& sp: spair) {  // [(l, r) : tag]
     if(sp.first.first == l) {
       eps.insert(sp.second);
@@ -307,11 +305,11 @@ void Alphabet::setSymbol(int32_t symbol, UString newSymbolString) {
 }
 
 void
-Alphabet::createLoopbackSymbols(set<int32_t> &symbols, Alphabet &basis, Side s, bool nonTagsToo)
+Alphabet::createLoopbackSymbols(std::set<int32_t> &symbols, Alphabet &basis, Side s, bool nonTagsToo)
 {
   // Non-tag letters get the same int32_t in spairinv across alphabets,
   // but tags may differ, so do those separately afterwards.
-  set<int32_t> tags;
+  std::set<int32_t> tags;
   for(auto& it : basis.spairinv)
   {
     if(s == left) {
@@ -347,8 +345,34 @@ Alphabet::createLoopbackSymbols(set<int32_t> &symbols, Alphabet &basis, Side s, 
   }
 }
 
-vector<UString>&
+std::vector<UString>&
 Alphabet::getTags()
 {
   return slexicinv;
+}
+
+std::vector<int32_t>
+Alphabet::tokenize(const UString& str) const
+{
+  std::vector<int32_t> ret;
+  size_t end = str.size();
+  size_t i = 0;
+  UChar32 c;
+  while (i < end) {
+    U16_NEXT(str.c_str(), i, end, c);
+    if (c == '\\') {
+    } else if (c == '<') {
+      size_t j = i;
+      while (c != '>' && j < end) {
+        U16_NEXT(str.c_str(), j, end, c);
+      }
+      if (c == '>') {
+        ret.push_back(operator()(str.substr(i-1, j-i+1)));
+        i = j;
+      }
+    } else {
+      ret.push_back(static_cast<int32_t>(c));
+    }
+  }
+  return ret;
 }

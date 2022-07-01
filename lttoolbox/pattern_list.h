@@ -26,10 +26,8 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
-typedef multimap<int, vector<int> > PatternStore;
-typedef pair<PatternStore::iterator, PatternStore::iterator> PatternRange;
+typedef std::multimap<int, std::vector<int> > PatternStore;
+typedef std::pair<PatternStore::iterator, PatternStore::iterator> PatternRange;
 
 class PatternList
 {
@@ -37,16 +35,16 @@ private:
   Alphabet alphabet;
   PatternStore patterns;
   bool sequence;
-  list<vector<int> > sequence_data;
+  std::list<std::vector<int> > sequence_data;
   Transducer transducer;
-  map<int, int> final_type;
+  std::map<int, int> final_type;
   int sequence_id;
   double default_weight;
 
   void copy(PatternList const &o);
   void destroy();
   void insertOutOfSequence(UString const &lemma, UString const &tags,
-                           vector<int> &result);
+                           std::vector<int> &result);
   void insertIntoSequence(int const id, UString const &lemma,
                           UString const &tags);
 

@@ -44,6 +44,7 @@ public:
   void reindex();
   // like operator() but add symbol to dynamic_symbols if not found
   int32_t lookupDynamic(const UString& symbol);
+  std::vector<int32_t> tokenize(const UString& str) const;
 };
 
 #endif

@@ -14,7 +14,7 @@
       </xs:sequence>
       <xs:attribute name="value" use="required">
         <xs:simpleType>
-          <xs:restriction base="xs:token">
+          <xs:restriction base="xs:string">
             <xs:length value="1"/>
           </xs:restriction>
         </xs:simpleType>
@@ -25,7 +25,7 @@
     <xs:complexType>
       <xs:attribute name="value" use="required">
         <xs:simpleType>
-          <xs:restriction base="xs:token">
+          <xs:restriction base="xs:string">
             <xs:length value="1"/>
           </xs:restriction>
         </xs:simpleType>

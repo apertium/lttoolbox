@@ -26,7 +26,6 @@
 #include <lttoolbox/string_writer.h>
 #include <lttoolbox/ustring.h>
 
-using namespace std;
 using namespace icu;
 
 /**
@@ -40,13 +39,13 @@ private:
    * Symbol-identifier relationship. Only contains <tags>.
    * @see slexicinv
    */
-  map<UString, int32_t> slexic;
+  std::map<UString, int32_t> slexic;
 
   /**
    * Identifier-symbol relationship. Only contains <tags>.
    * @see slexic
    */
-  vector<UString> slexicinv;
+  std::vector<UString> slexicinv;
 
 
   /**
@@ -54,13 +53,13 @@ private:
    * other characters are UChar32's casted to ints.
    * @see spairinv
    */
-  map<pair<int32_t, int32_t>, int32_t> spair;
+  std::map<std::pair<int32_t, int32_t>, int32_t> spair;
 
   /**
    * All symbol-pairs (both <tags> and letters).
    * @see spair
    */
-  vector<pair<int32_t, int32_t> > spairinv;
+  std::vector<std::pair<int32_t, int32_t> > spairinv;
 
 
   void copy(Alphabet const &a);
@@ -180,12 +179,12 @@ public:
    * @param code a symbol
    * @return the pair which code represents in this alphabet
    */
-  pair<int32_t, int32_t> const & decode(int32_t const code) const;
+  std::pair<int32_t, int32_t> const & decode(int32_t const code) const;
 
   /**
    * Get all symbols where the left-hand side of the symbol-pair is l.
    */
-  set<int32_t> symbolsWhereLeftIs(UChar32 l) const;
+  std::set<int32_t> symbolsWhereLeftIs(UChar32 l) const;
 
   enum Side
   {
@@ -202,12 +201,14 @@ public:
    * @param s whether to loopback on the left or right side of the symbol-pair
    * @param nonTagsToo by default only tags are included, but if this is true we include all symbols
    */
-  void createLoopbackSymbols(set<int32_t> &symbols, Alphabet &basis, Side s = right, bool nonTagsToo = false);
+  void createLoopbackSymbols(std::set<int32_t> &symbols, Alphabet &basis, Side s = right, bool nonTagsToo = false);
 
   /**
    * Return a reference to the array of tags
    */
-  vector<UString>& getTags();
+  std::vector<UString>& getTags();
+
+  std::vector<int32_t> tokenize(const UString& str) const;
 };
 
 #endif

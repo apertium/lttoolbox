@@ -27,7 +27,6 @@
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/node.h>
 
-using namespace std;
 
 /**
  * Transducer class for execution of lexical processing algorithms
@@ -48,12 +47,12 @@ private:
   /**
    * Node list
    */
-  vector<Node> node_list;
+  std::vector<Node> node_list;
 
   /**
    * Final node set mapped to its weight walues
    */
-  map<Node *, double> finals;
+  std::map<Node *, double> finals;
 
   /**
    * Copy function
@@ -113,7 +112,7 @@ public:
    * Gets the set of final nodes
    * @return the set of final nodes
    */
-  map<Node *, double> & getFinals();
+  std::map<Node *, double> & getFinals();
 };
 
 #endif

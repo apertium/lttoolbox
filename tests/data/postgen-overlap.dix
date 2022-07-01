@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dictionary>
+  <alphabet/>
+
+  <pardefs>
+    <pardef n="quotes_empty">
+      <e><i></i></e>
+      <e><i>"</i></e>
+    </pardef>
+  </pardefs>
+
+  <section id="main" type="standard">
+
+	  <e>
+		  <p>
+			  <l>abc</l>
+			  <r>xbc</r>
+		  </p>
+	  </e>
+
+	  <e>
+		  <p>
+			  <l>bc</l>
+			  <r>yc</r>
+		  </p>
+	  </e>
+
+	  <e>
+		  <p>
+			  <l>c</l>
+			  <r>z</r>
+		  </p>
+	  </e>
+
+  </section>
+
+</dictionary>

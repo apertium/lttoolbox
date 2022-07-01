@@ -16,6 +16,7 @@
  */
 #include <lttoolbox/lt_locale.h>
 #include <unicode/uloc.h>
+#include <unicode/ucnv.h>
 
 #include <clocale>
 #include <iostream>
@@ -23,14 +24,12 @@
 #include <windows.h>
 #endif
 
-using namespace std;
-
 
 void
 LtLocale::tryToSetLocale()
 {
   try {
-    locale::global(locale(locale::classic(), "", locale::ctype));
+    std::locale::global(std::locale(std::locale::classic(), "", std::locale::ctype));
   }
   catch (...) {
     // Nothing
@@ -38,6 +37,7 @@ LtLocale::tryToSetLocale()
 
   UErrorCode status = U_ZERO_ERROR;
   uloc_setDefault("en_US_POSIX", &status);
+  ucnv_setDefaultName("UTF-8");
 
 #if !defined(__CYGWIN__) && !defined (__MINGW32__)
   if(setlocale(LC_CTYPE, "") != NULL)
@@ -45,7 +45,7 @@ LtLocale::tryToSetLocale()
     return;
   }
 
-  cerr << "Warning: unsupported locale, fallback to \"C\"" << endl;
+  std::cerr << "Warning: unsupported locale, fallback to \"C\"" << std::endl;
 
   setlocale(LC_ALL, "C");
 #endif

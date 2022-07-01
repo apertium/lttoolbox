@@ -14,7 +14,7 @@ cc_sources = alphabet.cc alphabet_exe.cc att_compiler.cc compiler.cc compression
 library_includedir = $(includedir)/$(PACKAGE_NAME)-$(VERSION_API)/$(PACKAGE_NAME)
 library_include_HEADERS = $(h_sources)
 
-bin_PROGRAMS = lt-comp lt-proc lt-expand lt-tmxcomp lt-tmxproc lt-print lt-trim lt-append
+bin_PROGRAMS = lt-comp lt-proc lt-expand lt-paradigm lt-tmxcomp lt-tmxproc lt-print lt-trim lt-append lsx-comp
 instdir = lttoolbox
 
 lib_LTLIBRARIES= liblttoolbox3.la
@@ -37,8 +37,10 @@ lt_trim_SOURCES = lt_trim.cc
 lt_comp_SOURCES = lt_comp.cc
 lt_proc_SOURCES = lt_proc.cc
 lt_expand_SOURCES = lt_expand.cc
+lt_paradigm_SOURCES = lt_paradigm.cc
 lt_tmxcomp_SOURCES = lt_tmxcomp.cc
 lt_tmxproc_SOURCES = lt_tmxproc.cc
+lsx_comp_SOURCES = lt_comp.cc
 
 #lt-validate-dictionary: Makefile.am validate-header.sh
 #	@echo "Creating lt-validate-dictionary script"
@@ -50,7 +52,7 @@ lt_tmxproc_SOURCES = lt_tmxproc.cc
 
 
 
-man_MANS = lt-append.1 lt-comp.1 lt-expand.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1 lt-print.1 lt-trim.1
+man_MANS = lt-append.1 lt-comp.1 lt-expand.1 lt-paradigm.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1 lt-print.1 lt-trim.1 lsx-comp.1
 
 INCLUDES = -I$(top_srcdir) $(LIBXML_CFLAGS) $(ICU_CFLAGS)
 CLEANFILES = *~

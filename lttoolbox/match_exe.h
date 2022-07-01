@@ -27,7 +27,6 @@
 #include <lttoolbox/match_node.h>
 #include <lttoolbox/transducer.h>
 
-using namespace std;
 
 /**
  * Matcher class for execution of lexical recognizing algorithms
@@ -43,12 +42,12 @@ private:
   /**
    * MatchNode list
    */
-  vector<MatchNode> node_list;
+  std::vector<MatchNode> node_list;
 
   /**
    * Set of final nodes
    */
-  map<MatchNode *, int> finals;
+  std::map<MatchNode *, int> finals;
 
   /**
    * Copy function
@@ -73,7 +72,7 @@ public:
    * @param t the transducer
    * @param final_type the final types
    */
-   MatchExe(Transducer const &t, map<int, int> const &final_type);
+   MatchExe(Transducer const &t, std::map<int, int> const &final_type);
 
   /**
    * Destructor
@@ -103,7 +102,7 @@ public:
    * Gets the set of final nodes
    * @return the set of final nodes
    */
-  map<MatchNode *, int> & getFinals();
+  std::map<MatchNode *, int> & getFinals();
 };
 
 #endif

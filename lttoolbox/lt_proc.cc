@@ -15,6 +15,7 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 #include <lttoolbox/fst_processor.h>
+#include <lttoolbox/file_utils.h>
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/lt_locale.h>
 
@@ -23,70 +24,62 @@
 #include <iostream>
 #include <libgen.h>
 
-#ifdef _MSC_VER
-#include <io.h>
-#include <fcntl.h>
-#endif
-
-
-using namespace std;
-
 void endProgram(char *name)
 {
-  cout << basename(name) << ": process a stream with a letter transducer" << endl;
-  cout << "USAGE: " << basename(name) << " [ -a | -b | -c | -d | -e | -g | -n | -p | -x | -s | -t | -v | -h | -z | -w ] [-W] [-N N] [-L N] [ -i icx_file ] [ -r rcx_file ] fst_file [input_file [output_file]]" << endl;
-  cout << "Options:" << endl;
+  std::cout << basename(name) << ": process a stream with a letter transducer" << std::endl;
+  std::cout << "USAGE: " << basename(name) << " [ -a | -b | -c | -d | -e | -g | -n | -p | -x | -s | -t | -v | -h | -z | -w ] [-W] [-N N] [-L N] [ -i icx_file ] [ -r rcx_file ] fst_file [input_file [output_file]]" << std::endl;
+  std::cout << "Options:" << std::endl;
 #if HAVE_GETOPT_LONG
-  cout << "  -a, --analysis:          morphological analysis (default behavior)" << endl;
-  cout << "  -b, --bilingual:         lexical transfer" << endl;
-  cout << "  -c, --case-sensitive:    use the literal case of the incoming characters" << endl;
-  cout << "  -d, --debugged-gen       morph. generation with all the stuff" << endl;
-  cout << "  -e, --decompose-nouns:   Try to decompound unknown words" << endl;
-  cout << "  -g, --generation:        morphological generation" << endl;
-  cout << "  -i, --ignored-chars:     specify file with characters to ignore" << endl;
-  cout << "  -r, --restore-chars:     specify file with characters to diacritic restoration" << endl;
-  cout << "  -l, --tagged-gen:        morphological generation keeping lexical forms" << endl;
-  cout << "  -m, --tagged-nm-gen:     same as -l but without unknown word marks" << endl;
-  cout << "  -n, --non-marked-gen     morph. generation without unknown word marks" << endl;
-  cout << "  -o, --surf-bilingual:    lexical transfer with surface forms" << endl;
-  cout << "  -p, --post-generation:   post-generation" << endl;
-  cout << "  -x, --inter-generation:  inter-generation" << endl;
-  cout << "  -s, --sao:               SAO annotation system input processing" << endl;
-  cout << "  -t, --transliteration:   apply transliteration dictionary" << endl;
-  cout << "  -v, --version:           version" << endl;
-  cout << "  -z, --null-flush:        flush output on the null character " << endl;
-  cout << "  -w, --dictionary-case:   use dictionary case instead of surface case" << endl;
-  cout << "  -C, --careful-case:      use dictionary case if present, else surface" << endl;
-  cout << "  -I, --no-default-ignore: skips loading the default ignore characters" << endl;
-  cout << "  -W, --show-weights:      Print final analysis weights (if any)" << endl;
-  cout << "  -N, --analyses:          Output no more than N analyses (if the transducer is weighted, the N best analyses)" << endl;
-  cout << "  -L, --weight-classes:    Output no more than N best weight classes (where analyses with equal weight constitute a class)" << endl;
-  cout << "  -h, --help:              show this help" << endl;
+  std::cout << "  -a, --analysis:          morphological analysis (default behavior)" << std::endl;
+  std::cout << "  -b, --bilingual:         lexical transfer" << std::endl;
+  std::cout << "  -c, --case-sensitive:    use the literal case of the incoming characters" << std::endl;
+  std::cout << "  -d, --debugged-gen       morph. generation with all the stuff" << std::endl;
+  std::cout << "  -e, --decompose-nouns:   Try to decompound unknown words" << std::endl;
+  std::cout << "  -g, --generation:        morphological generation" << std::endl;
+  std::cout << "  -i, --ignored-chars:     specify file with characters to ignore" << std::endl;
+  std::cout << "  -r, --restore-chars:     specify file with characters to diacritic restoration" << std::endl;
+  std::cout << "  -l, --tagged-gen:        morphological generation keeping lexical forms" << std::endl;
+  std::cout << "  -m, --tagged-nm-gen:     same as -l but without unknown word marks" << std::endl;
+  std::cout << "  -n, --non-marked-gen     morph. generation without unknown word marks" << std::endl;
+  std::cout << "  -o, --surf-bilingual:    lexical transfer with surface forms" << std::endl;
+  std::cout << "  -p, --post-generation:   post-generation" << std::endl;
+  std::cout << "  -x, --inter-generation:  inter-generation" << std::endl;
+  std::cout << "  -s, --sao:               SAO annotation system input processing" << std::endl;
+  std::cout << "  -t, --transliteration:   apply transliteration dictionary" << std::endl;
+  std::cout << "  -v, --version:           version" << std::endl;
+  std::cout << "  -z, --null-flush:        flush output on the null character " << std::endl;
+  std::cout << "  -w, --dictionary-case:   use dictionary case instead of surface case" << std::endl;
+  std::cout << "  -C, --careful-case:      use dictionary case if present, else surface" << std::endl;
+  std::cout << "  -I, --no-default-ignore: skips loading the default ignore characters" << std::endl;
+  std::cout << "  -W, --show-weights:      Print final analysis weights (if any)" << std::endl;
+  std::cout << "  -N, --analyses:          Output no more than N analyses (if the transducer is weighted, the N best analyses)" << std::endl;
+  std::cout << "  -L, --weight-classes:    Output no more than N best weight classes (where analyses with equal weight constitute a class)" << std::endl;
+  std::cout << "  -h, --help:              show this help" << std::endl;
 #else
-  cout << "  -a:   morphological analysis (default behavior)" << endl;
-  cout << "  -b:   lexical transfer" << endl;
-  cout << "  -c:   use the literal case of the incoming characters" << endl;
-  cout << "  -d:   morph. generation with all the stuff" << endl;
-  cout << "  -e:   try to decompose unknown words as compounds" << endl;
-  cout << "  -g:   morphological generation" << endl;
-  cout << "  -i:   specify file with characters to ignore" << endl;
-  cout << "  -r:   specify file with characters to diacritic restoration" << endl;
-  cout << "  -l:   morphological generation keeping lexical forms" << endl;
-  cout << "  -n:   morph. generation without unknown word marks" << endl;
-  cout << "  -o:   lexical transfer with surface forms" << endl;
-  cout << "  -p:   post-generation" << endl;
-  cout << "  -x:   inter-generation" << endl;
-  cout << "  -s:   SAO annotation system input processing" << endl;
-  cout << "  -t:   apply transliteration dictionary" << endl;
-  cout << "  -v:   version" << endl;
-  cout << "  -z:   flush output on the null character " << endl;
-  cout << "  -C:   use dictionary case if present, else surface" << endl;
-  cout << "  -W:   Print final analysis weights (if any)" << endl;
-  cout << "  -N:   Output no more than N analyses" << endl;
-  cout << "  -L:   Output no more than N best weight classes" << endl;
-  cout << "  -I:   skips loading the default ignore characters" << endl;
-  cout << "  -w:   use dictionary case instead of surface case" << endl;
-  cout << "  -h:   show this help" << endl;
+  std::cout << "  -a:   morphological analysis (default behavior)" << std::endl;
+  std::cout << "  -b:   lexical transfer" << std::endl;
+  std::cout << "  -c:   use the literal case of the incoming characters" << std::endl;
+  std::cout << "  -d:   morph. generation with all the stuff" << std::endl;
+  std::cout << "  -e:   try to decompose unknown words as compounds" << std::endl;
+  std::cout << "  -g:   morphological generation" << std::endl;
+  std::cout << "  -i:   specify file with characters to ignore" << std::endl;
+  std::cout << "  -r:   specify file with characters to diacritic restoration" << std::endl;
+  std::cout << "  -l:   morphological generation keeping lexical forms" << std::endl;
+  std::cout << "  -n:   morph. generation without unknown word marks" << std::endl;
+  std::cout << "  -o:   lexical transfer with surface forms" << std::endl;
+  std::cout << "  -p:   post-generation" << std::endl;
+  std::cout << "  -x:   inter-generation" << std::endl;
+  std::cout << "  -s:   SAO annotation system input processing" << std::endl;
+  std::cout << "  -t:   apply transliteration dictionary" << std::endl;
+  std::cout << "  -v:   version" << std::endl;
+  std::cout << "  -z:   flush output on the null character " << std::endl;
+  std::cout << "  -C:   use dictionary case if present, else surface" << std::endl;
+  std::cout << "  -W:   Print final analysis weights (if any)" << std::endl;
+  std::cout << "  -N:   Output no more than N analyses" << std::endl;
+  std::cout << "  -L:   Output no more than N best weight classes" << std::endl;
+  std::cout << "  -I:   skips loading the default ignore characters" << std::endl;
+  std::cout << "  -w:   use dictionary case instead of surface case" << std::endl;
+  std::cout << "  -h:   show this help" << std::endl;
 #endif
   exit(EXIT_FAILURE);
 }
@@ -116,13 +109,13 @@ int main(int argc, char *argv[])
       {"surf-bilingual",    0, 0, 'o'},
       {"generation",        0, 0, 'g'},
       {"ignored-chars",     1, 0, 'i'},
-      {"restore-chars",     1, 0, 'i'},
+      {"restore-chars",     1, 0, 'r'},
       {"non-marked-gen",    0, 0, 'n'},
       {"debugged-gen",      0, 0, 'd'},
       {"tagged-gen",        0, 0, 'l'},
       {"tagged-nm-gen",     0, 0, 'm'},
       {"post-generation",   0, 0, 'p'},
-      {"inter-generation",   0, 0, 'x'},
+      {"inter-generation",  0, 0, 'x'},
       {"sao",               0, 0, 's'},
       {"transliteration",   0, 0, 't'},
       {"null-flush",        0, 0, 'z'},
@@ -139,6 +132,8 @@ int main(int argc, char *argv[])
 #endif
 
   GenerationMode bilmode = gm_unknown;
+  // more than one option sets generation mode, but -gb also sets gm_unknown
+  bool really_g = false;
   while(true)
   {
 #if HAVE_GETOPT_LONG
@@ -182,7 +177,7 @@ int main(int argc, char *argv[])
       maxAnalyses = atoi(optarg);
       if (maxAnalyses < 1)
       {
-        cerr << "Invalid or no argument for analyses count" << endl;
+        std::cerr << "Invalid or no argument for analyses count" << std::endl;
         exit(EXIT_FAILURE);
       }
       fstp.setMaxAnalysesValue(maxAnalyses);
@@ -192,7 +187,7 @@ int main(int argc, char *argv[])
       maxWeightClasses = atoi(optarg);
       if (maxWeightClasses < 1)
       {
-        cerr << "Invalid or no argument for weight class count" << endl;
+        std::cerr << "Invalid or no argument for weight class count" << std::endl;
         exit(EXIT_FAILURE);
       }
       fstp.setMaxWeightClassesValue(maxWeightClasses);
@@ -202,34 +197,50 @@ int main(int argc, char *argv[])
     case 'a':
     case 'b':
     case 'o':
-    case 'l':
-    case 'm':
     case 'g':
-    case 'n':
-    case 'd':
     case 'p':
     case 'x':
     case 't':
     case 's':
-    case 'C':
       if(cmd == 0)
       {
         cmd = c;
+        if (cmd == 'g') really_g = true;
       }
       else if(cmd == 'g' && c == 'b') {
         // "lt-proc -g -b generador.bin" should run biltrans, keeping unknown-marks
-        bilmode = gm_unknown;
-        cmd = 'b';
-      }
-      else if(cmd == 'n' && c == 'b') {
-        // "lt-proc -n -b generador.bin" should run biltrans, stripping unknown-marks
-        bilmode = gm_clean;
+        if (really_g) bilmode = gm_unknown;
         cmd = 'b';
       }
       else
       {
         endProgram(argv[0]);
       }
+      break;
+
+    case 'd':
+      if (cmd == 0) cmd = 'g';
+      bilmode = gm_all;
+      break;
+
+    case 'l':
+      if (cmd == 0) cmd = 'g';
+      bilmode = gm_tagged;
+      break;
+
+    case 'm':
+      if (cmd == 0) cmd = 'g';
+      bilmode = gm_tagged_nm;
+      break;
+
+    case 'n':
+      if (cmd == 0) cmd = 'g';
+      bilmode = gm_clean;
+      break;
+
+    case 'C':
+      if (cmd == 0) cmd = 'g';
+      bilmode = gm_carefulcase;
       break;
 
     case 'z':
@@ -241,7 +252,7 @@ int main(int argc, char *argv[])
       break;
 
     case 'v':
-      cout << basename(argv[0]) << " version " << PACKAGE_VERSION << endl;
+      std::cout << basename(argv[0]) << " version " << PACKAGE_VERSION << std::endl;
       exit(EXIT_SUCCESS);
       break;
     case 'h':
@@ -256,53 +267,22 @@ int main(int argc, char *argv[])
 
   if(optind == (argc - 3))
   {
-    FILE *in = fopen(argv[optind], "rb");
-    if(in == NULL || ferror(in))
-    {
-      cerr << "Error: Cannot open file '" << argv[optind] << "'." << endl << endl;
-      exit(EXIT_FAILURE);
-    }
-
-    if (!input.open(argv[optind+1])) {
-      cerr << "Error: Cannot open file '" << argv[optind+1] << "'." << endl << endl;
-      exit(EXIT_FAILURE);
-    }
-
-    output = u_fopen(argv[optind+2], "wb", NULL, NULL);
-    if(output == NULL)
-    {
-      cerr << "Error: Cannot open file '" << argv[optind+2] << "'." << endl << endl;
-      exit(EXIT_FAILURE);
-    }
-
+    FILE* in = openInBinFile(argv[optind]);
+    input.open_or_exit(argv[optind+1]);
+    output = openOutTextFile(argv[optind+2]);
     fstp.load(in);
     fclose(in);
   }
   else if(optind == (argc -2))
   {
-    FILE *in = fopen(argv[optind], "rb");
-    if(in == NULL || ferror(in))
-    {
-      cerr << "Error: Cannot open file '" << argv[optind] << "'." << endl << endl;
-      exit(EXIT_FAILURE);
-    }
-
-    if (!input.open(argv[optind+1])) {
-      cerr << "Error: Cannot open file '" << argv[optind+1] << "'." << endl << endl;
-      exit(EXIT_FAILURE);
-    }
-
+    FILE* in = openInBinFile(argv[optind]);
+    input.open_or_exit(argv[optind+1]);
     fstp.load(in);
     fclose(in);
   }
   else if(optind == (argc - 1))
   {
-    FILE *in = fopen(argv[optind], "rb");
-    if(in == NULL || ferror(in))
-    {
-      cerr << "Error: Cannot open file '" << argv[optind] << "'." << endl << endl;
-      exit(EXIT_FAILURE);
-     }
+    FILE* in = openInBinFile(argv[optind]);
     fstp.load(in);
     fclose(in);
   }
@@ -311,49 +291,14 @@ int main(int argc, char *argv[])
     endProgram(argv[0]);
   }
 
-#ifdef _MSC_VER
-  _setmode(_fileno(input), _O_U8TEXT);
-  _setmode(_fileno(output), _O_U8TEXT);
-#endif
-
   try
   {
     switch(cmd)
     {
-      case 'n':
-        fstp.initGeneration();
-        checkValidity(fstp);
-        fstp.generation(input, output, gm_clean);
-        break;
-
       case 'g':
         fstp.initGeneration();
         checkValidity(fstp);
-        fstp.generation(input, output);
-        break;
-
-      case 'd':
-        fstp.initGeneration();
-        checkValidity(fstp);
-        fstp.generation(input, output, gm_all);
-        break;
-
-      case 'l':
-        fstp.initGeneration();
-        checkValidity(fstp);
-        fstp.generation(input, output, gm_tagged);
-        break;
-
-      case 'm':
-        fstp.initGeneration();
-        checkValidity(fstp);
-        fstp.generation(input, output, gm_tagged_nm);
-        break;
-
-      case 'C':
-        fstp.initGeneration();
-        checkValidity(fstp);
-        fstp.generation(input, output, gm_carefulcase);
+        fstp.generation(input, output, bilmode);
         break;
 
       case 'p':
@@ -407,9 +352,9 @@ int main(int argc, char *argv[])
         break;
     }
   }
-  catch (exception& e)
+  catch (std::exception& e)
   {
-    cerr << e.what();
+    std::cerr << e.what();
     if (fstp.getNullFlush()) {
       u_fputc('\0', output);
     }

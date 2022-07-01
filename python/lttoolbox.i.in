@@ -62,26 +62,68 @@ public:
     int cmd = 0;
     int c = 0;
     optind = 1;
+	GenerationMode bilmode = gm_unknown;
     while (true)
     {
-      c = getopt(argc, argv, "bgpw");
+      c = getopt(argc, argv, "abcdeglmnoptwxzCIW");
       if (c == -1)
       {
         break;
       }
       switch(c)
       {
-        case 'b':
-        case 'g':
-        case 'p':
-          if(cmd == 0)
-          {
-            cmd = c;
-          }
+	  case 'a':
+	  case 'b':
+	  case 'e':
+	  case 'g':
+	  case 'p':
+	  case 't':
+	  case 'x':
+          if(cmd == 0) {
+			  cmd = c;
+		  } else if (cmd == 'g' && c == 'b') {
+			  cmd = c;
+		  }
           break;
-        case 'w':
+	  case 'c':
+		  setCaseSensitiveMode(true);
+		  break;
+	  case 'd':
+		  if (cmd == 0) cmd = 'g';
+		  bilmode = gm_all;
+		  break;
+	  case 'l':
+		  if (cmd == 0) cmd = 'g';
+		  bilmode = gm_tagged;
+		  break;
+	  case 'm':
+		  if (cmd == 0) cmd = 'g';
+		  bilmode = gm_tagged_nm;
+		  break;
+	  case 'n':
+		  if (cmd == 0) cmd = 'g';
+		  bilmode = gm_clean;
+		  break;
+	  case 'o':
+		  if (cmd == 0) cmd = 'b';
+		  setBiltransSurfaceForms(true);
+		  break;
+	  case 'w':
           setDictionaryCaseMode(true);
           break;
+	  case 'z':
+		  setNullFlush(true);
+		  break;
+	  case 'C':
+		  if (cmd == 0) cmd = 'g';
+		  bilmode = gm_carefulcase;
+		  break;
+	  case 'I':
+		  setUseDefaultIgnoredChars(false);
+		  break;
+	  case 'W':
+		  setDisplayWeightsMode(true);
+		  break;
         default:
           break;
       }
@@ -89,22 +131,42 @@ public:
 
     switch(cmd)
     {
-      case 'b':
-        bilingual(input, output);
-        break;
+	case 'b':
+		initBiltrans();
+		bilingual(input, output, bilmode);
+		break;
 
-      case 'g':
-        generation(input, output);
-        break;
+	case 'e':
+		initDecomposition();
+		analysis(input, output);
+		break;
 
-      case 'p':
-        postgeneration(input, output);
-        break;
+	case 'g':
+		initGeneration();
+		generation(input, output, bilmode);
+		break;
 
-      default:
+	case 'p':
+		initPostgeneration();
+		postgeneration(input, output);
+		break;
+
+	case 't':
+		initPostgeneration();
+		transliteration(input, output);
+		break;
+
+	case 'x':
+		initPostgeneration();
+		intergeneration(input, output);
+		break;
+
+	case 'a':
+	default:
+		initAnalysis();
         analysis(input, output);
         break;
-      }
+	}
 
     u_fclose(output);
   }

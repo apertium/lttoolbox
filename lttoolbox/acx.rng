@@ -3,14 +3,14 @@
   <oneOrMore>
     <element name="char">
       <attribute name="value">
-        <data type="token">
+        <data type="string">
           <param name="length">1</param>
         </data>
       </attribute>
       <oneOrMore>
         <element name="equiv-char">
           <attribute name="value">
-            <data type="token">
+            <data type="string">
               <param name="length">1</param>
             </data>
           </attribute>

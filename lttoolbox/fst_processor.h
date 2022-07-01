@@ -29,13 +29,12 @@
 #include <lttoolbox/input_file.h>
 #include <libxml/xmlreader.h>
 
+#include <deque>
 #include <map>
 #include <queue>
 #include <set>
 #include <string>
 #include <cstdint>
-
-using namespace std;
 
 /**
  * Kind of output of the generator module
@@ -59,7 +58,7 @@ private:
   /**
    * Transducers in FSTP
    */
-  map<UString, TransducerExe> transducers;
+  std::map<UString, TransducerExe> transducers;
 
   /**
    * Current state of lexical analysis
@@ -79,57 +78,59 @@ private:
   /**
    * The final states of inconditional sections in the dictionaries
    */
-  set<TransducerExe*> inconditional;
+  std::set<TransducerExe*> inconditional;
 
   /**
    * The final states of standard sections in the dictionaries
    */
-  set<TransducerExe*> standard;
+  std::set<TransducerExe*> standard;
 
   /**
    * The final states of postblank sections in the dictionaries
    */
-  set<TransducerExe*> postblank;
+  std::set<TransducerExe*> postblank;
 
   /**
    * The final states of preblank sections in the dictionaries
    */
-  set<TransducerExe*> preblank;
+  std::set<TransducerExe*> preblank;
 
   /**
    * Merge of 'inconditional', 'standard', 'postblank' and 'preblank' sets
    */
-  set<TransducerExe*> all_finals;
+  std::set<TransducerExe*> all_finals;
 
   /**
    * Queue of blanks, used in reading methods
    */
-  queue<UString> blankqueue;
+  std::queue<UString> blankqueue;
 
   /**
    * Queue of wordbound blanks, used in reading methods
    */
-  queue<UString> wblankqueue;
+  std::deque<UString> wblankqueue;
+
+  std::deque<std::vector<int32_t>> transliteration_queue;
 
   /**
    * Set of characters being considered alphabetics
    */
-  set<UChar32> alphabetic_chars;
+  std::set<UChar32> alphabetic_chars;
 
   /**
    * Set of characters to escape with a backslash
    */
-  set<UChar32> escaped_chars;
+  std::set<UChar32> escaped_chars;
 
   /**
    * Set of characters to ignore
    */
-  set<UChar32> ignored_chars;
+  std::set<UChar32> ignored_chars;
 
   /**
    * Mapping of characters for simplistic diacritic restoration specified in RCX files
    */
-  map<int, set<int> > rcx_map;
+  std::map<int, std::set<int> > rcx_map;
 
   /**
    * Original char being restored
@@ -240,20 +241,7 @@ private:
    */
   int maxAnalyses = INT_MAX;
 
-  /**
-   * True if a wblank block ([[..]]xyz[[/]]) was just read
-   */
-  bool is_wblank;
-
-  /**
-   * True if skip_mode is false and need to collect wblanks
-   */
-  bool collect_wblanks;
-
-  /**
-   * True if a wblank has been processed for postgen and we need an ending wblank
-   */
-  bool need_end_wblank;
+  bool transliteration_drop_tilde = false;
 
   /**
    * Output no more than 'N' best weight classes
@@ -268,14 +256,6 @@ private:
    * Prints an error of input stream and exits
    */
   void streamError();
-
-  /**
-   * Reads a wordbound blank (opening blank to closing blank) from the stream input -> [[...]]xyz[[/]]
-   * @param input the stream being read
-   * @param output the stream to write on
-   * @return true if the word enclosed by the wordbound blank has a ~ for postgeneration activation
-   */
-  bool wblankPostGen(InputFile& input, UFILE *output);
 
   /**
    * Returns true if the character code is identified as alphabetic
@@ -306,13 +286,8 @@ private:
    */
   int readDecomposition(InputFile& input, UFILE *output);
 
-  /**
-   * Read text from stream (postgeneration version)
-   * @param input the stream to read
-   * @param output the stream to write on
-   * @return the next symbol in the stream
-   */
-  int readPostgeneration(InputFile& input, UFILE *output);
+  bool readTransliterationBlank(InputFile& input);
+  bool readTransliterationWord(InputFile& input);
 
   /**
    * Read text from stream (generation version)
@@ -328,7 +303,7 @@ private:
    * @param output the stream to write on
    * @return the queue of 0-symbols, and the next symbol in the stream
    */
-  pair<UString, int> readBilingual(InputFile& input, UFILE *output);
+  std::pair<UString, int> readBilingual(InputFile& input, UFILE *output);
 
   /**
    * Read text from stream (SAO version)
@@ -342,26 +317,6 @@ private:
    * @param output stream to write blanks
    */
   void flushBlanks(UFILE *output);
-
-  /**
-   * Flush all the wordbound blanks remaining in the current process
-   * @param output stream to write blanks
-   */
-  void flushWblanks(UFILE *output);
-
-  /**
-   * Combine wordbound blanks in the queue and return them.
-   *
-   * May pop from 'wblankqueue' and set 'need_end_wblank' to true.
-   *
-   * If 'wblankqueue' (see which) is empty, we get an empty string,
-   * otherwise we return a semicolon-separated combination of opening
-   * wblanks in the queue. If there is only a closing wblank, we just
-   * set need_end_wblank.
-   *
-   * @return final wblank string
-  */
-  UString combineWblanks();
 
   /**
    * Calculate the initial state of parsing
@@ -404,15 +359,6 @@ private:
    * @param output the stream to write in
    */
   void writeEscapedWithTags(UString const &str, UFILE *output);
-
-
-  /**
-   * Checks if an string ends with a particular suffix
-   * @param str the string to test
-   * @param the searched suffix
-   * @returns true if 'str' has the suffix 'suffix'
-   */
-  static bool endsWith(UString const &str, UString const &suffix);
 
   /**
    * Prints a word
@@ -457,7 +403,7 @@ private:
 
   void initDecompositionSymbols();
 
-  vector<UString> numbers;
+  std::vector<UString> numbers;
   int readTMAnalysis(InputFile& input);
 
   unsigned int lastBlank(UString const &str);
@@ -469,22 +415,37 @@ private:
    * @param output stream where the word is written
    */
   void printSpace(UChar32 const val, UFILE *output);
+  /**
+   * Print one possibly escaped character
+   * if it's a space and the blank queue is non-empty,
+   * pop the first blank and print that instead
+   */
+  void printChar(const UChar32 val, UFILE* output);
 
   void writeChar(const UChar32 val, UFILE* output, bool single_blank);
 
   void skipUntil(InputFile& input, UFILE *output, UChar32 const character);
   static UString removeTags(UString const &str);
-  UString compoundAnalysis(UString str, bool uppercase, bool firstupper);
-  size_t firstNotAlpha(UString const &sf);
+  UString compoundAnalysis(UString str);
+
+  struct Indices {
+        size_t i_codepoint;
+        size_t i_utf16; // always >= i_codepoint since some codepoints take up 2 UTF-16's
+  };
+
+  /*
+   * Iterates through unicode characters, returns a Unicode character
+   * index and UTF-16 string index of first non-alphabetic character,
+   * or size of the string (in characters, string size)
+   *
+   * @return index of first non-alpha char, or string size, as a tuple of number of characters and index in string
+   */
+  Indices firstNotAlpha(UString const &sf);
 
   void analysis_wrapper_null_flush(InputFile& input, UFILE *output);
   void bilingual_wrapper_null_flush(InputFile& input, UFILE *output, GenerationMode mode = gm_unknown);
   void generation_wrapper_null_flush(InputFile& input, UFILE *output,
                                      GenerationMode mode);
-  void postgeneration_wrapper_null_flush(InputFile& input, UFILE *output);
-  void intergeneration_wrapper_null_flush(InputFile& input, UFILE *output);
-  void transliteration_wrapper_null_flush(InputFile& input, UFILE *output);
-
   UString compose(UString const &lexforms, UString const &queue) const;
 
   void procNodeICX();
@@ -506,8 +467,6 @@ public:
   static UString const XML_RESTORE_CHARS_ELEM;
   static UString const XML_VALUE_ATTR;
   static UString const XML_CHAR_ELEM;
-  static UString const WBLANK_START;
-  static UString const WBLANK_END;
   static UString const WBLANK_FINAL;
 
   FSTProcessor();
@@ -517,7 +476,8 @@ public:
   void initTMAnalysis();
   void initSAO(){initAnalysis();};
   void initGeneration();
-  void initPostgeneration();
+  void initPostgeneration(){initTransliteration();};
+  void initTransliteration();
   void initBiltrans();
   void initDecomposition();
 
@@ -530,11 +490,11 @@ public:
   UString biltrans(UString const &input_word, bool with_delim = true);
   UString biltransfull(UString const &input_word, bool with_delim = true);
   void bilingual(InputFile& input, UFILE *output, GenerationMode mode = gm_unknown);
-  pair<UString, int> biltransWithQueue(UString const &input_word, bool with_delim = true);
+  std::pair<UString, int> biltransWithQueue(UString const &input_word, bool with_delim = true);
   UString biltransWithoutQueue(UString const &input_word, bool with_delim = true);
   void SAO(InputFile& input, UFILE *output);
-  void parseICX(string const &file);
-  void parseRCX(string const &file);
+  void parseICX(std::string const &file);
+  void parseRCX(std::string const &file);
 
   void load(FILE *input);
 

@@ -38,6 +38,8 @@ UString const Transducer::JOIN_SYMBOL                 = "+"_u;
 UString const Transducer::ANY_TAG_SYMBOL              = "<ANY_TAG>"_u;
 UString const Transducer::ANY_CHAR_SYMBOL             = "<ANY_CHAR>"_u;
 UString const Transducer::LSX_BOUNDARY_SYMBOL         = "<$>"_u;
+UString const Transducer::LSX_BOUNDARY_SPACE_SYMBOL   = "<$_>"_u;
+UString const Transducer::LSX_BOUNDARY_NO_SPACE_SYMBOL= "<$->"_u;
 UString const Transducer::COMPOUND_ONLY_L_SYMBOL      = "<compound-only-L>"_u;
 UString const Transducer::COMPOUND_R_SYMBOL           = "<compound-R>"_u;
 
@@ -96,7 +98,7 @@ Transducer::insertSingleTransduction(int const tag, int const source, double con
     {
       // new state
       int state = newState();
-      transitions[source].insert(make_pair(tag, make_pair(state, weight)));
+      transitions[source].insert(std::make_pair(tag, std::make_pair(state, weight)));
       return state;
     }
     else if(transitions[source].count(tag) == 2)
@@ -127,7 +129,7 @@ int
 Transducer::insertNewSingleTransduction(int const tag, int const source, double const weight)
 {
   int state = newState();
-  transitions[source].insert(make_pair(tag, make_pair(state, weight)));
+  transitions[source].insert(std::make_pair(tag, std::make_pair(state, weight)));
   return state;
 }
 
@@ -135,7 +137,7 @@ int
 Transducer::insertTransducer(int const source, Transducer &t,
                             int const epsilon_tag)
 {
-  map<int, int> relation;
+  std::map<int, int> relation;
 
   if(t.transitions.empty())
   {
@@ -153,14 +155,14 @@ Transducer::insertTransducer(int const source, Transducer &t,
   {
     for(auto& it2 : it.second)
     {
-      transitions[relation[it.first]].insert(make_pair(it2.first,
-                                                        make_pair(relation[it2.second.first],
+      transitions[relation[it.first]].insert(std::make_pair(it2.first,
+                                                        std::make_pair(relation[it2.second.first],
                                                                   it2.second.second)));
     }
   }
 
-  transitions[source].insert(make_pair(epsilon_tag,
-                                       make_pair(relation[t.initial], default_weight)));
+  transitions[source].insert(std::make_pair(epsilon_tag,
+                                       std::make_pair(relation[t.initial], default_weight)));
 
   return relation[t.finals.begin()->first];
 }
@@ -183,12 +185,12 @@ Transducer::linkStates(int const source, int const target,
       }
     }
     // end of new code
-    transitions[source].insert(make_pair(tag, make_pair(target, weight)));
+    transitions[source].insert(std::make_pair(tag, std::make_pair(target, weight)));
   }
   else
   {
-    cerr << "Error: Trying to link nonexistent states (" << source;
-    cerr << ", " << target << ", " << tag << ")" << endl;
+    std::cerr << "Error: Trying to link nonexistent states (" << source;
+    std::cerr << ", " << target << ", " << tag << ")" << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -206,12 +208,12 @@ Transducer::setFinal(int const state, double const weight, bool value)
   int initial_copy = getInitial();
   if(state == initial_copy)
   {
-    cerr << "Setting initial state to final" << endl;
+    std::cerr << "Setting initial state to final" << std::endl;
   }
 */
   if(value)
   {
-    finals.insert(make_pair(state, weight));
+    finals.insert(std::make_pair(state, weight));
   }
   else
   {
@@ -225,16 +227,16 @@ Transducer::getInitial() const
   return initial;
 }
 
-set<int>
+std::set<int>
 Transducer::closure(int const state, int const epsilon_tag) const
 {
-  return closure(state, set<int>({epsilon_tag}));
+  return closure(state, std::set<int>({epsilon_tag}));
 }
 
-set<int>
-Transducer::closure(int const state, set<int> const &epsilon_tags) const
+std::set<int>
+Transducer::closure(int const state, std::set<int> const &epsilon_tags) const
 {
-  set<int> nonvisited, result;
+  std::set<int> nonvisited, result;
 
   nonvisited.insert(state);
   result.insert(state);
@@ -251,7 +253,7 @@ Transducer::closure(int const state, set<int> const &epsilon_tags) const
           }
           range.first++;
         }
-      } catch (out_of_range const &e) {
+      } catch (std::out_of_range const &e) {
         // No transition from any of the epsilon_tags – this is fine
       }
     }
@@ -274,17 +276,17 @@ Transducer::joinFinals(int const epsilon_tag)
     }
 
     finals.clear();
-    finals.insert(make_pair(state, default_weight));
+    finals.insert(std::make_pair(state, default_weight));
   }
   else if(finals.size() == 0)
   {
-    cerr << "Error: empty set of final states" <<endl;
+    std::cerr << "Error: empty set of final states" << std::endl;
     exit(EXIT_FAILURE);
   }
 }
 
 bool
-Transducer::isEmptyIntersection(set<int> const &s1, set<int> const &s2)
+Transducer::isEmptyIntersection(std::set<int> const &s1, std::set<int> const &s2)
 {
 
   if(s1.size() < s2.size())
@@ -314,11 +316,11 @@ Transducer::isEmptyIntersection(set<int> const &s1, set<int> const &s2)
 void
 Transducer::determinize(int const epsilon_tag)
 {
-  vector<set<int> > R(2);
-  map<int, set<int> > Q_prime;
-  map<set<int>, int> Q_prime_inv;
+  std::vector<std::set<int> > R(2);
+  std::map<int, std::set<int> > Q_prime;
+  std::map<std::set<int>, int> Q_prime_inv;
 
-  map<int, multimap<int, pair<int, double> > > transitions_prime;
+  std::map<int, std::multimap<int, std::pair<int, double> > > transitions_prime;
 
   unsigned int size_Q_prime = 0;
   Q_prime[0] = closure(initial, epsilon_tag);
@@ -327,16 +329,16 @@ Transducer::determinize(int const epsilon_tag)
   R[0].insert(0);
 
   int initial_prime = 0;
-  map<int, double> finals_prime;
+  std::map<int, double> finals_prime;
 
   if(isFinal(initial))
   {
-    finals_prime.insert(make_pair(0, default_weight));
+    finals_prime.insert(std::make_pair(0, default_weight));
   }
 
   int t = 0;
 
-  set<int> finals_state;
+  std::set<int> finals_state;
   for(auto& it : finals) {
     finals_state.insert(it.first);
   }
@@ -355,10 +357,10 @@ Transducer::determinize(int const epsilon_tag)
         if (it3 != finals.end()) {
           w = it3->second;
         }
-        finals_prime.insert(make_pair(it, w));
+        finals_prime.insert(std::make_pair(it, w));
       }
 
-      map<pair<int, double>, set<int> > mymap;
+      std::map<std::pair<int, double>, std::set<int> > mymap;
 
       for(auto& it2 : Q_prime[it])
       {
@@ -370,7 +372,7 @@ Transducer::determinize(int const epsilon_tag)
 
             for(auto& it4 : c)
             {
-              mymap[make_pair(it3.first, it3.second.second)].insert(it4);
+              mymap[std::make_pair(it3.first, it3.second.second)].insert(it4);
             }
           }
         }
@@ -387,8 +389,8 @@ Transducer::determinize(int const epsilon_tag)
           R[(t+1)%2].insert(Q_prime_inv[it2.second]);
           transitions_prime[tag].clear();
         }
-        transitions_prime[it].insert(make_pair(it2.first.first,
-                                                make_pair(Q_prime_inv[it2.second], it2.first.second)));
+        transitions_prime[it].insert(std::make_pair(it2.first.first,
+                                                std::make_pair(Q_prime_inv[it2.second], it2.first.second)));
       }
     }
 
@@ -422,7 +424,7 @@ Transducer::optional(int const epsilon_tag)
   state = newState();
   linkStates(finals.begin()->first, state, epsilon_tag, finals.begin()->second);
   finals.clear();
-  finals.insert(make_pair(state, default_weight));
+  finals.insert(std::make_pair(state, default_weight));
   linkStates(initial, state, epsilon_tag, default_weight);
 }
 
@@ -437,7 +439,7 @@ Transducer::oneOrMore(int const epsilon_tag)
   state = newState();
   linkStates(finals.begin()->first, state, epsilon_tag, finals.begin()->second);
   finals.clear();
-  finals.insert(make_pair(state, default_weight));
+  finals.insert(std::make_pair(state, default_weight));
   linkStates(state, initial, epsilon_tag, default_weight);
 }
 
@@ -468,16 +470,16 @@ Transducer::hasNoFinals() const
   return finals.size() == 0;
 }
 
-map<int, multimap<int, pair<int, double> > >&
+std::map<int, std::multimap<int, std::pair<int, double> > >&
 Transducer::getTransitions()
 {
   return transitions;
 }
 
-map<int, double>
+std::map<int, double>
 Transducer::getFinals() const
 {
-  return map<int, double>(finals);
+  return std::map<int, double>(finals);
 }
 
 int
@@ -624,7 +626,7 @@ Transducer::read(FILE *input, int const decalage)
     {
       base_weight = OldBinary::read_double(input, true);
     }
-    new_t.finals.insert(make_pair(base, base_weight));
+    new_t.finals.insert(std::make_pair(base, base_weight));
   }
 
   base = OldBinary::read_int(input, true);
@@ -647,7 +649,7 @@ Transducer::read(FILE *input, int const decalage)
       {
         new_t.transitions[state].clear(); // force create
       }
-      new_t.transitions[current_state].insert(make_pair(tagbase, make_pair(state, base_weight)));
+      new_t.transitions[current_state].insert(std::make_pair(tagbase, std::make_pair(state, base_weight)));
     }
     number_of_states--;
     current_state++;
@@ -777,16 +779,16 @@ void
 Transducer::serialise(std::ostream &serialised) const
 {
   Serialiser<int>::serialise(initial, serialised);
-  Serialiser<map<int, double> >::serialise(finals, serialised);
-  Serialiser<map<int, multimap<int, pair<int, double> > > >::serialise(transitions, serialised);
+  Serialiser<std::map<int, double> >::serialise(finals, serialised);
+  Serialiser<std::map<int, std::multimap<int, std::pair<int, double> > > >::serialise(transitions, serialised);
 }
 
 void
 Transducer::deserialise(std::istream &serialised)
 {
   initial = Deserialiser<int>::deserialise(serialised);
-  finals = Deserialiser<map<int, double> >::deserialise(serialised);
-  transitions = Deserialiser<map<int, multimap<int, pair<int, double> > > >::deserialise(serialised);
+  finals = Deserialiser<std::map<int, double> >::deserialise(serialised);
+  transitions = Deserialiser<std::map<int, std::multimap<int, std::pair<int, double> > > >::deserialise(serialised);
 }
 
 void
@@ -828,9 +830,9 @@ Transducer::reverse(int const epsilon_tag)
 {
   joinFinals(epsilon_tag);
 
-  map<int, multimap<int, pair<int, double> > > tmp_transitions;
+  std::map<int, std::multimap<int, std::pair<int, double> > > tmp_transitions;
 
-  for(map<int, multimap<int, pair<int, double> > >::reverse_iterator it = transitions.rbegin(); it != transitions.rend(); it++)
+  for(std::map<int, std::multimap<int, std::pair<int, double> > >::reverse_iterator it = transitions.rbegin(); it != transitions.rend(); it++)
   {
     auto aux = it->second;
     it->second.clear();
@@ -838,11 +840,11 @@ Transducer::reverse(int const epsilon_tag)
     {
       if(it2.second.first >= it->first)
       {
-        transitions[it2.second.first].insert(make_pair(it2.first, make_pair(it->first, it2.second.second)));
+        transitions[it2.second.first].insert(std::make_pair(it2.first, std::make_pair(it->first, it2.second.second)));
       }
       else
       {
-        tmp_transitions[it2.second.first].insert(make_pair(it2.first, make_pair(it->first, it2.second.second)));
+        tmp_transitions[it2.second.first].insert(std::make_pair(it2.first, std::make_pair(it->first, it2.second.second)));
       }
     }
     if(tmp_transitions.find(it->first) != tmp_transitions.end())
@@ -852,20 +854,20 @@ Transducer::reverse(int const epsilon_tag)
     }
   }
 
-  for(map<int, multimap<int, pair<int, double> > >::reverse_iterator it = tmp_transitions.rbegin(),
+  for(std::map<int, std::multimap<int, std::pair<int, double> > >::reverse_iterator it = tmp_transitions.rbegin(),
                                                                   limit = tmp_transitions.rend();
       it != limit; it++)
   {
     for(auto& it2 : it->second)
     {
-      transitions[it->first].insert(make_pair(it2.first, it2.second));
+      transitions[it->first].insert(std::make_pair(it2.first, it2.second));
     }
   }
 
   int tmp = initial;
   initial = finals.begin()->first;
   finals.clear();
-  finals.insert(make_pair(tmp, default_weight));
+  finals.insert(std::make_pair(tmp, default_weight));
 }
 
 void
@@ -928,7 +930,7 @@ Transducer::show(Alphabet const &alphabet, UFILE *output, int const epsilon_tag)
 int
 Transducer::getStateSize(int const state)
 {
- set<int> states;
+ std::set<int> states;
  auto myclosure1 = closure(state, 0);
  states.insert(myclosure1.begin(), myclosure1.end());
  int num_transitions = 0;
@@ -945,14 +947,14 @@ bool
 Transducer::recognise(UString pattern, Alphabet &a, FILE *err)
 {
   bool accepted = false;
-  set<int> states;
+  std::set<int> states;
 
   auto myclosure1 = closure(getInitial(), 0);
   states.insert(myclosure1.begin(), myclosure1.end());
   // For each of the characters in the input string
   for(auto& it : pattern)
   {
-    set<int> new_state;        //Transducer::closure(int const state, int const epsilon_tag)
+    std::set<int> new_state;        //Transducer::closure(int const state, int const epsilon_tag)
     // For each of the current alive states
     //fprintf(err, "step: %ls %lc (%d)\n", pattern.c_str(), *it, sym);
     for(auto& it2 : states)
@@ -974,9 +976,9 @@ Transducer::recognise(UString pattern, Alphabet &a, FILE *err)
         if(l.find(it) != UString::npos)
         {
           auto myclosure = closure(it3.second.first, 0);
-          //cerr << "Before closure alives: " <<new_state.size() << endl;
+          //std::cerr << "Before closure alives: " <<new_state.size() << std::endl;
           new_state.insert(myclosure.begin(), myclosure.end());
-          //cerr << "After closure alives: " <<new_state.size() << endl;
+          //std::cerr << "After closure alives: " <<new_state.size() << std::endl;
         }
       }
     }
@@ -998,11 +1000,11 @@ Transducer::unionWith(Alphabet &my_a,
                       Transducer &t,
                       int const epsilon_tag)
 {
-  finals.insert(make_pair(insertTransducer(initial, t, epsilon_tag), default_weight));
+  finals.insert(std::make_pair(insertTransducer(initial, t, epsilon_tag), default_weight));
 }
 
 Transducer
-Transducer::appendDotStar(set<int> const &loopback_symbols, int const epsilon_tag)
+Transducer::appendDotStar(std::set<int> const &loopback_symbols, int const epsilon_tag)
 {
   Transducer prefix_transducer(*this);
 
@@ -1029,10 +1031,10 @@ Transducer::copyWithTagsFirst(int start,
   Transducer new_t;
   Transducer lemq;
 
-  map<int, int> states_this_new;
-  states_this_new.insert(make_pair(start, new_t.initial));
-  map<int, int> states_this_lemq;
-  states_this_new.insert(make_pair(start, lemq.initial));
+  std::map<int, int> states_this_new;
+  states_this_new.insert(std::make_pair(start, new_t.initial));
+  std::map<int, int> states_this_lemq;
+  states_this_new.insert(std::make_pair(start, lemq.initial));
 
   typedef std::pair<int, int> SearchState;
   // Each searchstate in the stack is a transition in this FST, along
@@ -1041,7 +1043,7 @@ Transducer::copyWithTagsFirst(int start,
   std::set<SearchState> seen;
   std::set<SearchState> finally;
   SearchState current;
-  todo.push_front(make_pair(start,start));
+  todo.push_front(std::make_pair(start,start));
 
   while(todo.size() > 0) {
     current = todo.front();
@@ -1067,32 +1069,32 @@ Transducer::copyWithTagsFirst(int start,
         {
           // We've reached the first tag
           new_src = states_this_new[start];
-          lemq.finals.insert(make_pair(this_lemqlast, default_weight));
+          lemq.finals.insert(std::make_pair(this_lemqlast, default_weight));
         }
         else
         {
           if(states_this_new.find(this_src) == states_this_new.end())
           {
-            states_this_new.insert(make_pair(this_src, new_t.newState()));
+            states_this_new.insert(std::make_pair(this_src, new_t.newState()));
           }
           new_src = states_this_new[this_src];
         }
 
         if(states_this_new.find(this_trg) == states_this_new.end())
         {
-          states_this_new.insert(make_pair(this_trg, new_t.newState()));
+          states_this_new.insert(std::make_pair(this_trg, new_t.newState()));
         }
         int new_trg = states_this_new[this_trg];
         new_t.linkStates(new_src, new_trg, label, this_wt);
 
         if(isFinal(this_src))
         {
-          finally.insert(make_pair(this_src, this_lemqlast));
+          finally.insert(std::make_pair(this_src, this_lemqlast));
         }
 
-        if(seen.find(make_pair(this_trg, this_lemqlast)) == seen.end())
+        if(seen.find(std::make_pair(this_trg, this_lemqlast)) == seen.end())
         {
-          todo.push_front(make_pair(this_trg, this_lemqlast));
+          todo.push_front(std::make_pair(this_trg, this_lemqlast));
         }
       }
       else
@@ -1101,13 +1103,13 @@ Transducer::copyWithTagsFirst(int start,
         int lemq_src = states_this_lemq[this_src];
         if(states_this_lemq.find(this_trg) == states_this_lemq.end())
         {
-          states_this_lemq.insert(make_pair(this_trg, lemq.newState()));
+          states_this_lemq.insert(std::make_pair(this_trg, lemq.newState()));
         }
         int lemq_trg = states_this_lemq[this_trg];
         lemq.linkStates(lemq_src, lemq_trg, label, this_wt);
-        if(seen.find(make_pair(this_trg, this_trg)) == seen.end())
+        if(seen.find(std::make_pair(this_trg, this_trg)) == seen.end())
         {
-          todo.push_front(make_pair(this_trg, this_trg));
+          todo.push_front(std::make_pair(this_trg, this_trg));
         }
       }
     } // end for transitions
@@ -1120,14 +1122,14 @@ Transducer::copyWithTagsFirst(int start,
     // copy lemq, letting this_lemqlast be the only final state in newlemq
     Transducer newlemq = Transducer(lemq);
     newlemq.finals.clear();
-    newlemq.finals.insert(make_pair(states_this_lemq[this_lemqlast], default_weight));
+    newlemq.finals.insert(std::make_pair(states_this_lemq[this_lemqlast], default_weight));
     newlemq.minimize();
 
     int group_start = new_t.newState();
     new_t.linkStates(states_this_new[last_tag], group_start, group_label, default_weight);
 
     // append newlemq into the group after last_tag:
-    new_t.finals.insert(make_pair(new_t.insertTransducer(group_start, newlemq), default_weight));
+    new_t.finals.insert(std::make_pair(new_t.insertTransducer(group_start, newlemq), default_weight));
   }
 
   return new_t;
@@ -1143,8 +1145,8 @@ Transducer::moveLemqsLast(Alphabet const &alphabet,
   std::list<SearchState> todo;
   todo.push_front(initial);
 
-  map<int, int> states_this_new;
-  states_this_new.insert(make_pair(initial, new_t.initial));
+  std::map<int, int> states_this_new;
+  states_this_new.insert(std::make_pair(initial, new_t.initial));
 
   while(todo.size() > 0)
   {
@@ -1162,7 +1164,7 @@ Transducer::moveLemqsLast(Alphabet const &alphabet,
       if(left == GROUP_SYMBOL)
       {
         Transducer tagsFirst = copyWithTagsFirst(this_trg, label, alphabet, epsilon_tag);
-        new_t.finals.insert(make_pair(
+        new_t.finals.insert(std::make_pair(
           new_t.insertTransducer(new_src, tagsFirst, epsilon_tag), default_weight
           ));
       }
@@ -1170,7 +1172,7 @@ Transducer::moveLemqsLast(Alphabet const &alphabet,
       {
         if(states_this_new.find(this_trg) == states_this_new.end())
         {
-          states_this_new.insert(make_pair(this_trg, new_t.newState()));
+          states_this_new.insert(std::make_pair(this_trg, new_t.newState()));
         }
         int new_trg = states_this_new[this_trg];
         new_t.linkStates(new_src, new_trg, label, default_weight);
@@ -1184,7 +1186,7 @@ Transducer::moveLemqsLast(Alphabet const &alphabet,
 
   for(auto& it : finals)
    {
-     new_t.finals.insert(make_pair(states_this_new[it.first], it.second));
+     new_t.finals.insert(std::make_pair(states_this_new[it.first], it.second));
    }
 
   return new_t;
@@ -1218,10 +1220,10 @@ Transducer::intersect(Transducer &trimmer,
   std::list<SearchState> todo;
   std::set<SearchState> seen;
   SearchState current;
-  SearchState next = make_pair(initial, make_pair(trimmer.initial,
+  SearchState next = std::make_pair(initial, std::make_pair(trimmer.initial,
                                                   trimmer.initial));
   todo.push_front(next);
-  states_this_trimmed.insert(make_pair(next, trimmed.initial));
+  states_this_trimmed.insert(std::make_pair(next, trimmed.initial));
 
   while(todo.size() > 0)
   {
@@ -1234,7 +1236,7 @@ Transducer::intersect(Transducer &trimmer,
         trimmer_preplus_next = trimmer_preplus;
 
     if(states_this_trimmed.find(current) == states_this_trimmed.end()) {
-      cerr <<"Error: couldn't find "<<this_src<<","<<trimmer_src<<" in state map"<<endl;
+      std::cerr <<"Error: couldn't find "<<this_src<<","<<trimmer_src<<" in state map"<< std::endl;
       exit(EXIT_FAILURE);
     }
     int trimmed_src = states_this_trimmed[current];
@@ -1254,11 +1256,11 @@ Transducer::intersect(Transducer &trimmer,
 
       if(trimmer_left.empty())
       {
-        next = make_pair(this_src, make_pair(trimmer_trg, trimmer_preplus_next));
+        next = std::make_pair(this_src, std::make_pair(trimmer_trg, trimmer_preplus_next));
         if(seen.find(next) == seen.end())
         {
           todo.push_front(next);
-          states_this_trimmed.insert(make_pair(next, trimmed.newState()));
+          states_this_trimmed.insert(std::make_pair(next, trimmed.newState()));
         }
         int trimmed_trg = states_this_trimmed[next];
         trimmed.linkStates(trimmed_src,
@@ -1278,28 +1280,32 @@ Transducer::intersect(Transducer &trimmer,
       UString this_right;
       this_a.getSymbol(this_right, this_a.decode(this_label).second);
 
-      if(this_right == JOIN_SYMBOL || this_right == LSX_BOUNDARY_SYMBOL)
+      if(this_right == JOIN_SYMBOL || this_right == LSX_BOUNDARY_SYMBOL ||
+         this_right == LSX_BOUNDARY_SPACE_SYMBOL ||
+         this_right == LSX_BOUNDARY_NO_SPACE_SYMBOL)
       {
         if(trimmer_preplus == trimmer_src) {
           // Keep the old preplus state if it was set; equal to current trimmer state means unset:
           trimmer_preplus_next = trimmer_src; // not _trg when join!
         }
         // Go to the start in trimmer, but record where we restarted from in case we later see a #:
-        next = make_pair(this_trg, make_pair(trimmer.initial, trimmer_preplus_next));
+        next = std::make_pair(this_trg, std::make_pair(trimmer.initial, trimmer_preplus_next));
         if(seen.find(next) == seen.end())
         {
           todo.push_front(next);
         }
         if(states_this_trimmed.find(next) == states_this_trimmed.end())
         {
-          states_this_trimmed.insert(make_pair(next, trimmed.newState()));
+          states_this_trimmed.insert(std::make_pair(next, trimmed.newState()));
         }
         int trimmed_trg = states_this_trimmed[next];
         trimmed.linkStates(trimmed_src, // fromState
                            trimmed_trg, // toState
                            this_label, // symbol-pair, using this alphabet
                            this_wt); //weight of transduction
-        if(this_right == LSX_BOUNDARY_SYMBOL && isFinal(this_trg))
+        if((this_right == LSX_BOUNDARY_SYMBOL ||
+            this_right == LSX_BOUNDARY_SPACE_SYMBOL ||
+            this_right == LSX_BOUNDARY_NO_SPACE_SYMBOL) && isFinal(this_trg))
         {
           trimmed.setFinal(trimmed_trg, default_weight);
         }
@@ -1316,14 +1322,14 @@ Transducer::intersect(Transducer &trimmer,
           trimmer_preplus_next = trimmer_trg;
         }
 
-        next = make_pair(this_trg, make_pair(trimmer_trg, trimmer_preplus_next));
+        next = std::make_pair(this_trg, std::make_pair(trimmer_trg, trimmer_preplus_next));
         if(seen.find(next) == seen.end())
         {
           todo.push_front(next);
         }
         if(states_this_trimmed.find(next) == states_this_trimmed.end())
         {
-          states_this_trimmed.insert(make_pair(next, trimmed.newState()));
+          states_this_trimmed.insert(std::make_pair(next, trimmed.newState()));
         }
         int trimmed_trg = states_this_trimmed[next];
         trimmed.linkStates(trimmed_src, // fromState
@@ -1338,7 +1344,7 @@ Transducer::intersect(Transducer &trimmer,
         // If we see a hash/group, we may have to rewind our trimmer state first:
         if(this_right == GROUP_SYMBOL && trimmer_preplus != trimmer_src)
         {
-          states_this_trimmed.insert(make_pair(make_pair(this_src, make_pair(trimmer_preplus,
+          states_this_trimmed.insert(std::make_pair(std::make_pair(this_src, std::make_pair(trimmer_preplus,
                                                                              trimmer_preplus)),
                                                trimmed_src));
           trimmer_src = trimmer_preplus;
@@ -1360,14 +1366,14 @@ Transducer::intersect(Transducer &trimmer,
              (this_right == trimmer_left ||
               (this_right == ((trimmer_left[0] == '<') ? ANY_TAG_SYMBOL : ANY_CHAR_SYMBOL))))
           {
-            next = make_pair(this_trg, make_pair(trimmer_trg, trimmer_preplus_next));
+            next = std::make_pair(this_trg, std::make_pair(trimmer_trg, trimmer_preplus_next));
             if(seen.find(next) == seen.end())
             {
               todo.push_front(next);
             }
             if(states_this_trimmed.find(next) == states_this_trimmed.end())
             {
-              states_this_trimmed.insert(make_pair(next, trimmed.newState()));
+              states_this_trimmed.insert(std::make_pair(next, trimmed.newState()));
             }
             int trimmed_trg = states_this_trimmed[next];
             trimmed.linkStates(trimmed_src, // fromState
@@ -1387,7 +1393,7 @@ Transducer::intersect(Transducer &trimmer,
     int s_trimmed = it.second;
     if(isFinal(s_this) && trimmer.isFinal(s_trimmer))
     {
-      trimmed.finals.insert(make_pair(s_trimmed, default_weight));
+      trimmed.finals.insert(std::make_pair(s_trimmed, default_weight));
     }
   }
 
@@ -1400,8 +1406,8 @@ void
 Transducer::updateAlphabet(Alphabet& old_alpha, Alphabet& new_alpha,
                            bool has_pairs)
 {
-  set<int32_t> symbol_pairs;
-  set<int32_t> symbols;
+  std::set<int32_t> symbol_pairs;
+  std::set<int32_t> symbols;
   for (auto& it : transitions) {
     for (auto& it2 : it.second) {
       if (!has_pairs && it2.first < 0) {
@@ -1419,7 +1425,7 @@ Transducer::updateAlphabet(Alphabet& old_alpha, Alphabet& new_alpha,
       }
     }
   }
-  map<int32_t, int32_t> symbol_update;
+  std::map<int32_t, int32_t> symbol_update;
   for (auto& it : symbols) {
     UString s;
     old_alpha.getSymbol(s, it);
@@ -1427,7 +1433,7 @@ Transducer::updateAlphabet(Alphabet& old_alpha, Alphabet& new_alpha,
     symbol_update[it] = new_alpha(s);
   }
   if (has_pairs) {
-    map<int32_t, int32_t> pair_update;
+    std::map<int32_t, int32_t> pair_update;
     for (auto& it : symbol_pairs) {
       int32_t l1 = old_alpha.decode(it).first;
       int32_t r1 = old_alpha.decode(it).second;
@@ -1437,7 +1443,7 @@ Transducer::updateAlphabet(Alphabet& old_alpha, Alphabet& new_alpha,
     }
     symbol_update.swap(pair_update);
   }
-  map<int, multimap<int, pair<int, double> > > new_trans;
+  std::map<int, std::multimap<int, std::pair<int, double> > > new_trans;
   for (auto& it : transitions) {
     new_trans[it.first].clear();
     for (auto& it2 : it.second) {
@@ -1445,8 +1451,24 @@ Transducer::updateAlphabet(Alphabet& old_alpha, Alphabet& new_alpha,
       if (symbol_update.find(s) != symbol_update.end()) {
         s = symbol_update[s];
       }
-      new_trans[it.first].insert(make_pair(s, make_pair(it2.second.first, it2.second.second)));
+      new_trans[it.first].insert(std::make_pair(s, std::make_pair(it2.second.first, it2.second.second)));
     }
   }
   transitions.swap(new_trans);
+}
+
+void
+Transducer::invert(Alphabet& alpha)
+{
+  std::map<int, std::multimap<int, std::pair<int, double>>> tmp_trans;
+  for (auto& it : transitions) {
+    std::multimap<int, std::pair<int, double>> tmp_state;
+    for (auto& it2 : it.second) {
+      auto pr = alpha.decode(it2.first);
+      int new_sym = alpha(pr.second, pr.first);
+      tmp_state.insert(std::make_pair(new_sym, it2.second));
+    }
+    tmp_trans.insert(std::make_pair(it.first, tmp_state));
+  }
+  transitions.swap(tmp_trans);
 }

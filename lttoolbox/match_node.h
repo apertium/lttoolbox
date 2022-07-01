@@ -25,10 +25,9 @@
 
 class MatchState;
 
-using namespace std;
 
 //class MatchNode;
-//typedef map<int, pair<MatchNode *, double> > MNode;
+//typedef std::map<int, std::pair<MatchNode *, double> > MNode;
 
 typedef SortedVector MNode;
 

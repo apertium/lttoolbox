@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import unittest
 from printtest import PrintTest
 
@@ -39,4 +37,18 @@ class SectionsFst(unittest.TestCase, PrintTest):
 0\t1\tX\tX\t0.000000\t
 1\t2\tε\t<np>\t0.000000\t
 2\t0.000000
+"""
+
+
+class Alphabet(unittest.TestCase, PrintTest):
+    printdix = "data/alphabet.att"
+    printdir = "lr"
+    printflags = ["-a"]
+    expectedOutput = """A
+B
+C
+a
+b
+c
+<h>
 """

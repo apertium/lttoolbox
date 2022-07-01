@@ -22,24 +22,23 @@
 #include <string>
 #include <getopt.h>
 
-using namespace std;
 
 void endProgram(char *name)
 {
   if(name != NULL)
   {
-    cout << basename(name) << " v" << PACKAGE_VERSION <<": build a letter transducer from a TMX translation memory" << endl;
-    cout << "USAGE: " << basename(name) << " [OPTIONS] lang1-lang2 tmx_file output_file" << endl;
-    cout << "Modes:" << endl;
-    cout << "  lang1:     input language" << endl;
-    cout << "  lang2:     output language" << endl;
-    cout << "Options:" <<endl;
+    std::cout << basename(name) << " v" << PACKAGE_VERSION <<": build a letter transducer from a TMX translation memory" << std::endl;
+    std::cout << "USAGE: " << basename(name) << " [OPTIONS] lang1-lang2 tmx_file output_file" << std::endl;
+    std::cout << "Modes:" << std::endl;
+    std::cout << "  lang1:     input language" << std::endl;
+    std::cout << "  lang2:     output language" << std::endl;
+    std::cout << "Options:" << std::endl;
 #if HAVE_GETOPT_LONG
-    cout << "  -o, --origin-code code   the language code to be taken as lang1" << endl;
-    cout << "  -m, --meta-code code     the language code to be taken as lang2" << endl;
+    std::cout << "  -o, --origin-code code   the language code to be taken as lang1" << std::endl;
+    std::cout << "  -m, --meta-code code     the language code to be taken as lang2" << std::endl;
 #else
-    cout << "  -o code   the language code to be taken as lang1" << endl;
-    cout << "  -m code   the language code to be taken as lang2" << endl;
+    std::cout << "  -o code   the language code to be taken as lang1" << std::endl;
+    std::cout << "  -m code   the language code to be taken as lang2" << std::endl;
 #endif
   }
   exit(EXIT_FAILURE);
@@ -108,7 +107,7 @@ int main(int argc, char *argv[])
   FILE *output = fopen(argv[argc-1], "wb");
   if(!output)
   {
-    cerr << "Error: Cannot open file '" << argv[2] << "'." << endl;
+    std::cerr << "Error: Cannot open file '" << argv[2] << "'." << std::endl;
     exit(EXIT_FAILURE);
   }
   c.write(output);

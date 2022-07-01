@@ -1,13 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-import os
 from proctest import ProcTest
-import unittest
-
-from subprocess import Popen, PIPE, call
-from tempfile import mkdtemp
-from shutil import rmtree
 
 class AppendProcTest(ProcTest):
     dix1 = "data/append1.dix"
@@ -17,21 +9,11 @@ class AppendProcTest(ProcTest):
     procflags = ["-z"]
 
     def compileTest(self, tmpd):
-        self.assertEqual(0, call([os.environ['LTTOOLBOX_PATH']+"/lt-comp",
-                                  self.dir1,
-                                  self.dix1,
-                                  tmpd+"/dix1.bin"],
-                                 stdout=PIPE))
-        self.assertEqual(0, call([os.environ['LTTOOLBOX_PATH']+"/lt-comp",
-                                  self.dir2,
-                                  self.dix2,
-                                  tmpd+"/dix2.bin"],
-                                 stdout=PIPE))
-        self.assertEqual(0, call([os.environ['LTTOOLBOX_PATH']+"/lt-append",
-                                  tmpd+"/dix1.bin",
-                                  tmpd+"/dix2.bin",
-                                  tmpd+"/compiled.bin"],
-                                 stdout=PIPE))
+        self.compileDix(self.dir1, self.dix1, binName=tmpd+'/dix1.bin')
+        self.compileDix(self.dir2, self.dix2, binName=tmpd+'/dix2.bin')
+        self.callProc('lt-append', [tmpd+"/dix1.bin",
+                                    tmpd+"/dix2.bin",
+                                    tmpd+"/compiled.bin"])
         return True
 
 class SimpleAppend(AppendProcTest):

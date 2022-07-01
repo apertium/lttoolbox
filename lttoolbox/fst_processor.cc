@@ -23,13 +23,11 @@
 #include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/file_utils.h>
 #include <lttoolbox/symbol_iter.h>
+#include <lttoolbox/string_utils.h>
 
 #include <iostream>
 #include <cerrno>
 #include <climits>
-
-
-using namespace std;
 
 
 UString const FSTProcessor::XML_TEXT_NODE           = "#text"_u;
@@ -39,8 +37,6 @@ UString const FSTProcessor::XML_RESTORE_CHAR_ELEM   = "restore-char"_u;
 UString const FSTProcessor::XML_RESTORE_CHARS_ELEM  = "restore-chars"_u;
 UString const FSTProcessor::XML_VALUE_ATTR          = "value"_u;
 UString const FSTProcessor::XML_CHAR_ELEM           = "char"_u;
-UString const FSTProcessor::WBLANK_START            = "[["_u;
-UString const FSTProcessor::WBLANK_END              = "]]"_u;
 UString const FSTProcessor::WBLANK_FINAL            = "[[/]]"_u;
 
 
@@ -80,14 +76,14 @@ FSTProcessor::streamError()
 }
 
 void
-FSTProcessor::parseICX(string const &file)
+FSTProcessor::parseICX(std::string const &file)
 {
   if(useIgnoredChars)
   {
     reader = xmlReaderForFile(file.c_str(), NULL, 0);
     if(reader == NULL)
     {
-      cerr << "Error: cannot open '" << file << "'." << endl;
+      std::cerr << "Error: cannot open '" << file << "'." << std::endl;
       exit(EXIT_FAILURE);
     }
     int ret = xmlTextReaderRead(reader);
@@ -105,14 +101,14 @@ FSTProcessor::parseICX(string const &file)
 }
 
 void
-FSTProcessor::parseRCX(string const &file)
+FSTProcessor::parseRCX(std::string const &file)
 {
   if(useRestoreChars)
   {
     reader = xmlReaderForFile(file.c_str(), NULL, 0);
     if(reader == NULL)
     {
-      cerr << "Error: cannot open '" << file << "'." << endl;
+      std::cerr << "Error: cannot open '" << file << "'." << std::endl;
       exit(EXIT_FAILURE);
     }
     int ret = xmlTextReaderRead(reader);
@@ -146,8 +142,8 @@ FSTProcessor::procNodeICX()
   }
   else
   {
-    cerr << "Error in ICX file (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Invalid node '<" << name << ">'." << endl;
+    std::cerr << "Error in ICX file (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Invalid node '<" << name << ">'." << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -184,71 +180,10 @@ FSTProcessor::procNodeRCX()
   }
   else
   {
-    cerr << "Error in RCX file (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Invalid node '<" << name << ">'." << endl;
+    std::cerr << "Error in RCX file (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Invalid node '<" << name << ">'." << std::endl;
     exit(EXIT_FAILURE);
   }
-}
-
-bool
-FSTProcessor::wblankPostGen(InputFile& input, UFILE *output)
-{
-  UString result = WBLANK_START;
-  UChar32 c = 0;
-  bool in_content = false;
-
-  while(!input.eof())
-  {
-    c = input.get();
-    if(in_content && c == '~')
-    {
-      if(result[result.size()-1] == ']') {
-        // We just saw the end of a wblank, may want to merge
-        wblankqueue.push(result);
-      }
-      else {
-        // wake-up-mark happened some characters into the wblanked word
-        write(result, output);
-      }
-      return true;
-    }
-    else
-    {
-      result += c;
-    }
-
-    if(c == '\\')
-    {
-      if (input.eof()) streamError();
-      result += input.get();
-    }
-    else if(c == ']')
-    {
-      c = input.get();
-      result += c;
-
-      if(c == ']')
-      {
-        int resultlen = result.size();
-        if(result[resultlen-5] == '[' && result[resultlen-4] == '[' && result[resultlen-3] == '/') //ending blank [[/]]
-        {
-          write(result, output);
-          break;
-        }
-        else
-        {
-          in_content = true; // Assumption: No nested wblanks, always balanced
-        }
-      }
-    }
-  }
-
-  if(c != ']')
-  {
-    streamError();
-  }
-
-  return false;
 }
 
 int
@@ -257,9 +192,6 @@ FSTProcessor::readAnalysis(InputFile& input)
   if (!input_buffer.isEmpty())
   {
     UChar32 val = input_buffer.next();
-    while ((useIgnoredChars || useDefaultIgnoredChars) && ignored_chars.find(val) != ignored_chars.end()) {
-      val = input_buffer.next();
-    }
     return val;
   }
 
@@ -275,7 +207,6 @@ FSTProcessor::readAnalysis(InputFile& input)
 
   while ((useIgnoredChars || useDefaultIgnoredChars) && ignored_chars.find(val) != ignored_chars.end())
   {
-    input_buffer.add(val);
     val = input.get();
   }
 
@@ -400,68 +331,93 @@ FSTProcessor::readTMAnalysis(InputFile& input)
   return val;
 }
 
-int32_t
-FSTProcessor::readPostgeneration(InputFile& input, UFILE *output)
+bool
+FSTProcessor::readTransliterationBlank(InputFile& input)
 {
-  if(!input_buffer.isEmpty())
-  {
-    return input_buffer.next();
+  UString blank;
+  while (!input.eof()) {
+    UChar32 c = input.get();
+    if (u_isspace(c)) {
+      blank += c;
+    } else if (c == '[') {
+      if (input.peek() == '[') {
+        break;
+      }
+      blank += input.readBlock('[', ']');
+    } else {
+      input.unget(c);
+      break;
+    }
+  }
+  if (!blank.empty()) {
+    blankqueue.push(blank);
+  }
+  return !blank.empty();
+}
+
+bool
+FSTProcessor::readTransliterationWord(InputFile& input)
+{
+  if (input.eof() || input.peek() == '\0') {
+    return false;
   }
 
-  UChar32 val = input.get();
-  int32_t altval = 0;
-  is_wblank = false;
-  if(input.eof())
-  {
-    return 0;
+  if (!readTransliterationBlank(input)) {
+    blankqueue.push(""_u);
   }
 
-  switch(val)
-  {
-    case '<':
-      altval = alphabet(input.readBlock('<', '>'));
-      input_buffer.add(altval);
-      return altval;
-
-    case '[':
-      val = input.get();
-
-      if(val == '[')
-      {
-        if(collect_wblanks)
-        {
-          wblankqueue.push(input.finishWBlank());
-          is_wblank = true;
-          return static_cast<int32_t>(' ');
-        }
-        else if(wblankPostGen(input, output))
-        {
-          return static_cast<int32_t>('~');
-        }
-        else
-        {
-          is_wblank = true;
-          return static_cast<int32_t>(' ');
+  UString wblank;
+  std::vector<int32_t> word;
+  if (input.peek() == '[') {
+    input.get();
+    wblank = input.finishWBlank();
+    while (!input.eof()) {
+      if (readTransliterationBlank(input)) {
+        word.push_back(static_cast<int32_t>(' '));
+        if (input.peek() == '[') break;
+      } else {
+        UChar32 c = input.get();
+        if (c == '[') {
+          input.unget(c);
+          break;
+        } else if (c == '\\') {
+          word.push_back(static_cast<int32_t>(input.get()));
+        } else if (c == '<') {
+          word.push_back(alphabet(input.readBlock('<', '>')));
+        } else if (c == '\0') {
+          input.unget(c);
+          break;
+        } else {
+          word.push_back(static_cast<int32_t>(c));
         }
       }
-      else
-      {
-        input.unget(val);
-        blankqueue.push(input.readBlock('[', ']'));
-
-        input_buffer.add(static_cast<int32_t>(' '));
-        return static_cast<int32_t>(' ');
+    }
+    if (input.peek() == '[') {
+      input.get();
+      input.finishWBlank();
+    }
+  } else {
+    while (!input.eof()) {
+      UChar32 c = input.get();
+      if (u_isspace(c) || c == '[' || c == '\0') {
+        input.unget(c);
+        break;
+      } else if (c == '\\') {
+        word.push_back(static_cast<int32_t>(input.get()));
+      } else if (c == '<') {
+        word.push_back(alphabet(input.readBlock('<', '>')));
+      } else {
+        word.push_back(static_cast<int32_t>(c));
       }
-
-    case '\\':
-      val = input.get();
-      input_buffer.add(static_cast<int32_t>(val));
-      return val;
-
-    default:
-      input_buffer.add(val);
-      return val;
+    }
   }
+  if (word.empty()) {
+    return false;
+  }
+  wblankqueue.push_back(wblank);
+  transliteration_queue.push_back(word);
+
+  return true;
 }
 
 void
@@ -595,7 +551,7 @@ FSTProcessor::readGeneration(InputFile& input, UFILE *output)
   return 0x7fffffff;
 }
 
-pair<UString, int>
+std::pair<UString, int>
 FSTProcessor::readBilingual(InputFile& input, UFILE *output)
 {
   UChar32 val = input.get();
@@ -603,7 +559,7 @@ FSTProcessor::readBilingual(InputFile& input, UFILE *output)
 
   if(input.eof())
   {
-    return pair<UString, int>(symbol, 0x7fffffff);
+    return std::pair<UString, int>(symbol, 0x7fffffff);
   }
 
   if(outOfWord)
@@ -613,7 +569,7 @@ FSTProcessor::readBilingual(InputFile& input, UFILE *output)
       val = input.get();
       if(input.eof())
       {
-        return pair<UString, int>(symbol, 0x7fffffff);
+        return std::pair<UString, int>(symbol, 0x7fffffff);
       }
     }
     else if(val == '\\')
@@ -622,14 +578,14 @@ FSTProcessor::readBilingual(InputFile& input, UFILE *output)
       val = input.get();
       if(input.eof())
       {
-        return pair<UString, int>(symbol, 0x7fffffff);
+        return std::pair<UString, int>(symbol, 0x7fffffff);
       }
       u_fputc(val,output);
       skipUntil(input, output, '^');
       val = input.get();
       if(input.eof())
       {
-        return pair<UString, int>(symbol, 0x7fffffff);
+        return std::pair<UString, int>(symbol, 0x7fffffff);
       }
     }
     else
@@ -639,7 +595,7 @@ FSTProcessor::readBilingual(InputFile& input, UFILE *output)
       val = input.get();
       if(input.eof())
       {
-        return pair<UString, int>(symbol, 0x7fffffff);
+        return std::pair<UString, int>(symbol, 0x7fffffff);
       }
     }
     outOfWord = false;
@@ -648,12 +604,12 @@ FSTProcessor::readBilingual(InputFile& input, UFILE *output)
   if(val == '\\')
   {
     val = input.get();
-    return pair<UString, int>(symbol, val);
+    return std::pair<UString, int>(symbol, val);
   }
   else if(val == '$')
   {
     outOfWord = true;
-    return pair<UString, int>(symbol, static_cast<int32_t>('$'));
+    return std::pair<UString, int>(symbol, static_cast<int32_t>('$'));
   }
   else if(val == '<')
   {
@@ -665,7 +621,7 @@ FSTProcessor::readBilingual(InputFile& input, UFILE *output)
     {
       symbol = cad;
     }
-    return pair<UString, int>(symbol, res);
+    return std::pair<UString, int>(symbol, res);
   }
   else if(val == '[')
   {
@@ -683,7 +639,7 @@ FSTProcessor::readBilingual(InputFile& input, UFILE *output)
     return readBilingual(input, output);
   }
 
-  return pair<UString, int>(symbol, val);
+  return std::pair<UString, int>(symbol, val);
 }
 
 void
@@ -697,68 +653,9 @@ FSTProcessor::flushBlanks(UFILE *output)
 }
 
 void
-FSTProcessor::flushWblanks(UFILE *output)
-{
-  while(wblankqueue.size() > 0)
-  {
-    write(wblankqueue.front(), output);
-    wblankqueue.pop();
-  }
-}
-
-UString
-FSTProcessor::combineWblanks()
-{
-  UString final_wblank;
-  UString last_wblank;
-  bool seen_wblank = false;
-
-  while(wblankqueue.size() > 0)
-  {
-    if(wblankqueue.front().compare(WBLANK_FINAL) == 0)
-    {
-      if(seen_wblank) {
-        if(final_wblank.empty())
-        {
-          final_wblank += WBLANK_START;
-        }
-        else if(final_wblank.size() > 2)
-        {
-          final_wblank += "; "_u;
-        }
-
-        final_wblank += last_wblank.substr(2,last_wblank.size()-4); //add wblank without brackets [[..]]
-      }
-      else {
-        need_end_wblank = true;
-      }
-      last_wblank.clear();
-    }
-    else
-    {
-      seen_wblank = true;
-      last_wblank = wblankqueue.front();
-    }
-    wblankqueue.pop();
-  }
-
-  if(!last_wblank.empty())
-  {
-    wblankqueue.push(last_wblank);
-  }
-
-  if(!final_wblank.empty())
-  {
-    final_wblank += WBLANK_END;
-    need_end_wblank = true;
-  }
-  return final_wblank;
-}
-
-void
 FSTProcessor::calcInitial()
 {
-  set<TransducerExe*> temp;
+  std::set<TransducerExe*> temp;
   for(auto& it : transducers) {
     temp.insert(&it.second);
   }
@@ -766,43 +663,30 @@ FSTProcessor::calcInitial()
   initial_state.init(temp);
 }
 
-bool
-FSTProcessor::endsWith(UString const &str, UString const &suffix)
-{
-  if(str.size() < suffix.size())
-  {
-    return false;
-  }
-  else
-  {
-    return str.substr(str.size()-suffix.size()) == suffix;
-  }
-}
-
 void
 FSTProcessor::classifyFinals()
 {
   for(auto& it : transducers) {
-    if(endsWith(it.first, "@inconditional"_u))
+    if(StringUtils::endswith(it.first, "@inconditional"_u))
     {
       inconditional.insert(&it.second);
     }
-    else if(endsWith(it.first, "@standard"_u))
+    else if(StringUtils::endswith(it.first, "@standard"_u))
     {
       standard.insert(&it.second);
     }
-    else if(endsWith(it.first, "@postblank"_u))
+    else if(StringUtils::endswith(it.first, "@postblank"_u))
     {
       postblank.insert(&it.second);
     }
-    else if(endsWith(it.first, "@preblank"_u))
+    else if(StringUtils::endswith(it.first, "@preblank"_u))
     {
       preblank.insert(&it.second);
     }
     else
     {
-      cerr << "Error: Unsupported transducer type for '";
-      cerr << it.first << "'." << endl;
+      std::cerr << "Error: Unsupported transducer type for '";
+      std::cerr << it.first << "'." << std::endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -811,8 +695,12 @@ FSTProcessor::classifyFinals()
 UString
 FSTProcessor::filterFinals(const State& state, const UString& casefrom)
 {
-  bool firstupper = u_isupper(casefrom[0]);
-  bool uppercase = casefrom.size() > 1 && firstupper && u_isupper(casefrom[1]);
+  bool firstupper = false, uppercase = false;
+  if (!dictionaryCase) {
+    firstupper = u_isupper(casefrom[0]);
+    uppercase = (casefrom.size() > 1 &&
+                 firstupper && u_isupper(casefrom[casefrom.size()-1]));
+  }
   return state.filterFinals(all_finals, alphabet, escaped_chars,
                             displayWeightsMode, maxAnalyses, maxWeightClasses,
                             uppercase, firstupper, 0);
@@ -999,7 +887,7 @@ FSTProcessor::load(FILE *input)
       ptr = str_write.init(ptr);
 
       StringRef let_loc = reinterpret_cast<StringRef*>(ptr)[0];
-      vector<int32_t> vec;
+      std::vector<int32_t> vec;
       ustring_to_vec32(str_write.get(let_loc), vec);
       alphabetic_chars.insert(vec.begin(), vec.end());
       ptr += sizeof(StringRef);
@@ -1021,7 +909,7 @@ FSTProcessor::load(FILE *input)
 
       uint32_t s = read_le_32(input);
       uint32_t c = read_le_32(input);
-      vector<int32_t> vec;
+      std::vector<int32_t> vec;
       ustring_to_vec32(str_write.get(s, c), vec);
       alphabetic_chars.insert(vec.begin(), vec.end());
 
@@ -1094,7 +982,7 @@ FSTProcessor::initGeneration()
 }
 
 void
-FSTProcessor::initPostgeneration()
+FSTProcessor::initTransliteration()
 {
   initGeneration();
 }
@@ -1107,7 +995,7 @@ FSTProcessor::initBiltrans()
 
 
 UString
-FSTProcessor::compoundAnalysis(UString input_word, bool uppercase, bool firstupper)
+FSTProcessor::compoundAnalysis(UString input_word)
 {
   const int MAX_COMBINATIONS = 32767;
 
@@ -1121,8 +1009,8 @@ FSTProcessor::compoundAnalysis(UString input_word, bool uppercase, bool firstupp
 
     if(current_state.size() > MAX_COMBINATIONS)
     {
-      cerr << "Warning: compoundAnalysis's MAX_COMBINATIONS exceeded for '" << input_word << "'" << endl;
-      cerr << "         gave up at char " << i << " '" << val << "'." << endl;
+      std::cerr << "Warning: compoundAnalysis's MAX_COMBINATIONS exceeded for '" << input_word << "'" << std::endl;
+      std::cerr << "         gave up at char " << i << " '" << val << "'." << std::endl;
 
       UString nullString;
       return  nullString;
@@ -1141,9 +1029,7 @@ FSTProcessor::compoundAnalysis(UString input_word, bool uppercase, bool firstupp
   }
 
   current_state.pruneCompounds(compoundRSymbol, '+', compound_max_elements);
-  UString result = current_state.filterFinals(all_finals, alphabet, escaped_chars, displayWeightsMode, maxAnalyses, maxWeightClasses, uppercase, firstupper);
-
-  return result;
+  return filterFinals(current_state, input_word);
 }
 
 
@@ -1157,7 +1043,7 @@ FSTProcessor::initDecompositionSymbols()
      && (compoundOnlyLSymbol=alphabet("<@compound:only-L>"_u)) == 0
      && (compoundOnlyLSymbol=alphabet("<compound-only-L>"_u)) == 0)
   {
-    cerr << "Warning: Decomposition symbol <:compound:only-L> not found" << endl;
+    std::cerr << "Warning: Decomposition symbol <:compound:only-L> not found" << std::endl;
   }
   else if(!showControlSymbols)
   {
@@ -1170,7 +1056,7 @@ FSTProcessor::initDecompositionSymbols()
      && (compoundRSymbol=alphabet("<@compound:R>"_u)) == 0
      && (compoundRSymbol=alphabet("<compound-R>"_u)) == 0)
   {
-    cerr << "Warning: Decomposition symbol <:compound:R> not found" << endl;
+    std::cerr << "Warning: Decomposition symbol <:compound:R> not found" << std::endl;
   }
   else if(!showControlSymbols)
   {
@@ -1203,10 +1089,10 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
   UString sf;            // surface form
   UString lf_spcmp;      // space compound analysis
   bool seen_cpL = false; // have we seen a <compound-only-L> tag so far
+  size_t last_start = input_buffer.getPos(); // position in input_buffer when sf was last cleared
   size_t last = 0;       // position in input_buffer after last analysis
   size_t last_size = 0;  // size of sf at last analysis
-  bool firstupper = false, uppercase = false;
-  map<int, set<int> >::iterator rcx_map_ptr;
+  std::map<int, std::set<int> >::iterator rcx_map_ptr;
 
   UChar32 val;
   do
@@ -1217,80 +1103,44 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
     {
       if(current_state.isFinal(inconditional))
       {
-        if(!dictionaryCase)
-        {
-          firstupper = u_isupper(sf[0]);
-          uppercase = firstupper && u_isupper(sf[sf.size()-1]);
-        }
-
         if(do_decomposition && compoundOnlyLSymbol != 0)
         {
           current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
         }
-        lf = current_state.filterFinals(all_finals, alphabet,
-                                        escaped_chars,
-                                        displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                        uppercase, firstupper);
+        lf = filterFinals(current_state, sf);
         last_incond = true;
         last = input_buffer.getPos();
         last_size = sf.size();
       }
       else if(current_state.isFinal(postblank))
       {
-        if(!dictionaryCase)
-        {
-          firstupper = u_isupper(sf[0]);
-          uppercase = firstupper && u_isupper(sf[sf.size()-1]);
-        }
-
         if(do_decomposition && compoundOnlyLSymbol != 0)
         {
           current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
         }
-        lf = current_state.filterFinals(all_finals, alphabet,
-                                        escaped_chars,
-                                        displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                        uppercase, firstupper);
+        lf = filterFinals(current_state, sf);
         last_postblank = true;
         last = input_buffer.getPos();
         last_size = sf.size();
       }
       else if(current_state.isFinal(preblank))
       {
-        if(!dictionaryCase)
-        {
-          firstupper = u_isupper(sf[0]);
-          uppercase = firstupper && u_isupper(sf[sf.size()-1]);
-        }
-
         if(do_decomposition && compoundOnlyLSymbol != 0)
         {
           current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
         }
-        lf = current_state.filterFinals(all_finals, alphabet,
-                                        escaped_chars,
-                                        displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                        uppercase, firstupper);
+        lf = filterFinals(current_state, sf);
         last_preblank = true;
         last = input_buffer.getPos();
         last_size = sf.size();
       }
       else if(!isAlphabetic(val))
       {
-        if(!dictionaryCase)
-        {
-          firstupper = u_isupper(sf[0]);
-          uppercase = firstupper && u_isupper(sf[sf.size()-1]);
-        }
-
         if(do_decomposition && compoundOnlyLSymbol != 0)
         {
           current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
         }
-        lf = current_state.filterFinals(all_finals, alphabet,
-                                        escaped_chars,
-                                        displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                        uppercase, firstupper);
+        lf = filterFinals(current_state, sf);
         last_postblank = false;
         last_preblank = false;
         last_incond = false;
@@ -1319,7 +1169,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
     if(useRestoreChars && rcx_map.find(val) != rcx_map.end())
     {
       rcx_map_ptr = rcx_map.find(val);
-      set<int> tmpset = rcx_map_ptr->second;
+      std::set<int> tmpset = rcx_map_ptr->second;
       if(!u_isupper(val) || caseSensitive)
       {
         current_state.step(val, tmpset);
@@ -1363,11 +1213,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
         do {
           alphabet.getSymbol(sf, val);
         } while ((val = readAnalysis(input)) && isAlphabetic(val));
-        if (!dictionaryCase) {
-          firstupper = u_isupper(sf[0]);
-          uppercase = firstupper && u_isupper(sf[sf.size() - 1]);
-        }
-        lf_spcmp = compoundAnalysis(sf, uppercase, firstupper);
+        lf_spcmp = compoundAnalysis(sf);
         if(lf_spcmp.empty()) {  // didn't work, rewind!
           input_buffer.back(sf.size() - oldsf.size());
           val = oldval;
@@ -1422,28 +1268,19 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
         }
         while((val = readAnalysis(input)) && isAlphabetic(val));
 
-        unsigned int limit = firstNotAlpha(sf);
-        unsigned int size = sf.size();
-        limit = (limit == static_cast<unsigned int>(UString::npos)?size:limit);
-        if(limit == 0)
+        auto limit = firstNotAlpha(sf);
+        if(limit.i_codepoint == 0)
         {
-          input_buffer.back(sf.size());
+          input_buffer.setPos(1 + last_start);
           writeEscaped(sf.substr(0,1), output);
         }
         else
         {
-          input_buffer.back(1+(size-limit));
-          UString unknown_word = sf.substr(0, limit);
+          input_buffer.setPos(last_start + limit.i_codepoint);
+          UString unknown_word = sf.substr(0, limit.i_utf16);
           if(do_decomposition)
           {
-            if(!dictionaryCase)
-            {
-              firstupper = u_isupper(sf[0]);
-              uppercase = firstupper && u_isupper(sf[sf.size()-1]);
-            }
-
-            UString compound;
-            compound = compoundAnalysis(unknown_word, uppercase, firstupper);
+            UString compound = compoundAnalysis(unknown_word);
             if(!compound.empty())
             {
               printWord(unknown_word, compound, output);
@@ -1461,28 +1298,19 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
       }
       else if(lf.empty())
       {
-        unsigned int limit = firstNotAlpha(sf);
-        unsigned int size = sf.size();
-        limit = (limit == static_cast<unsigned int >(UString::npos)?size:limit);
-        if(limit == 0)
+        auto limit = firstNotAlpha(sf);
+        if(limit.i_codepoint == 0)
         {
-          input_buffer.back(sf.size());
+          input_buffer.setPos(1 + last_start);
           writeEscaped(sf.substr(0,1), output);
         }
         else
         {
-          input_buffer.back(1+(size-limit));
-          UString unknown_word = sf.substr(0, limit);
+          input_buffer.setPos(last_start + limit.i_codepoint);
+          UString unknown_word = sf.substr(0, limit.i_utf16);
           if(do_decomposition)
           {
-            if(!dictionaryCase)
-            {
-              firstupper = u_isupper(sf[0]);
-              uppercase = firstupper && u_isupper(sf[sf.size()-1]);
-            }
-
-            UString compound;
-            compound = compoundAnalysis(unknown_word, uppercase, firstupper);
+            UString compound = compoundAnalysis(unknown_word);
             if(!compound.empty())
             {
               printWord(unknown_word, compound, output);
@@ -1496,7 +1324,6 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
           {
             printUnknownWord(unknown_word, output);
           }
-
         }
       }
       else
@@ -1515,6 +1342,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
       current_state = initial_state;
       lf.clear();
       sf.clear();
+      last_start = input_buffer.getPos();
       last_incond = false;
       last_postblank = false;
       last_preblank = false;
@@ -1535,6 +1363,10 @@ FSTProcessor::analysis_wrapper_null_flush(InputFile& input, UFILE *output)
     analysis(input, output);
     u_fputc('\0', output);
     u_fflush(output);
+    // analysis() doesn't always leave input_buffer empty
+    // which results in repeatedly analyzing the same string
+    // so clear it here
+    while (!input_buffer.isEmpty()) input_buffer.next();
   }
 }
 
@@ -1548,42 +1380,6 @@ FSTProcessor::generation_wrapper_null_flush(InputFile& input, UFILE *output,
   while(!input.eof())
   {
     generation(input, output, mode);
-    u_fputc('\0', output);
-    u_fflush(output);
-  }
-}
-
-void
-FSTProcessor::postgeneration_wrapper_null_flush(InputFile& input, UFILE *output)
-{
-  setNullFlush(false);
-  while(!input.eof())
-  {
-    postgeneration(input, output);
-    u_fputc('\0', output);
-    u_fflush(output);
-  }
-}
-
-void
-FSTProcessor::intergeneration_wrapper_null_flush(InputFile& input, UFILE *output)
-{
-  setNullFlush(false);
-  while (!input.eof())
-  {
-    intergeneration(input, output);
-    u_fputc('\0', output);
-    u_fflush(output);
-  }
-}
-
-void
-FSTProcessor::transliteration_wrapper_null_flush(InputFile& input, UFILE *output)
-{
-  setNullFlush(false);
-  while(!input.eof())
-  {
-    transliteration(input, output);
     u_fputc('\0', output);
     u_fflush(output);
   }
@@ -1898,384 +1694,207 @@ FSTProcessor::generation(InputFile& input, UFILE *output, GenerationMode mode)
 void
 FSTProcessor::postgeneration(InputFile& input, UFILE *output)
 {
-  if(getNullFlush())
-  {
-    postgeneration_wrapper_null_flush(input, output);
-  }
-
-  bool skip_mode = true;
-  collect_wblanks = false;
-  need_end_wblank = false;
-  State current_state = initial_state;
-  UString lf;
-  UString sf;
-  int last = 0;
-  set<UChar32> empty_escaped_chars;
-
-  while(UChar32 val = readPostgeneration(input, output))
-  {
-    if(val == '~')
-    {
-      skip_mode = false;
-      collect_wblanks = true;
-    }
-
-    if(is_wblank && skip_mode)
-    {
-      //do nothing
-    }
-    else if(skip_mode)
-    {
-      if(u_isspace(val))
-      {
-        if(need_end_wblank)
-        {
-          write(WBLANK_FINAL, output);
-          need_end_wblank = false;
-        }
-
-        printSpace(val, output);
-      }
-      else
-      {
-        if(!need_end_wblank)
-        {
-          flushWblanks(output);
-        }
-
-        if(isEscaped(val))
-        {
-          u_fputc('\\', output);
-        }
-        u_fputc(val, output);
-
-        if(need_end_wblank)
-        {
-          write(WBLANK_FINAL, output);
-          need_end_wblank = false;
-        }
-      }
-    }
-    else
-    {
-      if(is_wblank)
-      {
-        continue;
-      }
-
-      // test for final states
-      if(current_state.isFinal(all_finals))
-      {
-        bool firstupper = u_isupper(sf[1]);
-        bool uppercase = sf.size() > 1 && firstupper && u_isupper(sf[2]);
-        lf = current_state.filterFinals(all_finals, alphabet,
-                                        empty_escaped_chars,
-                                        displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                        uppercase, firstupper, 0);
-
-        // case of the beggining of the next word
-
-        UString mybuf;
-        for(size_t i = sf.size(); i > 0; --i)
-        {
-          if(!isalpha(sf[i-1]))
-          {
-            break;
-          }
-          else
-          {
-            mybuf = sf[i-1] + mybuf;
-          }
-        }
-
-        if(mybuf.size() > 0)
-        {
-          bool myfirstupper = u_isupper(mybuf[0]);
-          bool myuppercase = mybuf.size() > 1 && u_isupper(mybuf[1]);
-
-          for(size_t i = lf.size(); i > 0; --i)
-          {
-            if(!isalpha(lf[i-1]))
-            {
-              if(myfirstupper && i != lf.size())
-              {
-                lf[i] = u_toupper(lf[i]);
-              }
-              else
-              {
-                lf[i] = u_tolower(lf[i]);
-              }
-              break;
-            }
-            else
-            {
-              if(myuppercase)
-              {
-                lf[i-1] = u_toupper(lf[i-1]);
-              }
-              else
-              {
-                lf[i-1] = u_tolower(lf[i-1]);
-              }
-            }
-          }
-        }
-
-        last = input_buffer.getPos();
-      }
-
-      current_state.step_case(val, caseSensitive);
-
-      if(current_state.size() != 0)
-      {
-        alphabet.getSymbol(sf, val);
-      }
-      else
-      {
-        UString final_wblank = combineWblanks();
-        write(final_wblank, output);
-
-        if(lf.empty())
-        {
-          unsigned int mark = sf.size();
-          unsigned int space_index = sf.size();
-
-          for(unsigned int i = 1, limit = sf.size(); i < limit; i++)
-          {
-            if(sf[i] == '~')
-            {
-              mark = i;
-              break;
-            }
-            else if(sf[i] == ' ')
-            {
-              space_index = i;
-            }
-          }
-
-          if(space_index != sf.size())
-          {
-            write(sf.substr(1, space_index-1), output);
-
-            if(need_end_wblank)
-            {
-              write(WBLANK_FINAL, output);
-              need_end_wblank = false;
-              u_fputc(sf[space_index], output);
-              flushWblanks(output);
-            }
-            else
-            {
-              u_fputc(sf[space_index], output);
-            }
-
-            write(sf.substr(space_index+1, mark-space_index-1), output);
-          }
-          else
-          {
-            flushWblanks(output);
-            write(sf.substr(1, mark-1), output);
-          }
-
-          if(mark == sf.size())
-          {
-            input_buffer.back(1);
-          }
-          else
-          {
-            input_buffer.back(sf.size()-mark);
-          }
-        }
-        else
-        {
-          write(lf.substr(1,lf.size()-3), output);
-          input_buffer.setPos(last);
-          input_buffer.back(2);
-          val = lf[lf.size()-2];
-          writeChar(val, output, false);
-        }
-
-        current_state = initial_state;
-        lf.clear();
-        sf.clear();
-        skip_mode = true;
-        collect_wblanks = false;
-      }
-    }
-  }
-
-  // print remaining blanks
-  flushBlanks(output);
+  transliteration_drop_tilde = true;
+  transliteration(input, output);
 }
 
 void
 FSTProcessor::intergeneration(InputFile& input, UFILE *output)
 {
-  if (getNullFlush())
-  {
-    intergeneration_wrapper_null_flush(input, output);
-  }
-
-  bool skip_mode = true;
-  State current_state = initial_state;
-  UString target;
-  UString source;
-  int last = 0;
-  set<UChar32> empty_escaped_chars;
-
-  while (true)
-  {
-    UChar32 val = readPostgeneration(input, output);
-
-    if (val == '~')
-    {
-      skip_mode = false;
-    }
-
-    if (skip_mode)
-    {
-      writeChar(val, output, false);
-    }
-    else
-    {
-      // test for final states
-      if (current_state.isFinal(all_finals))
-      {
-        bool firstupper = u_isupper(source[1]);
-        bool uppercase = source.size() > 1 && firstupper && u_isupper(source[2]);
-        target = current_state.filterFinals(all_finals, alphabet,
-                                        empty_escaped_chars,
-                                        displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                        uppercase, firstupper, 0);
-
-        last = input_buffer.getPos();
-      }
-
-      if (val != '\0')
-      {
-        current_state.step_case(val, caseSensitive);
-      }
-
-      if (val != '\0' && current_state.size() != 0)
-      {
-        alphabet.getSymbol(source, val);
-      }
-      else
-      {
-        if (target.empty()) // no match
-        {
-          if (val == '\0')
-          {
-            // flush source
-            write(source, output);
-          }
-          else
-          {
-            u_fputc(source[0], output);
-
-            unsigned int mark, limit;
-            for (mark = 1, limit = source.size(); mark < limit && source[mark] != '~' ; mark++)
-            {
-              u_fputc(source[mark], output);
-            }
-
-            if (mark != source.size())
-            {
-              int back = source.size() - mark;
-              input_buffer.back(back);
-            }
-
-            if (val == '~')
-            {
-              input_buffer.back(1);
-            } else {
-               u_fputc(val, output);
-            }
-          }
-        }
-        else
-        {
-          for(unsigned int i=1; i<target.size(); i++) {
-            writeChar(target[i], output, false);
-          }
-
-          if (val != '\0')
-          {
-            input_buffer.setPos(last);
-            input_buffer.back(1);
-          }
-        }
-
-        current_state = initial_state;
-        target.clear();
-        source.clear();
-        skip_mode = true;
-      }
-    }
-
-    if (val == '\0')
-    {
-      break;
-    }
-  }
-
-  // print remaining blanks
-  flushBlanks(output);
+  transliteration_drop_tilde = false;
+  transliteration(input, output);
 }
 
 void
 FSTProcessor::transliteration(InputFile& input, UFILE *output)
 {
-  if(getNullFlush())
-  {
-    transliteration_wrapper_null_flush(input, output);
-  }
+  size_t start_pos = 0;
+  size_t cur_word = 0;
+  size_t cur_pos = 0;
+  size_t match_pos = 0;
+  current_state = initial_state;
+  UString last_match;
+  int space_diff = 0;
 
-  State current_state = initial_state;
-  UString lf;
-  UString sf;
-  UString last_lf;
-  int rewind_point = 0;
-  int last_match = 0;
-  UChar32 firstchar = 0;
+  bool firstupper = false;
+  bool uppercase = false;
+  bool have_first = false;
+  bool have_second = false;
 
-  while(UChar32 val = readPostgeneration(input, output)) {
-    if (sf.empty()) {
-      firstchar = val;
-      rewind_point = input_buffer.getPos();
-    } else {
-      lf = filterFinals(current_state, sf);
-      if (!lf.empty()) {
-        last_match = input_buffer.getPos();
-        last_lf.swap(lf);
+  while (true) {
+    if (transliteration_queue.empty()) {
+      if (!blankqueue.empty()) {
+        flushBlanks(output);
+      }
+      if (!readTransliterationWord(input)) {
+        flushBlanks(output);
+        if (input.eof()) {
+          break;
+        } else {
+          u_fputc(input.get(), output);
+          u_fflush(output);
+          continue;
+        }
       }
     }
-    current_state.step(val);
-    if (current_state.size() != 0) {
-      alphabet.getSymbol(sf, val);
-    } else {
-      if (last_lf.empty()) {
-        input_buffer.setPos(rewind_point);
-        if (u_isspace(firstchar)) {
-          printSpace(firstchar, output);
-        } else {
-          if (isEscaped(firstchar)) {
-            u_fputc('\\', output);
+
+    if (current_state.isFinal(all_finals)) {
+      last_match = current_state.filterFinals(all_finals, alphabet,
+                                              escaped_chars, displayWeightsMode,
+                                              maxAnalyses, maxWeightClasses,
+                                              uppercase, firstupper);
+      while (cur_word > 0) {
+        if (cur_word == 1) {
+          if (cur_pos == 0 && last_match[last_match.size()-1] == ' ') {
+            match_pos = transliteration_queue.front().size();
+            last_match = last_match.substr(0, last_match.size()-1);
+            break;
+          } else {
+            cur_pos += transliteration_queue.front().size() + 1;
           }
-          u_fputc(firstchar, output);
         }
-      } else {
-        write(last_lf.substr(1), output);
-        last_lf.clear();
-        input_buffer.setPos(last_match);
-        input_buffer.back(1);
+        std::vector<int32_t> word = transliteration_queue.front();
+        transliteration_queue.pop_front();
+        word.push_back(static_cast<int32_t>(' '));
+        word.insert(word.end(), transliteration_queue.front().begin(),
+                    transliteration_queue.front().end());
+        transliteration_queue.pop_front();
+        transliteration_queue.push_front(word);
+        UString wblank = wblankqueue.front();
+        wblankqueue.pop_front();
+        wblank = StringUtils::merge_wblanks(wblank, wblankqueue.front());
+        wblankqueue.pop_front();
+        wblankqueue.push_front(wblank);
+        cur_word--;
       }
-      sf.clear();
+      if (cur_word == 0) {
+        match_pos = cur_pos;
+      }
+    }
+
+    int32_t sym = 0;
+    bool is_end = false;
+    if (cur_pos < transliteration_queue[cur_word].size()) {
+      sym = transliteration_queue[cur_word][cur_pos];
+      cur_pos++;
+    } else {
+      if (cur_word + 1 == transliteration_queue.size() &&
+          !readTransliterationWord(input)) {
+        is_end = true;
+      } else {
+        sym = static_cast<int32_t>(' ');
+        cur_word++;
+        cur_pos = 0;
+      }
+    }
+
+    if (isAlphabetic(sym)) {
+      if (!have_first) {
+        have_first = true;
+        if (u_isupper(sym)) {
+          firstupper = true;
+        } else {
+          firstupper = false;
+          have_second = true;
+        }
+      } else if (!have_second) {
+        have_second = true;
+        uppercase = u_isupper(sym);
+      }
+    }
+
+    current_state.step_case(sym, caseSensitive);
+
+    if (current_state.size() == 0 || is_end) {
+      if (last_match.empty()) {
+        start_pos++;
+      } else {
+        std::vector<int32_t> match = alphabet.tokenize(last_match.substr(1));
+        last_match.clear();
+        std::vector<int32_t> word = transliteration_queue.front();
+        transliteration_queue.pop_front();
+        size_t i = 0;
+        for (; i < match.size() && i < match_pos - start_pos; i++) {
+          if (match[match.size()-i-1] != word[match_pos-i-1]) {
+            break;
+          }
+        }
+        std::vector<int32_t> new_word;
+        new_word.insert(new_word.end(), word.begin(), word.begin()+start_pos);
+        new_word.insert(new_word.end(), match.begin(), match.end());
+        new_word.insert(new_word.end(), word.begin()+match_pos, word.end());
+        transliteration_queue.push_front(new_word);
+        int sf_spaces = 0;
+        int lf_spaces = 0;
+        for (auto c : word) {
+          if (c == static_cast<int32_t>(' ')) sf_spaces++;
+        }
+        for (auto c : new_word) {
+          if (c == static_cast<int32_t>(' ')) lf_spaces++;
+        }
+        space_diff += (lf_spaces - sf_spaces);
+        size_t last_start = start_pos;
+        start_pos = match_pos - i;
+        if (start_pos == last_start) start_pos++;
+        cur_pos = start_pos;
+        cur_word = 0;
+      }
+      if (start_pos >= transliteration_queue.front().size()) {
+        write(blankqueue.front(), output);
+        blankqueue.pop();
+        bool has_wblank = !wblankqueue.front().empty();
+        write(wblankqueue.front(), output);
+        wblankqueue.pop_front();
+        auto word = transliteration_queue.front();
+        transliteration_queue.pop_front();
+        int space_count = 0;
+        for (auto c : word) {
+          if (c == static_cast<int32_t>(' ')) space_count++;
+        }
+        int space_out = 0;
+        UString out;
+        for (auto c : word) {
+          if (c == ' ') {
+            if (space_out + space_diff >= space_count) {
+              out += ' ';
+            } else {
+              out += blankqueue.front();
+              blankqueue.pop();
+            }
+            space_out++;
+          } else if (transliteration_drop_tilde &&
+                     c == static_cast<int32_t>('~')) {
+          } else {
+            if (c > 0 && isEscaped(c)) {
+              out += '\\';
+            }
+            alphabet.getSymbol(out, c);
+          }
+        }
+        write(out, output);
+        if (has_wblank) {
+          write(WBLANK_FINAL, output);
+        }
+        while (space_diff < 0) {
+          if (blankqueue.front() != " "_u) {
+            write(blankqueue.front(), output);
+          }
+          blankqueue.pop();
+          space_diff++;
+        }
+        space_diff = 0;
+        start_pos = 0;
+      }
+      match_pos = 0;
+      cur_pos = start_pos;
+      cur_word = 0;
+      uppercase = false;
+      firstupper = false;
+      have_first = false;
+      have_second = false;
       current_state = initial_state;
     }
   }
-  // print remaining blanks
-  flushBlanks(output);
 }
 
 UString
@@ -2563,7 +2182,7 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
   outOfWord = false;
 
   skipUntil(input, output, '^');
-  pair<UString,int> tr;           // readBilingual return value, containing:
+  std::pair<UString,int> tr;           // readBilingual return value, containing:
   int val;                        // the alphabet value of current symbol, and
   UString symbol;           // the current symbol as a string
   bool seentags = false;          // have we seen any tags at all in the analysis?
@@ -2628,13 +2247,14 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
       }
       else
       { //xxx
+        UString prefix = (mode == gm_all ? "/#"_u : "/@"_u);
         if(biltransSurfaceForms)
         {
-          printWordBilingual(surface, "/@"_u + surface, output);
+          printWordBilingual(surface, prefix + surface, output);
         }
         else
         {
-          printWordBilingual(sf, "/@"_u + sf, output);
+          printWordBilingual(sf, prefix + sf, output);
         }
       }
       seensurface = false;
@@ -2715,7 +2335,7 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
   }
 }
 
-pair<UString, int>
+std::pair<UString, int>
 FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
 {
   State current_state = initial_state;
@@ -2734,7 +2354,7 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
 
   if(input_word[start_point] == '*')
   {
-    return pair<UString, int>(input_word, 0);
+    return std::pair<UString, int>(input_word, 0);
   }
 
   if(input_word[start_point] == '=')
@@ -2786,7 +2406,7 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
         {
           result = "@"_u + input_word;
         }
-        return pair<UString, int>(result, 0);
+        return std::pair<UString, int>(result, 0);
       }
     }
   }
@@ -2805,7 +2425,7 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
     {
       result = "@"_u + input_word;
     }
-    return pair<UString, int>(result, 0);
+    return std::pair<UString, int>(result, 0);
   }
 
 
@@ -2839,7 +2459,7 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
     {
       result_with_queue += '$';
     }
-    return pair<UString, int>(result_with_queue, queue.size());
+    return std::pair<UString, int>(result_with_queue, queue.size());
   }
   else
   {
@@ -2847,7 +2467,7 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
     {
       result += '$';
     }
-    return pair<UString, int>(result, 0);
+    return std::pair<UString, int>(result, 0);
   }
 }
 
@@ -2931,7 +2551,7 @@ FSTProcessor::valid() const
 {
   if(initial_state.isFinal(all_finals))
   {
-    cerr << "Error: Invalid dictionary (hint: the left side of an entry is empty)" << endl;
+    std::cerr << "Error: Invalid dictionary (hint: the left side of an entry is empty)" << std::endl;
     return false;
   }
   else
@@ -2940,7 +2560,7 @@ FSTProcessor::valid() const
     s.step(' ');
     if(s.size() != 0)
     {
-      cerr << "Error: Invalid dictionary (hint: entry beginning with whitespace)" << endl;
+      std::cerr << "Error: Invalid dictionary (hint: entry beginning with whitespace)" << std::endl;
       return false;
     }
   }
@@ -3114,18 +2734,16 @@ FSTProcessor::SAO(InputFile& input, UFILE *output)
         }
         while((val = readSAO(input)) && isAlphabetic(val));
 
-        unsigned int limit = firstNotAlpha(sf);
-        unsigned int size = sf.size();
-        limit = (limit == static_cast<unsigned int>(UString::npos)?size:limit);
-        input_buffer.back(1+(size-limit));
+        auto limit = firstNotAlpha(sf);
+        unsigned int size = sf.size(); // TODO: change these to character counts
+        input_buffer.back(1+(size-limit.i_utf16));
         u_fprintf(output, "<d>%S</d>", sf.c_str());
       }
       else if(lf.empty())
       {
-        unsigned int limit = firstNotAlpha(sf);
-        unsigned int size = sf.size();
-        limit = (limit == static_cast<unsigned int>(UString::npos)?size:limit);
-        input_buffer.back(1+(size-limit));
+        auto limit = firstNotAlpha(sf);
+        unsigned int size = sf.size(); // TODO: change these to character counts
+        input_buffer.back(1+(size-limit.i_utf16));
         u_fprintf(output, "<d>%S</d>", sf.c_str());
       }
       else
@@ -3234,18 +2852,22 @@ FSTProcessor::getNullFlush()
   return nullFlush;
 }
 
-size_t
+FSTProcessor::Indices
 FSTProcessor::firstNotAlpha(UString const &sf)
 {
+  FSTProcessor::Indices ix = { 0, 0 };
   UCharCharacterIterator it = UCharCharacterIterator(sf.c_str(), sf.size());
-  size_t i = 0;
   while (it.hasNext()) {
     UChar32 c = it.next32PostInc();
     if(!isAlphabetic(c))
     {
-      return i;
+      return ix;
     }
-    i += c > UINT16_MAX ? 2 : 1;
+    ix.i_codepoint++;
+    ix.i_utf16++;
+    if(c > UINT16_MAX) {
+      ix.i_utf16++;
+    }
   }
-  return UString::npos;
+  return ix;
 }

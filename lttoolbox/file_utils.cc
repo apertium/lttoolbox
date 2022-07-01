@@ -24,14 +24,14 @@
 #include <iostream>
 
 UFILE*
-openOutTextFile(const string& fname)
+openOutTextFile(const std::string& fname)
 {
   if (fname.empty() || fname == "-") {
     return u_finit(stdout, NULL, NULL);
   } else {
     UFILE* ret = u_fopen(fname.c_str(), "wb", NULL, NULL);
     if (!ret) {
-      cerr << "Error: Cannot open file '" << fname << "' for writing." << endl;
+      std::cerr << "Error: Cannot open file '" << fname << "' for writing." << std::endl;
       exit(EXIT_FAILURE);
     }
     return ret;
@@ -39,14 +39,14 @@ openOutTextFile(const string& fname)
 }
 
 FILE*
-openOutBinFile(const string& fname)
+openOutBinFile(const std::string& fname)
 {
   if (fname.empty() || fname == "-") {
     return stdout;
   } else {
     FILE* ret = fopen(fname.c_str(), "wb");
     if (!ret) {
-      cerr << "Error: Cannot open file '" << fname << "' for writing." << endl;
+      std::cerr << "Error: Cannot open file '" << fname << "' for writing." << std::endl;
       exit(EXIT_FAILURE);
     }
     return ret;
@@ -54,14 +54,14 @@ openOutBinFile(const string& fname)
 }
 
 FILE*
-openInBinFile(const string& fname)
+openInBinFile(const std::string& fname)
 {
   if (fname.empty() || fname == "-") {
     return stdin;
   } else {
     FILE* ret = fopen(fname.c_str(), "rb");
     if (!ret) {
-      cerr << "Error: Cannot open file '" << fname << "' for reading." << endl;
+      std::cerr << "Error: Cannot open file '" << fname << "' for reading." << std::endl;
       exit(EXIT_FAILURE);
     }
     return ret;
@@ -71,7 +71,7 @@ openInBinFile(const string& fname)
 void
 writeTransducerSet(FILE* output, const UString& letters,
                    Alphabet& alpha,
-                   map<UString, Transducer>& trans)
+                   std::map<UString, Transducer>& trans)
 {
   fwrite_unlocked(HEADER_LTTOOLBOX, 1, 4, output);
   uint64_t features = 0;
@@ -100,8 +100,8 @@ writeTransducerSet(FILE* output, const UString& letters,
   // transducers
   write_le_64(output, transducer_count);
   for (auto& it : trans) {
-    cout << it.first << " " << it.second.size();
-    cout << " " << it.second.numberOfTransitions() << endl;
+    std::cout << it.first << " " << it.second.size();
+    std::cout << " " << it.second.numberOfTransitions() << std::endl;
     StringRef loc = sw.add(it.first);
     write_le_32(output, loc.start);
     write_le_32(output, loc.count);
@@ -110,9 +110,9 @@ writeTransducerSet(FILE* output, const UString& letters,
 }
 
 void
-readTransducerSet(FILE* input, set<UChar32>& letters,
+readTransducerSet(FILE* input, std::set<UChar32>& letters,
                   Alphabet& alpha,
-                  map<UString, Transducer>& trans)
+                  std::map<UString, Transducer>& trans)
 {
   fpos_t pos;
   bool mmap = false;
@@ -172,5 +172,5 @@ readTransducerSet(FILE* input, set<UChar32>& letters,
       len--;
     }
   }
-  letters = set<int32_t>(letters_str.begin(), letters_str.end());
+  letters = std::set<int32_t>(letters_str.begin(), letters_str.end());
 }

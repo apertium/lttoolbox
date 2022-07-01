@@ -28,22 +28,15 @@
 #include <cstring>
 #include <getopt.h>
 
-#ifdef _MSC_VER
-#include <io.h>
-#include <fcntl.h>
-#endif
-
-using namespace std;
-
 void endProgram(char *name)
 {
   if(name != NULL)
   {
-    cout << basename(name) << " v" << PACKAGE_VERSION <<": add sections to a compiled transducer" << endl;
-    cout << "USAGE: " << basename(name) << " [-ksh] bin_file1 bin_file2 output_file" << endl;
-    cout << "    -k, --keep:     in case of section name conflicts, keep the one from the first transducer" << endl;
-    cout << "    -s, --single:   treat input transducers as one-sided" << endl;
-    cout << "    -h, --help:     print this message and exit" << endl;
+    std::cout << basename(name) << " v" << PACKAGE_VERSION <<": add sections to a compiled transducer" << std::endl;
+    std::cout << "USAGE: " << basename(name) << " [-ksh] bin_file1 bin_file2 output_file" << std::endl;
+    std::cout << "    -k, --keep:     in case of section name conflicts, keep the one from the first transducer" << std::endl;
+    std::cout << "    -s, --single:   treat input transducers as one-sided" << std::endl;
+    std::cout << "    -h, --help:     print this message and exit" << std::endl;
   }
   exit(EXIT_FAILURE);
 }
@@ -55,10 +48,6 @@ int main(int argc, char *argv[])
 
   bool pairs = true;
   bool keep = false;
-
-#ifdef _MSC_VER
-  _setmode(_fileno(output), _O_U8TEXT);
-#endif
 
 #if HAVE_GETOPT_LONG
   int option_index=0;
@@ -98,9 +87,9 @@ int main(int argc, char *argv[])
     }
   }
 
-  string infile1;
-  string infile2;
-  string outfile;
+  std::string infile1;
+  std::string infile2;
+  std::string outfile;
   switch(argc - optind)
   {
     case 1:
@@ -128,8 +117,8 @@ int main(int argc, char *argv[])
   FILE* output = openOutBinFile(outfile);
 
   Alphabet alpha1, alpha2;
-  set<UChar32> chars1, chars2;
-  map<UString, Transducer> trans1, trans2;
+  std::set<UChar32> chars1, chars2;
+  std::map<UString, Transducer> trans1, trans2;
 
   readTransducerSet(input1, chars1, alpha1, trans1);
   readTransducerSet(input2, chars2, alpha2, trans2);
@@ -144,7 +133,7 @@ int main(int argc, char *argv[])
       if (keep) {
         continue;
       } else {
-        cerr << "WARNING: section '" << it.first << "' appears in both transducers and will be overwritten!" << endl;
+        std::cerr << "WARNING: section '" << it.first << "' appears in both transducers and will be overwritten!" << std::endl;
       }
     }
     it.second.updateAlphabet(alpha2, alpha1, pairs);

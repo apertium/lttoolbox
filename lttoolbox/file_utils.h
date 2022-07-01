@@ -23,15 +23,18 @@
 
 #include <cstdio>
 
-UFILE* openOutTextFile(const string& fname);
-FILE* openOutBinFile(const string& fname);
-FILE* openInBinFile(const string& fname);
+UFILE* openOutTextFile(const std::string& fname);
+FILE* openOutBinFile(const std::string& fname);
+FILE* openInBinFile(const std::string& fname);
 
 void writeTransducerSet(FILE* output, const UString& letters,
                         Alphabet& alpha,
-                        map<UString, Transducer>& trans);
-void readTransducerSet(FILE* input, set<UChar32>& letters,
+                        std::map<UString, Transducer>& trans);
+void readTransducerSet(FILE* input, std::set<UChar32>& letters,
                        Alphabet& alpha,
-                       map<UString, Transducer>& trans);
+                       std::map<UString, Transducer>& trans);
+void readTransducerSet(FILE* input, std::set<UChar32>& letters,
+                       Alphabet& alpha,
+                       std::map<UString, TransExe>& trans);
 
 #endif // __FILE_UTILS_H__

@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 # If you have HFST installed, you can diff lttoolbox binaries like this:
 # $ lt-print -H full.bin | hfst-txt2fst | hfst-fst2strings -c1 > full.strings
 # $ lt-print -H trim.bin | hfst-txt2fst | hfst-fst2strings -c1 > trim.strings
@@ -8,13 +6,7 @@ from __future__ import unicode_literals
 # This is similar to diffing the lt-expand of uncompiled XML dictionaries.
 # See also `man hfst-fst2strings'.
 
-import os
-from proctest import ProcTest
-import unittest
-
-from subprocess import Popen, PIPE, call
-from tempfile import mkdtemp
-from shutil import rmtree
+from proctest import ProcTest, TempDir
 
 class TrimProcTest(ProcTest):
     monodix = "data/minimal-mono.dix"
@@ -24,22 +16,11 @@ class TrimProcTest(ProcTest):
     procflags = ["-z"]
 
     def compileTest(self, tmpd):
-        self.assertEqual(0, call([os.environ['LTTOOLBOX_PATH']+"/lt-comp",
-                                  self.monodir,
-                                  self.monodix,
-                                  tmpd+"/mono.bin"],
-                                 stdout=PIPE))
-        self.assertEqual(0, call([os.environ['LTTOOLBOX_PATH']+"/lt-comp",
-                                  self.bidir,
-                                  self.bidix,
-                                  tmpd+"/bi.bin"],
-                                 stdout=PIPE))
-        self.assertEqual(0, call([os.environ['LTTOOLBOX_PATH']+"/lt-trim",
-                                  tmpd+"/mono.bin",
+        self.compileDix(self.monodir, self.monodix, binName=tmpd+'/mono.bin')
+        self.compileDix(self.bidir, self.bidix, binName=tmpd+'/bi.bin')
+        self.callProc('lt-trim', [tmpd+"/mono.bin",
                                   tmpd+"/bi.bin",
-                                  tmpd+"/compiled.bin"],
-                                 stdout=PIPE))
-
+                                  tmpd+"/compiled.bin"])
 
 class TrimNormalAndJoin(TrimProcTest):
     inputs = ["abc", "ab", "y", "n", "jg", "jh", "kg"]
@@ -110,7 +91,6 @@ class BothJoinAndGroup(TrimProcTest):
     monodix = "data/group-mono.dix"
     bidix = "data/group-bi.dix"
 
-
 class FinalEpsilons(TrimProcTest):
     inputs = ["ea"]
     expectedOutputs = ["^ea/e<n>#a$"]
@@ -138,7 +118,6 @@ class DoubleClitics(TrimProcTest):
     bidix = "data/double-clitics-bi.dix"
     bidir = "lr"
 
-
 class GroupAfterJoin(TrimProcTest):
     "https://sourceforge.net/p/apertium/tickets/117/"
     inputs = ["notG a"]
@@ -147,27 +126,14 @@ class GroupAfterJoin(TrimProcTest):
     bidix = "data/group-after-join-bi.dix"
     bidir = "lr"
 
-
 class Empty(TrimProcTest):
     def runTest(self):
-        tmpd = mkdtemp()
-        try:
-            self.assertEqual(0, call([os.environ['LTTOOLBOX_PATH']+"/lt-comp",
-                                      "lr",
-                                      "data/empty-mono.dix",
-                                      tmpd+"/empty-mono.bin"],
-                                     stdout=PIPE))
-            self.assertEqual(0, call([os.environ['LTTOOLBOX_PATH']+"/lt-comp",
-                                      "rl", # rl!
-                                      "data/empty-bi.dix",
-                                      tmpd+"/empty-bi.bin"],
-                                     stdout=PIPE))
-            self.assertEqual(1, call([os.environ['LTTOOLBOX_PATH']+"/lt-trim",
-                                      tmpd+"/empty-mono.bin",
+        with TempDir() as tmpd:
+            self.compileDix('lr', 'data/empty-mono.dix',
+                            binName=tmpd+'/empty-mono.bin')
+            self.compileDix('rl', 'data/empty-bi.dix',
+                            binName=tmpd+'/empty-bi.bin')
+            self.callProc('lt-trim', [tmpd+"/empty-mono.bin",
                                       tmpd+"/empty-bi.bin",
                                       tmpd+"/empty-trimmed.bin"],
-                                     stdout=PIPE,
-                                     stderr=PIPE))
-
-        finally:
-            rmtree(tmpd)
+                          retCode=1)

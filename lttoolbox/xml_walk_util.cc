@@ -1,4 +1,5 @@
 #include <lttoolbox/xml_walk_util.h>
+#include <iostream>
 
 children::children(xmlNode* node_)
   : node(node_), cur(node->children)
@@ -53,6 +54,31 @@ children::operator==(const children& other) const
   return node == other.node && cur == other.cur;
 }
 
+xmlNode*
+load_xml(const char* fname)
+{
+  xmlDoc* doc = xmlReadFile(fname, NULL, 0);
+  if (doc == nullptr) {
+    std::cerr << "Error: Could not parse file '" << fname << "'." << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  return xmlDocGetRootElement(doc);
+}
+
+void
+error_and_die(xmlNode* node, const char* fmt, ...)
+{
+  UFILE* err_out = u_finit(stderr, NULL, NULL);
+  u_fprintf(err_out, "Error in %S on line %d: ",
+            to_ustring((char*) node->doc->URL).c_str(), node->line);
+  va_list argptr;
+  va_start(argptr, fmt);
+  u_vfprintf(err_out, fmt, argptr);
+  va_end(argptr);
+  u_fputc('\n', err_out);
+  exit(EXIT_FAILURE);
+}
+
 UString
 getattr(xmlNode* node, const char* attr)
 {
@@ -62,4 +88,21 @@ getattr(xmlNode* node, const char* attr)
     }
   }
   return ""_u;
+}
+
+UString
+getattr(xmlNode* node, const UString& attr, const UString& fallback)
+{
+  for (xmlAttr* i = node->properties; i != NULL; i = i->next) {
+    if (to_ustring((const char*) i->name) == attr) {
+      return to_ustring((const char*) i->children->content);
+    }
+  }
+  return fallback;
+}
+
+UString
+getattr(xmlNode* node, const UString& attr)
+{
+  return getattr(node, attr, ""_u);
 }

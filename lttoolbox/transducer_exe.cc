@@ -98,12 +98,14 @@ TransducerExe::read_compressed(FILE* input, Alphabet& alphabet, bool match)
         base_weight = OldBinary::read_double(input, true);
       }
       if (match) {
-        temp[tag_base].push_back(make_pair(tag_base,
-                                           make_pair(dest, base_weight)));
+        temp[tag_base].push_back(std::make_pair(tag_base,
+                                                std::make_pair(dest,
+                                                               base_weight)));
       } else {
         auto sym = alphabet.decode(tag_base);
-        temp[sym.first].push_back(make_pair(sym.second,
-                                            make_pair(dest, base_weight)));
+        temp[sym.first].push_back(std::make_pair(sym.second,
+                                                 std::make_pair(dest,
+                                                                base_weight)));
       }
     }
     for (auto& it : temp) {
@@ -156,11 +158,11 @@ TransducerExe::read_serialised(FILE* input, Alphabet& alphabet, bool match)
       uint64_t dest = OldBinary::read_int(input, false);
       double weight = OldBinary::read_double(input, false);
       if (match) {
-        temp[tag].push_back(make_pair(tag, make_pair(dest, weight)));
+        temp[tag].push_back(std::make_pair(tag, std::make_pair(dest, weight)));
       } else {
         auto sym = alphabet.decode(tag);
-        temp[sym.first].push_back(make_pair(sym.second,
-                                            make_pair(dest, weight)));
+        temp[sym.first].push_back(std::make_pair(sym.second,
+                                                 std::make_pair(dest, weight)));
       }
     }
     for (auto& it : temp) {

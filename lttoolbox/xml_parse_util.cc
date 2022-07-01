@@ -20,7 +20,6 @@
 #include <iostream>
 #include <utf8.h>
 
-using namespace std;
 
 UString
 XMLParseUtil::attrib(xmlTextReaderPtr reader, UString const &name)
@@ -81,7 +80,7 @@ XMLParseUtil::readValue(xmlTextReaderPtr reader)
 }
 
 void
-XMLParseUtil::readValueInto32(xmlTextReaderPtr reader, vector<int32_t>& vec)
+XMLParseUtil::readValueInto32(xmlTextReaderPtr reader, std::vector<int32_t>& vec)
 {
   const xmlChar* val = xmlTextReaderConstValue(reader);
   if (val == NULL) return;

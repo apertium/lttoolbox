@@ -35,7 +35,6 @@
 #define PUNCT     2
 #define BOTH      3
 
-using namespace std;
 using namespace icu;
 
 /** Bitmask; 1 = WORD, 2 = PUNCT, 3 = BOTH. */
@@ -70,15 +69,15 @@ public:
    * extract_transducer().
    */
   void _extract_transducer(TransducerType type, int from,
-                           Transducer& transducer, map<int, int>& corr,
-                           set<int>& visited) ;
+                           Transducer& transducer, std::map<int, int>& corr,
+                           std::set<int>& visited) ;
 
   /**
    * Reads the AT&T format file @p file_name. The transducer and the alphabet
    * are both cleared before reading the new file.
    * If read_rl = true then the second tape is used as the input
    */
-  void parse(string const &file_name, bool read_rl);
+  void parse(std::string const &file_name, bool read_rl);
 
   /** Writes the transducer to @p file_name in lt binary format. */
 
@@ -93,7 +92,7 @@ private:
   bool splitting = true;
 
   /** The final state(s). */
-  map<int, double> finals;
+  std::map<int, double> finals;
   /**
    * Id of the starting state. We assume it is the source state of the first
    * transduction in the file.
@@ -109,7 +108,7 @@ private:
 
   Alphabet alphabet;
   /** All non-multicharacter symbols. */
-  set<UChar> letters;
+  std::set<UChar> letters;
 
   /** Used in AttNode. */
   struct Transduction
@@ -130,13 +129,13 @@ private:
   struct AttNode
   {
     int                  id;
-    vector<Transduction> transductions;
+    std::vector<Transduction> transductions;
 
     AttNode(int id) : id(id) {}
   };
 
   /** Stores the transducer graph. */
-  map<int, AttNode*> graph;
+  std::map<int, AttNode*> graph;
 
   /** Clears the data associated with the current transducer. */
   void clear();
@@ -175,7 +174,7 @@ private:
   void classify_single_transition(Transduction& t);
 
   void classify_forwards();
-  TransducerType classify_backwards(int state, set<int>& path);
+  TransducerType classify_backwards(int state, std::set<int>& path);
 
   /**
    * Converts symbols like @0@ to epsilon, @_SPACE_@ to space, etc.
@@ -187,7 +186,7 @@ private:
   // if a character should be in the alphabet, add it
   void update_alphabet(UChar32 c);
   // convert a string to a symbol code, splitting non-tag multichars
-  void symbol_code(const UString& symbol, vector<int32_t>& split);
+  void symbol_code(const UString& symbol, std::vector<int32_t>& split);
   void add_transition(int from, int to,
                       const UString& upper, const UString& lower,
                       double weight);

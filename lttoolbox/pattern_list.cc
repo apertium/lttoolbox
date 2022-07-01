@@ -80,7 +80,7 @@ PatternList::beginSequence()
 {
   if(sequence)
   {
-    cerr << "Error: opening an unended sequence" << endl;
+    std::cerr << "Error: opening an unended sequence" << std::endl;
     exit(EXIT_FAILURE);
   }
   sequence = true;
@@ -92,12 +92,12 @@ PatternList::endSequence()
 {
   if(!sequence)
   {
-    cerr << "Error: ending an unopened sequence" << endl;
+    std::cerr << "Error: ending an unopened sequence" << std::endl;
     exit(EXIT_FAILURE);
   }
   sequence = false;
 
-  for(list<vector<int> >::iterator it = sequence_data.begin(),
+  for(auto it = sequence_data.begin(),
       limit = sequence_data.end();
       it != limit; it++)
   {
@@ -108,7 +108,7 @@ PatternList::endSequence()
 
 void
 PatternList::insertOutOfSequence(UString const &lemma, UString const &tags,
-                                 vector<int> &result)
+                                 std::vector<int> &result)
 {
   if(lemma.empty())
   {
@@ -159,14 +159,14 @@ PatternList::insertIntoSequence(int const id, UString const &lemma,
 
   if(sequence_data.size() == 0)
   {
-    vector<int> new_vector;
+    std::vector<int> new_vector;
     insertOutOfSequence(lemma, tags, new_vector);
     sequence_data.push_back(new_vector);
   }
   else
   {
-    list<vector<int> >::iterator it    = sequence_data.begin();
-    list<vector<int> >::iterator limit = sequence_data.end();
+    auto it    = sequence_data.begin();
+    auto limit = sequence_data.end();
     for(; it != limit; it++)
     {
       it->push_back('+');
@@ -180,7 +180,7 @@ PatternList::insert(int const id, UString const &lemma, UString const &tags)
 {
   if(!sequence)
   {
-    vector<int> local;
+    std::vector<int> local;
     insertOutOfSequence(lemma, tags, local);
     local.push_back(alphabet(QUEUE));
     patterns.insert(make_pair(id, local));
@@ -196,7 +196,7 @@ PatternList::insert(int const id, int const otherid)
 {
   if(!sequence)
   {
-    cerr << "Error: using labels outside of a sequence" << endl;
+    std::cerr << "Error: using labels outside of a sequence" << std::endl;
     exit(EXIT_FAILURE);
   }
 
@@ -212,15 +212,15 @@ PatternList::insert(int const id, int const otherid)
   }
   else
   {
-    list<vector<int> > new_sequence_data;
+    std::list<std::vector<int>> new_sequence_data;
 
-    for(list<vector<int> >::iterator it = sequence_data.begin(),
+    for(auto it = sequence_data.begin(),
           limit = sequence_data.end(); it != limit; it++)
     {
       for(PatternRange p = patterns.equal_range(otherid);
           p.first != p.second; p.first++)
       {
-        vector<int> temp = *it;
+        std::vector<int> temp = *it;
         temp.push_back('+');
         temp.insert(temp.end(), (p.first->second).begin(),
                     (p.first->second).end());
@@ -303,7 +303,7 @@ PatternList::getPatterns()
 void
 PatternList::buildTransducer()
 {
-  for(PatternStore::const_iterator it = patterns.begin(), limit = patterns.end();
+  for(auto it = patterns.begin(), limit = patterns.end();
       it != limit; it++)
   {
     int state = transducer.getInitial();
@@ -374,7 +374,7 @@ PatternList::write(FILE *output)
 
   Compression::multibyte_write(final_type.size(), output);
 
-  for(map<int, int>::const_iterator it = final_type.begin(), limit = final_type.end();
+  for(auto it = final_type.begin(), limit = final_type.end();
       it != limit; it++)
   {
     Compression::multibyte_write(it->first, output);
@@ -408,7 +408,7 @@ PatternList::serialise(std::ostream &serialised) const
 {
   alphabet.serialise(serialised);
   transducer.serialise(serialised);
-  Serialiser<map<int, int> >::serialise(final_type, serialised);
+  Serialiser<std::map<int, int> >::serialise(final_type, serialised);
 }
 
 void
@@ -416,7 +416,7 @@ PatternList::deserialise(std::istream &serialised)
 {
   alphabet.deserialise(serialised);
   transducer.deserialise(serialised);
-  final_type = Deserialiser<map<int, int> >::deserialise(serialised);
+  final_type = Deserialiser<std::map<int, int> >::deserialise(serialised);
 }
 
 MatchExe *

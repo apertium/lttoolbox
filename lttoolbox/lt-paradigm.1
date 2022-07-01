@@ -1,0 +1,47 @@
+.Dd June 30, 2022
+.Dt LT-PARADIGM 1
+.Os Apertium
+.Sh NAME
+.Nm lt-paradigm
+.Nd generate listings from a compiled transducer
+.Sh SYNOPSIS
+.Nm lt-paradigm
+.Op Fl a | s | z | h
+.Op Fl e Ar TAG
+.Ar fst_file
+.Op Ar input_file Op Ar output_file
+.Sh DESCRIPTION
+.Nm lt-paradigm
+prints paths matching input patterns from a transducer
+.Bl -tag -width Ds
+.It Ar fst_file
+The compiled transducer
+.It Ar input_file
+A list of patterns to be extracted, separated by newlines or nulls
+.It Ar output_file
+All paths matching the patterns in input_file. Each path is terminated by a newline and groups are separated by the separator used in the input.
+.El
+.Sh OPTIONS
+.Bl -tag -width Ds
+.It Fl a Fl Fl analyser
+Match patterns on the right side of the transducer rather than the left.
+.It Fl e Ar TAG Fl Fl exclude Ar TAG
+When expanding <*>, do use
+.Ar TAG
+.It Fl s Fl Fl sort
+Sort the output for each pattern.
+.It Fl z Fl Fl null-flush
+No-op, included for compatibility.
+.It Fl h Fl Fl help
+Prints a short help message.
+.El
+.Sh SEE ALSO
+.Xr lt-expand 1 ,
+.Xr hfst-expand 1 ,
+.Sh COPYRIGHT
+Copyright \(co 2022 Apertium
+This is free software.
+You may redistribute copies of it under the terms of
+.Lk https://www.gnu.org/licenses/gpl.html the GNU General Public License .
+.Sh BUGS
+Many... lurking in the dark and waiting for you!

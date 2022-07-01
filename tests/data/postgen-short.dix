@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet/>
+  <sdefs>
+    <sdef n="test"/>
+  </sdefs>
+
+  <pardefs>
+   <pardef n="le">
+      <e>
+        <p>
+          <l>la<b/></l>
+          <r>se<b/>la<b/></r>
+        </p>
+      </e>
+    </pardef>
+
+
+  </pardefs>
+
+  <section id="main" type="standard">
+
+	  <e>
+		  <p>
+			  <l><a/>e<b/>a</l>
+			  <r>a</r>
+		  </p>
+	  </e>
+
+  </section>
+
+</dictionary>

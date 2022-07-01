@@ -26,8 +26,6 @@
 #include <libxml/encoding.h>
 
 
-using namespace std;
-
 Expander::Expander() :
 reader(0)
 {
@@ -39,12 +37,12 @@ Expander::~Expander()
 }
 
 void
-Expander::expand(string const &file, UFILE* output)
+Expander::expand(std::string const &file, UFILE* output)
 {
   reader = xmlReaderForFile(file.c_str(), NULL, 0);
   if(reader == NULL)
   {
-    cerr << "Error: Cannot open '" << file << "'." << endl;
+    std::cerr << "Error: Cannot open '" << file << "'." << std::endl;
     exit(EXIT_FAILURE);
   }
 
@@ -57,7 +55,7 @@ Expander::expand(string const &file, UFILE* output)
 
   if(ret != 0)
   {
-    cerr << "Error: Parse error at the end of input." << endl;
+    std::cerr << "Error: Parse error at the end of input." << std::endl;
   }
 
   xmlFreeTextReader(reader);
@@ -84,8 +82,8 @@ Expander::requireEmptyError(UString const &name)
 {
   if(!xmlTextReaderIsEmptyElement(reader))
   {
-    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Non-empty element '<" << name << ">' should be empty." << endl;
+    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Non-empty element '<" << name << ">' should be empty." << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -168,9 +166,9 @@ Expander::readString(UString &result, UString const &name)
   }
   else
   {
-    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Invalid specification of element '<" << name;
-    cerr << ">' in this context." << endl;
+    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Invalid specification of element '<" << name;
+    std::cerr << ">' in this context." << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -182,8 +180,8 @@ Expander::skipBlanks(UString &name)
   {
     if(!allBlanks())
     {
-      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << "): Invalid construction." << endl;
+      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      std::cerr << "): Invalid construction." << std::endl;
       exit(EXIT_FAILURE);
     }
     xmlTextReaderRead(reader);
@@ -201,8 +199,8 @@ Expander::skip(UString &name, UString const &elem)
   {
     if(!allBlanks())
     {
-      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << "): Invalid construction." << endl;
+      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      std::cerr << "): Invalid construction." << std::endl;
       exit(EXIT_FAILURE);
     }
     xmlTextReaderRead(reader);
@@ -211,8 +209,8 @@ Expander::skip(UString &name, UString const &elem)
 
   if(name != elem)
   {
-    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Expected '<" << elem << ">'." << endl;
+    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Expected '<" << elem << ">'." << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -240,7 +238,7 @@ Expander::procIdentity()
   return both_sides;
 }
 
-pair<UString, UString>
+std::pair<UString, UString>
 Expander::procIdentityGroup()
 {
   UString lhs;
@@ -265,11 +263,11 @@ Expander::procIdentityGroup()
   lhs += both_sides;
   rhs += both_sides;
 
-  pair<UString, UString> e(lhs, rhs);
+  std::pair<UString, UString> e(lhs, rhs);
   return e;
 }
 
-pair<UString, UString>
+std::pair<UString, UString>
 Expander::procTransduction()
 {
   UString lhs, rhs;
@@ -311,7 +309,7 @@ Expander::procTransduction()
 
   skip(name, Compiler::COMPILER_PAIR_ELEM);
 
-  pair<UString, UString> e(lhs, rhs);
+  std::pair<UString, UString> e(lhs, rhs);
   return e;
 }
 
@@ -335,10 +333,10 @@ Expander::requireAttribute(UString const &value, UString const &attrname,
 {
   if(value.empty())
   {
-    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): '<" << elemname;
-    cerr << "' element must specify non-void '";
-    cerr<< attrname << "' attribute." << endl;
+    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): '<" << elemname;
+    std::cerr << "' element must specify non-void '";
+    std::cerr<< attrname << "' attribute." << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -367,8 +365,8 @@ Expander::procEntry(UFILE* output)
       int ret = xmlTextReaderRead(reader);
       if(ret != 1)
       {
-        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        cerr << "): Parse error." << endl;
+        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+        std::cerr << "): Parse error." << std::endl;
         exit(EXIT_FAILURE);
       }
       myname = XMLParseUtil::readName(reader);
@@ -399,8 +397,8 @@ Expander::procEntry(UFILE* output)
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << "): Parse error." << endl;
+      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      std::cerr << "): Parse error." << std::endl;
       exit(EXIT_FAILURE);
     }
     UString name = XMLParseUtil::readName(reader);
@@ -409,7 +407,7 @@ Expander::procEntry(UFILE* output)
     int type = xmlTextReaderNodeType(reader);
     if(name == Compiler::COMPILER_PAIR_ELEM)
     {
-      pair<UString, UString> p = procTransduction();
+      std::pair<UString, UString> p = procTransduction();
       append(items, p);
       append(items_lr, p);
       append(items_rl, p);
@@ -423,7 +421,7 @@ Expander::procEntry(UFILE* output)
     }
     else if(name == Compiler::COMPILER_IDENTITYGROUP_ELEM)
     {
-      pair<UString, UString> p = procIdentityGroup();
+      std::pair<UString, UString> p = procIdentityGroup();
       append(items, p);
       append(items_lr, p);
       append(items_rl, p);
@@ -444,8 +442,8 @@ Expander::procEntry(UFILE* output)
          paradigm_lr.find(p) == paradigm_lr.end() &&
          paradigm_rl.find(p) == paradigm_rl.end())
       {
-        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        cerr << "): Undefined paradigm '" << p << "'." <<endl;
+        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+        std::cerr << "): Undefined paradigm '" << p << "'." << std::endl;
         exit(EXIT_FAILURE);
       }
 
@@ -526,9 +524,9 @@ Expander::procEntry(UFILE* output)
     }
     else
     {
-      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << "): Invalid inclusion of '<" << name << ">' into '<" << Compiler::COMPILER_ENTRY_ELEM;
-      cerr << ">'." << endl;
+      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      std::cerr << "): Invalid inclusion of '<" << name << ">' into '<" << Compiler::COMPILER_ENTRY_ELEM;
+      std::cerr << ">'." << std::endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -583,8 +581,8 @@ Expander::procNode(UFILE *output)
   }
   else
   {
-    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << "): Invalid node '<" << name << ">'." << endl;
+    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Invalid node '<" << name << ">'." << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -608,7 +606,7 @@ Expander::append(EntList &result,
   {
     for(auto& it2 : endings)
     {
-      temp.push_back(pair<UString, UString>(it.first + it2.first,
+      temp.push_back(std::pair<UString, UString>(it.first + it2.first,
                           it.second + it2.second));
     }
   }
@@ -628,7 +626,7 @@ Expander::append(EntList &result, UString const &endings)
 
 void
 Expander::append(EntList &result,
-                 pair<UString, UString> const &endings)
+                 std::pair<UString, UString> const &endings)
 {
   for(auto& it : result)
   {

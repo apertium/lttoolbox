@@ -154,7 +154,7 @@ MatchState2::classifyFinals(const std::map<uint64_t, int>& finals,
 int
 MatchState2::classifyFinals(const std::map<uint64_t, int>& finals) const
 {
-  set<int> empty;
+  std::set<int> empty;
   return classifyFinals(finals, empty);
 }
 

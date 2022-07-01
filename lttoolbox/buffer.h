@@ -21,8 +21,6 @@
 #include <cstdlib>
 #include <cstring>
 
-using namespace std;
-
 /**
  * Generic circular buffer class
  */
@@ -75,7 +73,7 @@ public:
     {
       if(buf_size == 0)
       {
-        cerr << "Error: Cannot create empty buffer." << endl;
+        std::cerr << "Error: Cannot create empty buffer." << std::endl;
         exit(EXIT_FAILURE);
       }
       buf = new T[buf_size];
@@ -228,7 +226,7 @@ public:
    */
   void setPos(unsigned int const newpos)
     {
-      currentpos = newpos;
+      currentpos = newpos % size;
     }
 
   /**

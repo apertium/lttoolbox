@@ -23,8 +23,6 @@
 #include <lttoolbox/xml_parse_util.h>
 #include <cstdint>
 
-using namespace std;
-
 /**
  * This is a "Compiler" helper class, to store the parts of each entry
  * before combining it to build the transducer being "compiled".
@@ -54,17 +52,17 @@ private:
   /**
    * Left side of transduction (if 'single_transduction')
    */
-  vector<int> leftSide;
+  std::vector<int> leftSide;
 
   /**
    * Right side of transduction (if 'single_transduction')
    */
-  vector<int> rightSide;
+  std::vector<int> rightSide;
 
   /**
    * Regular expression (if 'regexp')
    */
-  vector<int32_t> myregexp;
+  std::vector<int32_t> myregexp;
 
   /**
    * copy method
@@ -109,7 +107,7 @@ public:
    * @param pd right part
    * @param ew entry weight
    */
-  void setSingleTransduction(vector<int> const &pi, vector<int> const &pd, double const ew = 0);
+  void setSingleTransduction(std::vector<int> const &pi, std::vector<int> const &pd, double const ew = 0);
 
   /**
    * Set regular expression.
@@ -151,19 +149,19 @@ public:
    * Retrieve the left part of the paradigm.
    * @return the left part of the paradigm.
    */
-  vector<int> const & left() const;
+  std::vector<int> const & left() const;
 
   /**
    * Retrieve the right part of the paradigm.
    * @return the right part of the paradigm.
    */
-  vector<int> const & right() const;
+  std::vector<int> const & right() const;
 
   /**
    * Retrieve the regular expression specification.
    * @return the regular expression specification.
    */
-  vector<int32_t> const & regExp() const;
+  std::vector<int32_t> const & regExp() const;
 
   /**
    * Retrieve the weight value of the entry.
