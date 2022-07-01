@@ -73,7 +73,9 @@ void*
 AlphabetExe::init(void* ptr)
 {
   mmapping = true;
-  tag_count = from_le_64(reinterpret_cast<uint64_t*>(ptr)[0]);
+  // TODO: why is from_le_64 segfaulting here?
+  //tag_count = from_le_64(reinterpret_cast<uint64_t*>(ptr)[0]);
+  tag_count = reinterpret_cast<uint64_t*>(ptr)[0];
   tags = reinterpret_cast<StringRef*>(ptr + sizeof(uint64_t));
   for (uint64_t i = 0; i < tag_count; i++) {
     symbol_map[sw->get(tags[i])] = -static_cast<int32_t>(i) - 1;
@@ -98,6 +100,9 @@ AlphabetExe::getSymbol(UString& result, int32_t symbol, bool uppercase) const
   if (symbol == 0) {
     return;
   } else if (symbol < 0) {
+    if (clearedSymbols.find(symbol) != clearedSymbols.end()) {
+      return;
+    }
     int idx = -symbol-1;
     if (idx < tag_count) {
       result.append(sw->get(tags[idx]));
@@ -121,8 +126,12 @@ void
 AlphabetExe::clearSymbol(const int32_t symbol)
 {
   if (symbol < 0) {
-    tags[-symbol-1].start = 0;
-    tags[-symbol-1].count = 0;
+    if (mmapping) {
+      clearedSymbols.insert(symbol);
+    } else {
+      tags[-symbol-1].start = 0;
+      tags[-symbol-1].count = 0;
+    }
   }
 }
 

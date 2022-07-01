@@ -729,7 +729,7 @@ FSTProcessor::writeEscapedPopBlanks(UString const &str, UFILE *output)
       u_fputc('\\', output);
     }
     u_fputc(str[i], output);
-    if (str[i] == ' ') {
+    if (str[i] == ' ' && !blankqueue.empty()) {
       if (blankqueue.front() == " "_u) {
         blankqueue.pop();
       } else {
@@ -829,7 +829,7 @@ void
 FSTProcessor::writeChar(const UChar32 val, UFILE* output, bool single_blank)
 {
   if(u_isspace(val)) {
-    if (single_blank) {
+    if (single_blank && !blankqueue.empty()) {
       write(blankqueue.front(), output);
       blankqueue.pop();
     } else {

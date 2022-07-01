@@ -20,6 +20,7 @@
 
 #include <lttoolbox/string_writer.h>
 #include <map>
+#include <set>
 #include <vector>
 
 class AlphabetExe {
@@ -31,6 +32,9 @@ private:
   bool mmapping = false;
   // tags added at runtime - used by apertium-separable
   std::vector<UString> dynamic_symbols;
+  // tags that should not be printed, such as <compound-only-L>
+  // used by clearSymbol() if we're mmapping since we can't edit the data
+  std::set<int32_t> clearedSymbols;
 public:
   AlphabetExe(StringWriter* sw_);
   ~AlphabetExe();
