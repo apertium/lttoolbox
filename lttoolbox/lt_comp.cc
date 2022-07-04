@@ -156,9 +156,14 @@ int main(int argc, char *argv[])
     }
   }
 
-  if(std::getenv("LT_JOBS")) {
+  auto LT_JOBS = std::getenv("LT_JOBS");
+  if(LT_JOBS != NULL && LT_JOBS[0] != 'n') {
     c.setJobs(true);
     c.setMaxSectionEntries(50000);
+  }
+  else {
+    c.setJobs(false);
+    c.setMaxSectionEntries(0);
   }
   if(const char* max_section_entries = std::getenv("LT_MAX_SECTION_ENTRIES")) {
     c.setMaxSectionEntries(std::stol(max_section_entries));
