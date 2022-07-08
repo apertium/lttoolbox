@@ -828,6 +828,31 @@ Compiler::procEntry()
 
   std::vector<EntryToken> elements;
 
+  if (entry_debugging && current_paradigm.empty()) {
+    UString ln = "Line near "_u;
+    ln += StringUtils::itoa(xmlTextReaderGetParserLineNumber(reader));
+    // Note that this line number will usually be a little bit wrong.
+    // This function actually returns the current line of the *parser*
+    // which is probably several lines past the element we're currently
+    // looking at.
+    UString c = this->attrib("c"_u);
+    if (!c.empty()) {
+      ln += ' ';
+      ln += c;
+    }
+    std::vector<int32_t> empty;
+    std::vector<int32_t> debug_syms;
+    ustring_to_vec32(ln, debug_syms);
+    if (is_separable) {
+      debug_syms.push_back(word_boundary_s);
+    } else {
+      debug_syms.push_back(static_cast<int32_t>(' '));
+    }
+    EntryToken e;
+    e.setSingleTransduction(empty, debug_syms);
+    elements.push_back(e);
+  }
+
   while(true)
   {
     int ret = xmlTextReaderRead(reader);
@@ -1076,4 +1101,10 @@ void
 Compiler::setVerbose(bool verbosity)
 {
   verbose = verbosity;
+}
+
+void
+Compiler::setEntryDebugging(bool debug)
+{
+  entry_debugging = debug;
 }

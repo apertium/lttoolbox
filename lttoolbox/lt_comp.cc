@@ -41,6 +41,7 @@ void endProgram(char *name)
     std::cout << basename(name) << " v" << PACKAGE_VERSION <<": build a letter transducer from a dictionary" << std::endl;
     std::cout << "USAGE: " << basename(name) << " [-hmvalrHSj] lr | rl dictionary_file output_file [acx_file]" << std::endl;
 #if HAVE_GETOPT_LONG
+    std::cout << "  -d, --debug:               insert line numbers before each entry" << std::endl;
     std::cout << "  -m, --keep-boundaries:     keep morpheme boundaries" << std::endl;
     std::cout << "  -v, --var:                 set language variant" << std::endl;
     std::cout << "  -a, --alt:                 set alternative (monodix)" << std::endl;
@@ -50,6 +51,7 @@ void endProgram(char *name)
     std::cout << "  -S, --no-split:            don't attempt to split into word and punctuation transducers" << std::endl;
     std::cout << "  -j, --jobs:                use one cpu core per section when minimising, new section after 50k entries" << std::endl;
 #else
+    std::cout << "  -d:     insert line numbers before each entry" << std::endl;
     std::cout << "  -m:     keep morpheme boundaries" << std::endl;
     std::cout << "  -v:     set language variant" << std::endl;
     std::cout << "  -a:     set alternative (monodix)" << std::endl;
@@ -76,6 +78,7 @@ int main(int argc, char *argv[])
   AttCompiler a;
   c.setKeepBoundaries(false);
   c.setVerbose(false);
+  c.setEntryDebugging(false);
 
 #if HAVE_GETOPT_LONG
   int option_index=0;
@@ -92,6 +95,7 @@ int main(int argc, char *argv[])
       {"var",       required_argument, 0, 'v'},
       {"var-left",  required_argument, 0, 'l'},
       {"var-right", required_argument, 0, 'r'},
+      {"debug",     no_argument,       0, 'd'},
       {"keep-boundaries",      no_argument,       0, 'm'},
       {"hfst",      no_argument,       0, 'H'},
       {"no-split",  no_argument,       0, 'S'},
@@ -101,9 +105,9 @@ int main(int argc, char *argv[])
       {0, 0, 0, 0}
     };
 
-    int cnt=getopt_long(argc, argv, "a:v:l:r:mHShVj", long_options, &option_index);
+    int cnt=getopt_long(argc, argv, "a:v:l:r:dmHShVj", long_options, &option_index);
 #else
-    int cnt=getopt(argc, argv, "a:v:l:r:mHShV");
+    int cnt=getopt(argc, argv, "a:v:l:r:dmHShV");
 #endif
     if (cnt==-1)
       break;
@@ -126,6 +130,10 @@ int main(int argc, char *argv[])
       case 'r':
         vr = optarg;
         c.setVariantRightValue(to_ustring(optarg));
+        break;
+
+      case 'd':
+        c.setEntryDebugging(true);
         break;
 
       case 'm':
