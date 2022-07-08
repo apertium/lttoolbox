@@ -404,6 +404,14 @@ class PostgenOciBacktrack(ProcTest):
                        "[25] Ostal de las amigas."]
     procflags = ['-p', '-z']
 
+class PostgenRetainCaps(ProcTest):
+    procdix = "data/oci-pgen.dix"
+    procflags = ['-p', '-z']
+    inputs = ['[01] ~detlo ostal',
+              '[02] ~detlo Ostal']
+    expectedOutputs = ["[01] l'ostal",
+                       "[02] l'Ostal"]
+
 class BufferIndex(ProcTest):
     procdix = "data/underscore.dix"
     inputs = ["_a",

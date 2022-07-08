@@ -199,6 +199,8 @@ public:
 
   void step_override(int const input, int const alt, int const old_sym, int const new_sym);
 
+  void step_case_override(const int val, const bool caseSensitive);
+
   /**
    * Init the state with the initial node and empty output
    * @param initial the initial node of the transducer

@@ -1722,7 +1722,7 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
       }
     }
 
-    current_state.step_case(sym, caseSensitive);
+    current_state.step_case_override(sym, caseSensitive);
 
     if (current_state.size() == 0 || is_end) {
       if (last_match.empty()) {
