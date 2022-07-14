@@ -20,6 +20,7 @@
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/deserialiser.h>
 #include <lttoolbox/serialiser.h>
+#include <lttoolbox/sorted_vector.hpp>
 
 #include <cstdlib>
 #include <iostream>
@@ -314,16 +315,16 @@ Transducer::isEmptyIntersection(std::set<int> const &s1, std::set<int> const &s2
 void
 Transducer::determinize(int const epsilon_tag)
 {
-  std::vector<std::set<int> > R(2);
-  std::vector<std::set<int>> Q_prime;
-  std::map<std::set<int>, int> Q_prime_inv;
+  std::vector<sorted_vector<int>> R(2);
+  std::vector<sorted_vector<int>> Q_prime;
+  std::map<sorted_vector<int>, int> Q_prime_inv;
 
   std::map<int, std::multimap<int, std::pair<int, double> > > transitions_prime;
 
   // We're almost certainly going to need the closure of (nearly) every
   // state, and we're often going to need the closure several times,
   // so it's faster to precompute (though it does slow things down a bit).
-  std::vector<std::set<int>> all_closures;
+  std::vector<sorted_vector<int>> all_closures;
   all_closures.reserve(transitions.size());
   for (size_t i = 0; i < transitions.size(); i++) {
     all_closures.push_back(closure(i, epsilon_tag));
@@ -345,7 +346,7 @@ Transducer::determinize(int const epsilon_tag)
 
   int t = 0;
 
-  std::set<int> finals_state;
+  sorted_vector<int> finals_state;
   for(auto& it : finals) {
     finals_state.insert(it.first);
   }
@@ -357,8 +358,7 @@ Transducer::determinize(int const epsilon_tag)
 
     for(auto& it : R[t])
     {
-      if(!isEmptyIntersection(Q_prime[it], finals_state))
-      {
+      if (Q_prime[it].intersects(finals_state)) {
         double w = default_weight;
         auto it3 = finals.find(it);
         if (it3 != finals.end()) {
@@ -367,7 +367,7 @@ Transducer::determinize(int const epsilon_tag)
         finals_prime.insert(std::make_pair(it, w));
       }
 
-      std::map<std::pair<int, double>, std::set<int> > mymap;
+      std::map<std::pair<int, double>, sorted_vector<int> > mymap;
 
       for(auto& it2 : Q_prime[it])
       {
