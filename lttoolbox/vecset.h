@@ -53,15 +53,16 @@ public:
       if (this->operator[](m) == value) {
         return true;
       } else if (this->operator[](m) < value) {
-        r = m;
-      } else {
         l = m+1;
+      } else {
+        r = m;
       }
     }
     return false;
   }
 
   void union_with(const VecSet<T>& other) {
+    VecSet<T> temp;
     auto ti = this->begin();
     auto oi = other.begin();
     auto te = this->end();
