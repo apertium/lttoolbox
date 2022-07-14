@@ -315,13 +315,22 @@ void
 Transducer::determinize(int const epsilon_tag)
 {
   std::vector<std::set<int> > R(2);
-  std::map<int, std::set<int> > Q_prime;
+  std::vector<std::set<int>> Q_prime;
   std::map<std::set<int>, int> Q_prime_inv;
 
   std::map<int, std::multimap<int, std::pair<int, double> > > transitions_prime;
 
+  // We're almost certainly going to need the closure of (nearly) every
+  // state, and we're often going to need the closure several times,
+  // so it's faster to precompute (though it does slow things down a bit).
+  std::vector<std::set<int>> all_closures;
+  all_closures.reserve(transitions.size());
+  for (size_t i = 0; i < transitions.size(); i++) {
+    all_closures.push_back(closure(i, epsilon_tag));
+  }
+
   unsigned int size_Q_prime = 0;
-  Q_prime[0] = closure(initial, epsilon_tag);
+  Q_prime.push_back(all_closures[initial]);
 
   Q_prime_inv[Q_prime[0]] = 0;
   R[0].insert(0);
@@ -366,9 +375,7 @@ Transducer::determinize(int const epsilon_tag)
         {
           if(it3.first != epsilon_tag)
           {
-            auto c = closure(it3.second.first, epsilon_tag);
-
-            for(auto& it4 : c)
+            for(auto& it4 : all_closures[it3.second.first])
             {
               mymap[std::make_pair(it3.first, it3.second.second)].insert(it4);
             }
@@ -382,7 +389,7 @@ Transducer::determinize(int const epsilon_tag)
         if(Q_prime_inv.find(it2.second) == Q_prime_inv.end())
         {
           int tag = Q_prime.size();
-          Q_prime[tag] = it2.second;
+          Q_prime.push_back(it2.second);
           Q_prime_inv[it2.second] = tag;
           R[(t+1)%2].insert(Q_prime_inv[it2.second]);
           transitions_prime[tag].clear();
