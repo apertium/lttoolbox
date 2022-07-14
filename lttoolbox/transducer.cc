@@ -20,6 +20,7 @@
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/deserialiser.h>
 #include <lttoolbox/serialiser.h>
+#include <lttoolbox/vecset.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -314,26 +315,26 @@ Transducer::isEmptyIntersection(std::set<int> const &s1, std::set<int> const &s2
 void
 Transducer::determinize(int const epsilon_tag)
 {
-  std::vector<std::set<int> > R(2);
-  std::vector<std::set<int>> Q_prime;
-  std::map<std::set<int>, int> Q_prime_inv;
+  std::vector<VecSet<int> > R(2);
+  std::vector<VecSet<int>> Q_prime;
+  std::map<VecSet<int>, int> Q_prime_inv;
 
   std::map<int, std::multimap<int, std::pair<int, double> > > transitions_prime;
 
   // We're almost certainly going to need the closure of (nearly) every
   // state, and we're often going to need the closure several times,
   // so it's faster to precompute (though it does slow things down a bit).
-  std::vector<std::set<int>> all_closures;
-  all_closures.reserve(transitions.size());
+  std::vector<VecSet<int>> all_closures;
+  all_closures.resize(transitions.size());
   for (size_t i = 0; i < transitions.size(); i++) {
-    all_closures.push_back(closure(i, epsilon_tag));
+    all_closures[i].union_with(closure(i, epsilon_tag));
   }
 
   unsigned int size_Q_prime = 0;
   Q_prime.push_back(all_closures[initial]);
 
   Q_prime_inv[Q_prime[0]] = 0;
-  R[0].insert(0);
+  R[0].add(0);
 
   int initial_prime = 0;
   std::map<int, double> finals_prime;
@@ -345,9 +346,9 @@ Transducer::determinize(int const epsilon_tag)
 
   int t = 0;
 
-  std::set<int> finals_state;
+  VecSet<int> finals_state;
   for(auto& it : finals) {
-    finals_state.insert(it.first);
+    finals_state.add(it.first);
   }
 
   while(size_Q_prime != Q_prime.size())
@@ -357,8 +358,7 @@ Transducer::determinize(int const epsilon_tag)
 
     for(auto& it : R[t])
     {
-      if(!isEmptyIntersection(Q_prime[it], finals_state))
-      {
+      if (Q_prime[it].overlaps(finals_state)) {
         double w = default_weight;
         auto it3 = finals.find(it);
         if (it3 != finals.end()) {
@@ -367,7 +367,7 @@ Transducer::determinize(int const epsilon_tag)
         finals_prime.insert(std::make_pair(it, w));
       }
 
-      std::map<std::pair<int, double>, std::set<int> > mymap;
+      std::map<std::pair<int, double>, VecSet<int> > mymap;
 
       for(auto& it2 : Q_prime[it])
       {
@@ -377,7 +377,7 @@ Transducer::determinize(int const epsilon_tag)
           {
             for(auto& it4 : all_closures[it3.second.first])
             {
-              mymap[std::make_pair(it3.first, it3.second.second)].insert(it4);
+              mymap[std::make_pair(it3.first, it3.second.second)].add(it4);
             }
           }
         }
@@ -391,7 +391,7 @@ Transducer::determinize(int const epsilon_tag)
           int tag = Q_prime.size();
           Q_prime.push_back(it2.second);
           Q_prime_inv[it2.second] = tag;
-          R[(t+1)%2].insert(Q_prime_inv[it2.second]);
+          R[(t+1)%2].add(Q_prime_inv[it2.second]);
           transitions_prime[tag].clear();
         }
         transitions_prime[it].insert(std::make_pair(it2.first.first,
