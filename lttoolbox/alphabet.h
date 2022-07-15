@@ -115,6 +115,9 @@ public:
    * @return true if defined
    */
   bool isSymbolDefined(UString const &s);
+  // TODO: This should always be const.
+  // But binary compatibility, so have 2 copies for now.
+  bool isSymbolDefined(UString const &s) const;
 
   /**
    * Returns the size of the alphabet (number of symbols).
@@ -198,6 +201,9 @@ public:
   void createLoopbackSymbols(std::set<int32_t> &symbols, Alphabet &basis, Side s = right, bool nonTagsToo = false);
 
   std::vector<int32_t> tokenize(const UString& str) const;
+
+  bool sameSymbol(const int32_t tsym, const Alphabet& other, const int32_t osym,
+                  bool allow_anys=false) const;
 };
 
 #endif

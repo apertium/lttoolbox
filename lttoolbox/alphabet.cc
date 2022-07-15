@@ -116,6 +116,12 @@ Alphabet::isSymbolDefined(UString const &s)
   return slexic.find(s) != slexic.end();
 }
 
+bool
+Alphabet::isSymbolDefined(const UString& s) const
+{
+  return slexic.find(s) != slexic.end();
+}
+
 int32_t
 Alphabet::size() const
 {
@@ -325,4 +331,24 @@ Alphabet::tokenize(const UString& str) const
     }
   }
   return ret;
+}
+
+bool
+Alphabet::sameSymbol(const int32_t tsym, const Alphabet& other, int32_t osym,
+                     bool allow_anys) const
+{
+  // if it's a letter, then it's equal across alphabets
+  if (tsym >= 0 && tsym == osym) return true;
+  if (tsym < 0 && osym < 0 &&
+      this->slexicinv[-tsym-1] == other.slexicinv[-osym-1]) {
+    return true;
+  }
+  if (allow_anys &&
+      ((tsym < 0 && this->slexicinv[-tsym-1] == "<ANY_CHAR>"_u && osym > 0) ||
+       (tsym < 0 && this->slexicinv[-tsym-1] == "<ANY_TAG>"_u && osym < 0) ||
+       (osym < 0 && other.slexicinv[-osym-1] == "<ANY_CHAR>"_u && tsym > 0) ||
+       (osym < 0 && other.slexicinv[-osym-1] == "<ANY_TAG>"_u && tsym < 0))) {
+    return true;
+  }
+  return false;
 }
