@@ -20,7 +20,6 @@
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/deserialiser.h>
 #include <lttoolbox/serialiser.h>
-#include <lttoolbox/sorted_vector.hpp>
 
 #include <cstdlib>
 #include <iostream>
@@ -262,6 +261,40 @@ Transducer::closure(int const state, std::set<int> const &epsilon_tags) const
   return result;
 }
 
+std::vector<sorted_vector<int>>
+Transducer::closure_all(const int epsilon_tag) const
+{
+  std::vector<sorted_vector<int>> ret;
+  ret.reserve(transitions.size());
+  std::vector<std::vector<int>> reversed;
+  reversed.resize(transitions.size());
+  sorted_vector<int> todo;
+  for (size_t i = 0; i < transitions.size(); i++) {
+    sorted_vector<int> c;
+    c.insert(i);
+    auto range = transitions.at(i).equal_range(epsilon_tag);
+    for (; range.first != range.second; range.first++) {
+      c.insert(range.first->second.first);
+      reversed[range.first->second.first].push_back(i);
+    }
+    if (c.size() > 1) todo.insert(i);
+    ret.push_back(c);
+  }
+  while (!todo.empty()) {
+    sorted_vector<int> new_todo;
+    for (auto& it : todo) {
+      sorted_vector<int> temp = ret[it];
+      for (auto& it2 : temp) {
+        ret[it].insert(ret[it2].begin(), ret[it2].end());
+      }
+      if (ret[it].size() > temp.size())
+        new_todo.insert(reversed[it].begin(), reversed[it].end());
+    }
+    todo.swap(new_todo);
+  }
+  return ret;
+}
+
 void
 Transducer::joinFinals(int const epsilon_tag)
 {
@@ -284,34 +317,6 @@ Transducer::joinFinals(int const epsilon_tag)
   }
 }
 
-bool
-Transducer::isEmptyIntersection(std::set<int> const &s1, std::set<int> const &s2)
-{
-
-  if(s1.size() < s2.size())
-  {
-    for(auto& it : s1)
-    {
-      if(s2.count(it))
-      {
-        return false;
-      }
-    }
-  }
-  else
-  {
-    for(auto& it : s2)
-    {
-      if(s1.count(it))
-      {
-        return false;
-      }
-    }
-  }
-
-  return true;
-}
-
 void
 Transducer::determinize(int const epsilon_tag)
 {
@@ -323,12 +328,8 @@ Transducer::determinize(int const epsilon_tag)
 
   // We're almost certainly going to need the closure of (nearly) every
   // state, and we're often going to need the closure several times,
-  // so it's faster to precompute (though it does slow things down a bit).
-  std::vector<sorted_vector<int>> all_closures;
-  all_closures.reserve(transitions.size());
-  for (size_t i = 0; i < transitions.size(); i++) {
-    all_closures.push_back(closure(i, epsilon_tag));
-  }
+  // so it's faster to precompute.
+  std::vector<sorted_vector<int>> all_closures = closure_all(epsilon_tag);
 
   unsigned int size_Q_prime = 0;
   Q_prime.push_back(all_closures[initial]);
@@ -375,27 +376,29 @@ Transducer::determinize(int const epsilon_tag)
         {
           if(it3.first != epsilon_tag)
           {
-            for(auto& it4 : all_closures[it3.second.first])
-            {
-              mymap[std::make_pair(it3.first, it3.second.second)].insert(it4);
-            }
+            auto& it4 = all_closures[it3.second.first];
+            mymap[std::make_pair(it3.first, it3.second.second)].insert(it4.begin(), it4.end());
           }
         }
       }
 
       // adding new states
+      auto& state_prime = transitions_prime[it];
       for(auto& it2 : mymap)
       {
-        if(Q_prime_inv.find(it2.second) == Q_prime_inv.end())
-        {
-          int tag = Q_prime.size();
+        int tag;
+        auto loc = Q_prime_inv.find(it2.second);
+        if(loc == Q_prime_inv.end()) {
+          tag = Q_prime.size();
           Q_prime.push_back(it2.second);
           Q_prime_inv[it2.second] = tag;
-          R[(t+1)%2].insert(Q_prime_inv[it2.second]);
+          R[(t+1)%2].insert(tag);
           transitions_prime[tag].clear();
+        } else {
+          tag = loc->second;
         }
-        transitions_prime[it].insert(std::make_pair(it2.first.first,
-                                                std::make_pair(Q_prime_inv[it2.second], it2.first.second)));
+        state_prime.insert(std::make_pair(it2.first.first,
+                                          std::make_pair(tag, it2.first.second)));
       }
     }
 
