@@ -20,6 +20,16 @@
 #include <iostream>
 #include <utf8.h>
 
+xmlTextReaderPtr
+XMLParseUtil::open_or_exit(const char* fname)
+{
+  xmlTextReaderPtr reader = xmlReaderForFile(fname, NULL, 0);
+  if (reader == NULL) {
+    std::cerr << "Error: cannot open '" << fname << "' for reading." << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  return reader;
+}
 
 UString
 XMLParseUtil::attrib(xmlTextReaderPtr reader, UString const &name)

@@ -30,6 +30,9 @@ FILE* openInBinFile(const std::string& fname);
 void writeTransducerSet(FILE* output, const UString& letters,
                         Alphabet& alpha,
                         std::map<UString, Transducer>& trans);
+void writeTransducerSet(FILE* output, const std::set<UChar32>& letters,
+                        Alphabet& alpha,
+                        std::map<UString, Transducer>& trans);
 void readTransducerSet(FILE* input, std::set<UChar32>& letters,
                        Alphabet& alpha,
                        std::map<UString, Transducer>& trans);

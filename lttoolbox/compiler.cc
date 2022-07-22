@@ -21,6 +21,7 @@
 #include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/string_utils.h>
 #include <lttoolbox/file_utils.h>
+#include <lttoolbox/acx.h>
 
 #include <string>
 #include <cstdlib>
@@ -90,31 +91,20 @@ Compiler::parseACX(std::string const &file, UString const &dir)
 {
   if(dir == COMPILER_RESTRICTION_LR_VAL)
   {
-    reader = xmlReaderForFile(file.c_str(), NULL, 0);
-    if(reader == NULL)
-    {
-      std::cerr << "Error: cannot open '" << file << "'." << std::endl;
-      exit(EXIT_FAILURE);
-    }
-    int ret = xmlTextReaderRead(reader);
-    while(ret == 1)
-    {
-      procNodeACX();
-      ret = xmlTextReaderRead(reader);
-    }
+    acx_map = readACX(file.c_str());
   }
 }
 
 void
 Compiler::parse(std::string const &file, UString const &dir)
 {
-  direction = dir;
-  reader = xmlReaderForFile(file.c_str(), NULL, 0);
-  if(reader == NULL)
-  {
-    std::cerr << "Error: Cannot open '" << file << "'." << std::endl;
-    exit(EXIT_FAILURE);
+  if (dir == "u"_u) {
+    direction = "lr"_u;
+    unified_compilation = true;
+  } else {
+    direction = dir;
   }
+  reader = XMLParseUtil::open_or_exit(file.c_str());
 
   int ret = xmlTextReaderRead(reader);
   while(ret == 1)
@@ -284,7 +274,7 @@ Compiler::matchTransduction(std::vector<int> const &pi,
   }
   else
   {
-    std::map<int, std::set<int> >::iterator acx_map_ptr;
+    std::map<int32_t, sorted_vector<int32_t> >::iterator acx_map_ptr;
     int rsymbol = 0;
 
     while(true)
@@ -800,8 +790,53 @@ Compiler::procEntry()
   UString varr      = this->attrib(COMPILER_VR_ATTR);
   UString wsweight  = this->attrib(COMPILER_WEIGHT_ATTR);
 
+  std::vector<EntryToken> elements;
+
   // if entry is masked by a restriction of direction or an ignore mark
-  if((!attribute.empty() && attribute != direction)
+  if (unified_compilation && ignore != COMPILER_IGNORE_YES_VAL) {
+    std::vector<int> syms;
+    if (!attribute.empty()) {
+      UString t = "<r:"_u;
+      t += attribute;
+      t += '>';
+      alphabet.includeSymbol(t);
+      syms.push_back(alphabet(t));
+    }
+    if (!altval.empty()) {
+      UString t = "<alt:"_u;
+      t += altval;
+      t += '>';
+      alphabet.includeSymbol(t);
+      syms.push_back(alphabet(t));
+    }
+    if (!varval.empty()) {
+      UString t = "<v:"_u;
+      t += varval;
+      t += '>';
+      alphabet.includeSymbol(t);
+      syms.push_back(alphabet(t));
+    }
+    if (!varl.empty()) {
+      UString t = "<vl:"_u;
+      t += varl;
+      t += '>';
+      alphabet.includeSymbol(t);
+      syms.push_back(alphabet(t));
+    }
+    if (!varr.empty()) {
+      UString t = "<vr:"_u;
+      t += varr;
+      t += '>';
+      alphabet.includeSymbol(t);
+      syms.push_back(alphabet(t));
+    }
+    if (!syms.empty()) {
+      EntryToken e;
+      e.setSingleTransduction(syms, syms);
+      elements.push_back(e);
+    }
+  }
+  else if((!attribute.empty() && attribute != direction)
    || ignore == COMPILER_IGNORE_YES_VAL
    || (!altval.empty() && altval != alt)
    || (!varval.empty() && !variant.empty() && varval != variant)
@@ -825,8 +860,6 @@ Compiler::procEntry()
   {
     weight = StringUtils::stod(wsweight);
   }
-
-  std::vector<EntryToken> elements;
 
   if (entry_debugging && current_paradigm.empty()) {
     UString ln = "Line near "_u;
@@ -929,38 +962,6 @@ Compiler::procEntry()
       std::cerr << ">'." << std::endl;
       exit(EXIT_FAILURE);
     }
-  }
-}
-
-void
-Compiler::procNodeACX()
-{
-  UString name = XMLParseUtil::readName(reader);
-  if(name == COMPILER_TEXT_NODE)
-  {
-    /* ignore */
-  }
-  else if(name == COMPILER_ACX_ANALYSIS_ELEM)
-  {
-    /* ignore */
-  }
-  else if(name == COMPILER_ACX_CHAR_ELEM)
-  {
-    acx_current_char = static_cast<int>(attrib(COMPILER_ACX_VALUE_ATTR)[0]);
-  }
-  else if(name == COMPILER_ACX_EQUIV_CHAR_ELEM)
-  {
-    acx_map[acx_current_char].insert(static_cast<int>(attrib(COMPILER_ACX_VALUE_ATTR)[0]));
-  }
-  else if(name == COMPILER_COMMENT_NODE)
-  {
-    /* ignore */
-  }
-  else
-  {
-    std::cerr << "Error in ACX file (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Invalid node '<" << name << ">'." << std::endl;
-    exit(EXIT_FAILURE);
   }
 }
 

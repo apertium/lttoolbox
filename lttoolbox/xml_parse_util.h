@@ -29,6 +29,8 @@ class XMLParseUtil
 {
 public:
 
+  static xmlTextReaderPtr open_or_exit(const char* fname);
+
   /* If attrib does not exist (or other error), returns an empty string: */
   static UString attrib(xmlTextReaderPtr reader, UString const &name);
 

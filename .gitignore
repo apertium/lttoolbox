@@ -74,6 +74,8 @@
 /lttoolbox/lt-append
 /lttoolbox/lsx-comp
 /lttoolbox/lt-paradigm
+/lttoolbox/lt-invert
+/lttoolbox/lt-restrict
 /python/Makefile
 /python/Makefile.in
 /python/lttoolbox.i

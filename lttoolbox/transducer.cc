@@ -1345,3 +1345,27 @@ Transducer::invert(Alphabet& alpha)
   }
   transitions.swap(tmp_trans);
 }
+
+void
+Transducer::deleteSymbols(const sorted_vector<int32_t>& syms)
+{
+  for (auto& state : transitions) {
+    for (auto& sym : syms) {
+      state.second.erase(sym);
+    }
+  }
+}
+
+void
+Transducer::epsilonizeSymbols(const sorted_vector<int32_t>& syms)
+{
+  for (auto& state: transitions) {
+    for (auto& sym : syms) {
+      auto pr = state.second.equal_range(sym);
+      for (auto it = pr.first; it != pr.second; it++) {
+        state.second.insert(std::make_pair(0, it->second));
+      }
+      state.second.erase(sym);
+    }
+  }
+}

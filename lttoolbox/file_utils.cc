@@ -86,6 +86,14 @@ writeTransducerSet(FILE* output, const UString& letters,
 }
 
 void
+writeTransducerSet(FILE* output, const std::set<UChar32>& letters,
+                   Alphabet& alpha,
+                   std::map<UString, Transducer>& trans)
+{
+  writeTransducerSet(output, UString(letters.begin(), letters.end()), alpha, trans);
+}
+
+void
 readShared(FILE* input, std::set<UChar32>& letters, Alphabet& alpha)
 {
   fpos_t pos;

@@ -249,6 +249,13 @@ StringUtils::caseequal(const UString& a, const UString& b)
 }
 
 bool
+StringUtils::startswith(const UString& str, const UString& prefix)
+{
+  return (prefix.size() <= str.size() &&
+          str.substr(0, prefix.size()) == prefix);
+}
+
+bool
 StringUtils::endswith(const UString& str, const UString& suffix)
 {
   return (suffix.size() <= str.size() &&

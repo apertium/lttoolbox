@@ -22,6 +22,7 @@
 #include <lttoolbox/entry_token.h>
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/ustring.h>
+#include <lttoolbox/sorted_vector.hpp>
 
 #include <thread>
 #include <map>
@@ -98,6 +99,13 @@ private:
   UString direction;
 
   /**
+   * If this is set to true, attributes v, vl, vr, r, and alt
+   * insert special symbols to be filtered by lt-restrict rather than
+   * ignoring entries.
+   */
+  bool unified_compilation = false;
+
+  /**
    * List of characters to be considered alphabetic
    */
   UString letters;
@@ -171,12 +179,7 @@ private:
   /**
    * Mapping of aliases of characters specified in ACX files
    */
-  std::map<int, std::set<int> > acx_map;
-
-  /**
-   * Original char being mapped
-   */
-  int acx_current_char = 0;
+  std::map<int32_t, sorted_vector<int32_t> > acx_map;
 
   /**
    * LSX symbols
@@ -196,12 +199,6 @@ private:
    * Method to parse an XML Node
    */
   void procNode();
-
-  /**
-   * Method to parse an XML Node in ACX files
-   */
-  void procNodeACX();
-
 
   /**
    * Parse the &lt;alphabet&gt; element

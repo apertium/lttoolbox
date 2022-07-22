@@ -17,12 +17,10 @@
 #include <lttoolbox/compiler.h>
 #include <lttoolbox/att_compiler.h>
 #include <lttoolbox/lt_locale.h>
+#include <lttoolbox/cli.h>
+#include <lttoolbox/file_utils.h>
 
-#include <cstdlib>
 #include <iostream>
-#include <libgen.h>
-#include <string>
-#include <getopt.h>
 
 /*
  * Error function that does nothing so that when we fallback from
@@ -34,135 +32,59 @@ void errorFunc(void *ctx, const char *msg, ...)
   return;
 }
 
-void endProgram(char *name)
-{
-  if(name != NULL)
-  {
-    std::cout << basename(name) << " v" << PACKAGE_VERSION <<": build a letter transducer from a dictionary" << std::endl;
-    std::cout << "USAGE: " << basename(name) << " [-hmvalrHSj] lr | rl dictionary_file output_file [acx_file]" << std::endl;
-#if HAVE_GETOPT_LONG
-    std::cout << "  -d, --debug:               insert line numbers before each entry" << std::endl;
-    std::cout << "  -m, --keep-boundaries:     keep morpheme boundaries" << std::endl;
-    std::cout << "  -v, --var:                 set language variant" << std::endl;
-    std::cout << "  -a, --alt:                 set alternative (monodix)" << std::endl;
-    std::cout << "  -l, --var-left:            set left language variant (bidix)" << std::endl;
-    std::cout << "  -r, --var-right:           set right language variant (bidix)" << std::endl;
-    std::cout << "  -H, --hfst:                expect HFST symbols" << std::endl;
-    std::cout << "  -S, --no-split:            don't attempt to split into word and punctuation transducers" << std::endl;
-    std::cout << "  -j, --jobs:                use one cpu core per section when minimising, new section after 50k entries" << std::endl;
-#else
-    std::cout << "  -d:     insert line numbers before each entry" << std::endl;
-    std::cout << "  -m:     keep morpheme boundaries" << std::endl;
-    std::cout << "  -v:     set language variant" << std::endl;
-    std::cout << "  -a:     set alternative (monodix)" << std::endl;
-    std::cout << "  -l:     set left language variant (bidix)" << std::endl;
-    std::cout << "  -r:     set right language variant (bidix)" << std::endl;
-    std::cout << "  -H:     expect HFST symbols" << std::endl;
-    std::cout << "  -S:     don't attempt to split into word and punctuation transducers" << std::endl;
-    std::cout << "  -j:     use one cpu core per section when minimising, new section after 50k entries" << std::endl;
-#endif
-    std::cout << "Modes:" << std::endl;
-    std::cout << "  lr:     left-to-right compilation" << std::endl;
-    std::cout << "  rl:     right-to-left compilation" << std::endl;
-  }
-  exit(EXIT_FAILURE);
-}
-
-
 int main(int argc, char *argv[])
 {
   LtLocale::tryToSetLocale();
+  CLI cli("build a letter transducer from a dictionary", PACKAGE_VERSION);
+  cli.add_bool_arg('d', "debug", "insert line numbers before each entry");
+  cli.add_bool_arg('m', "keep-boundaries", "keep morpheme boundaries");
+  cli.add_str_arg('v', "var", "set language variant", "VAR");
+  cli.add_str_arg('a', "alt", "set alternative (monodix)", "ALT");
+  cli.add_str_arg('l', "var-left", "set left language variant (bidix)", "VAR");
+  cli.add_str_arg('r', "var-right", "set right language variant (bidix)", "VAR");
+  cli.add_bool_arg('H', "hfst", "expect HFST symbols");
+  cli.add_bool_arg('S', "no-split", "don't attempt to split into word and punctuation sections");
+  cli.add_bool_arg('j', "jobs", "use one cpu core per section when minimising, new section after 50k entries");
+  cli.add_bool_arg('V', "verbose", "compile verbosely");
+  cli.add_bool_arg('h', "help", "print this message and exit");
+  cli.add_file_arg("lr | rl | u", false);
+  cli.add_file_arg("dictionary_file", false);
+  cli.add_file_arg("output_file", false);
+  cli.add_file_arg("acx_file", true);
+  cli.parse_args(argc, argv);
 
   char ttype = 'x';
   Compiler c;
   AttCompiler a;
-  c.setKeepBoundaries(false);
-  c.setVerbose(false);
-  c.setEntryDebugging(false);
 
-#if HAVE_GETOPT_LONG
-  int option_index=0;
-#endif
-
-  std::string vl;
-  std::string vr;
-
-  while (true) {
-#if HAVE_GETOPT_LONG
-    static struct option long_options[] =
-    {
-      {"alt",       required_argument, 0, 'a'},
-      {"var",       required_argument, 0, 'v'},
-      {"var-left",  required_argument, 0, 'l'},
-      {"var-right", required_argument, 0, 'r'},
-      {"debug",     no_argument,       0, 'd'},
-      {"keep-boundaries",      no_argument,       0, 'm'},
-      {"hfst",      no_argument,       0, 'H'},
-      {"no-split",  no_argument,       0, 'S'},
-      {"help",      no_argument,       0, 'h'},
-      {"verbose",   no_argument,       0, 'V'},
-      {"jobs",      no_argument,       0, 'j'},
-      {0, 0, 0, 0}
-    };
-
-    int cnt=getopt_long(argc, argv, "a:v:l:r:dmHShVj", long_options, &option_index);
-#else
-    int cnt=getopt(argc, argv, "a:v:l:r:dmHShV");
-#endif
-    if (cnt==-1)
-      break;
-
-    switch (cnt)
-    {
-      case 'a':
-        c.setAltValue(to_ustring(optarg));
-        break;
-
-      case 'v':
-        c.setVariantValue(to_ustring(optarg));
-        break;
-
-      case 'l':
-        vl = optarg;
-        c.setVariantLeftValue(to_ustring(optarg));
-        break;
-
-      case 'r':
-        vr = optarg;
-        c.setVariantRightValue(to_ustring(optarg));
-        break;
-
-      case 'd':
-        c.setEntryDebugging(true);
-        break;
-
-      case 'm':
-        c.setKeepBoundaries(true);
-        break;
-
-      case 'H':
-        a.setHfstSymbols(true);
-        break;
-
-      case 'S':
-        a.setSplitting(false);
-        break;
-
-      case 'j':
-        c.setJobs(true);
-        c.setMaxSectionEntries(50000);
-        break;
-
-      case 'V':
-        c.setVerbose(true);
-        break;
-
-      case 'h':
-      default:
-        endProgram(argv[0]);
-        break;
-    }
+  bool have_vl = false;
+  bool have_vr = false;
+  auto args = cli.get_strs();
+  if (args.find("var") != args.end()) {
+    c.setVariantValue(to_ustring(args["var"][0].c_str()));
   }
+  if (args.find("alt") != args.end()) {
+    c.setAltValue(to_ustring(args["alt"][0].c_str()));
+  }
+  if (args.find("var-left") != args.end()) {
+    have_vl = true;
+    c.setVariantLeftValue(to_ustring(args["var-left"][0].c_str()));
+  }
+  if (args.find("var-right") != args.end()) {
+    have_vr = true;
+    c.setVariantRightValue(to_ustring(args["var-right"][0].c_str()));
+  }
+
+  c.setEntryDebugging(cli.get_bools()["debug"]);
+  c.setKeepBoundaries(cli.get_bools()["keep-boundaries"]);
+  if (cli.get_bools()["jobs"]) {
+    c.setJobs(true);
+    c.setMaxSectionEntries(50000);
+  }
+  c.setVerbose(cli.get_bools()["verbose"]);
+
+  a.setHfstSymbols(cli.get_bools()["hfst"]);
+  a.setSplitting(!cli.get_bools()["no-split"]);
 
   auto LT_JOBS = std::getenv("LT_JOBS");
   if(LT_JOBS != NULL && LT_JOBS[0] != 'n') {
@@ -177,30 +99,10 @@ int main(int argc, char *argv[])
     c.setMaxSectionEntries(std::stol(max_section_entries));
   }
 
-  std::string opc;
-  std::string infile;
-  std::string outfile;
-  std::string acxfile;
-
-  switch(argc - optind + 1)
-  {
-    case 5:
-      opc = argv[argc-4];
-      infile = argv[argc-3];
-      outfile = argv[argc-2];
-      acxfile = argv[argc-1];
-      break;
-
-    case 4:
-      opc = argv[argc-3];
-      infile = argv[argc-2];
-      outfile = argv[argc-1];
-      break;
-
-    default:
-      endProgram(argv[0]);
-      break;
-  }
+  std::string opc = cli.get_files()[0];
+  std::string infile = cli.get_files()[1];
+  std::string outfile = cli.get_files()[2];
+  std::string acxfile = cli.get_files()[3];
 
   xmlTextReaderPtr reader;
   reader = xmlReaderForFile(infile.c_str(), NULL, 0);
@@ -226,10 +128,9 @@ int main(int argc, char *argv[])
 
   if(opc == "lr")
   {
-    if(vr == "" && vl != "")
-    {
+    if (have_vr && !have_vl) {
       std::cout << "Error: -l specified, but mode is lr" << std::endl;
-      endProgram(argv[0]);
+      cli.print_usage();
     }
     if(ttype == 'a')
     {
@@ -237,7 +138,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-      if(acxfile != "")
+      if(!acxfile.empty())
       {
         c.parseACX(acxfile, Compiler::COMPILER_RESTRICTION_LR_VAL);
       }
@@ -246,10 +147,9 @@ int main(int argc, char *argv[])
   }
   else if(opc == "rl")
   {
-    if(vl == "" && vr != "")
-    {
+    if (have_vl && !have_vr) {
       std::cout << "Error: -r specified, but mode is rl" << std::endl;
-      endProgram(argv[0]);
+      cli.print_usage();
     }
     if(ttype == 'a')
     {
@@ -260,17 +160,19 @@ int main(int argc, char *argv[])
       c.parse(infile, Compiler::COMPILER_RESTRICTION_RL_VAL);
     }
   }
+  else if (opc == "u") {
+    if (ttype == 'a') {
+      a.parse(infile, false);
+    } else {
+      c.parse(infile, "u"_u);
+    }
+  }
   else
   {
-    endProgram(argv[0]);
+    cli.print_usage();
   }
 
-  FILE *output = fopen(outfile.c_str(), "wb");
-  if(!output)
-  {
-    std::cerr << "Error: Cannot open file '" << outfile << "'." << std::endl;
-    exit(EXIT_FAILURE);
-  }
+  FILE* output = openOutBinFile(outfile);
   if(ttype == 'a')
   {
     a.write(output);
