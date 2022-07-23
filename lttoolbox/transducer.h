@@ -22,6 +22,7 @@
 #include <set>
 
 #include <lttoolbox/alphabet.h>
+#include <lttoolbox/sorted_vector.hpp>
 
 
 /**
@@ -61,14 +62,6 @@ private:
    * @return the new state number
    */
   int newState();
-
-  /**
-   * Test if the intersection of two sets is empty
-   * @param s1 first set
-   * @param s2 second set
-   * @return true if the intersection is empty
-   */
-  static bool isEmptyIntersection(std::set<int> const &s1, std::set<int> const &s2);
 
   /**
    * Copy function
@@ -220,6 +213,8 @@ public:
    * @return the epsilon-connected states
    */
   std::set<int> closure(int const state, std::set<int> const &epsilon_tags) const;
+
+  std::vector<sorted_vector<int>> closure_all(const int epsilon_tag) const;
 
   /**
    * Join all finals in one using epsilon transductions

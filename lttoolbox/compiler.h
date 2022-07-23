@@ -132,6 +132,11 @@ private:
    */
   bool is_separable = false;
 
+  /**
+   * Should we put output line numbers on each <e> in <section>?
+   */
+  bool entry_debugging = false;
+
 
   /**
    * Identifier of all the symbols during the compilation
@@ -444,6 +449,8 @@ public:
    * @param v the value
    */
   void setVariantRightValue(UString const &v);
+
+  void setEntryDebugging(const bool b);
 };
 
 

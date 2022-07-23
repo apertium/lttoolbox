@@ -127,7 +127,7 @@ public:
    * Write method.
    * @param output output stream.
    */
-  void write(FILE *output);
+  void write(FILE *output) const;
 
   /**
    * Read method.
@@ -209,6 +209,9 @@ public:
   std::vector<UString>& getTags();
 
   std::vector<int32_t> tokenize(const UString& str) const;
+
+  bool sameSymbol(const int32_t tsym, const Alphabet& other, const int32_t osym,
+                  bool allow_anys=false) const;
 };
 
 #endif

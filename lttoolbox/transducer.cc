@@ -263,6 +263,40 @@ Transducer::closure(int const state, std::set<int> const &epsilon_tags) const
   return result;
 }
 
+std::vector<sorted_vector<int>>
+Transducer::closure_all(const int epsilon_tag) const
+{
+  std::vector<sorted_vector<int>> ret;
+  ret.reserve(transitions.size());
+  std::vector<std::vector<int>> reversed;
+  reversed.resize(transitions.size());
+  sorted_vector<int> todo;
+  for (size_t i = 0; i < transitions.size(); i++) {
+    sorted_vector<int> c;
+    c.insert(i);
+    auto range = transitions.at(i).equal_range(epsilon_tag);
+    for (; range.first != range.second; range.first++) {
+      c.insert(range.first->second.first);
+      reversed[range.first->second.first].push_back(i);
+    }
+    if (c.size() > 1) todo.insert(i);
+    ret.push_back(c);
+  }
+  while (!todo.empty()) {
+    sorted_vector<int> new_todo;
+    for (auto& it : todo) {
+      sorted_vector<int> temp = ret[it];
+      for (auto& it2 : temp) {
+        ret[it].insert(ret[it2].begin(), ret[it2].end());
+      }
+      if (ret[it].size() > temp.size())
+        new_todo.insert(reversed[it].begin(), reversed[it].end());
+    }
+    todo.swap(new_todo);
+  }
+  return ret;
+}
+
 void
 Transducer::joinFinals(int const epsilon_tag)
 {
@@ -285,45 +319,22 @@ Transducer::joinFinals(int const epsilon_tag)
   }
 }
 
-bool
-Transducer::isEmptyIntersection(std::set<int> const &s1, std::set<int> const &s2)
-{
-
-  if(s1.size() < s2.size())
-  {
-    for(auto& it : s1)
-    {
-      if(s2.count(it))
-      {
-        return false;
-      }
-    }
-  }
-  else
-  {
-    for(auto& it : s2)
-    {
-      if(s1.count(it))
-      {
-        return false;
-      }
-    }
-  }
-
-  return true;
-}
-
 void
 Transducer::determinize(int const epsilon_tag)
 {
-  std::vector<std::set<int> > R(2);
-  std::map<int, std::set<int> > Q_prime;
-  std::map<std::set<int>, int> Q_prime_inv;
+  std::vector<sorted_vector<int>> R(2);
+  std::vector<sorted_vector<int>> Q_prime;
+  std::map<sorted_vector<int>, int> Q_prime_inv;
 
   std::map<int, std::multimap<int, std::pair<int, double> > > transitions_prime;
 
+  // We're almost certainly going to need the closure of (nearly) every
+  // state, and we're often going to need the closure several times,
+  // so it's faster to precompute.
+  std::vector<sorted_vector<int>> all_closures = closure_all(epsilon_tag);
+
   unsigned int size_Q_prime = 0;
-  Q_prime[0] = closure(initial, epsilon_tag);
+  Q_prime.push_back(all_closures[initial]);
 
   Q_prime_inv[Q_prime[0]] = 0;
   R[0].insert(0);
@@ -338,7 +349,7 @@ Transducer::determinize(int const epsilon_tag)
 
   int t = 0;
 
-  std::set<int> finals_state;
+  sorted_vector<int> finals_state;
   for(auto& it : finals) {
     finals_state.insert(it.first);
   }
@@ -350,8 +361,7 @@ Transducer::determinize(int const epsilon_tag)
 
     for(auto& it : R[t])
     {
-      if(!isEmptyIntersection(Q_prime[it], finals_state))
-      {
+      if (Q_prime[it].intersects(finals_state)) {
         double w = default_weight;
         auto it3 = finals.find(it);
         if (it3 != finals.end()) {
@@ -360,7 +370,7 @@ Transducer::determinize(int const epsilon_tag)
         finals_prime.insert(std::make_pair(it, w));
       }
 
-      std::map<std::pair<int, double>, std::set<int> > mymap;
+      std::map<std::pair<int, double>, sorted_vector<int> > mymap;
 
       for(auto& it2 : Q_prime[it])
       {
@@ -368,29 +378,29 @@ Transducer::determinize(int const epsilon_tag)
         {
           if(it3.first != epsilon_tag)
           {
-            auto c = closure(it3.second.first, epsilon_tag);
-
-            for(auto& it4 : c)
-            {
-              mymap[std::make_pair(it3.first, it3.second.second)].insert(it4);
-            }
+            auto& it4 = all_closures[it3.second.first];
+            mymap[std::make_pair(it3.first, it3.second.second)].insert(it4.begin(), it4.end());
           }
         }
       }
 
       // adding new states
+      auto& state_prime = transitions_prime[it];
       for(auto& it2 : mymap)
       {
-        if(Q_prime_inv.find(it2.second) == Q_prime_inv.end())
-        {
-          int tag = Q_prime.size();
-          Q_prime[tag] = it2.second;
+        int tag;
+        auto loc = Q_prime_inv.find(it2.second);
+        if(loc == Q_prime_inv.end()) {
+          tag = Q_prime.size();
+          Q_prime.push_back(it2.second);
           Q_prime_inv[it2.second] = tag;
-          R[(t+1)%2].insert(Q_prime_inv[it2.second]);
+          R[(t+1)%2].insert(tag);
           transitions_prime[tag].clear();
+        } else {
+          tag = loc->second;
         }
-        transitions_prime[it].insert(std::make_pair(it2.first.first,
-                                                std::make_pair(Q_prime_inv[it2.second], it2.first.second)));
+        state_prime.insert(std::make_pair(it2.first.first,
+                                          std::make_pair(tag, it2.first.second)));
       }
     }
 
@@ -1027,15 +1037,15 @@ Transducer::copyWithTagsFirst(int start,
   typedef std::pair<int, int> SearchState;
   // Each searchstate in the stack is a transition in this FST, along
   // with the last reached state of the lemq
-  std::list<SearchState> todo;
+  std::vector<SearchState> todo;
   std::set<SearchState> seen;
   std::set<SearchState> finally;
   SearchState current;
-  todo.push_front(std::make_pair(start,start));
+  todo.push_back(std::make_pair(start,start));
 
-  while(todo.size() > 0) {
-    current = todo.front();
-    todo.pop_front();
+  while(!todo.empty()) {
+    current = todo.back();
+    todo.pop_back();
     seen.insert(current);
     int this_src = current.first, this_lemqlast = current.second;
 
@@ -1082,7 +1092,7 @@ Transducer::copyWithTagsFirst(int start,
 
         if(seen.find(std::make_pair(this_trg, this_lemqlast)) == seen.end())
         {
-          todo.push_front(std::make_pair(this_trg, this_lemqlast));
+          todo.push_back(std::make_pair(this_trg, this_lemqlast));
         }
       }
       else
@@ -1097,7 +1107,7 @@ Transducer::copyWithTagsFirst(int start,
         lemq.linkStates(lemq_src, lemq_trg, label, this_wt);
         if(seen.find(std::make_pair(this_trg, this_trg)) == seen.end())
         {
-          todo.push_front(std::make_pair(this_trg, this_trg));
+          todo.push_back(std::make_pair(this_trg, this_trg));
         }
       }
     } // end for transitions
@@ -1130,16 +1140,15 @@ Transducer::moveLemqsLast(Alphabet const &alphabet,
   Transducer new_t;
   typedef int SearchState;
   std::set<SearchState> seen;
-  std::list<SearchState> todo;
-  todo.push_front(initial);
+  std::vector<SearchState> todo;
+  todo.push_back(initial);
 
   std::map<int, int> states_this_new;
   states_this_new.insert(std::make_pair(initial, new_t.initial));
 
-  while(todo.size() > 0)
-  {
-    int this_src = todo.front();
-    todo.pop_front();
+  while(!todo.empty()) {
+    int this_src = todo.back();
+    todo.pop_back();
     seen.insert(this_src);
     for(auto& trans_it : transitions[this_src])
     {
@@ -1166,7 +1175,7 @@ Transducer::moveLemqsLast(Alphabet const &alphabet,
         new_t.linkStates(new_src, new_trg, label, default_weight);
         if(seen.find(this_trg) == seen.end())
         {
-          todo.push_front(this_trg);
+          todo.push_back(this_trg);
         }
       }
     }
@@ -1205,18 +1214,35 @@ Transducer::intersect(Transducer &trimmer,
   Transducer trimmed;
   std::map<SearchState, int> states_this_trimmed;
 
-  std::list<SearchState> todo;
+  std::vector<SearchState> todo;
   std::set<SearchState> seen;
   SearchState current;
   SearchState next = std::make_pair(initial, std::make_pair(trimmer.initial,
                                                   trimmer.initial));
-  todo.push_front(next);
+  todo.push_back(next);
   states_this_trimmed.insert(std::make_pair(next, trimmed.initial));
 
-  while(todo.size() > 0)
+  sorted_vector<int32_t> sym_wb, sym_lsx, sym_cmp_or_eps;
   {
-    current = todo.front();
-    todo.pop_front();
+    if (this_a.isSymbolDefined(LSX_BOUNDARY_SYMBOL))
+      sym_lsx.insert(this_a(LSX_BOUNDARY_SYMBOL));
+    if (this_a.isSymbolDefined(LSX_BOUNDARY_SPACE_SYMBOL))
+      sym_lsx.insert(this_a(LSX_BOUNDARY_SPACE_SYMBOL));
+    if (this_a.isSymbolDefined(LSX_BOUNDARY_NO_SPACE_SYMBOL))
+      sym_lsx.insert(this_a(LSX_BOUNDARY_NO_SPACE_SYMBOL));
+    sym_wb = sym_lsx;
+    sym_wb.insert(static_cast<int32_t>('+')); // JOIN_SYMBOL
+
+    if (this_a.isSymbolDefined(COMPOUND_ONLY_L_SYMBOL))
+      sym_cmp_or_eps.insert(this_a(COMPOUND_ONLY_L_SYMBOL));
+    if (this_a.isSymbolDefined(COMPOUND_R_SYMBOL))
+      sym_cmp_or_eps.insert(this_a(COMPOUND_R_SYMBOL));
+    sym_cmp_or_eps.insert(0); // epsilon
+  }
+
+  while(!todo.empty()) {
+    current = todo.back();
+    todo.pop_back();
     seen.insert(current);
     int this_src        = current.first,
         trimmer_src     = current.second.first,
@@ -1230,24 +1256,23 @@ Transducer::intersect(Transducer &trimmer,
     int trimmed_src = states_this_trimmed[current];
 
     // First loop through _epsilon_ transitions of trimmer
-    for(auto& trimmer_trans_it : trimmer.transitions.at(trimmer_src)) {
+    for(auto& trimmer_trans_it : trimmer.transitions[trimmer_src]) {
       int trimmer_label = trimmer_trans_it.first,
           trimmer_trg   = trimmer_trans_it.second.first;
       double trimmer_wt = trimmer_trans_it.second.second;
-      UString trimmer_left;
-      trimmer_a.getSymbol(trimmer_left, trimmer_a.decode(trimmer_label).first);
+      int32_t trimmer_left = trimmer_a.decode(trimmer_label).first;
 
       if(trimmer_preplus == trimmer_src) {
         // Keep the old preplus state if it was set; equal to current trimmer state means unset:
         trimmer_preplus_next = trimmer_trg;
       }
 
-      if(trimmer_left.empty())
+      if(trimmer_left == 0)
       {
         next = std::make_pair(this_src, std::make_pair(trimmer_trg, trimmer_preplus_next));
         if(seen.find(next) == seen.end())
         {
-          todo.push_front(next);
+          todo.push_back(next);
           states_this_trimmed.insert(std::make_pair(next, trimmed.newState()));
         }
         int trimmed_trg = states_this_trimmed[next];
@@ -1265,13 +1290,9 @@ Transducer::intersect(Transducer &trimmer,
       int this_label = trans_it.first,
           this_trg   = trans_it.second.first;
       double this_wt = trans_it.second.second;
-      UString this_right;
-      this_a.getSymbol(this_right, this_a.decode(this_label).second);
+      int32_t this_right = this_a.decode(this_label).second;
 
-      if(this_right == JOIN_SYMBOL || this_right == LSX_BOUNDARY_SYMBOL ||
-         this_right == LSX_BOUNDARY_SPACE_SYMBOL ||
-         this_right == LSX_BOUNDARY_NO_SPACE_SYMBOL)
-      {
+      if (sym_wb.count(this_right)) {
         if(trimmer_preplus == trimmer_src) {
           // Keep the old preplus state if it was set; equal to current trimmer state means unset:
           trimmer_preplus_next = trimmer_src; // not _trg when join!
@@ -1280,7 +1301,7 @@ Transducer::intersect(Transducer &trimmer,
         next = std::make_pair(this_trg, std::make_pair(trimmer.initial, trimmer_preplus_next));
         if(seen.find(next) == seen.end())
         {
-          todo.push_front(next);
+          todo.push_back(next);
         }
         if(states_this_trimmed.find(next) == states_this_trimmed.end())
         {
@@ -1291,17 +1312,11 @@ Transducer::intersect(Transducer &trimmer,
                            trimmed_trg, // toState
                            this_label, // symbol-pair, using this alphabet
                            this_wt); //weight of transduction
-        if((this_right == LSX_BOUNDARY_SYMBOL ||
-            this_right == LSX_BOUNDARY_SPACE_SYMBOL ||
-            this_right == LSX_BOUNDARY_NO_SPACE_SYMBOL) && isFinal(this_trg))
-        {
+        if (sym_lsx.count(this_right) && isFinal(this_trg)) {
           trimmed.setFinal(trimmed_trg, default_weight);
         }
       }
-      else if ( this_right == COMPOUND_ONLY_L_SYMBOL
-                || this_right == COMPOUND_R_SYMBOL
-                || this_right.empty() )
-      {
+      else if (sym_cmp_or_eps.count(this_right)) {
         // Stay put in the trimmer FST
         int trimmer_trg = trimmer_src;
 
@@ -1313,7 +1328,7 @@ Transducer::intersect(Transducer &trimmer,
         next = std::make_pair(this_trg, std::make_pair(trimmer_trg, trimmer_preplus_next));
         if(seen.find(next) == seen.end())
         {
-          todo.push_front(next);
+          todo.push_back(next);
         }
         if(states_this_trimmed.find(next) == states_this_trimmed.end())
         {
@@ -1330,7 +1345,8 @@ Transducer::intersect(Transducer &trimmer,
         // Loop through non-epsilon arcs from the live state of trimmer
 
         // If we see a hash/group, we may have to rewind our trimmer state first:
-        if(this_right == GROUP_SYMBOL && trimmer_preplus != trimmer_src)
+        if(this_right == static_cast<int32_t>('#') &&
+           trimmer_preplus != trimmer_src)
         {
           states_this_trimmed.insert(std::make_pair(std::make_pair(this_src, std::make_pair(trimmer_preplus,
                                                                              trimmer_preplus)),
@@ -1342,22 +1358,19 @@ Transducer::intersect(Transducer &trimmer,
         {
           int trimmer_label = trimmer_trans_it.first,
               trimmer_trg   = trimmer_trans_it.second.first;
-          UString trimmer_left;
-          trimmer_a.getSymbol(trimmer_left, trimmer_a.decode(trimmer_label).first);
+          int32_t trimmer_left = trimmer_a.decode(trimmer_label).first;
 
           if(trimmer_preplus == trimmer_src) {
             // Keep the old preplus state if it was set; equal to current trimmer state means unset:
             trimmer_preplus_next = trimmer_trg;
           }
 
-          if(!trimmer_left.empty() && // we've already dealt with trimmer epsilons
-             (this_right == trimmer_left ||
-              (this_right == ((trimmer_left[0] == '<') ? ANY_TAG_SYMBOL : ANY_CHAR_SYMBOL))))
-          {
+          if (trimmer_left != 0 && // we've already dealt with trimmer epsilons
+              this_a.sameSymbol(this_right, trimmer_a, trimmer_left, true)) {
             next = std::make_pair(this_trg, std::make_pair(trimmer_trg, trimmer_preplus_next));
             if(seen.find(next) == seen.end())
             {
-              todo.push_front(next);
+              todo.push_back(next);
             }
             if(states_this_trimmed.find(next) == states_this_trimmed.end())
             {

@@ -408,6 +408,17 @@ State::step_case(UChar32 val, bool caseSensitive)
 }
 
 
+void
+State::step_case_override(UChar32 val, bool caseSensitive)
+{
+  if (!u_isupper(val) || caseSensitive) {
+    step(val);
+  } else {
+    step_override(val, u_tolower(val), u_tolower(val), val);
+  }
+}
+
+
 bool
 State::isFinal(const std::set<TransducerExe*>& finals) const
 {

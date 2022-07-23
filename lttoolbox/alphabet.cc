@@ -113,7 +113,7 @@ Alphabet::operator()(UString const &s) const
 }
 
 bool
-Alphabet::isSymbolDefined(UString const &s) const
+Alphabet::isSymbolDefined(const UString& s) const
 {
   return slexic.find(s) != slexic.end();
 }
@@ -125,23 +125,20 @@ Alphabet::size() const
 }
 
 void
-Alphabet::write(FILE *output)
+Alphabet::write(FILE *output) const
 {
   // First, we write the taglist
   Compression::multibyte_write(slexicinv.size(), output);  // taglist size
-  for(size_t i = 0, limit = slexicinv.size(); i < limit; i++)
-  {
-    Compression::string_write(slexicinv[i].substr(1, slexicinv[i].size()-2), output);
+  for (auto& it : slexicinv) {
+    Compression::string_write(it.substr(1, it.size()-2), output);
   }
-
   // Then we write the list of pairs
   // All numbers are biased + slexicinv.size() to be positive or zero
   size_t bias = slexicinv.size();
   Compression::multibyte_write(spairinv.size(), output);
-  for(size_t i = 0, limit = spairinv.size(); i != limit; i++)
-  {
-    Compression::multibyte_write(spairinv[i].first + bias, output);
-    Compression::multibyte_write(spairinv[i].second + bias, output);
+  for (auto& it : spairinv) {
+    Compression::multibyte_write(it.first + bias, output);
+    Compression::multibyte_write(it.second + bias, output);
   }
 }
 
@@ -375,4 +372,24 @@ Alphabet::tokenize(const UString& str) const
     }
   }
   return ret;
+}
+
+bool
+Alphabet::sameSymbol(const int32_t tsym, const Alphabet& other, int32_t osym,
+                     bool allow_anys) const
+{
+  // if it's a letter, then it's equal across alphabets
+  if (tsym >= 0 && tsym == osym) return true;
+  if (tsym < 0 && osym < 0 &&
+      this->slexicinv[-tsym-1] == other.slexicinv[-osym-1]) {
+    return true;
+  }
+  if (allow_anys &&
+      ((tsym < 0 && this->slexicinv[-tsym-1] == "<ANY_CHAR>"_u && osym > 0) ||
+       (tsym < 0 && this->slexicinv[-tsym-1] == "<ANY_TAG>"_u && osym < 0) ||
+       (osym < 0 && other.slexicinv[-osym-1] == "<ANY_CHAR>"_u && tsym > 0) ||
+       (osym < 0 && other.slexicinv[-osym-1] == "<ANY_TAG>"_u && tsym < 0))) {
+    return true;
+  }
+  return false;
 }

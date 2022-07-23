@@ -4,6 +4,7 @@
 #include <unicode/uchar.h>
 #include <unicode/ustring.h>
 #include <iostream>
+#include <limits>
 
 UString
 StringUtils::trim(const UString& str)
@@ -153,6 +154,14 @@ StringUtils::stod(const UString& str)
 {
   double ret;
   int c = u_sscanf(str.c_str(), "%lf", &ret);
+  if (str.size() == 3 && str[0] == 'i' && str[1] == 'n' && str[2] == 'f') {
+    ret = std::numeric_limits<double>::infinity();
+    c = 1;
+  }
+  if (str.size() == 4 && str[0] == '-' && str[1] == 'i' && str[2] == 'n' && str[3] == 'f') {
+    ret = -1*std::numeric_limits<double>::infinity();
+    c = 1;
+  }
   if (c != 1) {
     throw std::invalid_argument("unable to parse float");
   }

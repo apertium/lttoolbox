@@ -1655,7 +1655,7 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
     if (current_state.isFinal(all_finals)) {
       last_match = current_state.filterFinals(all_finals, alphabet,
                                               escaped_chars, displayWeightsMode,
-                                              maxAnalyses, maxWeightClasses,
+                                              1, maxWeightClasses,
                                               uppercase, firstupper);
       while (cur_word > 0) {
         if (cur_word == 1) {
@@ -1717,7 +1717,7 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
       }
     }
 
-    current_state.step_case(sym, caseSensitive);
+    current_state.step_case_override(sym, caseSensitive);
 
     if (current_state.size() == 0 || is_end) {
       if (last_match.empty()) {
