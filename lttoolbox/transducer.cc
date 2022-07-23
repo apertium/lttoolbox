@@ -1369,3 +1369,24 @@ Transducer::epsilonizeSymbols(const sorted_vector<int32_t>& syms)
     }
   }
 }
+
+void
+Transducer::applyACX(Alphabet& alpha,
+                     const std::map<int32_t, sorted_vector<int32_t>>& acx)
+{
+  for (auto& state : transitions) {
+    std::vector<std::pair<int, std::pair<int, double>>> to_insert;
+    for (auto& it : state.second) {
+      auto pr = alpha.decode(it.first);
+      auto loc = acx.find(pr.first);
+      if (loc != acx.end()) {
+        for (auto& sym : loc->second) {
+          to_insert.push_back(std::make_pair(alpha(sym, pr.second), it.second));
+        }
+      }
+    }
+    for (auto& it : to_insert) {
+      state.second.insert(it);
+    }
+  }
+}

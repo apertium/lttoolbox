@@ -76,6 +76,7 @@
 /lttoolbox/lt-paradigm
 /lttoolbox/lt-invert
 /lttoolbox/lt-restrict
+/lttoolbox/lt-apply-acx
 /python/Makefile
 /python/Makefile.in
 /python/lttoolbox.i

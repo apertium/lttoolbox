@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
   bool min = cli.get_bools()["minimise"];
   if (!min) {
     auto LT_RELEASE = std::getenv("LT_RELEASE");
-    bool min = (LT_RELEASE != NULL && LT_RELEASE[0] != 'n');
+    min = (LT_RELEASE != NULL && LT_RELEASE[0] != 'n');
   }
 
   for (auto& it : trans) {
