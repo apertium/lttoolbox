@@ -23,22 +23,9 @@
 #include <stdexcept>
 #include <lttoolbox/ustring.h>
 #include <lttoolbox/my_stdio.h>
+#include <lttoolbox/binary_headers.h>
 
-// Global lttoolbox features
-constexpr char HEADER_LTTOOLBOX[4]{'L', 'T', 'T', 'B'};
-enum LT_FEATURES : uint64_t {
-  LTF_UNKNOWN = (1ull << 0), // Features >= this are unknown, so throw an error; Inc this if more features are added
-  LTF_RESERVED = (1ull << 63), // If we ever reach this many feature flags, we need a flag to know how to extend beyond 64 bits
-};
-
-// Invididual transducer features
-constexpr char HEADER_TRANSDUCER[4]{'L', 'T', 'T', 'D'};
-enum TD_FEATURES : uint64_t {
-  TDF_WEIGHTS = (1ull << 0),
-  TDF_UNKNOWN = (1ull << 1), // Features >= this are unknown, so throw an error; Inc this if more features are added
-  TDF_RESERVED = (1ull << 63), // If we ever reach this many feature flags, we need a flag to know how to extend beyond 64 bits
-};
-
+using namespace std;
 
 inline auto write_u64(FILE *out, uint64_t value) {
   auto rv = fwrite_unlocked(reinterpret_cast<const char*>(&value), 1, sizeof(value), out);

@@ -15,10 +15,14 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 #include <lttoolbox/fst_processor.h>
-#include <lttoolbox/compression.h>
+#include <lttoolbox/binary_headers.h>
+#include <lttoolbox/endian_util.h>
 #include <lttoolbox/exception.h>
+#include <lttoolbox/mmap.h>
+#include <lttoolbox/old_binary.h>
 #include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/file_utils.h>
+#include <lttoolbox/symbol_iter.h>
 #include <lttoolbox/string_utils.h>
 
 #include <iostream>
@@ -37,6 +41,7 @@ UString const FSTProcessor::WBLANK_FINAL            = "[[/]]"_u;
 
 
 FSTProcessor::FSTProcessor()
+  : alphabet(AlphabetExe(&str_write))
 {
   // escaped_chars chars
   escaped_chars.insert('[');
@@ -54,6 +59,13 @@ FSTProcessor::FSTProcessor()
   if(useDefaultIgnoredChars)
   {
     initDefaultIgnoredCharacters();
+  }
+}
+
+FSTProcessor::~FSTProcessor()
+{
+  if (mmapping) {
+    munmap(mmap_pointer, mmap_len);
   }
 }
 
@@ -643,11 +655,12 @@ FSTProcessor::flushBlanks(UFILE *output)
 void
 FSTProcessor::calcInitial()
 {
+  std::set<TransducerExe*> temp;
   for(auto& it : transducers) {
-    root.addTransition(0, 0, it.second.getInitial(), default_weight);
+    temp.insert(&it.second);
   }
 
-  initial_state.init(&root);
+  initial_state.init(temp);
 }
 
 void
@@ -656,23 +669,19 @@ FSTProcessor::classifyFinals()
   for(auto& it : transducers) {
     if(StringUtils::endswith(it.first, "@inconditional"_u))
     {
-      inconditional.insert(it.second.getFinals().begin(),
-                           it.second.getFinals().end());
+      inconditional.insert(&it.second);
     }
     else if(StringUtils::endswith(it.first, "@standard"_u))
     {
-      standard.insert(it.second.getFinals().begin(),
-                      it.second.getFinals().end());
+      standard.insert(&it.second);
     }
     else if(StringUtils::endswith(it.first, "@postblank"_u))
     {
-      postblank.insert(it.second.getFinals().begin(),
-                       it.second.getFinals().end());
+      postblank.insert(&it.second);
     }
     else if(StringUtils::endswith(it.first, "@preblank"_u))
     {
-      preblank.insert(it.second.getFinals().begin(),
-                      it.second.getFinals().end());
+      preblank.insert(&it.second);
     }
     else
     {
@@ -720,7 +729,7 @@ FSTProcessor::writeEscapedPopBlanks(UString const &str, UFILE *output)
       u_fputc('\\', output);
     }
     u_fputc(str[i], output);
-    if (str[i] == ' ') {
+    if (str[i] == ' ' && !blankqueue.empty()) {
       if (blankqueue.front() == " "_u) {
         blankqueue.pop();
       } else {
@@ -749,8 +758,6 @@ FSTProcessor::writeEscapedWithTags(UString const &str, UFILE *output)
     u_fputc(str[i], output);
   }
 }
-
-
 
 void
 FSTProcessor::printWord(UString const &sf, UString const &lf, UFILE *output)
@@ -819,17 +826,17 @@ FSTProcessor::printSpace(UChar32 const val, UFILE *output)
 }
 
 void
-FSTProcessor::printChar(const UChar32 val, UFILE* output)
+FSTProcessor::writeChar(const UChar32 val, UFILE* output, bool single_blank)
 {
-  if (u_isspace(val)) {
-    if (blankqueue.size() > 0) {
+  if(u_isspace(val)) {
+    if (single_blank && !blankqueue.empty()) {
       write(blankqueue.front(), output);
       blankqueue.pop();
     } else {
-      u_fputc(val, output);
+      printSpace(val, output);
     }
   } else {
-    if (isEscaped(val)) {
+    if(isEscaped(val)) {
       u_fputc('\\', output);
     }
     if (val) {
@@ -853,7 +860,8 @@ FSTProcessor::isAlphabetic(UChar32 const c) const
 void
 FSTProcessor::load(FILE *input)
 {
-  readTransducerSet(input, alphabetic_chars, alphabet, transducers);
+  readTransducerSet(input, mmapping, mmap_pointer, mmap_len,
+                    str_write, &alphabetic_chars, alphabet, transducers);
 }
 
 void
@@ -873,8 +881,7 @@ FSTProcessor::initTMAnalysis()
   calcInitial();
 
   for(auto& it : transducers) {
-    all_finals.insert(it.second.getFinals().begin(),
-                      it.second.getFinals().end());
+    all_finals.insert(&it.second);
   }
 }
 
@@ -884,8 +891,7 @@ FSTProcessor::initGeneration()
   setIgnoredChars(false);
   calcInitial();
   for(auto& it : transducers) {
-    all_finals.insert(it.second.getFinals().begin(),
-                      it.second.getFinals().end());
+    all_finals.insert(&it.second);
   }
 }
 
@@ -955,7 +961,7 @@ FSTProcessor::initDecompositionSymbols()
   }
   else if(!showControlSymbols)
   {
-    alphabet.setSymbol(compoundOnlyLSymbol, ""_u);
+    alphabet.clearSymbol(compoundOnlyLSymbol);
   }
 
   if((compoundRSymbol=alphabet("<:co:R>"_u)) == 0
@@ -968,7 +974,7 @@ FSTProcessor::initDecompositionSymbols()
   }
   else if(!showControlSymbols)
   {
-    alphabet.setSymbol(compoundRSymbol, ""_u);
+    alphabet.clearSymbol(compoundRSymbol);
   }
 }
 
@@ -1139,7 +1145,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
       }
       else if(!isAlphabetic(val) && sf.empty())
       {
-        printChar(val, output);
+        writeChar(val, output, true);
       }
       else if(last_postblank)
       {
@@ -1342,18 +1348,7 @@ FSTProcessor::tm_analysis(InputFile& input, UFILE *output)
     {
       if((u_isspace(val) || u_ispunct(val)) && sf.empty())
       {
-        if(u_isspace(val))
-        {
-          printSpace(val, output);
-        }
-        else
-        {
-          if(isEscaped(val))
-          {
-            u_fputc('\\', output);
-          }
-          u_fputc(val, output);
-        }
+        writeChar(val, output, false);
       }
       else if(!u_isspace(val) && !u_ispunct(val) &&
               ((sf.size()-input_buffer.diffPrevPos(last)) > lastBlank(sf) ||
@@ -1821,77 +1816,41 @@ FSTProcessor::biltransfull(UString const &input_word, bool with_delim)
 {
   State current_state = initial_state;
   UString result;
-  unsigned int start_point = 1;
-  unsigned int end_point = input_word.size()-2;
+  unsigned int start = 1;
+  unsigned int end = input_word.size()-2;
   UString queue;
   bool mark = false;
 
   if(with_delim == false)
   {
-    start_point = 0;
-    end_point = input_word.size()-1;
+    start = 0;
+    end = input_word.size()-1;
   }
 
-  if(input_word[start_point] == '*')
+  if(input_word[start] == '*')
   {
     return input_word;
   }
 
-  if(input_word[start_point] == '=')
+  if(input_word[start] == '=')
   {
-    start_point++;
+    start++;
     mark = true;
   }
 
-  bool firstupper = u_isupper(input_word[start_point]);
-  bool uppercase = firstupper && u_isupper(input_word[start_point+1]);
+  bool firstupper = u_isupper(input_word[start]);
+  bool uppercase = firstupper && u_isupper(input_word[start+1]);
 
-  for(unsigned int i = start_point; i <= end_point; i++)
-  {
-    int val;
-    UString symbol;
-
-    if(input_word[i] == '\\')
-    {
-      i++;
-      val = static_cast<int32_t>(input_word[i]);
+  for (auto it = symbol_iter(input_word.substr(start, end-start+1), &alphabet); it != it.end(); ++it) {
+    if (current_state.size() != 0) {
+      current_state.step_case(*it, caseSensitive);
     }
-    else if(input_word[i] == '<')
-    {
-      symbol = '<';
-      for(unsigned int j = i + 1; j <= end_point; j++)
-      {
-        symbol += input_word[j];
-        if(input_word[j] == '>')
-        {
-          i = j;
-          break;
-        }
-      }
-      val = alphabet(symbol);
-    }
-    else
-    {
-      val = static_cast<int32_t>(input_word[i]);
-    }
-    if(current_state.size() != 0)
-    {
-      if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
-      {
-        current_state.step(val, u_tolower(val));
-      }
-      else
-      {
-        current_state.step(val);
-      }
-    }
-    if(current_state.isFinal(all_finals))
-    {
+    if (current_state.isFinal(all_finals)) {
       result.clear();
-      if(with_delim) {
+      if (with_delim) {
         result += '^';
       }
-      if(mark) {
+      if (mark) {
         result += '=';
       }
       result += current_state.filterFinals(all_finals, alphabet,
@@ -1902,9 +1861,9 @@ FSTProcessor::biltransfull(UString const &input_word, bool with_delim)
 
     if(current_state.size() == 0)
     {
-      if(!symbol.empty() && !result.empty())
+      if(alphabet.isTag(*it) && !result.empty())
       {
-        queue.append(symbol);
+        queue.append(it.string());
       }
       else
       {
@@ -1922,7 +1881,7 @@ FSTProcessor::biltransfull(UString const &input_word, bool with_delim)
     }
   }
 
-  if(start_point < (end_point - 3))
+  if(start < (end - 3))
   {
     return "^$"_u;
   }
@@ -1999,44 +1958,10 @@ FSTProcessor::biltrans(UString const &input_word, bool with_delim)
   bool firstupper = u_isupper(input_word[start_point]);
   bool uppercase = firstupper && u_isupper(input_word[start_point+1]);
 
-  for(unsigned int i = start_point; i <= end_point; i++)
-  {
-    int val;
-    UString symbol;
-
-    if(input_word[i] == '\\')
-    {
-      i++;
-      val = static_cast<int32_t>(input_word[i]);
-    }
-    else if(input_word[i] == '<')
-    {
-      symbol = '<';
-      for(unsigned int j = i + 1; j <= end_point; j++)
-      {
-        symbol += input_word[j];
-        if(input_word[j] == '>')
-        {
-          i = j;
-          break;
-        }
-      }
-      val = alphabet(symbol);
-    }
-    else
-    {
-      val = static_cast<int32_t>(input_word[i]);
-    }
+  for (auto it = symbol_iter(input_word.substr(start_point, end_point-start_point+1), &alphabet); it != it.end(); it++) {
     if(current_state.size() != 0)
     {
-      if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
-      {
-        current_state.step(val, u_tolower(val));
-      }
-      else
-      {
-        current_state.step(val);
-      }
+      current_state.step_case(*it, caseSensitive);
     }
     if(current_state.isFinal(all_finals))
     {
@@ -2055,9 +1980,9 @@ FSTProcessor::biltrans(UString const &input_word, bool with_delim)
 
     if(current_state.size() == 0)
     {
-      if(!symbol.empty() && !result.empty())
+      if(alphabet.isTag(*it) && !result.empty())
       {
-        queue.append(symbol);
+        queue.append(it.string());
       }
       else
       {
@@ -2355,45 +2280,13 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
   bool firstupper = u_isupper(input_word[start_point]);
   bool uppercase = firstupper && u_isupper(input_word[start_point+1]);
 
-  for(unsigned int i = start_point; i <= end_point; i++)
-  {
-    int val = 0;
-    UString symbol;
-
-    if(input_word[i] == '\\')
-    {
-      i++;
-      val = input_word[i];
-    }
-    else if(input_word[i] == '<')
-    {
+  for (auto it = symbol_iter(input_word.substr(start_point, end_point-start_point+1), &alphabet); it != it.end(); it++) {
+    if (alphabet.isTag(*it)) {
       seentags = true;
-      symbol = '<';
-      for(unsigned int j = i + 1; j <= end_point; j++)
-      {
-        symbol += input_word[j];
-        if(input_word[j] == '>')
-        {
-          i = j;
-          break;
-        }
-      }
-      val = alphabet(symbol);
-    }
-    else
-    {
-      val = input_word[i];
     }
     if(current_state.size() != 0)
     {
-      if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
-      {
-        current_state.step(val, u_tolower(val));
-      }
-      else
-      {
-        current_state.step(val);
-      }
+      current_state.step_case(*it, caseSensitive);
     }
     if(current_state.isFinal(all_finals))
     {
@@ -2412,9 +2305,9 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
 
     if(current_state.size() == 0)
     {
-      if(!symbol.empty() && !result.empty())
+      if(alphabet.isTag(*it) && !result.empty())
       {
-        queue.append(symbol);
+        queue.append(it.string());
       }
       else
       {
@@ -2521,44 +2414,10 @@ FSTProcessor::biltransWithoutQueue(UString const &input_word, bool with_delim)
   bool firstupper = u_isupper(input_word[start_point]);
   bool uppercase = firstupper && u_isupper(input_word[start_point+1]);
 
-  for(unsigned int i = start_point; i <= end_point; i++)
-  {
-    int val;
-    UString symbol;
-
-    if(input_word[i] == '\\')
-    {
-      i++;
-      val = static_cast<int32_t>(input_word[i]);
-    }
-    else if(input_word[i] == '<')
-    {
-      symbol = '<';
-      for(unsigned int j = i + 1; j <= end_point; j++)
-      {
-        symbol += input_word[j];
-        if(input_word[j] == '>')
-        {
-          i = j;
-          break;
-        }
-      }
-      val = alphabet(symbol);
-    }
-    else
-    {
-      val = static_cast<int32_t>(input_word[i]);
-    }
+  for (auto it = symbol_iter(input_word.substr(start_point, end_point-start_point+1), &alphabet); it != it.end(); it++) {
     if(current_state.size() != 0)
     {
-      if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
-      {
-        current_state.step(val, u_tolower(val));
-      }
-      else
-      {
-        current_state.step(val);
-      }
+      current_state.step_case(*it, caseSensitive);
     }
     if(current_state.isFinal(all_finals))
     {
@@ -2577,7 +2436,7 @@ FSTProcessor::biltransWithoutQueue(UString const &input_word, bool with_delim)
 
     if(current_state.size() == 0)
     {
-      if(symbol.empty())
+      if(!alphabet.isTag(*it))
       {
         // word is not present
         if(with_delim)
@@ -2764,18 +2623,7 @@ FSTProcessor::SAO(InputFile& input, UFILE *output)
     {
       if(!isAlphabetic(val) && sf.empty())
       {
-        if(u_isspace(val))
-        {
-          printSpace(val, output);
-        }
-        else
-        {
-          if(isEscaped(val))
-          {
-            u_fputc('\\', output);
-          }
-          u_fputc(val, output);
-        }
+        writeChar(val, output, false);
       }
       else if(last_incond)
       {

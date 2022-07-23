@@ -25,8 +25,10 @@
 #include <vector>
 #include <cstdint>
 #include <iomanip>
+#include <lttoolbox/string_view.h>
 
 typedef std::basic_string<UChar> UString;
+typedef std::basic_string_view<UChar> UString_view;
 
 void write(const UString& str, UFILE* output);
 
@@ -34,7 +36,7 @@ UString to_ustring(const char* str);
 UString to_ustring(const uint8_t* str);
 
 // append UTF-16 string to UTF-32 vector of symbols
-void ustring_to_vec32(const UString& str, std::vector<int32_t>& vec);
+void ustring_to_vec32(UString_view str, std::vector<int32_t>& vec);
 
 inline std::ostream&
 operator<<(std::ostream& ostr, char16_t c)
@@ -44,7 +46,7 @@ operator<<(std::ostream& ostr, char16_t c)
 }
 
 inline std::ostream&
-operator<<(std::ostream& ostr, const UString& str)
+operator<<(std::ostream& ostr, UString_view str)
 {
   std::string res;
   utf8::utf16to8(str.begin(), str.end(), std::back_inserter(res));

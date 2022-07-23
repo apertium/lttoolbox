@@ -16,10 +16,12 @@
  */
 #include <lttoolbox/compiler.h>
 #include <lttoolbox/compression.h>
+#include <lttoolbox/endian_util.h>
 #include <lttoolbox/entry_token.h>
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/string_utils.h>
+#include <lttoolbox/string_writer.h>
 #include <lttoolbox/file_utils.h>
 
 #include <string>
@@ -208,7 +210,7 @@ Compiler::procAlphabet()
       bool space = true;
       for(unsigned int i = 0; i < letters.length(); i++)
       {
-        if(!u_isspace(letters.at(i)))
+        if(!u_isspace(letters[i]))
         {
           space = false;
           break;

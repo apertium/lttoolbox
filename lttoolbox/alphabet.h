@@ -23,6 +23,7 @@
 #include <set>
 #include <vector>
 #include <cstdint>
+#include <lttoolbox/string_writer.h>
 #include <lttoolbox/ustring.h>
 
 using namespace icu;
@@ -114,9 +115,6 @@ public:
    * @param s symbol
    * @return true if defined
    */
-  bool isSymbolDefined(UString const &s);
-  // TODO: This should always be const.
-  // But binary compatibility, so have 2 copies for now.
   bool isSymbolDefined(UString const &s) const;
 
   /**
@@ -129,7 +127,7 @@ public:
    * Write method.
    * @param output output stream.
    */
-  void write(FILE *output);
+  void write(FILE *output) const;
 
   /**
    * Read method.
@@ -137,8 +135,13 @@ public:
    */
   void read(FILE *input);
 
+  void write_mmap(FILE* output, StringWriter& sw) const;
+  void read_mmap(FILE* input, StringWriter& sw);
+
   void serialise(std::ostream &serialised) const;
   void deserialise(std::istream &serialised);
+
+  void read_serialised(FILE* in);
 
   /**
    * Write a symbol enclosed by angle brackets in the output stream.
@@ -199,6 +202,11 @@ public:
    * @param nonTagsToo by default only tags are included, but if this is true we include all symbols
    */
   void createLoopbackSymbols(std::set<int32_t> &symbols, Alphabet &basis, Side s = right, bool nonTagsToo = false);
+
+  /**
+   * Return a reference to the array of tags
+   */
+  std::vector<UString>& getTags();
 
   std::vector<int32_t> tokenize(const UString& str) const;
 

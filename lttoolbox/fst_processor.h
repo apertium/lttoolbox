@@ -19,12 +19,13 @@
 #define _FSTPROCESSOR_
 
 #include <lttoolbox/ustring.h>
+#include <lttoolbox/alphabet_exe.h>
 #include <unicode/uchriter.h>
-#include <lttoolbox/alphabet.h>
 #include <lttoolbox/buffer.h>
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/state.h>
-#include <lttoolbox/trans_exe.h>
+#include <lttoolbox/string_writer.h>
+#include <lttoolbox/transducer_exe.h>
 #include <lttoolbox/input_file.h>
 #include <libxml/xmlreader.h>
 
@@ -57,7 +58,7 @@ private:
   /**
    * Transducers in FSTP
    */
-  std::map<UString, TransExe> transducers;
+  std::map<UString, TransducerExe> transducers;
 
   /**
    * Current state of lexical analysis
@@ -77,27 +78,27 @@ private:
   /**
    * The final states of inconditional sections in the dictionaries
    */
-  std::map<Node *, double> inconditional;
+  std::set<TransducerExe*> inconditional;
 
   /**
    * The final states of standard sections in the dictionaries
    */
-  std::map<Node *, double> standard;
+  std::set<TransducerExe*> standard;
 
   /**
    * The final states of postblank sections in the dictionaries
    */
-  std::map<Node *, double> postblank;
+  std::set<TransducerExe*> postblank;
 
   /**
    * The final states of preblank sections in the dictionaries
    */
-  std::map<Node *, double> preblank;
+  std::set<TransducerExe*> preblank;
 
   /**
    * Merge of 'inconditional', 'standard', 'postblank' and 'preblank' sets
    */
-  std::map<Node *, double> all_finals;
+  std::set<TransducerExe*> all_finals;
 
   /**
    * Queue of blanks, used in reading methods
@@ -137,9 +138,14 @@ private:
   int rcx_current_char;
 
   /**
+   * String manager
+   */
+  StringWriter str_write;
+
+  /**
    * Alphabet
    */
-  Alphabet alphabet;
+  AlphabetExe alphabet;
 
   /**
    * Input buffer
@@ -241,6 +247,10 @@ private:
    * Output no more than 'N' best weight classes
    */
   int maxWeightClasses = INT_MAX;
+
+  bool mmapping = false;
+  void* mmap_pointer = nullptr;
+  int mmap_len = 0;
 
   /**
    * Prints an error of input stream and exits
@@ -412,6 +422,8 @@ private:
    */
   void printChar(const UChar32 val, UFILE* output);
 
+  void writeChar(const UChar32 val, UFILE* output, bool single_blank);
+
   void skipUntil(InputFile& input, UFILE *output, UChar32 const character);
   static UString removeTags(UString const &str);
   UString compoundAnalysis(UString str);
@@ -458,6 +470,7 @@ public:
   static UString const WBLANK_FINAL;
 
   FSTProcessor();
+  ~FSTProcessor();
 
   void initAnalysis();
   void initTMAnalysis();

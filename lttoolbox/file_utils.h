@@ -18,8 +18,11 @@
 #ifndef __FILE_UTILS_H__
 
 #include <lttoolbox/alphabet.h>
+#include <lttoolbox/alphabet_exe.h>
+#include <lttoolbox/string_writer.h>
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/trans_exe.h>
+#include <lttoolbox/transducer_exe.h>
 
 #include <cstdio>
 
@@ -36,5 +39,12 @@ void readTransducerSet(FILE* input, std::set<UChar32>& letters,
 void readTransducerSet(FILE* input, std::set<UChar32>& letters,
                        Alphabet& alpha,
                        std::map<UString, TransExe>& trans);
+
+// if letters == nullptr, then skip it (e.g. in lrx)
+void readTransducerSet(FILE* input,
+                       bool& mmapping, void* mmap_ptr, int& mmap_len,
+                       StringWriter& str_write,
+                       std::set<UChar32>* letters, AlphabetExe& alpha,
+                       std::map<UString, TransducerExe>& trans);
 
 #endif // __FILE_UTILS_H__

@@ -17,7 +17,6 @@
 #include <lttoolbox/state.h>
 
 #include <cstring>
-#include <climits>
 #include <algorithm>
 
 //debug//
@@ -25,8 +24,7 @@
 //debug//
 
 State::State()
-{
-}
+{}
 
 State::~State()
 {
@@ -41,21 +39,15 @@ State::State(State const &s)
 State &
 State::operator =(State const &s)
 {
-  if(this != &s)
-  {
-    destroy();
-    copy(s);
-  }
-
+  copy(s);
   return *this;
 }
 
 void
 State::destroy()
 {
-  for(size_t i = 0, limit = state.size(); i != limit; i++)
-  {
-    delete state[i].sequence;
+  for (auto& it : state) {
+    delete it.sequence;
   }
 
   state.clear();
@@ -64,19 +56,17 @@ State::destroy()
 void
 State::copy(State const &s)
 {
-  // release references
-  for(size_t i = 0, limit = state.size(); i != limit; i++)
-  {
-    delete state[i].sequence;
+  if (this == &s) {
+    return;
   }
+  destroy();
 
   state = s.state;
 
-  for(size_t i = 0, limit = state.size(); i != limit; i++)
-  {
-    std::vector<std::pair<int, double>> *tmp = new std::vector<std::pair<int, double>>();
-    *tmp = *(state[i].sequence);
-    state[i].sequence = tmp;
+  for (auto& it : state) {
+    TPath* tmp = new TPath();
+    *tmp = *(it.sequence);
+    it.sequence = tmp;
   }
 }
 
@@ -87,63 +77,62 @@ State::size() const
 }
 
 void
-State::init(Node *initial)
+State::init(const std::set<TransducerExe*>& exes)
 {
-  state.clear();
-  state.push_back(TNodeState(initial, new std::vector<std::pair<int, double>>(), false));
-  state[0].sequence->clear();
+  destroy();
+  for (auto& it : exes) {
+    state.push_back(TNodeState(it, it->initial, new TPath(), false));
+  }
   epsilonClosure();
 }
 
 bool
-State::apply_into(std::vector<TNodeState>* new_state, int const input, int index, bool dirty)
+State::apply_into(std::vector<TNodeState>* new_state, const int32_t input,
+                  int index, bool dirty)
 {
-  std::map<int, Dest>::const_iterator it;
-  it = state[index].where->transitions.find(input);
-  if(it != state[index].where->transitions.end())
-  {
-    for(int j = 0; j != it->second.size; j++)
-    {
-      std::vector<std::pair<int, double>> *new_v = new std::vector<std::pair<int, double>>();
-      *new_v = *(state[index].sequence);
-      if(it->first != 0)
-      {
-        new_v->push_back(std::make_pair(it->second.out_tag[j], it->second.out_weight[j]));
-      }
-      new_state->push_back(TNodeState(it->second.dest[j], new_v, state[index].dirty||dirty));
+  uint64_t start, end;
+  bool any = false;
+  TransducerExe* trans = state[index].where;
+  trans->get_range(state[index].state, input, start, end);
+  for (uint64_t i = start; i < end; i++) {
+    TPath* new_v = new TPath();
+    *new_v = *(state[index].sequence);
+    if (input != 0) {
+      new_v->push_back(std::make_pair(trans->transitions[i].osym,
+                                      trans->transitions[i].weight));
     }
-    return true;
+    new_state->push_back(TNodeState(trans, trans->transitions[i].dest, new_v,
+                                    state[index].dirty || dirty));
+    any = true;
   }
-  return false;
+  return any;
 }
 
 bool
-State::apply_into_override(std::vector<TNodeState>* new_state, int const input, int const old_sym, int const new_sym, int index, bool dirty)
+State::apply_into_override(std::vector<TNodeState>* new_state,
+                           const int32_t input,
+                           const int32_t old_sym, const int32_t new_sym,
+                           int index, bool dirty)
 {
-  std::map<int, Dest>::const_iterator it;
-  it = state[index].where->transitions.find(input);
-  if(it != state[index].where->transitions.end())
-  {
-    for(int j = 0; j != it->second.size; j++)
-    {
-      std::vector<std::pair<int, double>> *new_v = new std::vector<std::pair<int, double>>();
-      *new_v = *(state[index].sequence);
-      if(it->first != 0)
-      {
-        if(it->second.out_tag[j] == old_sym)
-        {
-          new_v->push_back(std::make_pair(new_sym, it->second.out_weight[j]));
-        }
-        else
-        {
-          new_v->push_back(std::make_pair(it->second.out_tag[j], it->second.out_weight[j]));
-        }
+  uint64_t start, end;
+  bool any = false;
+  TransducerExe* trans = state[index].where;
+  trans->get_range(state[index].state, input, start, end);
+  for (uint64_t i = start; i < end; i++) {
+    TPath* new_v = new TPath();
+    *new_v = *(state[index].sequence);
+    if (input != 0) {
+      int32_t s = trans->transitions[i].osym;
+      if (s == old_sym) {
+        s = new_sym;
       }
-      new_state->push_back(TNodeState(it->second.dest[j], new_v, state[index].dirty||dirty));
+      new_v->push_back(std::make_pair(s, trans->transitions[i].weight));
     }
-    return true;
+    new_state->push_back(TNodeState(trans, trans->transitions[i].dest, new_v,
+                                    state[index].dirty || dirty));
+    any = true;
   }
-  return false;
+  return any;
 }
 
 void
@@ -265,19 +254,18 @@ State::epsilonClosure()
 {
   for(size_t i = 0; i != state.size(); i++)
   {
-    auto it2 = state[i].where->transitions.find(0);
-    if(it2 != state[i].where->transitions.end())
-    {
-      for(int j = 0 ; j != it2->second.size; j++)
-      {
-        std::vector<std::pair<int, double>> *tmp = new std::vector<std::pair<int, double>>();
-        *tmp = *(state[i].sequence);
-        if(it2->second.out_tag[j] != 0)
-        {
-          tmp->push_back(std::make_pair(it2->second.out_tag[j], it2->second.out_weight[j]));
-        }
-        state.push_back(TNodeState(it2->second.dest[j], tmp, state[i].dirty));
+    TransducerExe* trans = state[i].where;
+    uint64_t start, end;
+    trans->get_range(state[i].state, 0, start, end);
+    for (uint64_t j = start; j < end; j++) {
+      TPath* tmp = new TPath();
+      *tmp = *(state[i].sequence);
+      if (trans->transitions[j].osym != 0) {
+        tmp->push_back(std::make_pair(trans->transitions[j].osym,
+                                      trans->transitions[j].weight));
       }
+      state.push_back(TNodeState(trans, trans->transitions[j].dest, tmp,
+                                 state[i].dirty));
     }
   }
 }
@@ -432,12 +420,10 @@ State::step_case_override(UChar32 val, bool caseSensitive)
 
 
 bool
-State::isFinal(std::map<Node *, double> const &finals) const
+State::isFinal(const std::set<TransducerExe*>& finals) const
 {
-  for(size_t i = 0, limit = state.size(); i != limit; i++)
-  {
-    if(finals.find(state[i].where) != finals.end())
-    {
+  for (auto& it : state) {
+    if(finals.find(it.where) != finals.end() && it.where->is_final(it.state)) {
       return true;
     }
   }
@@ -472,8 +458,8 @@ State::NFinals(std::vector<std::pair<UString, double>> lf, int maxAnalyses, int 
 
 
 UString
-State::filterFinals(std::map<Node *, double> const &finals,
-                    Alphabet const &alphabet,
+State::filterFinals(const std::set<TransducerExe*>& finals,
+                    AlphabetExe const &alphabet,
                     std::set<UChar32> const &escaped_chars,
                     bool display_weights, int max_analyses, int max_weight_classes,
                     bool uppercase, bool firstupper, int firstchar) const
@@ -483,23 +469,22 @@ State::filterFinals(std::map<Node *, double> const &finals,
   UString result;
   double cost = 0.0000;
 
-  for(size_t i = 0, limit = state.size(); i != limit; i++)
-  {
-    if(finals.find(state[i].where) != finals.end())
+  for (auto& st : state) {
+    if(finals.find(st.where) != finals.end() && st.where->is_final(st.state))
     {
-      if(state[i].dirty)
+      if(st.dirty)
       {
         result.clear();
         cost = 0.0000;
         unsigned int const first_char = result.size() + firstchar;
-        for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
+        for(size_t j = 0, limit2 = st.sequence->size(); j != limit2; j++)
         {
-          if(escaped_chars.find(((*(state[i].sequence))[j]).first) != escaped_chars.end())
+          if(escaped_chars.find(((*(st.sequence))[j]).first) != escaped_chars.end())
           {
             result += '\\';
           }
-          alphabet.getSymbol(result, ((*(state[i].sequence))[j]).first, uppercase);
-          cost += ((*(state[i].sequence))[j]).second;
+          alphabet.getSymbol(result, ((*(st.sequence))[j]).first, uppercase);
+          cost += ((*(st.sequence))[j]).second;
         }
         if(firstupper)
         {
@@ -518,19 +503,21 @@ State::filterFinals(std::map<Node *, double> const &finals,
       {
         result.clear();
         cost = 0.0000;
-        for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
+        for(size_t j = 0, limit2 = st.sequence->size(); j != limit2; j++)
         {
-          if(escaped_chars.find(((*(state[i].sequence))[j]).first) != escaped_chars.end())
+          if(escaped_chars.find(((*(st.sequence))[j]).first) != escaped_chars.end())
           {
             result += '\\';
           }
-          alphabet.getSymbol(result, ((*(state[i].sequence))[j]).first);
-          cost += ((*(state[i].sequence))[j]).second;
+          alphabet.getSymbol(result, ((*(st.sequence))[j]).first);
+          cost += ((*(st.sequence))[j]).second;
         }
       }
 
       // Add the weight of the final state
-      cost += (*(finals.find(state[i].where))).second;
+      double temp;
+      st.where->find_final(st.state, temp);
+      cost += temp;
       response.push_back(make_pair(result, cost));
     }
   }
@@ -561,8 +548,8 @@ State::filterFinals(std::map<Node *, double> const &finals,
 
 
 std::set<std::pair<UString, std::vector<UString> > >
-State::filterFinalsLRX(std::map<Node *, double> const &finals,
-                       Alphabet const &alphabet,
+State::filterFinalsLRX(const std::set<TransducerExe*>& finals,
+                       AlphabetExe const &alphabet,
                        std::set<UChar32> const &escaped_chars,
                        bool uppercase, bool firstupper, int firstchar) const
 {
@@ -571,21 +558,20 @@ State::filterFinalsLRX(std::map<Node *, double> const &finals,
   std::vector<UString> current_result;
   UString rule_id;
 
-  for(size_t i = 0, limit = state.size(); i != limit; i++)
-  {
-    if(finals.find(state[i].where) != finals.end())
+  for (auto& st : state) {
+    if(finals.find(st.where) != finals.end() && st.where->is_final(st.state))
     {
       current_result.clear();
       rule_id.clear();
       UString current_word;
-      for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
+      for(size_t j = 0, limit2 = st.sequence->size(); j != limit2; j++)
       {
-        if(escaped_chars.find(((*(state[i].sequence))[j]).first) != escaped_chars.end())
+        if(escaped_chars.find(((*(st.sequence))[j]).first) != escaped_chars.end())
         {
           current_word += '\\';
         }
         UString sym;
-        alphabet.getSymbol(sym, ((*(state[i].sequence))[j]).first, uppercase);
+        alphabet.getSymbol(sym, ((*(st.sequence))[j]).first, uppercase);
         if(sym == "<$>"_u)
         {
           if(!current_word.empty())
@@ -609,37 +595,36 @@ State::filterFinalsLRX(std::map<Node *, double> const &finals,
 
 
 UString
-State::filterFinalsSAO(std::map<Node *, double> const &finals,
-                       Alphabet const &alphabet,
+State::filterFinalsSAO(const std::set<TransducerExe*>& finals,
+                       AlphabetExe const &alphabet,
                        std::set<UChar32> const &escaped_chars,
                        bool uppercase, bool firstupper, int firstchar) const
 {
   UString result;
   UString annot;
 
-  for(size_t i = 0, limit = state.size(); i != limit; i++)
-  {
-    if(finals.find(state[i].where) != finals.end())
+  for (auto& st : state) {
+    if(finals.find(st.where) != finals.end() && st.where->is_final(st.state))
     {
       result += '/';
       unsigned int const first_char = result.size() + firstchar;
-      for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
+      for(size_t j = 0, limit2 = st.sequence->size(); j != limit2; j++)
       {
-        if(escaped_chars.find(((*(state[i].sequence))[j]).first) != escaped_chars.end())
+        if(escaped_chars.find(((*(st.sequence))[j]).first) != escaped_chars.end())
         {
           result += '\\';
         }
-        if(alphabet.isTag(((*(state[i].sequence))[j]).first))
+        if(alphabet.isTag(((*(st.sequence))[j]).first))
         {
           annot.clear();
-          alphabet.getSymbol(annot, ((*(state[i].sequence))[j]).first);
+          alphabet.getSymbol(annot, ((*(st.sequence))[j]).first);
           result += '&';
           result += annot.substr(1,annot.length()-2);
           result += ';';
         }
         else
         {
-          alphabet.getSymbol(result, ((*(state[i].sequence))[j]).first, uppercase);
+          alphabet.getSymbol(result, ((*(st.sequence))[j]).first, uppercase);
         }
       }
       if(firstupper)
@@ -661,25 +646,25 @@ State::filterFinalsSAO(std::map<Node *, double> const &finals,
 }
 
 UString
-State::filterFinalsTM(std::map<Node *, double> const &finals,
-                      Alphabet const &alphabet,
+State::filterFinalsTM(const std::set<TransducerExe*>& finals,
+                      AlphabetExe const &alphabet,
                       std::set<UChar32> const &escaped_chars,
-                      std::queue<UString> &blankqueue, std::vector<UString> &numbers) const
+                      std::queue<UString> &blankqueue,
+                      std::vector<UString> &numbers) const
 {
   UString result;
 
-  for(size_t i = 0, limit = state.size(); i != limit; i++)
-  {
-    if(finals.find(state[i].where) != finals.end())
+  for (auto& st : state) {
+    if(finals.find(st.where) != finals.end() && st.where->is_final(st.state))
     {
       result += '/';
-      for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
+      for(size_t j = 0, limit2 = st.sequence->size(); j != limit2; j++)
       {
-        if(escaped_chars.find((*(state[i].sequence))[j].first) != escaped_chars.end())
+        if(escaped_chars.find((*(st.sequence))[j].first) != escaped_chars.end())
         {
           result += '\\';
         }
-        alphabet.getSymbol(result, (*(state[i].sequence))[j].first);
+        alphabet.getSymbol(result, (*(st.sequence))[j].first);
       }
     }
   }
@@ -777,12 +762,11 @@ State::pruneCompounds(int requiredSymbol, int separationSymbol, int compound_max
 
   for(unsigned int i = 0; i<state.size(); i++)
   {
-    std::vector<std::pair<int, double>> seq = *state.at(i).sequence;
-
+    std::vector<std::pair<int, double>> seq = *state[i].sequence;
     if(lastPartHasRequiredSymbol(seq, requiredSymbol, separationSymbol))
     {
       int this_noOfCompoundElements = 0;
-      for (int j = seq.size()-2; j>0; j--) if ((seq.at(j)).first==separationSymbol) this_noOfCompoundElements++;
+      for (int j = seq.size()-2; j>0; j--) if ((seq[j]).first==separationSymbol) this_noOfCompoundElements++;
       noOfCompoundElements[i] = this_noOfCompoundElements;
       minNoOfCompoundElements = (minNoOfCompoundElements < this_noOfCompoundElements) ?
                         minNoOfCompoundElements : this_noOfCompoundElements;
@@ -884,34 +868,22 @@ State::lastPartHasRequiredSymbol(const std::vector<std::pair<int, double>> &seq,
 
 
 void
-State::restartFinals(const std::map<Node *, double> &finals, int requiredSymbol, State *restart_state, int separationSymbol)
+State::restartFinals(const std::set<TransducerExe*>& finals, int requiredSymbol, State *restart_state, int separationSymbol)
 {
-
-  for(unsigned int i=0;  i<state.size(); i++)
-  {
-    TNodeState state_i = state.at(i);
+  for (auto& st : state) {
     // A state can be a possible final state and still have transitions
 
-    if(finals.count(state_i.where) > 0)
-    {
-      bool restart = lastPartHasRequiredSymbol(*(state_i.sequence), requiredSymbol, separationSymbol);
-      if(restart)
-      {
-        if(restart_state != NULL)
-        {
-          for(unsigned int j=0; j<restart_state->state.size(); j++)
-          {
-            TNodeState initst = restart_state->state.at(j);
-            std::vector<std::pair<int, double>> *tnvec = new std::vector<std::pair<int, double>>;
-
-            for(unsigned int k=0; k < state_i.sequence->size(); k++)
-            {
-              tnvec->push_back(state_i.sequence->at(k));
-            }
-            TNodeState tn(initst.where, tnvec, state_i.dirty);
-            tn.sequence->push_back(std::make_pair(separationSymbol, 0.0000));
-            state.push_back(tn);
+    if (finals.find(st.where) != finals.end() && st.where->is_final(st.state)) {
+      bool restart = lastPartHasRequiredSymbol(*(st.sequence), requiredSymbol, separationSymbol);
+      if(restart && restart_state != NULL) {
+        for (auto& initst : restart_state->state) {
+          TPath* tnvec = new TPath();
+          for (auto& it : *(st.sequence)) {
+            tnvec->push_back(it);
           }
+          TNodeState tn(initst.where, initst.state, tnvec, st.dirty);
+          tn.sequence->push_back(std::make_pair(separationSymbol, 0.0000));
+          state.push_back(tn);
         }
       }
     }
@@ -921,7 +893,7 @@ State::restartFinals(const std::map<Node *, double> &finals, int requiredSymbol,
 
 
 UString
-State::getReadableString(const Alphabet &a)
+State::getReadableString(const AlphabetExe &a)
 {
   UString retval;
   retval += '[';

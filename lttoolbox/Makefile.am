@@ -1,14 +1,14 @@
 
-h_sources = alphabet.h att_compiler.h buffer.h compiler.h compression.h  \
-            deserialiser.h entry_token.h expander.h file_utils.h fst_processor.h input_file.h lt_locale.h \
-            match_exe.h match_node.h match_state.h my_stdio.h node.h \
-            pattern_list.h regexp_compiler.h serialiser.h sorted_vector.h state.h string_utils.h \
-            transducer.h trans_exe.h xml_parse_util.h xml_walk_util.h exception.h tmx_compiler.h \
+h_sources = alphabet.h alphabet_exe.h att_compiler.h binary_headers.h buffer.h compiler.h compression.h  \
+            deserialiser.h endian_util.h entry_token.h expander.h file_utils.h fst_processor.h input_file.h lt_locale.h \
+            match_exe.h match_node.h match_state.h match_state2.h mmap.h my_stdio.h node.h old_binary.h \
+            pattern_list.h regexp_compiler.h serialiser.h sorted_vector.h state.h string_utils.h string_view.h string_writer.h symbol_iter.h \
+            transducer.h transducer_exe.h trans_exe.h xml_parse_util.h xml_walk_util.h exception.h tmx_compiler.h \
             ustring.h sorted_vector.hpp
-cc_sources = alphabet.cc att_compiler.cc compiler.cc compression.cc entry_token.cc \
+cc_sources = alphabet.cc alphabet_exe.cc att_compiler.cc compiler.cc binary_headers.cc compression.cc entry_token.cc \
              expander.cc file_utils.cc fst_processor.cc input_file.cc lt_locale.cc match_exe.cc \
-             match_node.cc match_state.cc node.cc pattern_list.cc \
-             regexp_compiler.cc sorted_vector.cc state.cc string_utils.cc transducer.cc \
+             match_node.cc match_state.cc match_state2.cc node.cc old_binary.cc pattern_list.cc \
+             regexp_compiler.cc sorted_vector.cc state.cc string_utils.cc string_writer.cc symbol_iter.cc transducer.cc transducer_exe.cc \
              trans_exe.cc xml_parse_util.cc xml_walk_util.cc tmx_compiler.cc ustring.cc
 
 library_includedir = $(includedir)/$(PACKAGE_NAME)-$(VERSION_API)/$(PACKAGE_NAME)

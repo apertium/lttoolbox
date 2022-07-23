@@ -336,8 +336,13 @@ public:
    */
   void read(FILE *input, int const decalage = 0);
 
+  void read_mmap(FILE* input, Alphabet& alpha);
+  void write_mmap(FILE* output, const Alphabet& alpha) const;
+
   void serialise(std::ostream &serialised) const;
   void deserialise(std::istream &serialised);
+
+  void read_serialised(FILE* in);
 
   /**
    * Insert another transducer into this, unifying source and targets.

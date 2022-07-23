@@ -20,6 +20,8 @@
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/deserialiser.h>
 #include <lttoolbox/serialiser.h>
+#include <lttoolbox/endian_util.h>
+#include <lttoolbox/old_binary.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -602,26 +604,16 @@ Transducer::read(FILE *input, int const decalage)
   Transducer new_t;
 
   bool read_weights = false;
-
-  fpos_t pos;
-  if (fgetpos(input, &pos) == 0) {
-      char header[4]{};
-      fread_unlocked(header, 1, 4, input);
-      if (strncmp(header, HEADER_TRANSDUCER, 4) == 0) {
-          auto features = read_le<uint64_t>(input);
-          if (features >= TDF_UNKNOWN) {
-              throw std::runtime_error("Transducer has features that are unknown to this version of lttoolbox - upgrade!");
-          }
-          read_weights = (features & TDF_WEIGHTS);
-      }
-      else {
-          // Old binary format
-          fsetpos(input, &pos);
-      }
+  uint64_t features;
+  if (readHeader(input, HEADER_TRANSDUCER, features)) {
+    if (features >= TDF_UNKNOWN) {
+      throw std::runtime_error("Transducer has features that are unknown to this version of lttoolbox - upgrade!");
+    }
+    read_weights = (features & TDF_WEIGHTS);
   }
 
-  new_t.initial = Compression::multibyte_read(input);
-  int finals_size = Compression::multibyte_read(input);
+  new_t.initial = OldBinary::read_int(input, true);
+  int finals_size = OldBinary::read_int(input, true);
 
   int base = 0;
   double base_weight = default_weight;
@@ -629,29 +621,29 @@ Transducer::read(FILE *input, int const decalage)
   {
     finals_size--;
 
-    base += Compression::multibyte_read(input);
+    base += OldBinary::read_int(input, true);
     if(read_weights)
     {
-      base_weight = Compression::long_multibyte_read(input);
+      base_weight = OldBinary::read_double(input, true);
     }
     new_t.finals.insert(std::make_pair(base, base_weight));
   }
 
-  base = Compression::multibyte_read(input);
+  base = OldBinary::read_int(input, true);
   int number_of_states = base;
   int current_state = 0;
   while(number_of_states > 0)
   {
-    int number_of_local_transitions = Compression::multibyte_read(input);
+    int number_of_local_transitions = OldBinary::read_int(input, true);
     int tagbase = 0;
     while(number_of_local_transitions > 0)
     {
       number_of_local_transitions--;
-      tagbase += Compression::multibyte_read(input) - decalage;
-      int state = (current_state + Compression::multibyte_read(input)) % base;
+      tagbase += OldBinary::read_int(input, true) - decalage;
+      int state = (current_state + OldBinary::read_int(input, true)) % base;
       if(read_weights)
       {
-        base_weight = Compression::long_multibyte_read(input);
+        base_weight = OldBinary::read_double(input, true);
       }
       if(new_t.transitions.find(state) == new_t.transitions.end())
       {
@@ -664,6 +656,121 @@ Transducer::read(FILE *input, int const decalage)
   }
 
   *this = new_t;
+}
+
+void
+Transducer::read_mmap(FILE* in, Alphabet& alpha)
+{
+  uint64_t features;
+  if (readHeader(in, HEADER_TRANSDUCER, features)) {
+    if (features >= TDF_UNKNOWN) {
+      throw std::runtime_error("Transducer has features that are unknown to this version of lttoolbox - upgrade!");
+    }
+  } else {
+    throw std::runtime_error("Unable to read transducer header!");
+  }
+
+  read_le_64(in); // total size
+  initial = read_le_64(in);
+  uint64_t state_count = read_le_64(in);
+  uint64_t final_count = read_le_64(in);
+  uint64_t trans_count = read_le_64(in);
+
+  if (transitions.size() > state_count) {
+    transitions.clear();
+    // if transitions.size() <= state_count, they'll get cleared
+    // when we read in the offsets, so don't bother here
+  }
+  finals.clear();
+
+  for (uint64_t i = 0; i < final_count; i++) {
+    uint64_t s = read_le_64(in);
+    double w = read_le_double(in);
+    finals.insert(make_pair(s, w));
+  }
+
+  vector<uint64_t> offsets;
+  offsets.reserve(state_count+1);
+  for (uint64_t i = 0; i < state_count; i++) {
+    transitions[i].clear();
+    offsets.push_back(read_le_64(in));
+  }
+  offsets.push_back(read_le_64(in));
+
+  uint64_t state = 0;
+  for (uint64_t i = 0; i < trans_count; i++) {
+    while (i == offsets[state+1]) {
+      state++;
+    }
+    int32_t isym = read_le_s32(in);
+    int32_t osym = read_le_s32(in);
+    int32_t sym = alpha(isym, osym);
+    uint64_t dest = read_le_64(in);
+    double wght = read_le_double(in);
+    transitions[state].insert(make_pair(sym, make_pair(dest, wght)));
+  }
+}
+
+void
+Transducer::write_mmap(FILE* out, const Alphabet& alpha) const
+{
+  fwrite_unlocked(HEADER_TRANSDUCER, 1, 4, out);
+  uint64_t features = 0;
+  features |= TDF_WEIGHTS;
+  features |= TDF_MMAP;
+  write_le_64(out, features);
+
+  uint64_t tr_count = 0;
+  vector<uint64_t> offsets;
+  offsets.reserve(transitions.size()+1);
+  for (auto& it : transitions) {
+    offsets.push_back(tr_count);
+    tr_count += it.second.size();
+  }
+  offsets.push_back(tr_count);
+
+  // TODO: which things should be smaller than u64?
+
+  uint64_t total_size =
+    ( transitions.size() + 1 +  // offset of each state
+      (tr_count * 3) +          // each transition
+      (finals.size() * 2) +     // final states
+      4 );                      // initial state + length of each section
+
+  write_le_64(out, total_size*8);       // number of bytes after this
+  write_le_64(out, initial);            // initial state
+  write_le_64(out, transitions.size()); // number of states
+  write_le_64(out, finals.size());      // number of finals
+  write_le_64(out, tr_count);           // number of transitions
+
+  for (auto& it : finals) {
+    write_le_64(out, it.first);
+    write_le_double(out, it.second);
+  }
+
+  for (auto& it : offsets) {
+    write_le_64(out, it);
+  }
+
+  for (auto& it : transitions) {
+    // we want to make sure the transitions are sorted by input symbol
+    map<int, set<int>> symbols;
+    for (auto& it2 : it.second) {
+      symbols[alpha.decode(it2.first).first].insert(it2.first);
+    }
+    for (auto& s_in : symbols) {
+      for (auto& s : s_in.second) {
+        auto range = it.second.equal_range(s);
+        for (auto tr = range.first; tr != range.second; ++tr) {
+          auto sym = alpha.decode(tr->first);
+          write_le_s32(out, sym.first); // input symbol
+          write_le_s32(out, sym.second); // output symbol
+          write_le_64(out, tr->second.first); // destination
+          write_le_double(out, tr->second.second); // weight
+        }
+      }
+    }
+  }
 }
 
 void
@@ -680,6 +787,27 @@ Transducer::deserialise(std::istream &serialised)
   initial = Deserialiser<int>::deserialise(serialised);
   finals = Deserialiser<std::map<int, double> >::deserialise(serialised);
   transitions = Deserialiser<std::map<int, std::multimap<int, std::pair<int, double> > > >::deserialise(serialised);
+}
+
+void
+Transducer::read_serialised(FILE* in)
+{
+  initial = OldBinary::read_int(in, false);
+  for (uint64_t i = OldBinary::read_int(in, false); i > 0; i--) {
+    int s = OldBinary::read_int(in, false);
+    finals.insert(make_pair(s, OldBinary::read_double(in, false)));
+  }
+  for (uint64_t i = OldBinary::read_int(in, false); i > 0; i--) {
+    int src = OldBinary::read_int(in, false);
+    multimap<int, pair<int, double> > st;
+    for (uint64_t j = OldBinary::read_int(in, false); j > 0; j--) {
+      int sym = OldBinary::read_int(in, false);
+      int dest = OldBinary::read_int(in, false);
+      double w = OldBinary::read_double(in, false);
+      st.insert(make_pair(sym, make_pair(dest, w)));
+    }
+    transitions.insert(make_pair(src, st));
+  }
 }
 
 void

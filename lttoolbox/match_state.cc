@@ -15,7 +15,6 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 #include <lttoolbox/match_state.h>
-#include <lttoolbox/pattern_list.h>
 
 #include <climits>
 #include <cstring>

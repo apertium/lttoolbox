@@ -16,6 +16,8 @@
  */
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
+#include <lttoolbox/endian_util.h>
+#include <lttoolbox/string_writer.h>
 #include <lttoolbox/file_utils.h>
 
 #include <lttoolbox/my_stdio.h>
