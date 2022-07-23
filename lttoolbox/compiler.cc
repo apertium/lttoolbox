@@ -99,7 +99,7 @@ void
 Compiler::parse(std::string const &file, UString const &dir)
 {
   if (dir == "u"_u) {
-    direction = "lr"_u;
+    direction = COMPILER_RESTRICTION_LR_VAL;
     unified_compilation = true;
   } else {
     direction = dir;

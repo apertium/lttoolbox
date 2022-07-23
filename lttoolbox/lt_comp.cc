@@ -77,17 +77,13 @@ int main(int argc, char *argv[])
 
   c.setEntryDebugging(cli.get_bools()["debug"]);
   c.setKeepBoundaries(cli.get_bools()["keep-boundaries"]);
-  if (cli.get_bools()["jobs"]) {
-    c.setJobs(true);
-    c.setMaxSectionEntries(50000);
-  }
   c.setVerbose(cli.get_bools()["verbose"]);
 
   a.setHfstSymbols(cli.get_bools()["hfst"]);
   a.setSplitting(!cli.get_bools()["no-split"]);
 
   auto LT_JOBS = std::getenv("LT_JOBS");
-  if(LT_JOBS != NULL && LT_JOBS[0] != 'n') {
+  if(cli.get_bools()["jobs"] || (LT_JOBS != NULL && LT_JOBS[0] != 'n')) {
     c.setJobs(true);
     c.setMaxSectionEntries(50000);
   }

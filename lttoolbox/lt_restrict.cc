@@ -49,6 +49,8 @@ int main(int argc, char* argv[])
   cli.parse_args(argc, argv);
 
   std::string dir = cli.get_files()[0];
+  if (dir == "lr") dir = "LR";
+  else if (dir == "rl") dir = "RL";
   FILE* input = openInBinFile(cli.get_files()[1]);
   FILE* output = openOutBinFile(cli.get_files()[2]);
 

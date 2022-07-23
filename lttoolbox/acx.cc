@@ -40,14 +40,14 @@ std::map<int32_t, sorted_vector<int32_t>> readACX(const char* file)
   std::map<int32_t, sorted_vector<int32_t>> acx;
   xmlNode* top_node = load_xml(file);
   for (auto char_node : children(top_node)) {
-    if (xmlStrEqual(char_node->name, CHAR_NODE)) {
+    if (!xmlStrEqual(char_node->name, CHAR_NODE)) {
       error_and_die(char_node, "Expected <char> but found <%s>.",
                     (const char*)char_node->name);
     }
     int32_t key = get_val(char_node);
     sorted_vector<int32_t> vec;
     for (auto equiv_node : children(char_node)) {
-      if (xmlStrEqual(equiv_node->name, EQUIV_NODE)) {
+      if (!xmlStrEqual(equiv_node->name, EQUIV_NODE)) {
         error_and_die(char_node, "Expected <equiv-char> but found <%s>.",
                       (const char*)equiv_node->name);
       }
