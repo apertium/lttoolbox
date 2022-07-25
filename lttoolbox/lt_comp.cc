@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
     if (ttype == 'a') {
       a.parse(infile, false);
     } else {
-      c.parse(infile, "u"_u);
+      c.parse(infile, Compiler::COMPILER_RESTRICTION_U_VAL);
     }
   }
   else

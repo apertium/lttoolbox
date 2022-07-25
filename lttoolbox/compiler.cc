@@ -15,18 +15,14 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 #include <lttoolbox/compiler.h>
-#include <lttoolbox/compression.h>
-#include <lttoolbox/entry_token.h>
-#include <lttoolbox/lt_locale.h>
 #include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/string_utils.h>
 #include <lttoolbox/file_utils.h>
 #include <lttoolbox/acx.h>
+#include <lttoolbox/regexp_compiler.h>
 
-#include <string>
-#include <cstdlib>
 #include <iostream>
-#include <libxml/encoding.h>
+#include <thread>
 
 UString const Compiler::COMPILER_DICTIONARY_ELEM    = "dictionary"_u;
 UString const Compiler::COMPILER_ALPHABET_ELEM      = "alphabet"_u;
@@ -40,6 +36,7 @@ UString const Compiler::COMPILER_ENTRY_ELEM         = "e"_u;
 UString const Compiler::COMPILER_RESTRICTION_ATTR   = "r"_u;
 UString const Compiler::COMPILER_RESTRICTION_LR_VAL = "LR"_u;
 UString const Compiler::COMPILER_RESTRICTION_RL_VAL = "RL"_u;
+UString const Compiler::COMPILER_RESTRICTION_U_VAL  = "U"_u;
 UString const Compiler::COMPILER_PAIR_ELEM          = "p"_u;
 UString const Compiler::COMPILER_LEFT_ELEM          = "l"_u;
 UString const Compiler::COMPILER_RIGHT_ELEM         = "r"_u;
@@ -98,7 +95,7 @@ Compiler::parseACX(std::string const &file, UString const &dir)
 void
 Compiler::parse(std::string const &file, UString const &dir)
 {
-  if (dir == "u"_u) {
+  if (dir == COMPILER_RESTRICTION_U_VAL) {
     direction = COMPILER_RESTRICTION_LR_VAL;
     unified_compilation = true;
   } else {
@@ -779,6 +776,39 @@ Compiler::procSection()
   }
 }
 
+bool
+Compiler::filterEntry(const UString& value, const UString& filter,
+                      bool keep_on_empty_filter)
+{
+  if (value.empty()) return true;
+  else if (keep_on_empty_filter && filter.empty()) return true;
+  auto ops = StringUtils::split(value, " "_u);
+  for (auto& it : ops) {
+    if (it == filter) return true;
+  }
+  return false;
+}
+
+void
+Compiler::symbolFilters(const UString& value, const UString& prefix,
+                        std::vector<std::vector<int32_t>>& symbols)
+{
+  if (value.empty()) return;
+  std::vector<int32_t> syms;
+  for (auto& it : StringUtils::split(value, " "_u)) {
+    if (it.empty()) continue;
+    UString tag;
+    tag += '<';
+    tag += prefix;
+    tag += ':';
+    tag += it;
+    tag += '>';
+    alphabet.includeSymbol(tag);
+    syms.push_back(alphabet(tag));
+  }
+  if (!syms.empty()) symbols.push_back(syms);
+}
+
 void
 Compiler::procEntry()
 {
@@ -794,54 +824,70 @@ Compiler::procEntry()
 
   // if entry is masked by a restriction of direction or an ignore mark
   if (unified_compilation && ignore != COMPILER_IGNORE_YES_VAL) {
-    std::vector<int> syms;
-    if (!attribute.empty()) {
-      UString t = "<r:"_u;
-      t += attribute;
-      t += '>';
-      alphabet.includeSymbol(t);
-      syms.push_back(alphabet(t));
-    }
-    if (!altval.empty()) {
-      UString t = "<alt:"_u;
-      t += altval;
-      t += '>';
-      alphabet.includeSymbol(t);
-      syms.push_back(alphabet(t));
-    }
-    if (!varval.empty()) {
-      UString t = "<v:"_u;
-      t += varval;
-      t += '>';
-      alphabet.includeSymbol(t);
-      syms.push_back(alphabet(t));
-    }
-    if (!varl.empty()) {
-      UString t = "<vl:"_u;
-      t += varl;
-      t += '>';
-      alphabet.includeSymbol(t);
-      syms.push_back(alphabet(t));
-    }
-    if (!varr.empty()) {
-      UString t = "<vr:"_u;
-      t += varr;
-      t += '>';
-      alphabet.includeSymbol(t);
-      syms.push_back(alphabet(t));
-    }
-    if (!syms.empty()) {
-      EntryToken e;
-      e.setSingleTransduction(syms, syms);
-      elements.push_back(e);
+    std::vector<std::vector<int32_t>> symbols;
+    symbolFilters(attribute, "r"_u, symbols);
+    symbolFilters(altval, "alt"_u, symbols);
+    symbolFilters(varval, "v"_u, symbols);
+    symbolFilters(varl, "vl"_u, symbols);
+    symbolFilters(varr, "vr"_u, symbols);
+    if (!symbols.empty()) {
+      bool multi = false;
+      for (auto& it : symbols) {
+        if (it.size() > 1) {
+          multi = true;
+          break;
+        }
+      }
+      if (multi) {
+        UString parname = "--"_u;
+        parname += attribute;
+        parname += '-';
+        parname += altval;
+        parname += '-';
+        parname += varval;
+        parname += '-';
+        parname += varl;
+        parname += '-';
+        parname += varr;
+        if (paradigms.find(parname) == paradigms.end()) {
+          std::vector<int32_t> re;
+          for (auto& it : symbols) {
+            if (it.size() == 1) {
+              re.push_back(it[0]);
+            } else {
+              re.push_back(static_cast<int32_t>('['));
+              re.insert(re.end(), it.begin(), it.end());
+              re.push_back(static_cast<int32_t>(']'));
+            }
+          }
+          EntryToken e;
+          e.setRegexp(re);
+          std::vector<EntryToken> vec(1, e);
+          parname.swap(current_paradigm);
+          insertEntryTokens(vec);
+          parname.swap(current_paradigm);
+        }
+        EntryToken e;
+        e.setParadigm(parname);
+        elements.push_back(e);
+      }
+      else {
+        std::vector<int> syms;
+        for (auto& it : symbols) {
+          syms.push_back(it[0]);
+        }
+        EntryToken e;
+        e.setSingleTransduction(syms, syms);
+        elements.push_back(e);
+      }
     }
   }
   else if((!attribute.empty() && attribute != direction)
    || ignore == COMPILER_IGNORE_YES_VAL
-   || (!altval.empty() && altval != alt)
-   || (!varval.empty() && !variant.empty() && varval != variant)
-   || (direction == COMPILER_RESTRICTION_RL_VAL && !varl.empty() && varl != variant_left)
-   || (direction == COMPILER_RESTRICTION_LR_VAL && !varr.empty() && varr != variant_right))
+   || !filterEntry(altval, alt, false)
+   || !filterEntry(varval, variant, true)
+   || (direction == COMPILER_RESTRICTION_RL_VAL && !filterEntry(varl, variant_left, false))
+   || (direction == COMPILER_RESTRICTION_LR_VAL && !filterEntry(varr, variant_right, false)))
   {
     // parse to the end of the entry
     UString name;

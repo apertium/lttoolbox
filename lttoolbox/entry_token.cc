@@ -85,6 +85,13 @@ EntryToken::setRegexp(UString const &r)
 }
 
 void
+EntryToken::setRegexp(const std::vector<int32_t>& r)
+{
+  myregexp = r;
+  type = regexp;
+}
+
+void
 EntryToken::readRegexp(xmlTextReaderPtr reader)
 {
   XMLParseUtil::readValueInto32(reader, myregexp);

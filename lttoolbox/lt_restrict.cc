@@ -61,9 +61,11 @@ int main(int argc, char* argv[])
 
   sorted_vector<int32_t> keep;
   sorted_vector<int32_t> drop;
+  bool has_var = false;
   get_symbol(dir, alpha, "r", keep);
   for (auto& it : cli.get_strs()["var"]) {
     get_symbol(it, alpha, "v", keep);
+    has_var = true;
   }
   for (auto& it : cli.get_strs()["alt"]) {
     get_symbol(it, alpha, "alt", keep);
@@ -79,7 +81,7 @@ int main(int argc, char* argv[])
     UString t;
     alpha.getSymbol(t, -i);
     if (StringUtils::startswith(t, "<r:"_u) ||
-        StringUtils::startswith(t, "<v:"_u) ||
+        (has_var && StringUtils::startswith(t, "<v:"_u)) ||
         StringUtils::startswith(t, "<alt:"_u) ||
         StringUtils::startswith(t, "<vl:"_u) ||
         StringUtils::startswith(t, "<vr:"_u)) {
@@ -87,6 +89,8 @@ int main(int argc, char* argv[])
       if (!keep.count(s)) {
         drop.insert(s);
       }
+    } else if (!has_var && StringUtils::startswith(t, "<v:"_u)) {
+      keep.insert(alpha(-i, -i));
     }
   }
 
@@ -99,6 +103,9 @@ int main(int argc, char* argv[])
   for (auto& it : trans) {
     it.second.deleteSymbols(drop);
     it.second.epsilonizeSymbols(keep);
+    if (dir == "RL") {
+      it.second.invert(alpha);
+    }
     if (min) {
       it.second.minimize();
     }

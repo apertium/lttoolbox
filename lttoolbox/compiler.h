@@ -18,15 +18,12 @@
 #define _MYCOMPILER_
 
 #include <lttoolbox/alphabet.h>
-#include <lttoolbox/regexp_compiler.h>
 #include <lttoolbox/entry_token.h>
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/ustring.h>
 #include <lttoolbox/sorted_vector.hpp>
 
-#include <thread>
 #include <map>
-#include <string>
 #include <set>
 #include <libxml/xmlreader.h>
 
@@ -190,11 +187,6 @@ private:
   int32_t word_boundary_s = 0;
   int32_t word_boundary_ns = 0;
 
-  /*
-  static std::string range(char const a, char const b);
-  std::string readAlphabet();
-  */
-
   /**
    * Method to parse an XML Node
    */
@@ -219,6 +211,15 @@ private:
    * Parse the &lt;e&gt; element
    */
   void procEntry();
+
+  /**
+   * Return true if the filter (command line) is consistent with
+   * the value (attribute) and false otherwise
+   */
+  bool filterEntry(const UString& value, const UString& filter,
+                   bool keep_on_empty_filter);
+  void symbolFilters(const UString& value, const UString& prefix,
+                     std::vector<std::vector<int32_t>>& symbols);
 
   /**
    * Parse the &lt;re&gt; element
@@ -338,6 +339,7 @@ public:
   LTTOOLBOX_IMPORTS static UString const COMPILER_RESTRICTION_ATTR;
   LTTOOLBOX_IMPORTS static UString const COMPILER_RESTRICTION_LR_VAL;
   LTTOOLBOX_IMPORTS static UString const COMPILER_RESTRICTION_RL_VAL;
+  LTTOOLBOX_IMPORTS static UString const COMPILER_RESTRICTION_U_VAL;
   LTTOOLBOX_IMPORTS static UString const COMPILER_PAIR_ELEM;
   LTTOOLBOX_IMPORTS static UString const COMPILER_LEFT_ELEM;
   LTTOOLBOX_IMPORTS static UString const COMPILER_RIGHT_ELEM;
