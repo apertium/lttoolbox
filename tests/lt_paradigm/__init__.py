@@ -1,6 +1,7 @@
-from proctest import ProcTest
+from basictest import ProcTest
+import unittest
 
-class ParadigmTest(ProcTest):
+class ParadigmTest(unittest.TestCase, ProcTest):
     inputs = ['ab<n><*>', 'y<*>', '*<n><def>']
     expectedOutputs = ['ab<n><def>:abc\nab<n><ind>:ab',
                        'y<n><ind>:y',

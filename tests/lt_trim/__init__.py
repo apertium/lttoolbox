@@ -6,9 +6,10 @@
 # This is similar to diffing the lt-expand of uncompiled XML dictionaries.
 # See also `man hfst-fst2strings'.
 
-from proctest import ProcTest, TempDir
+from basictest import ProcTest, TempDir
+import unittest
 
-class TrimProcTest(ProcTest):
+class TrimProcTest(unittest.TestCase, ProcTest):
     monodix = "data/minimal-mono.dix"
     monodir = "lr"
     bidix = "data/minimal-bi.dix"

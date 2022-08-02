@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-from proctest import ProcTest
+from basictest import ProcTest
+import unittest
 
-class AppendProcTest(ProcTest):
+class AppendProcTest(unittest.TestCase, ProcTest):
     dix1 = "data/append1.dix"
     dix2 = "data/append2.dix"
     dir1 = "lr"

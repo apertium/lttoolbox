@@ -1,51 +1,50 @@
 # -*- coding: utf-8 -*-
 
-from proctest import ProcTest
-from printtest import PrintTest
+from basictest import ProcTest, PrintTest
 import unittest
 
-class CompNormalAndJoin(ProcTest):
+class CompNormalAndJoin(unittest.TestCase, ProcTest):
     inputs = ["abc", "ab", "y", "n", "jg", "jh", "kg"]
     expectedOutputs = ["^abc/ab<n><def>$", "^ab/ab<n><ind>$", "^y/y<n><ind>$", "^n/n<n><ind>$", "^jg/j<pr>+g<n>$", "^jh/j<pr>+h<n>$", "^kg/k<pr>+g<n>$"]
 
 
-class EmptyDixOk(ProcTest):
+class EmptyDixOk(unittest.TestCase, ProcTest):
 	procdix = "data/entirely-empty.dix"
 	inputs = ["abc"]
 	expectedOutputs = ["^abc/*abc$"]
 
 
-class CompEmptyLhsShouldError(ProcTest):
+class CompEmptyLhsShouldError(unittest.TestCase, ProcTest):
     procdix = "data/lhs-empty-mono.dix"
     expectedCompRetCodeFail = True
 
 
-class CompEmptyRhsShouldError(ProcTest):
+class CompEmptyRhsShouldError(unittest.TestCase, ProcTest):
     procdir = "rl"
     procdix = "data/rhs-empty-mono.dix"
     expectedCompRetCodeFail = True
 
 
-class CompLhsInitialSpaceShouldError(ProcTest):
+class CompLhsInitialSpaceShouldError(unittest.TestCase, ProcTest):
     procdix = "data/lhs-ws-mono.dix"
     expectedCompRetCodeFail = True
 
 
-class CompRhsInitialSpaceShouldError(ProcTest):
+class CompRhsInitialSpaceShouldError(unittest.TestCase, ProcTest):
     procdix = "data/rhs-ws-mono.dix"
     procdir = "rl"
     expectedCompRetCodeFail = True
 
 
-class CompAttEpsilonLoopShouldError(ProcTest):
+class CompAttEpsilonLoopShouldError(unittest.TestCase, ProcTest):
     procdix = "data/cat-epsilon-loop.att"
     expectedCompRetCodeFail = True
 
-class CompAttEpsilonToFinalShouldError(ProcTest):
+class CompAttEpsilonToFinalShouldError(unittest.TestCase, ProcTest):
     procdix = "data/cat-epsilon-to-final.att"
     expectedCompRetCodeFail = True
 
-class CompSplitMultichar(ProcTest):
+class CompSplitMultichar(unittest.TestCase, ProcTest):
     procdix = "data/multichar.att"
     inputs = ["א"]
     expectedOutputs = ["^א/אַן<blah>$"]
