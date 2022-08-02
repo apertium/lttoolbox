@@ -23,14 +23,15 @@
 #include <string>
 #include <getopt.h>
 
-CLI::CLI(std::string desc, std::string version)
+CLI::CLI(std::string desc, std::string ver)
 {
-  description = " v" + version + ": " + desc;
+  description = desc;
+  version = ver;
 }
 
 CLI::CLI(std::string desc)
 {
-  description = ": " + desc;
+  description = desc;
 }
 
 CLI::~CLI()
@@ -65,7 +66,11 @@ void CLI::set_epilog(std::string e)
 void CLI::print_usage()
 {
   if (!prog_name.empty()) {
-    std::cout << prog_name << description << std::endl;
+    std::cout << prog_name;
+    if (!version.empty()) {
+      std::cout << " v" << version;
+    }
+    std::cout << ": " << description << std::endl;
     std::cout << "USAGE: " << prog_name;
     std::string bargs;
     std::string sargs;
@@ -145,6 +150,10 @@ void CLI::parse_args(int argc, char* argv[])
     for (auto& it : options) {
       if (it.short_opt == cnt) {
         found = true;
+        if (it.short_opt == 'v' && it.long_opt == "version") {
+          std::cout << prog_name << " version " << version << std::endl;
+          exit(EXIT_SUCCESS);
+        }
         if (it.is_bool) {
           bools[it.long_opt] = true;
         } else {

@@ -30,6 +30,7 @@ private:
   };
 
   std::string description;
+  std::string version;
   std::string epilog;
 
   std::vector<CLIOption> options;
