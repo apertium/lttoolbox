@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
-from printtest import PrintTest
+from basictest import PrintTest
 
 
 class NonWeightedFst(unittest.TestCase, PrintTest):

@@ -289,6 +289,16 @@ Compression::long_multibyte_write(const double& value, FILE *output)
   unsigned int mantissa = static_cast<unsigned int>(static_cast<int>(0x40000000 * frexp(value, &exp)));
   unsigned int exponent = static_cast<unsigned int>(static_cast<int>(exp));
 
+  if (std::isinf(value)) {
+    mantissa = std::numeric_limits<unsigned int>::max();
+    if (value < 0) {
+      exponent = std::numeric_limits<unsigned int>::max() - 1;
+    }
+    else {
+      exponent = std::numeric_limits<unsigned int>::max();
+    }
+  }
+
   if(mantissa < 0x04000000)
   {
     multibyte_write(mantissa, output);
@@ -325,6 +335,16 @@ Compression::long_multibyte_write(const double& value, std::ostream &output)
 
   unsigned int mantissa = static_cast<unsigned int>(static_cast<int>(0x40000000 * frexp(value, &exp)));
   unsigned int exponent = static_cast<unsigned int>(static_cast<int>(exp));
+
+  if (std::isinf(value)) {
+    mantissa = std::numeric_limits<unsigned int>::max();
+    if (value < 0) {
+      exponent = std::numeric_limits<unsigned int>::max() - 1;
+    }
+    else {
+      exponent = std::numeric_limits<unsigned int>::max();
+    }
+  }
 
   if(mantissa < 0x04000000)
   {
@@ -393,7 +413,17 @@ Compression::long_multibyte_read(FILE *input)
   }
 
   double value = static_cast<double>(static_cast<int>(mantissa)) / 0x40000000;
-  result = ldexp(value, static_cast<int>(exponent));
+  if (mantissa == std::numeric_limits<unsigned int>::max() && exponent >= std::numeric_limits<unsigned int>::max() - 1) {
+    if (exponent == std::numeric_limits<unsigned int>::max() - 1) {
+      result = -1.0*std::numeric_limits<double>::infinity();
+    }
+    else {
+      result = std::numeric_limits<double>::infinity();
+    }
+  }
+  else {
+    result = ldexp(value, static_cast<int>(exponent));
+  }
 
   return result;
 }
@@ -436,7 +466,17 @@ Compression::long_multibyte_read(std::istream &input)
   }
 
   double value = static_cast<double>(static_cast<int>(mantissa)) / 0x40000000;
-  result = ldexp(value, static_cast<int>(exponent));
+  if (mantissa == std::numeric_limits<unsigned int>::max() && exponent >= std::numeric_limits<unsigned int>::max() - 1) {
+    if (exponent == std::numeric_limits<unsigned int>::max() - 1) {
+      result = -1.0*std::numeric_limits<double>::infinity();
+    }
+    else {
+      result = std::numeric_limits<double>::infinity();
+    }
+  }
+  else {
+    result = ldexp(value, static_cast<int>(exponent));
+  }
 
   return result;
 }

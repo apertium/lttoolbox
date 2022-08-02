@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-from proctest import ProcTest
+from basictest import ProcTest as _ProcTest
+import unittest
+
+class ProcTest(unittest.TestCase, _ProcTest):
+    pass
 
 class ValidInput(ProcTest):
     inputs = ["ab",

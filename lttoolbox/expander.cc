@@ -537,7 +537,7 @@ Expander::procNode(UFILE *output)
 {
   UString name = XMLParseUtil::readName(reader);
 
-  // DO: optimize the execution order of this string "ifs"
+  // TODO: optimize the execution order of this string "ifs"
 
   if(name == Compiler::COMPILER_TEXT_NODE)
   {
@@ -591,9 +591,25 @@ UString
 Expander::procRegexp()
 {
   xmlTextReaderRead(reader);
-  UString re = XMLParseUtil::readValue(reader);
+  UString val = XMLParseUtil::readValue(reader);
+  UString escaped = "^$/<>{}*@#+~:"_u;
+  UString ret;
+  bool esc = false;
+  for (auto& c : val) {
+    if (esc) {
+      ret += c;
+      esc = false;
+      continue;
+    }
+    if (escaped.find(c) != UString::npos) {
+      ret += '\\';
+    } else if (c == '\\') {
+      esc = true;
+    }
+    ret += c;
+  }
   xmlTextReaderRead(reader);
-  return re;
+  return ret;
 }
 
 void
