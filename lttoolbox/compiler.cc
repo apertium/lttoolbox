@@ -337,7 +337,7 @@ Compiler::matchTransduction(std::vector<int> const &pi,
       {
         for(auto& it : acx_map_ptr->second)
         {
-          t.linkStates(state, new_state, alphabet(it ,rsymbol), weight_value);
+          t.linkStates(state, new_state, alphabet(it, rsymbol), weight_value);
         }
       }
       state = new_state;
@@ -362,15 +362,7 @@ Compiler::requireEmptyError(UString const &name)
 bool
 Compiler::allBlanks()
 {
-  bool flag = true;
-  UString text = XMLParseUtil::readValue(reader);
-
-  for(auto c : text)
-  {
-    flag = flag && u_isspace(c);
-  }
-
-  return flag;
+  return XMLParseUtil::allBlanks(reader);
 }
 
 void

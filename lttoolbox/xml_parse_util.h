@@ -42,6 +42,8 @@ public:
   static UString readName(xmlTextReaderPtr reader);
   static UString readValue(xmlTextReaderPtr reader);
   static void readValueInto32(xmlTextReaderPtr reader, std::vector<int32_t>& vec);
+
+  static bool allBlanks(xmlTextReaderPtr reader);
 };
 
 #endif

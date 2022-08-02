@@ -70,3 +70,29 @@ class CompLSX(unittest.TestCase, PrintTest):
 13	14	ε	ε	0.000000\t
 14	0.000000
 '''
+
+class RestrictTest(unittest.TestCase, ProcTest):
+    procdix = 'data/variants.dix'
+    procdir = 'lr'
+    restrictflags = []
+    inputs = ['abc', 'ab']
+    expectedOutputs = ['^abc/ab<n><def>$', '^ab/*ab$']
+
+    def compileTest(self, tmpd):
+        ret = self.compileDix('u', self.procdix, binName=tmpd+'/uni.bin')
+        if not ret: return ret
+        self.callProc('lt-restrict',
+                      [self.procdir, tmpd+'/uni.bin', tmpd+'/compiled.bin'],
+                      self.restrictflags)
+
+class RestrictRL1(RestrictTest):
+    procdir = 'rl'
+    restrictflags = ['-v', 'gascon']
+    inputs = ['abc', 'ab']
+    expectedOutputs = ['^abc/*abc$', '^ab/ab<n><ind>$']
+
+class RestrictRL2(RestrictTest):
+    procdir = 'rl'
+    restrictflags = ['-v', 'oci']
+    inputs = ['abc', 'ab']
+    expectedOutputs = ['^abc/*abc$', '^ab/abbb<n><ind>$']

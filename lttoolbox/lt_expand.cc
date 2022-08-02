@@ -49,8 +49,6 @@ int main(int argc, char *argv[])
     e.setVariantRightValue(to_ustring(args["var-right"][0].c_str()));
   }
 
-  FILE* input = openInBinFile(cli.get_files()[0]);
-  fclose(input);
   UFILE* output = openOutTextFile(cli.get_files()[1]);
 
   e.expand(cli.get_files()[0], output);

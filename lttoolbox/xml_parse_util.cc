@@ -98,3 +98,12 @@ XMLParseUtil::readValueInto32(xmlTextReaderPtr reader, std::vector<int32_t>& vec
   vec.reserve(vec.size() + sz);
   utf8::utf8to32(val, val+sz, std::back_inserter(vec));
 }
+
+bool
+XMLParseUtil::allBlanks(xmlTextReaderPtr reader)
+{
+  for (auto& c : readValue(reader)) {
+    if (!u_isspace(c)) return false;
+  }
+  return true;
+}
