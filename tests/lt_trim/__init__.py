@@ -138,3 +138,12 @@ class Empty(TrimProcTest):
                                       tmpd+"/empty-bi.bin",
                                       tmpd+"/empty-trimmed.bin"],
                           retCode=1)
+
+class PlusLemma(TrimProcTest):
+    monodix = 'data/plus-lemma-mono.dix'
+    bidix = 'data/plus-lemma-bi.dix'
+    bidir = 'lr'
+    inputs = ['abc', 'I+D', 'jg']
+    expectedOutputs = ['^abc/ab<n><def>$',
+                       '^I+D/I+D<n><acr><f><sg>$',
+                       '^jg/j<pr>+g<n>$']

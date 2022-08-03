@@ -1164,7 +1164,10 @@ Transducer::intersect(Transducer &trimmer,
       double this_wt = trans_it.second.second;
       int32_t this_right = this_a.decode(this_label).second;
 
+      bool special = false;
+
       if (sym_wb.count(this_right)) {
+        special = (this_right != static_cast<int32_t>('+'));
         if(trimmer_preplus == trimmer_src) {
           // Keep the old preplus state if it was set; equal to current trimmer state means unset:
           trimmer_preplus_next = trimmer_src; // not _trg when join!
@@ -1189,6 +1192,7 @@ Transducer::intersect(Transducer &trimmer,
         }
       }
       else if (sym_cmp_or_eps.count(this_right)) {
+        special = true;
         // Stay put in the trimmer FST
         int trimmer_trg = trimmer_src;
 
@@ -1212,8 +1216,9 @@ Transducer::intersect(Transducer &trimmer,
                            this_label, // symbol-pair, using this alphabet
                            this_wt); //weight of transduction
       }
-      else
-      {
+
+      // if we're at a normal symbol or a + that might be part of a lemma
+      if (!special) {
         // Loop through non-epsilon arcs from the live state of trimmer
 
         // If we see a hash/group, we may have to rewind our trimmer state first:
