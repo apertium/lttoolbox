@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 Universitat d'Alacant / Universidad de Alicante
+ * Copyright (C) 2022 Apertium
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -14,37 +14,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
-#include <lttoolbox/fst_processor.h>
-#include <lttoolbox/lt_locale.h>
-#include <lttoolbox/cli.h>
-#include <lttoolbox/file_utils.h>
 
-int main(int argc, char *argv[])
+#include <lttoolbox/file_utils.h>
+#include <lttoolbox/cli.h>
+#include <lttoolbox/lt_locale.h>
+#include <lttoolbox/string_utils.h>
+#include <lttoolbox/acx.h>
+
+int main(int argc, char* argv[])
 {
   LtLocale::tryToSetLocale();
-  CLI cli("process a stream with a letter transducer");
-  cli.add_file_arg("fst_file", false);
-  cli.add_file_arg("input_file");
+  CLI cli("apply an ACX file to a compiled transducer", PACKAGE_VERSION);
+  cli.add_file_arg("input_file", false);
+  cli.add_file_arg("acx_file");
   cli.add_file_arg("output_file");
   cli.parse_args(argc, argv);
 
-  FSTProcessor fstp;
-  FILE* aux = openInBinFile(cli.get_files()[0]);
-  fstp.load(aux);
-  fclose(aux);
-  fstp.initTMAnalysis();
-  if (!fstp.valid()) {
-    return EXIT_FAILURE;
+  FILE* input = openInBinFile(cli.get_files()[0]);
+  auto acx = readACX(cli.get_files()[1].c_str());
+  FILE* output = openOutBinFile(cli.get_files()[2]);
+
+  Alphabet alpha;
+  std::set<UChar32> letters;
+  std::map<UString, Transducer> trans;
+  readTransducerSet(input, letters, alpha, trans);
+
+  for (auto& it : trans) {
+    it.second.applyACX(alpha, acx);
   }
 
-  InputFile input;
-  if (!cli.get_files()[1].empty()) {
-    input.open_or_exit(cli.get_files()[1].c_str());
-  }
-  UFILE* output = openOutTextFile(cli.get_files()[2].c_str());
+  writeTransducerSet(output, letters, alpha, trans);
 
-  fstp.tm_analysis(input, output);
-
-  u_fclose(output);
-  return EXIT_SUCCESS;
+  fclose(input);
+  fclose(output);
+  return 0;
 }

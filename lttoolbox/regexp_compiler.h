@@ -17,15 +17,12 @@
 #ifndef _REGEXP_COMPILER_
 #define _REGEXP_COMPILER_
 
-#include <lttoolbox/ustring.h>
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/transducer.h>
 
 #include <set>
 #include <vector>
 #include <cstdint>
-
-#define FIN_FICHERO - 1
 
 /**
  * Compiler that builds a transducer to identify regular expressions.  This
@@ -37,7 +34,7 @@ private:
   /**
    * Last token
    */
-  int token;
+  int token = 0;
 
   /**
    * Input string
@@ -47,12 +44,12 @@ private:
   /**
    * Location in the input string
    */
-  size_t index;
+  size_t index = 0;
 
   /**
    * Alphabet to encode symbols
    */
-  Alphabet *alphabet;
+  Alphabet *alphabet = nullptr;
 
   /**
    * Transducer to store analysis
@@ -62,22 +59,22 @@ private:
   /**
    * Current state
    */
-  int state;
+  int state = 0;
 
   /**
    * Current letter
    */
-  int letter;
+  int letter = 0;
 
   /**
    * Post-operator: '+', '?', '*'
    */
-  UChar32 postop;
+  UChar32 postop = '\0';
 
   /**
    * Default value of weight
    */
-  double default_weight;
+  double default_weight = 0.0000;
 
   /**
    *
@@ -89,11 +86,6 @@ private:
    * @param rec the regular expresion compiler to be copied
    */
   void copy(RegexpCompiler const &rec);
-
-  /**
-   * Destroy method
-   */
-  void destroy();
 
   /**
    * RDP top function

@@ -19,12 +19,11 @@
 
 #include <lttoolbox/ustring.h>
 
-#include <list>
 #include <map>
 #include <libxml/xmlreader.h>
 #include <string>
 
-typedef std::list<std::pair<UString, UString> > EntList;
+typedef std::vector<std::pair<UString, UString> > EntList;
 
 /**
  * An expander of dictionaries
@@ -35,7 +34,7 @@ private:
   /**
    * The libxml2's XML reader
    */
-  xmlTextReaderPtr reader;
+  xmlTextReaderPtr reader = nullptr;
 
   /**
    * The alt value
@@ -178,8 +177,8 @@ private:
    *               this method, the result of concatenations.
    * @param endings the endings to be appended.
    */
-  static void append(std::list<std::pair<UString, UString> > &result,
-                     std::list<std::pair<UString, UString> > const &endings);
+  static void append(EntList &result,
+                     EntList const &endings);
 
   /**
    * Append a list of endings to a list of current transductions.
@@ -187,7 +186,7 @@ private:
    *               this method, the result of concatenations.
    * @param endings the endings to be appended.
    */
-  static void append(std::list<std::pair<UString, UString> > &result,
+  static void append(EntList &result,
                      UString const &endings);
 
   /**
@@ -196,7 +195,7 @@ private:
    *               this method, the result of concatenations.
    * @param endings the endings to be appended.
    */
-  static void append(std::list<std::pair<UString, UString> > &result,
+  static void append(EntList &result,
                      std::pair<UString, UString> const &endings);
 
 public:

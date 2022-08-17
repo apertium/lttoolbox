@@ -18,122 +18,40 @@
 #include <lttoolbox/expander.h>
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/file_utils.h>
-
-#include <cstdlib>
-#include <iostream>
-#include <libgen.h>
-#include <string>
-#include <getopt.h>
-
-void endProgram(char *name)
-{
-  if(name != NULL)
-  {
-    std::cout << basename(name) << " v" << PACKAGE_VERSION <<": expand the contents of a dictionary file" << std::endl;
-    std::cout << "USAGE: " << basename(name) << " [-mavlrh] dictionary_file [output_file]" << std::endl;
-#if HAVE_GETOPT_LONG
-    std::cout << "  -m, --keep-boundaries:     keep morpheme boundaries" << std::endl;
-    std::cout << "  -v, --var:                 set language variant" << std::endl;
-    std::cout << "  -a, --alt:                 set alternative (monodix)" << std::endl;
-    std::cout << "  -l, --var-left:            set left language variant (bidix)" << std::endl;
-    std::cout << "  -r, --var-right:           set right language variant (bidix)" << std::endl;
-#else
-    std::cout << "  -m:     keep morpheme boundaries" << std::endl;
-    std::cout << "  -v:     set language variant" << std::endl;
-    std::cout << "  -a:     set alternative (monodix)" << std::endl;
-    std::cout << "  -l:     set left language variant (bidix)" << std::endl;
-    std::cout << "  -r:     set right language variant (bidix)" << std::endl;
-#endif
-  }
-  exit(EXIT_FAILURE);
-}
+#include <lttoolbox/cli.h>
 
 int main(int argc, char *argv[])
 {
   LtLocale::tryToSetLocale();
+  CLI cli("expand the contents of a dictionary file", PACKAGE_VERSION);
+  cli.add_bool_arg('m', "keep-boundaries", "keep morpheme boundaries");
+  cli.add_str_arg('v', "var", "set language variant", "VAR");
+  cli.add_str_arg('a', "alt", "set alternative (monodix)", "ALT");
+  cli.add_str_arg('l', "var-left", "set left language variant (bidix)", "VAR");
+  cli.add_str_arg('r', "var-right", "set right language variant (bidix)", "VAR");
+  cli.add_file_arg("dictionary_file", false);
+  cli.add_file_arg("output_file");
+  cli.parse_args(argc, argv);
 
-  FILE* input = NULL;
-  UFILE* output = NULL;
   Expander e;
-  e.setKeepBoundaries(false);
-
-#if HAVE_GETOPT_LONG
-  int option_index=0;
-#endif
-
-  while (true) {
-#if HAVE_GETOPT_LONG
-    static struct option long_options[] =
-    {
-      {"keep-boundaries", no_argument, 0, 'm'},
-      {"alt",       required_argument, 0, 'a'},
-      {"var",       required_argument, 0, 'v'},
-      {"var-left",  required_argument, 0, 'l'},
-      {"var-right", required_argument, 0, 'r'},
-      {"help",      no_argument,       0, 'h'},
-      {0, 0, 0, 0}
-    };
-
-    int cnt=getopt_long(argc, argv, "a:v:l:r:mh", long_options, &option_index);
-#else
-    int cnt=getopt(argc, argv, "a:v:l:r:mh");
-#endif
-    if (cnt==-1)
-      break;
-
-    switch (cnt)
-    {
-      case 'a':
-        e.setAltValue(to_ustring(optarg));
-        break;
-
-      case 'v':
-        e.setVariantValue(to_ustring(optarg));
-        break;
-
-      case 'l':
-        e.setVariantLeftValue(to_ustring(optarg));
-        break;
-
-      case 'm':
-        e.setKeepBoundaries(true);
-        break;
-
-      case 'r':
-        e.setVariantRightValue(to_ustring(optarg));
-        break;
-
-      case 'h':
-      default:
-        endProgram(argv[0]);
-        break;
-    }
+  e.setKeepBoundaries(cli.get_bools()["keep-boundaries"]);
+  auto args = cli.get_strs();
+  if (args.find("var") != args.end()) {
+    e.setVariantValue(to_ustring(args["var"][0].c_str()));
+  }
+  if (args.find("alt") != args.end()) {
+    e.setAltValue(to_ustring(args["alt"][0].c_str()));
+  }
+  if (args.find("var-left") != args.end()) {
+    e.setVariantLeftValue(to_ustring(args["var-left"][0].c_str()));
+  }
+  if (args.find("var-right") != args.end()) {
+    e.setVariantRightValue(to_ustring(args["var-right"][0].c_str()));
   }
 
-  std::string infile;
-  std::string outfile;
+  UFILE* output = openOutTextFile(cli.get_files()[1]);
 
-  switch(argc - optind + 1)
-  {
-    case 2:
-      infile = argv[argc-1];
-      break;
-
-    case 3:
-      infile = argv[argc-2];
-      outfile = argv[argc-1];
-      break;
-
-    default:
-      endProgram(argv[0]);
-      break;
-  }
-
-  input = openInBinFile(infile);
-  fclose(input);
-  output = openOutTextFile(outfile);
-
-  e.expand(infile, output);
+  e.expand(cli.get_files()[0], output);
   u_fclose(output);
 
   return EXIT_SUCCESS;

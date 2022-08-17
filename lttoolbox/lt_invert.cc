@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 Universitat d'Alacant / Universidad de Alicante
+ * Copyright (C) 2022 Apertium
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -14,37 +14,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
-#include <lttoolbox/fst_processor.h>
+#include <lttoolbox/transducer.h>
+#include <lttoolbox/file_utils.h>
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/cli.h>
-#include <lttoolbox/file_utils.h>
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
   LtLocale::tryToSetLocale();
-  CLI cli("process a stream with a letter transducer");
-  cli.add_file_arg("fst_file", false);
-  cli.add_file_arg("input_file");
-  cli.add_file_arg("output_file");
+
+  CLI cli("reverse the direction of a compiled transducer", PACKAGE_VERSION);
+  cli.add_bool_arg('h', "help", "print this message and exit");
+  cli.add_file_arg("in_bin");
+  cli.add_file_arg("out_bin");
   cli.parse_args(argc, argv);
 
-  FSTProcessor fstp;
-  FILE* aux = openInBinFile(cli.get_files()[0]);
-  fstp.load(aux);
-  fclose(aux);
-  fstp.initTMAnalysis();
-  if (!fstp.valid()) {
-    return EXIT_FAILURE;
+  FILE* input = openInBinFile(cli.get_files()[0]);
+  FILE* output = openOutBinFile(cli.get_files()[1]);
+
+  Alphabet alphabet;
+  std::set<UChar32> alphabetic_chars;
+  std::map<UString, Transducer> transducers;
+  readTransducerSet(input, alphabetic_chars, alphabet, transducers);
+
+  for (auto& it : transducers) {
+    it.second.invert(alphabet);
   }
 
-  InputFile input;
-  if (!cli.get_files()[1].empty()) {
-    input.open_or_exit(cli.get_files()[1].c_str());
-  }
-  UFILE* output = openOutTextFile(cli.get_files()[2].c_str());
+  writeTransducerSet(output, alphabetic_chars, alphabet, transducers);
 
-  fstp.tm_analysis(input, output);
-
-  u_fclose(output);
+  fclose(input);
+  fclose(output);
   return EXIT_SUCCESS;
 }

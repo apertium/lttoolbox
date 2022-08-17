@@ -11,7 +11,7 @@ if len(sys.argv) > 1:
 	os.environ['LTTOOLBOX_PATH'] = sys.argv[1]
 
 modules = ['lt_proc', 'lt_trim', 'lt_print', 'lt_comp', 'lt_append',
-           'lt_paradigm', 'lt_expand']
+           'lt_paradigm', 'lt_expand', 'lt_apply_acx']
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(__file__))

@@ -18,21 +18,16 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <climits>
 
-RegexpCompiler::RegexpCompiler() :
-token(0),
-index(0),
-alphabet(0),
-state(0),
-letter(0),
-postop(0),
-default_weight(0.0000)
+#define FIN_FICHERO INT_MAX
+
+RegexpCompiler::RegexpCompiler()
 {
 }
 
 RegexpCompiler::~RegexpCompiler()
 {
-  destroy();
 }
 
 RegexpCompiler::RegexpCompiler(RegexpCompiler const &rec)
@@ -45,7 +40,6 @@ RegexpCompiler::operator =(RegexpCompiler const &rec)
 {
   if(this != &rec)
   {
-    destroy();
     copy(rec);
   }
 
@@ -64,11 +58,6 @@ RegexpCompiler::copy(RegexpCompiler const &rec)
   letter = rec.letter;
   postop = rec.postop;
   default_weight = rec.default_weight;
-}
-
-void
-RegexpCompiler::destroy()
-{
 }
 
 bool

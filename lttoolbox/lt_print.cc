@@ -15,98 +15,26 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 #include <lttoolbox/transducer.h>
-#include <lttoolbox/compression.h>
 #include <lttoolbox/file_utils.h>
-
-#include <lttoolbox/my_stdio.h>
+#include <lttoolbox/cli.h>
 #include <lttoolbox/lt_locale.h>
-
-#include <cstdlib>
-#include <iostream>
-#include <libgen.h>
-#include <string>
-#include <cstring>
-#include <getopt.h>
-
-void endProgram(char *name)
-{
-  if(name != NULL)
-  {
-    std::cout << basename(name) << " v" << PACKAGE_VERSION <<": dump a transducer to text in ATT format" << std::endl;
-    std::cout << "USAGE: " << basename(name) << " [-aHh] bin_file [output_file] " << std::endl;
-    std::cout << "    -a, --alpha:    print transducer alphabet" << std::endl;
-    std::cout << "    -H, --hfst:     use HFST-compatible character escapes" << std::endl;
-    std::cout << "    -h, --help:     print this message and exit" << std::endl;
-  }
-  exit(EXIT_FAILURE);
-}
-
 
 int main(int argc, char *argv[])
 {
   LtLocale::tryToSetLocale();
+  CLI cli("dump a transducer to text in ATT format", PACKAGE_VERSION);
+  cli.add_bool_arg('a', "alpha", "print transducer alphabet");
+  cli.add_bool_arg('H', "hfst", "use HFST-compatible character escapes");
+  cli.add_bool_arg('h', "help", "print this message and exit");
+  cli.add_file_arg("bin_file");
+  cli.add_file_arg("output_file");
+  cli.parse_args(argc, argv);
 
-  bool alpha = false;
-  bool hfst = false;
+  bool alpha = cli.get_bools()["alpha"];
+  bool hfst = cli.get_bools()["hfst"];
 
-#if HAVE_GETOPT_LONG
-  int option_index=0;
-#endif
-
-  while (true) {
-#if HAVE_GETOPT_LONG
-    static struct option long_options[] =
-    {
-      {"alpha",     no_argument, 0, 'a'},
-      {"hfst",      no_argument, 0, 'H'},
-      {"help",      no_argument, 0, 'h'},
-      {0, 0, 0, 0}
-    };
-
-    int cnt=getopt_long(argc, argv, "aHh", long_options, &option_index);
-#else
-    int cnt=getopt(argc, argv, "aHh");
-#endif
-    if (cnt==-1)
-      break;
-
-    switch (cnt)
-    {
-      case 'a':
-        alpha = true;
-        break;
-
-      case 'H':
-        hfst = true;
-        break;
-
-      case 'h':
-      default:
-        endProgram(argv[0]);
-        break;
-    }
-  }
-
-  std::string infile;
-  std::string outfile;
-  switch(argc - optind)
-  {
-    case 1:
-      infile = argv[argc-1];
-      break;
-
-    case 2:
-      infile = argv[argc-2];
-      outfile = argv[argc-1];
-      break;
-
-    default:
-      endProgram(argv[0]);
-      break;
-  }
-
-  FILE* input = openInBinFile(infile);
-  UFILE* output = openOutTextFile(outfile);
+  FILE* input = openInBinFile(cli.get_files()[0]);
+  UFILE* output = openOutTextFile(cli.get_files()[1]);
 
   Alphabet alphabet;
   std::set<UChar32> alphabetic_chars;

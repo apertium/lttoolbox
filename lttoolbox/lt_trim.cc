@@ -16,22 +16,9 @@
  */
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/file_utils.h>
-
+#include <lttoolbox/cli.h>
 #include <lttoolbox/lt_locale.h>
-
-#include <cstdlib>
 #include <iostream>
-#include <libgen.h>
-
-void endProgram(char *name)
-{
-  if(name != NULL)
-  {
-    std::cout << basename(name) << " v" << PACKAGE_VERSION <<": trim a transducer to another transducer" << std::endl;
-    std::cout << "USAGE: " << basename(name) << " analyser_bin_file bidix_bin_file trimmed_bin_file " << std::endl;
-  }
-  exit(EXIT_FAILURE);
-}
 
 void
 trim(FILE* file_mono, FILE* file_bi, FILE* file_out)
@@ -92,23 +79,22 @@ trim(FILE* file_mono, FILE* file_bi, FILE* file_out)
     exit(EXIT_FAILURE);
   }
 
-  writeTransducerSet(file_out, UString(letters_mono.begin(), letters_mono.end()),
-                     alph_mono, trans_trim);
+  writeTransducerSet(file_out, letters_mono, alph_mono, trans_trim);
 }
 
 
 int main(int argc, char *argv[])
 {
   LtLocale::tryToSetLocale();
+  CLI cli("trim a transducer to another transducer", PACKAGE_VERSION);
+  cli.add_file_arg("analyser_bin_file", false);
+  cli.add_file_arg("bidix_bin_file");
+  cli.add_file_arg("trimmed_bin_file");
+  cli.parse_args(argc, argv);
 
-  if(argc != 4)
-  {
-    endProgram(argv[0]);
-  }
-
-  FILE* analyser = openInBinFile(argv[1]);
-  FILE* bidix = openInBinFile(argv[2]);
-  FILE* output = openOutBinFile(argv[3]);
+  FILE* analyser = openInBinFile(cli.get_files()[0]);
+  FILE* bidix = openInBinFile(cli.get_files()[1]);
+  FILE* output = openOutBinFile(cli.get_files()[2]);
 
   trim(analyser, bidix, output);
 

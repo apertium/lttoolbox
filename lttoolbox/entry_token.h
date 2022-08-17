@@ -114,6 +114,7 @@ public:
    * @param r the regular expression specification.
    */
   void setRegexp(UString const &r);
+  void setRegexp(const std::vector<int32_t>& r);
 
   /**
    * More efficient version of setRegexp()

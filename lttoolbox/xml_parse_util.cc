@@ -20,6 +20,16 @@
 #include <iostream>
 #include <utf8.h>
 
+xmlTextReaderPtr
+XMLParseUtil::open_or_exit(const char* fname)
+{
+  xmlTextReaderPtr reader = xmlReaderForFile(fname, NULL, 0);
+  if (reader == NULL) {
+    std::cerr << "Error: cannot open '" << fname << "' for reading." << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  return reader;
+}
 
 UString
 XMLParseUtil::attrib(xmlTextReaderPtr reader, UString const &name)
@@ -87,4 +97,13 @@ XMLParseUtil::readValueInto32(xmlTextReaderPtr reader, std::vector<int32_t>& vec
   auto sz = xmlStrlen(val);
   vec.reserve(vec.size() + sz);
   utf8::utf8to32(val, val+sz, std::back_inserter(vec));
+}
+
+bool
+XMLParseUtil::allBlanks(xmlTextReaderPtr reader)
+{
+  for (auto& c : readValue(reader)) {
+    if (!u_isspace(c)) return false;
+  }
+  return true;
 }

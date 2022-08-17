@@ -424,6 +424,23 @@ public:
    * Invert all transitions so x:y becomes y:x (this will update alpha).
    */
   void invert(Alphabet& alpha);
+
+  /**
+   * Deletes all transitions with a symbol pair in syms
+   */
+  void deleteSymbols(const sorted_vector<int32_t>& syms);
+
+  /**
+   * For every transition with a symbol pair in syms,
+   * change the symbol pair to epsilon
+   */
+  void epsilonizeSymbols(const sorted_vector<int32_t>& syms);
+
+  /**
+   * Given a map of symbols, x:[a,b,c],
+   * expand all x:y transitions to x:y, a:y, b:y, c:y
+   */
+  void applyACX(Alphabet& alpha, const std::map<int32_t, sorted_vector<int32_t>>& acx);
 };
 
 #endif

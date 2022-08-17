@@ -34,6 +34,7 @@ public:
 
   static bool caseequal(const UString& a, const UString& b);
 
+  static bool startswith(const UString& str, const UString& prefix);
   static bool endswith(const UString& str, const UString& suffix);
 
   static UString merge_wblanks(const UString& w1, const UString& w2);

@@ -29,6 +29,8 @@ class XMLParseUtil
 {
 public:
 
+  static xmlTextReaderPtr open_or_exit(const char* fname);
+
   /* If attrib does not exist (or other error), returns an empty string: */
   static UString attrib(xmlTextReaderPtr reader, UString const &name);
 
@@ -40,6 +42,8 @@ public:
   static UString readName(xmlTextReaderPtr reader);
   static UString readValue(xmlTextReaderPtr reader);
   static void readValueInto32(xmlTextReaderPtr reader, std::vector<int32_t>& vec);
+
+  static bool allBlanks(xmlTextReaderPtr reader);
 };
 
 #endif

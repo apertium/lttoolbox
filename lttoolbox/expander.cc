@@ -17,19 +17,15 @@
 
 #include <lttoolbox/compiler.h>
 #include <lttoolbox/expander.h>
-#include <lttoolbox/lt_locale.h>
 #include <lttoolbox/xml_parse_util.h>
-#include <lttoolbox/my_stdio.h>
 
 #include <cstdlib>
 #include <iostream>
 #include <libxml/encoding.h>
 
 
-Expander::Expander() :
-reader(0)
+Expander::Expander()
 {
-  LtLocale::tryToSetLocale();
 }
 
 Expander::~Expander()
@@ -39,12 +35,7 @@ Expander::~Expander()
 void
 Expander::expand(std::string const &file, UFILE* output)
 {
-  reader = xmlReaderForFile(file.c_str(), NULL, 0);
-  if(reader == NULL)
-  {
-    std::cerr << "Error: Cannot open '" << file << "'." << std::endl;
-    exit(EXIT_FAILURE);
-  }
+  reader = XMLParseUtil::open_or_exit(file.c_str());
 
   int ret = xmlTextReaderRead(reader);
   while(ret == 1)
@@ -91,15 +82,7 @@ Expander::requireEmptyError(UString const &name)
 bool
 Expander::allBlanks()
 {
-  bool flag = true;
-  UString text = XMLParseUtil::readValue(reader);
-
-  for(auto c : text)
-  {
-    flag = flag && isspace(c);
-  }
-
-  return flag;
+  return XMLParseUtil::allBlanks(reader);
 }
 
 void

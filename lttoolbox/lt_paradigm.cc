@@ -20,20 +20,9 @@
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/state.h>
 #include <lttoolbox/trans_exe.h>
+#include <lttoolbox/cli.h>
 
-#include <getopt.h>
-#include <iostream>
-#include <libgen.h>
 #include <queue>
-
-void endProgram(char* name)
-{
-  std::cout << basename(name) << ": generate listings from a compiled transducer" << std::endl;
-  std::cout << "Usage: " << basename(name) << " [ -a ] FST [ input [ output ] ]" << std::endl;
-  std::cout << "  -a, --analyser:       FST is an analyser (tags on the right)" << std::endl;
-  std::cout << "  -h, --help:           Print this help and exit" << std::endl;
-  exit(EXIT_FAILURE);
-}
 
 void expand(Transducer& inter, int state, const std::set<int>& past_states,
             const std::vector<int32_t>& syms, const Alphabet& alpha, UFILE* out,
@@ -112,59 +101,26 @@ void process(const UString& pattern, std::map<UString, Transducer>& trans,
 int main(int argc, char* argv[])
 {
   LtLocale::tryToSetLocale();
+  CLI cli("generate listings from a compiled transducer", PACKAGE_VERSION);
+  cli.add_bool_arg('a', "analyser", "FST is an analyser (tags on the right)");
+  cli.add_str_arg('e', "exclude", "disregard paths containing TAG", "TAG");
+  cli.add_bool_arg('s', "sort", "alphabetize the paths for each pattern");
+  cli.add_bool_arg('z', "null-flush", "flush output on \\0");
+  cli.add_bool_arg('h', "help", "show this help and exit");
+  cli.add_file_arg("FST", false);
+  cli.add_file_arg("input");
+  cli.add_file_arg("output");
+  cli.parse_args(argc, argv);
 
-  bool should_invert = true;
-  bool sort = false;
+  bool should_invert = !cli.get_bools()["analyser"];
+  bool sort = cli.get_bools()["sort"];
   std::set<UString> skip_tags;
-
-#if HAVE_GETOPT_LONG
-  static struct option long_options[] =
-    {
-     {"analyser",     0, 0, 'a'},
-     {"exclude",      1, 0, 'e'},
-     {"sort",         0, 0, 's'},
-     {"null-flush",   0, 0, 'z'},
-     {"help",         0, 0, 'h'},
-     {0,0,0,0}
-    };
-#endif
-
-  while (true) {
-#if HAVE_GETOPT_LONG
-    int c = getopt_long(argc, argv, "ae:szh", long_options, &optind);
-#else
-    int c = getopt(argc, argv, "ae:szh");
-#endif
-    if (c == -1) break;
-
-    switch (c) {
-    case 'a':
-      should_invert = false;
-      break;
-
-    case 'e':
-      skip_tags.insert(to_ustring(optarg));
-      break;
-
-    case 's':
-      sort = true;
-      break;
-
-    case 'z': // no-op
-      break;
-
-    case 'h':
-    default:
-      endProgram(argv[0]);
-      break;
-    }
+  for (auto& it : cli.get_strs()["exclude"]) {
+    skip_tags.insert(to_ustring(it.c_str()));
   }
 
-  if (optind == argc) {
-    std::cerr << "Transducer file is required." << std::endl;
-    exit(EXIT_FAILURE);
-  }
-  FILE* fst = openInBinFile(argv[optind++]);
+  FILE* fst = openInBinFile(cli.get_files()[0]);
+
   std::set<UChar32> letters;
   Alphabet alpha;
   std::map<UString, Transducer> trans;
@@ -189,13 +145,10 @@ int main(int argc, char* argv[])
   }
 
   InputFile input;
-  UFILE* output = u_finit(stdout, NULL, NULL);
-  if (optind < argc) {
-    input.open_or_exit(argv[optind++]);
+  if (!cli.get_files()[1].empty()) {
+    input.open_or_exit(cli.get_files()[1].c_str());
   }
-  if (optind < argc) {
-    output = openOutTextFile(argv[optind++]);
-  }
+  UFILE* output = openOutTextFile(cli.get_files()[2]);
 
   UString cur;
   do {

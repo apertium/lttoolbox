@@ -15,17 +15,14 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 #include <lttoolbox/compiler.h>
-#include <lttoolbox/compression.h>
-#include <lttoolbox/entry_token.h>
-#include <lttoolbox/lt_locale.h>
 #include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/string_utils.h>
 #include <lttoolbox/file_utils.h>
+#include <lttoolbox/acx.h>
+#include <lttoolbox/regexp_compiler.h>
 
-#include <string>
-#include <cstdlib>
 #include <iostream>
-#include <libxml/encoding.h>
+#include <thread>
 
 UString const Compiler::COMPILER_DICTIONARY_ELEM    = "dictionary"_u;
 UString const Compiler::COMPILER_ALPHABET_ELEM      = "alphabet"_u;
@@ -39,6 +36,7 @@ UString const Compiler::COMPILER_ENTRY_ELEM         = "e"_u;
 UString const Compiler::COMPILER_RESTRICTION_ATTR   = "r"_u;
 UString const Compiler::COMPILER_RESTRICTION_LR_VAL = "LR"_u;
 UString const Compiler::COMPILER_RESTRICTION_RL_VAL = "RL"_u;
+UString const Compiler::COMPILER_RESTRICTION_U_VAL  = "U"_u;
 UString const Compiler::COMPILER_PAIR_ELEM          = "p"_u;
 UString const Compiler::COMPILER_LEFT_ELEM          = "l"_u;
 UString const Compiler::COMPILER_RIGHT_ELEM         = "r"_u;
@@ -90,31 +88,20 @@ Compiler::parseACX(std::string const &file, UString const &dir)
 {
   if(dir == COMPILER_RESTRICTION_LR_VAL)
   {
-    reader = xmlReaderForFile(file.c_str(), NULL, 0);
-    if(reader == NULL)
-    {
-      std::cerr << "Error: cannot open '" << file << "'." << std::endl;
-      exit(EXIT_FAILURE);
-    }
-    int ret = xmlTextReaderRead(reader);
-    while(ret == 1)
-    {
-      procNodeACX();
-      ret = xmlTextReaderRead(reader);
-    }
+    acx_map = readACX(file.c_str());
   }
 }
 
 void
 Compiler::parse(std::string const &file, UString const &dir)
 {
-  direction = dir;
-  reader = xmlReaderForFile(file.c_str(), NULL, 0);
-  if(reader == NULL)
-  {
-    std::cerr << "Error: Cannot open '" << file << "'." << std::endl;
-    exit(EXIT_FAILURE);
+  if (dir == COMPILER_RESTRICTION_U_VAL) {
+    direction = COMPILER_RESTRICTION_LR_VAL;
+    unified_compilation = true;
+  } else {
+    direction = dir;
   }
+  reader = XMLParseUtil::open_or_exit(file.c_str());
 
   int ret = xmlTextReaderRead(reader);
   while(ret == 1)
@@ -284,7 +271,7 @@ Compiler::matchTransduction(std::vector<int> const &pi,
   }
   else
   {
-    std::map<int, std::set<int> >::iterator acx_map_ptr;
+    std::map<int32_t, sorted_vector<int32_t> >::iterator acx_map_ptr;
     int rsymbol = 0;
 
     while(true)
@@ -350,7 +337,7 @@ Compiler::matchTransduction(std::vector<int> const &pi,
       {
         for(auto& it : acx_map_ptr->second)
         {
-          t.linkStates(state, new_state, alphabet(it ,rsymbol), weight_value);
+          t.linkStates(state, new_state, alphabet(it, rsymbol), weight_value);
         }
       }
       state = new_state;
@@ -375,15 +362,7 @@ Compiler::requireEmptyError(UString const &name)
 bool
 Compiler::allBlanks()
 {
-  bool flag = true;
-  UString text = XMLParseUtil::readValue(reader);
-
-  for(auto c : text)
-  {
-    flag = flag && u_isspace(c);
-  }
-
-  return flag;
+  return XMLParseUtil::allBlanks(reader);
 }
 
 void
@@ -789,6 +768,39 @@ Compiler::procSection()
   }
 }
 
+bool
+Compiler::filterEntry(const UString& value, const UString& filter,
+                      bool keep_on_empty_filter)
+{
+  if (value.empty()) return true;
+  else if (keep_on_empty_filter && filter.empty()) return true;
+  auto ops = StringUtils::split(value, " "_u);
+  for (auto& it : ops) {
+    if (it == filter) return true;
+  }
+  return false;
+}
+
+void
+Compiler::symbolFilters(const UString& value, const UString& prefix,
+                        std::vector<std::vector<int32_t>>& symbols)
+{
+  if (value.empty()) return;
+  std::vector<int32_t> syms;
+  for (auto& it : StringUtils::split(value, " "_u)) {
+    if (it.empty()) continue;
+    UString tag;
+    tag += '<';
+    tag += prefix;
+    tag += ':';
+    tag += it;
+    tag += '>';
+    alphabet.includeSymbol(tag);
+    syms.push_back(alphabet(tag));
+  }
+  if (!syms.empty()) symbols.push_back(syms);
+}
+
 void
 Compiler::procEntry()
 {
@@ -800,13 +812,74 @@ Compiler::procEntry()
   UString varr      = this->attrib(COMPILER_VR_ATTR);
   UString wsweight  = this->attrib(COMPILER_WEIGHT_ATTR);
 
+  std::vector<EntryToken> elements;
+
   // if entry is masked by a restriction of direction or an ignore mark
-  if((!attribute.empty() && attribute != direction)
+  if (unified_compilation && ignore != COMPILER_IGNORE_YES_VAL) {
+    std::vector<std::vector<int32_t>> symbols;
+    symbolFilters(attribute, "r"_u, symbols);
+    symbolFilters(altval, "alt"_u, symbols);
+    symbolFilters(varval, "v"_u, symbols);
+    symbolFilters(varl, "vl"_u, symbols);
+    symbolFilters(varr, "vr"_u, symbols);
+    if (!symbols.empty()) {
+      bool multi = false;
+      for (auto& it : symbols) {
+        if (it.size() > 1) {
+          multi = true;
+          break;
+        }
+      }
+      if (multi) {
+        UString parname = "--"_u;
+        parname += attribute;
+        parname += '-';
+        parname += altval;
+        parname += '-';
+        parname += varval;
+        parname += '-';
+        parname += varl;
+        parname += '-';
+        parname += varr;
+        if (paradigms.find(parname) == paradigms.end()) {
+          std::vector<int32_t> re;
+          for (auto& it : symbols) {
+            if (it.size() == 1) {
+              re.push_back(it[0]);
+            } else {
+              re.push_back(static_cast<int32_t>('['));
+              re.insert(re.end(), it.begin(), it.end());
+              re.push_back(static_cast<int32_t>(']'));
+            }
+          }
+          EntryToken e;
+          e.setRegexp(re);
+          std::vector<EntryToken> vec(1, e);
+          parname.swap(current_paradigm);
+          insertEntryTokens(vec);
+          parname.swap(current_paradigm);
+        }
+        EntryToken e;
+        e.setParadigm(parname);
+        elements.push_back(e);
+      }
+      else {
+        std::vector<int> syms;
+        for (auto& it : symbols) {
+          syms.push_back(it[0]);
+        }
+        EntryToken e;
+        e.setSingleTransduction(syms, syms);
+        elements.push_back(e);
+      }
+    }
+  }
+  else if((!attribute.empty() && attribute != direction)
    || ignore == COMPILER_IGNORE_YES_VAL
-   || (!altval.empty() && altval != alt)
-   || (!varval.empty() && !variant.empty() && varval != variant)
-   || (direction == COMPILER_RESTRICTION_RL_VAL && !varl.empty() && varl != variant_left)
-   || (direction == COMPILER_RESTRICTION_LR_VAL && !varr.empty() && varr != variant_right))
+   || !filterEntry(altval, alt, false)
+   || !filterEntry(varval, variant, true)
+   || (direction == COMPILER_RESTRICTION_RL_VAL && !filterEntry(varl, variant_left, false))
+   || (direction == COMPILER_RESTRICTION_LR_VAL && !filterEntry(varr, variant_right, false)))
   {
     // parse to the end of the entry
     UString name;
@@ -825,8 +898,6 @@ Compiler::procEntry()
   {
     weight = StringUtils::stod(wsweight);
   }
-
-  std::vector<EntryToken> elements;
 
   if (entry_debugging && current_paradigm.empty()) {
     UString ln = "Line near "_u;
@@ -929,38 +1000,6 @@ Compiler::procEntry()
       std::cerr << ">'." << std::endl;
       exit(EXIT_FAILURE);
     }
-  }
-}
-
-void
-Compiler::procNodeACX()
-{
-  UString name = XMLParseUtil::readName(reader);
-  if(name == COMPILER_TEXT_NODE)
-  {
-    /* ignore */
-  }
-  else if(name == COMPILER_ACX_ANALYSIS_ELEM)
-  {
-    /* ignore */
-  }
-  else if(name == COMPILER_ACX_CHAR_ELEM)
-  {
-    acx_current_char = static_cast<int>(attrib(COMPILER_ACX_VALUE_ATTR)[0]);
-  }
-  else if(name == COMPILER_ACX_EQUIV_CHAR_ELEM)
-  {
-    acx_map[acx_current_char].insert(static_cast<int>(attrib(COMPILER_ACX_VALUE_ATTR)[0]));
-  }
-  else if(name == COMPILER_COMMENT_NODE)
-  {
-    /* ignore */
-  }
-  else
-  {
-    std::cerr << "Error in ACX file (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Invalid node '<" << name << ">'." << std::endl;
-    exit(EXIT_FAILURE);
   }
 }
 

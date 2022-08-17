@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<analysis-chars>
+	<char value="a">
+		<equiv-char value="á"/>
+		<equiv-char value="ä"/>
+	</char>
+</analysis-chars>
