@@ -26,7 +26,8 @@
 
 
 /**
-  * Default value of weight
+  * Default value of weight.
+  * Used as the identity element by various operations.
   */
 constexpr double default_weight = 0;
 
@@ -411,6 +412,54 @@ public:
                        Alphabet const &my_a,
                        Alphabet const &t_a,
                        int const epsilon_tag = 0);
+
+  /**
+   * Composes two finite-state transducers
+   *
+   * The returned transducer is not minimized! Minimization will exit
+   * with failure if there are no finals, but we might want to
+   * continue with intersecting the other sections.
+   *
+   * Weights are added. The alphabet of this transducer is re-used –
+   * and may be altered if g adds new symbols!
+   *
+   * @param g the Transducer with which this is composed
+   * @param my_a the alphabet of this transducer
+   * @param g_a the alphabet of the transducer g
+   * @param f_inverted run composition right-to-left on this transducer
+   * @param g_anywhere don't require anchored matches, let g optionally compose at any sub-path
+   * @return the composition gf
+   */
+  Transducer compose(Transducer const &g,
+                     Alphabet &my_a, // not const since we may add symbols from g_a
+                     Alphabet const &g_a,
+                     bool f_inverted = false,
+                     bool g_anywhere = false,
+                     int const epsilon_tag = 0);
+
+  /**
+   * Helper for creating the arc label when composing g ∘ f, used by compose.
+   *
+   * @return symbol-pair going from input of f to output of g (left/right-inverted if f_inverted)
+   */
+  inline
+  int32_t composeLabel(Alphabet &f_a, Alphabet const &g_a,
+                       int32_t f_input, int32_t g_right,
+                       bool f_inverted)
+  {
+    int32_t gf_label;
+    if (g_right >= 0) { // optimisation: non-symbols are equal across alphabets
+      gf_label = f_inverted ? f_a(g_right, f_input)
+                            : f_a(f_input, g_right);
+    }
+    else {
+      UString g_rightstr;
+      g_a.getSymbol(g_rightstr, g_right);
+      gf_label = f_inverted ? f_a(f_a(g_rightstr), f_input)
+                            : f_a(f_input,         f_a(g_rightstr));
+    }
+    return gf_label;
+  }
 
   /**
    * Ensure that new_alpha contains all the symbols in old_alpha

@@ -9,6 +9,7 @@
 from basictest import ProcTest, TempDir
 import unittest
 
+
 class TrimProcTest(unittest.TestCase, ProcTest):
     monodix = "data/minimal-mono.dix"
     monodir = "lr"
@@ -22,6 +23,10 @@ class TrimProcTest(unittest.TestCase, ProcTest):
         self.callProc('lt-trim', [tmpd+"/mono.bin",
                                   tmpd+"/bi.bin",
                                   tmpd+"/compiled.bin"])
+        # The above already asserts retcode, so if we got this far we know it
+        # compiled fine:
+        return True
+
 
 class TrimNormalAndJoin(TrimProcTest):
     inputs = ["abc", "ab", "y", "n", "jg", "jh", "kg"]

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅabcdefghijklmnopqrstuvwxyzæøåcqwxzCQWXZéèêóòâôÉÊÈÓÔÒÂáàÁÀäÄöÖšŠčČðđÐýÝñÑüÜíÍıİËë-0123456789̇</alphabet>
+  <sdefs>
+    <sdef n="n"/>
+    <sdef n="compound-only-L" 	c="May only be the left-side of a compound"/>
+    <sdef n="compound-R" 	c="May be the right-side of a compound, or a full word"/>
+  </sdefs>
+  <pardefs>
+    <pardef n="cp-L">
+      <e>       <p><l>¤</l>            <r><s n="compound-only-L"/></r></p></e>
+    </pardef>
+  </pardefs>
+
+  <section id="main" type="standard">
+
+    <!-- Assuming we compose with pp2p, -->
+    <!-- this one will have pp¤ before epsilons: -->
+    <e> <p><l>opp¤</l>            <r>opp<s n="n"/><s n="compound-only-L"/></r></p></e>
+
+    <!-- this one will have pp then epsilon because of the pardef then ¤: -->
+    <e> <p><l>app</l> <r>app<s n="n"/></r></p><par n="cp-L"/></e>
+
+    <e><i>py</i><p><l></l> <r><s n="compound-R"/></r></p></e>
+
+    <!-- the first one should not allow analyses with just one p: -->
+    <e><i>upp</i><p><l></l> <r><s n="n"/></r></p></e>
+    <!-- but this one should: -->
+    <e><i>upp</i><p><l></l> <r><s n="n"/></r></p><par n="cp-L"/></e>
+
+    <e><i>tupp</i><p><l></l> <r><s n="n"/></r></p><par n="cp-L"/></e>
+
+  </section>
+</dictionary>

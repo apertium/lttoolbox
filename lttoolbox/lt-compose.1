@@ -1,0 +1,60 @@
+.Dd September 25, 2022
+.Dt LT-COMPOSE 1
+.Os Apertium
+.Sh NAME
+.Nm lt-compose
+.Nd compiled dictionary composition for Apertium
+.Sh SYNOPSIS
+.Nm lt-compose
+.Ar transducer1_binary
+.Ar transducer2_binary
+.Ar composed_binary
+.Sh DESCRIPTION
+.Nm lt-compose
+is the application responsible for composing two compiled
+dictionaries, matching the output-side of transducer1 with the
+input-side of transducer2. By default, matches are anchored to
+initial/final states, so the transducer2 has to match full paths (in
+regex terms, transducer2 is implicitly surrounded by ^ and $). But
+there is also support for letting transducer2 match sub-paths of
+transducer1 (in which matches become optional, making the composition
+a superset of transducer1). Matching sub-paths means that transducer2
+can start matching in the midst of paths of transducer2 (in regex
+terms, transducer2 is implicitly surrounded in .* on both sides).
+.Sh OPTIONS
+.Bl -tag -width Ds
+.It Fl i , Fl Fl inverted
+Apply transducer2 to the input-side (left) of transducer1 instead of
+the output-side. You would do this when altering the forms of an
+analyser.
+.It Fl a , Fl Fl anywhere
+Allow transducer2 to match sub-paths instead of requiring matching
+initial/final states. Matches then become optional.
+.It Fl j , Fl Fl jobs
+Parallelise composition by using one cpu core per section of
+transducer1. You can also set the environment variable LT_JOBS=true if
+you always want parallelisation where available in lttoolbox.
+.Sh FILES
+.Bl -tag -width Ds
+.It Ar transducer1_binary
+a finite state transducer
+.It Ar transducer2_binary
+a finite state transducer
+.It Ar composed_binary
+a finite state transducer
+.El
+.Sh SEE ALSO
+.Xr apertium 1 ,
+.Xr apertium-tagger 1 ,
+.Xr lt-comp 1 ,
+.Xr lt-expand 1 ,
+.Xr lt-print 1 ,
+.Xr lt-trim 1 ,
+.Xr lt-proc 1
+.Sh AUTHOR
+Copyright \(co 2005-2022 Universitat d'Alacant / Universidad de Alicante.
+This is free software.
+You may redistribute copies of it under the terms of
+.Lk https://www.gnu.org/licenses/gpl.html the GNU General Public License .
+.Sh BUGS
+Many... lurking in the dark and waiting for you!

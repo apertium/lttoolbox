@@ -61,6 +61,7 @@ trim(FILE* file_mono, FILE* file_bi, FILE* file_out)
       std::cerr << "Warning: section " << it.first << " is empty! Skipping it..." << std::endl;
       continue;
     }
+    // TODO: parallelise this loop (as in lt_compose.cc)
     Transducer trimmed = it.second.intersect(moved_transducer,
                                              alph_mono,
                                              alph_prefix);

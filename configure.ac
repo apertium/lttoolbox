@@ -3,6 +3,7 @@ AC_PREREQ(2.52)
 m4_define([PKG_VERSION_MAJOR], [3])
 m4_define([PKG_VERSION_MINOR], [6])
 m4_define([PKG_VERSION_PATCH], [10])
+m4_include([m4/ax_pthread.m4])
 
 AC_INIT([lttoolbox], [PKG_VERSION_MAJOR.PKG_VERSION_MINOR.PKG_VERSION_PATCH], [apertium-stuff@lists.sourceforge.net], [lttoolbox], [https://wiki.apertium.org/wiki/Lttoolbox])
 
@@ -50,6 +51,9 @@ AC_CHECK_HEADERS([stdlib.h string.h unistd.h stddef.h])
 AC_CHECK_HEADER([utf8cpp/utf8.h], [CPPFLAGS="-I/usr/include/utf8cpp/ $CPPFLAGS"], [
   AC_CHECK_HEADER([utf8.h], [], [AC_MSG_ERROR([You don't have utfcpp installed.])])
 ])
+
+# Checks for POSIX thread support
+AX_PTHREAD([], [AC_MSG_ERROR([Can't find libpthread])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

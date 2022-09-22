@@ -1395,3 +1395,203 @@ Transducer::applyACX(Alphabet& alpha,
     }
   }
 }
+
+
+Transducer
+Transducer::compose(Transducer const &g,
+                    Alphabet &f_a, // this alphabet
+                    Alphabet const &g_a, // alphabet of g
+                    bool f_inverted,
+                    bool g_anywhere,
+                    int const epsilon_tag)
+{
+  /**
+   * g ∘ f = composed
+   * where f = this
+   *
+   * The basic algorithm is:
+   *
+   * Transducer gf;             // composition
+   * queue = [ (f.init, g.init, gf.init) ]
+   * while(!queue.empty()):
+   *   f_src, g_src, gf_src = queue.pop()
+   *   for (f_input, f_output, f_trg) in state_f.transitions:
+   *     for (g_input, g_output, g_trg) in state_g.transitions:
+   *       if g_input == f_output:
+   *         gf_trg = gf.add_state()
+   *         gf.add_transition(gf_src,  f_input, g_output, gf_trg)
+   *         queue.add(f_trg, g_trg, gf_trg)
+   *     gf_trg = gf.add_state()
+   *     gf.add_transition(gf_src, f_input, f_output, gf_trg)
+   *     queue.add(f_trg, g.init, gf_trg)
+   *
+   * with some added complications:
+   *
+   * 1. Since we can have loops, we need to keep track of which pairs
+   *    (f_src, g_src) we've seen, so we don't keep re-adding them. And
+   *    on seeing a previously seen pair, we need to know which state
+   *    in gf was added from that pair.
+   *
+   * 2. We have to be able to skip epsilons on the input-side of g and
+   *    the output-side of f.
+   *
+   * 3. When f_inverted, we swap f_left/f_right in matching.
+   *
+   * 4. If composing g_anywhere, we can add initials from g anywhere
+   *    in gf, and finals in gf can be initials in g.
+   */
+  joinFinals(epsilon_tag);
+
+  // (f_state, g_state)
+  typedef std::pair<int, int> SearchState;
+
+  // State numbers will differ in fXg transducers and gf:
+  Transducer gf;
+  std::map<SearchState, int> states_f_g_gf;
+
+  std::vector<SearchState> todo;
+  std::set<SearchState> seen;
+  SearchState current;
+  SearchState next = std::make_pair(initial, g.initial);
+  todo.push_back(next);
+  states_f_g_gf.insert(std::make_pair(next, gf.initial));
+
+  while(!todo.empty()) {
+    current = todo.back();
+    todo.pop_back();
+    seen.insert(current);
+    int f_src  = current.first,
+        g_src     = current.second;
+
+    if(states_f_g_gf.find(current) == states_f_g_gf.end()) {
+      std::cerr <<"Error: couldn't find "<<f_src<<","<<g_src<<" in state map"<< std::endl;
+      exit(EXIT_FAILURE);
+    }
+    int gf_src = states_f_g_gf[current];
+
+    // First loop through _epsilon_ transitions of g (input side)
+    for(const auto &g_trans_it : g.transitions.at(g_src)) {
+      int g_label = g_trans_it.first,
+          g_trg   = g_trans_it.second.first;
+      double g_wt = g_trans_it.second.second;
+      std::pair<int32_t, int32_t> g_leftright = g_a.decode(g_label);
+      int32_t g_left = g_leftright.first,
+              g_right = g_leftright.second;
+
+      if(g_left == 0)
+      {
+        next = std::make_pair(f_src, g_trg);
+        if (seen.find(next) == seen.end()) {
+          todo.push_back(next);
+        }
+        if (states_f_g_gf.find(next) == states_f_g_gf.end()) {
+          states_f_g_gf.insert(std::make_pair(next, gf.newState()));
+        }
+        int gf_trg = states_f_g_gf[next];
+        int32_t gf_label = composeLabel(f_a, g_a, 0, g_right, f_inverted);
+        gf.linkStates(gf_src,
+                      gf_trg,
+                      gf_label,
+                      g_wt);
+      }
+    }
+
+    // Loop through arcs from f_src; when the right-side of our arc
+    // matches left-side of an arc from g states, add that to todo:
+    for(auto& trans_it : transitions[f_src])
+    {
+      int f_label = trans_it.first,
+          f_trg   = trans_it.second.first;
+      double f_wt = trans_it.second.second;
+      std::pair<int32_t, int32_t> f_leftright = f_a.decode(f_label);
+      int32_t f_input, f_output;
+      if(f_inverted) {
+        f_input = f_leftright.second;
+        f_output = f_leftright.first;
+      }
+      else {
+        f_input = f_leftright.first;
+        f_output = f_leftright.second;
+      }
+
+      // Loop through non-epsilon arcs from the live state of g
+      for (auto &g_trans_it : g.transitions.at(g_src)) {
+        int g_label = g_trans_it.first,
+            g_trg = g_trans_it.second.first;
+        double g_wt = g_trans_it.second.second;
+        std::pair<int32_t, int32_t> g_leftright = g_a.decode(g_label);
+        const int32_t g_left = g_leftright.first,
+                      g_right = g_leftright.second;
+
+        // output of f same as input of g?
+        // label becomes input of f and output of g
+        if (g_left != 0 && // we've already dealt with g epsilons
+            f_a.sameSymbol(f_output, g_a, g_left, true)) {
+          next = std::make_pair(f_trg, g_trg);
+          if (seen.find(next) == seen.end()) {
+            todo.push_back(next);
+          }
+          if (states_f_g_gf.find(next) == states_f_g_gf.end()) {
+            states_f_g_gf.insert(std::make_pair(next, gf.newState()));
+          }
+          int gf_trg = states_f_g_gf[next];
+          int32_t gf_label = composeLabel(f_a, g_a, f_input, g_right, f_inverted);
+          gf.linkStates(gf_src,   // fromState
+                        gf_trg,   // toState
+                        gf_label, // symbol-pair, using f alphabet
+                        f_wt + g_wt); // weight of transduction – composition adds weights!
+        }
+      }
+      if(g_anywhere && g_src == g.initial) {
+        // If g_anywhere, all g entries are optional – we always add
+        // the transitions that were already in f:
+        next = std::make_pair(f_trg, g_src);
+        if (seen.find(next) == seen.end()) {
+          todo.push_back(next);
+        }
+        if (states_f_g_gf.find(next) == states_f_g_gf.end()) {
+          states_f_g_gf.insert(std::make_pair(next, gf.newState()));
+        }
+        int gf_trg = states_f_g_gf[next];
+        gf.linkStates(gf_src,  // fromState
+                      gf_trg,  // toState
+                      f_label, // symbol-pair, using f alphabet
+                      f_wt);   // weight of transduction
+      }
+      // If f has an epsilon, also add a transition not to g.initial but g_src:
+      if(f_output == 0) {      // will be the left if f_inverted
+        next = std::make_pair(f_trg, g_src);
+        if (seen.find(next) == seen.end()) {
+          todo.push_back(next);
+        }
+        if (states_f_g_gf.find(next) == states_f_g_gf.end()) {
+          states_f_g_gf.insert(std::make_pair(next, gf.newState()));
+        }
+        int gf_trg = states_f_g_gf[next];
+        gf.linkStates(gf_src,  // fromState
+                      gf_trg,  // toState
+                      f_label, // symbol-pair, using f alphabet
+                      f_wt);   // weight of transduction
+      }
+    } // end loop arcs from f_src
+  } // end while todo
+
+  for(auto& it : states_f_g_gf)
+  {
+    int s_f = it.first.first;
+    int s_g = it.first.second;
+    int s_gf = it.second;
+    if(isFinal(s_f) && (g.isFinal(s_g)
+                        // if we're in anywhere mode, every state will be paired with g.initial if it's not paired with something in the middle of g
+                        || (g_anywhere && g.initial == s_g)))
+    {
+      double wt_gf = finals[s_f] + (g.isFinal(s_g) ? g.finals.at(s_g)
+                                                   : default_weight);
+      gf.finals.insert(std::make_pair(s_gf, wt_gf));
+    }
+  }
+
+  // We do not minimize here, in order to let lt_compose print a warning
+  // (instead of exiting the whole program) if no finals.
+  return gf;
+}

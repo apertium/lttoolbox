@@ -14,7 +14,7 @@ cc_sources = acx.cc alphabet.cc att_compiler.cc cli.cc compiler.cc compression.c
 library_includedir = $(includedir)/$(PACKAGE_NAME)-$(VERSION_API)/$(PACKAGE_NAME)
 library_include_HEADERS = $(h_sources)
 
-bin_PROGRAMS = lt-comp lt-proc lt-expand lt-paradigm lt-tmxcomp lt-tmxproc lt-print lt-trim lt-append lsx-comp lt-invert lt-restrict lt-apply-acx
+bin_PROGRAMS = lt-comp lt-proc lt-expand lt-paradigm lt-tmxcomp lt-tmxproc lt-print lt-trim lt-compose lt-append lsx-comp lt-invert lt-restrict lt-apply-acx
 instdir = lttoolbox
 
 lib_LTLIBRARIES= liblttoolbox3.la
@@ -28,12 +28,13 @@ lttoolboxlib = $(prefix)/lib
 
 lttoolbox_DATA = dix.dtd dix.rng dix.rnc acx.rng xsd/dix.xsd xsd/acx.xsd
 
-LDADD = liblttoolbox$(VERSION_MAJOR).la
+LDADD = liblttoolbox$(VERSION_MAJOR).la $(PTHREAD_LIBS)
 AM_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LIBXML_LIBS) $(ICU_LIBS)
 
 lt_append_SOURCES = lt_append.cc
 lt_print_SOURCES = lt_print.cc
 lt_trim_SOURCES = lt_trim.cc
+lt_compose_SOURCES = lt_compose.cc
 lt_comp_SOURCES = lt_comp.cc
 lt_proc_SOURCES = lt_proc.cc
 lt_expand_SOURCES = lt_expand.cc
@@ -55,9 +56,9 @@ lt_apply_acx_SOURCES = lt_apply_acx.cc
 
 
 
-man_MANS = lt-append.1 lt-comp.1 lt-expand.1 lt-paradigm.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1 lt-print.1 lt-trim.1 lsx-comp.1
+man_MANS = lt-append.1 lt-comp.1 lt-expand.1 lt-paradigm.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1 lt-print.1 lt-trim.1 lt-compose.1 lsx-comp.1
 
-INCLUDES = -I$(top_srcdir) $(LIBXML_CFLAGS) $(ICU_CFLAGS)
+INCLUDES = -I$(top_srcdir) $(LIBXML_CFLAGS) $(ICU_CFLAGS) $(PTHREAD_CFLAGS)
 CLEANFILES = *~
 
 EXTRA_DIST = dix.dtd dix.rng dix.rnc acx.rng xsd/dix.xsd xsd/acx.xsd $(man_MANS)

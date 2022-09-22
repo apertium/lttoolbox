@@ -2,7 +2,7 @@
 import os
 from shutil import rmtree
 import signal
-from subprocess import call, PIPE, Popen
+from subprocess import run, call, PIPE, Popen
 from sys import stderr
 from tempfile import mkdtemp
 
@@ -73,10 +73,12 @@ class BasicTest:
         return code == 0
 
     def callProc(self, name, bins, flags=None, retCode=0):
-        self.assertEqual(retCode,
-                         call([os.environ['LTTOOLBOX_PATH']+'/'+name]
-                              + (flags or []) + bins,
-                              stdout=PIPE, stderr=PIPE))
+        cmd = [os.environ['LTTOOLBOX_PATH']+'/'+name] + (flags or []) + bins
+        res = run(cmd, capture_output=True)
+        if res.returncode != retCode:
+            print("\nSTDOUT:", res.stdout)
+            print("STDERR:", res.stderr)
+        self.assertEqual(retCode, res.returncode)
 
 class TempDir:
     def __enter__(self):
@@ -84,6 +86,7 @@ class TempDir:
         return self.tmpd
     def __exit__(self, *args):
         rmtree(self.tmpd)
+
 
 class PrintTest(BasicTest):
     """See lt_print test for how to use this. Override runTest if you don't
@@ -96,8 +99,8 @@ class PrintTest(BasicTest):
     printflags = []
 
     def compileTest(self, tmpd):
-        self.compileDix(self.printdir, self.printdix,
-                        binName=tmpd+'/compiled.bin')
+        return self.compileDix(self.printdir, self.printdix,
+                               binName=tmpd+'/compiled.bin')
 
     def runTest(self):
         with TempDir() as tmpd:
@@ -110,6 +113,7 @@ class PrintTest(BasicTest):
                              self.expectedOutput)
 
             self.closePipe(self.printresult, self.expectedRetCodeFail)
+
 
 class ProcTest(BasicTest):
     """See lt_proc test for how to use this. Override runTest if you don't
