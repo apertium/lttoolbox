@@ -1271,7 +1271,7 @@ Transducer::intersect(Transducer &trimmer,
     int s_trimmed = it.second;
     if(isFinal(s_this) && trimmer.isFinal(s_trimmer))
     {
-      trimmed.finals.insert(std::make_pair(s_trimmed, default_weight));
+      trimmed.finals.insert(std::make_pair(s_trimmed, finals[s_this]));
     }
   }
 
