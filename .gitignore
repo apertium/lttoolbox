@@ -1,5 +1,6 @@
 *.pyc
 **/*.deps/
+/build/
 /.ccls-cache/
 /*.pc
 /aclocal.m4
@@ -60,6 +61,7 @@
 
 /compile_commands.json
 /lttoolbox/lt-comp
+/lttoolbox/lt-compose
 /lttoolbox/lt-proc
 /lttoolbox/lt-trim
 /lttoolbox/Makefile

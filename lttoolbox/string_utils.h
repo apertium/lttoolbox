@@ -7,16 +7,16 @@
 class StringUtils {
 public:
   // delete leading and trailing whitespace
-  static UString trim(const UString& str);
+  static UStringView trim(UStringView str);
 
   // split string on delimiter
-  static std::vector<UString> split(const UString& str, const UString& delim);
+  static std::vector<UString> split(UStringView str, UStringView delim=u" ");
 
   // inverse of split
-  static UString join(const std::vector<UString>& vec, const UString& delim);
+  static UString join(const std::vector<UString>& vec, UStringView delim);
 
   // replace each occurrence of olds with news
-  static UString substitute(const UString& str, const UString& olds, const UString& news);
+  static UString substitute(UStringView str, UStringView olds, UStringView news);
 
   static UString itoa(int n);
   static std::string itoa_string(int n);
@@ -25,19 +25,19 @@ public:
   static int stoi(const UString& str);
   static double stod(const UString& str);
 
-  static UString tolower(const UString& str);
-  static UString toupper(const UString& str);
-  static UString totitle(const UString& str);
+  static UString tolower(UStringView str);
+  static UString toupper(UStringView str);
+  static UString totitle(UStringView str);
 
-  static UString getcase(const UString& str);
-  static UString copycase(const UString& source, const UString& target);
+  static UString getcase(UStringView str);
+  static UString copycase(UStringView source, UStringView target);
 
-  static bool caseequal(const UString& a, const UString& b);
+  static bool caseequal(UStringView a, UStringView b);
 
-  static bool startswith(const UString& str, const UString& prefix);
-  static bool endswith(const UString& str, const UString& suffix);
+  static bool startswith(UStringView str, UStringView prefix);
+  static bool endswith(UStringView str, UStringView suffix);
 
-  static UString merge_wblanks(const UString& w1, const UString& w2);
+  static UString merge_wblanks(UStringView w1, UStringView w2);
 };
 
 #endif // __LT_STRING_UTILS_H__

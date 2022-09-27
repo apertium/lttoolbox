@@ -32,37 +32,31 @@ XMLParseUtil::open_or_exit(const char* fname)
 }
 
 UString
-XMLParseUtil::attrib(xmlTextReaderPtr reader, UString const &name)
-{
-  return attrib(reader, name, ""_u);
-}
-
-UString
-XMLParseUtil::attrib(xmlTextReaderPtr reader, UString const& name, const UString& fallback)
+XMLParseUtil::attrib(xmlTextReaderPtr reader, UStringView name, UStringView fallback)
 {
   std::string temp;
   temp.reserve(name.size());
   utf8::utf16to8(name.begin(), name.end(), std::back_inserter(temp));
-  const xmlChar *attrname = reinterpret_cast<const xmlChar*>(temp.c_str());
-  xmlChar *myattr = xmlTextReaderGetAttribute(reader, attrname);
+  auto attrname = reinterpret_cast<const xmlChar*>(temp.c_str());
+  auto myattr = xmlTextReaderGetAttribute(reader, attrname);
   if(myattr == NULL) {
     xmlFree(myattr);
-    return fallback;
+    return US(fallback);
   } else {
-    UString result = to_ustring(reinterpret_cast<char*>(myattr));
+    auto result = to_ustring(reinterpret_cast<char*>(myattr));
     xmlFree(myattr);
     return result;
   }
 }
 
 std::string
-XMLParseUtil::attrib_str(xmlTextReaderPtr reader, const UString& name)
+XMLParseUtil::attrib_str(xmlTextReaderPtr reader, UStringView name)
 {
   std::string temp;
   temp.reserve(name.size());
   utf8::utf16to8(name.begin(), name.end(), std::back_inserter(temp));
-  const xmlChar *attrname = reinterpret_cast<const xmlChar*>(temp.c_str());
-  xmlChar *myattr = xmlTextReaderGetAttribute(reader, attrname);
+  auto attrname = reinterpret_cast<const xmlChar*>(temp.c_str());
+  auto myattr = xmlTextReaderGetAttribute(reader, attrname);
   if(myattr == NULL) {
     xmlFree(myattr);
     return "";

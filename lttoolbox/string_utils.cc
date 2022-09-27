@@ -6,8 +6,8 @@
 #include <iostream>
 #include <limits>
 
-UString
-StringUtils::trim(const UString& str)
+UStringView
+StringUtils::trim(UStringView str)
 {
   if (str.empty()) {
     return str;
@@ -17,17 +17,17 @@ StringUtils::trim(const UString& str)
   size_t i = 0;
   UChar32 c;
   while (begin < end) {
-    U16_GET(str.c_str(), begin, i, end, c);
+    U16_GET(str.data(), begin, i, end, c);
     if (!u_isspace(c)) {
       begin = i;
       break;
     } else {
-      U16_FWD_1(str.c_str(), i, end);
+      U16_FWD_1(str.data(), i, end);
     }
   }
   i = str.size();
-  U16_BACK_1(str.c_str(), 0, i);
-  U16_GET(str.c_str(), 0, i, end, c);
+  U16_BACK_1(str.data(), 0, i);
+  U16_GET(str.data(), 0, i, end, c);
   if (!u_isspace(c)) {
     if (begin == 0) {
       return str;
@@ -37,8 +37,8 @@ StringUtils::trim(const UString& str)
   }
   while (end > begin) {
     end = i;
-    U16_BACK_1(str.c_str(), 0, i);
-    U16_GET(str.c_str(), 0, i, str.size(), c);
+    U16_BACK_1(str.data(), 0, i);
+    U16_GET(str.data(), 0, i, str.size(), c);
     if (!u_isspace(c)) {
       break;
     }
@@ -47,20 +47,20 @@ StringUtils::trim(const UString& str)
 }
 
 std::vector<UString>
-StringUtils::split(const UString& str, const UString& delim)
+StringUtils::split(UStringView str, UStringView delim)
 {
   size_t pos = 0;
   size_t new_pos;
   std::vector<UString> result;
   while (pos < str.size()) {
     new_pos = str.find(delim, pos);
-    if (new_pos == UString::npos) {
+    if (new_pos == UStringView::npos) {
       new_pos = str.size();
     }
     if (new_pos > pos) {
       // if we have a non-empty substring between this delimiter
       // and the last one
-      result.push_back(str.substr(pos, new_pos-pos));
+      result.push_back(US(str.substr(pos, new_pos-pos)));
     }
     pos = new_pos + delim.size();
   }
@@ -68,7 +68,7 @@ StringUtils::split(const UString& str, const UString& delim)
 }
 
 UString
-StringUtils::join(const std::vector<UString>& vec, const UString& delim)
+StringUtils::join(const std::vector<UString>& vec, UStringView delim)
 {
   UString s;
   for (auto& piece : vec) {
@@ -81,11 +81,11 @@ StringUtils::join(const std::vector<UString>& vec, const UString& delim)
 }
 
 UString
-StringUtils::substitute(const UString& str, const UString& olds, const UString& news)
+StringUtils::substitute(UStringView str, UStringView olds, UStringView news)
 {
-  UString s = str;
+  UString s{str};
   size_t p = s.find(olds, 0);
-  while (p != UString::npos) {
+  while (p != UStringView::npos) {
     s.replace(p, olds.length(), news);
     p += news.length();
     p = s.find(olds, p);
@@ -148,11 +148,11 @@ StringUtils::stod(const UString& str)
 }
 
 UString
-StringUtils::tolower(const UString& str)
+StringUtils::tolower(UStringView str)
 {
   UChar buf[str.size()*2];
   UErrorCode err = U_ZERO_ERROR;
-  u_strToLower(buf, str.size()*2, str.c_str(), str.size(), NULL, &err);
+  u_strToLower(buf, str.size()*2, str.data(), str.size(), NULL, &err);
   if (U_FAILURE(err)) {
     std::cerr << "Error: unable to lowercase string '" << str << "'.\n";
     std::cerr << "error code: " << u_errorName(err) << std::endl;
@@ -162,11 +162,11 @@ StringUtils::tolower(const UString& str)
 }
 
 UString
-StringUtils::toupper(const UString& str)
+StringUtils::toupper(UStringView str)
 {
   UChar buf[str.size()*2];
   UErrorCode err = U_ZERO_ERROR;
-  u_strToUpper(buf, str.size()*2, str.c_str(), str.size(), NULL, &err);
+  u_strToUpper(buf, str.size()*2, str.data(), str.size(), NULL, &err);
   if (U_FAILURE(err)) {
     std::cerr << "Error: unable to uppercase string '" << str << "'.\n";
     std::cerr << "error code: " << u_errorName(err) << std::endl;
@@ -176,11 +176,11 @@ StringUtils::toupper(const UString& str)
 }
 
 UString
-StringUtils::totitle(const UString& str)
+StringUtils::totitle(UStringView str)
 {
   UChar buf[str.size()*2];
   UErrorCode err = U_ZERO_ERROR;
-  u_strToTitle(buf, str.size()*2, str.c_str(), str.size(), NULL, NULL, &err);
+  u_strToTitle(buf, str.size()*2, str.data(), str.size(), NULL, NULL, &err);
   if (U_FAILURE(err)) {
     std::cerr << "Error: unable to titlecase string '" << str << "'.\n";
     std::cerr << "error code: " << u_errorName(err) << std::endl;
@@ -190,7 +190,7 @@ StringUtils::totitle(const UString& str)
 }
 
 UString
-StringUtils::getcase(const UString& str)
+StringUtils::getcase(UStringView str)
 {
   UString ret = "aa"_u;
   if (str.empty()) {
@@ -199,12 +199,12 @@ StringUtils::getcase(const UString& str)
   size_t i = 0;
   size_t l = str.size();
   UChar32 c;
-  U16_NEXT(str.c_str(), i, l, c);
+  U16_NEXT(str.data(), i, l, c);
   if (u_isupper(c)) {
     ret[0] = 'A';
     if (i < l) {
-      U16_BACK_1(str.c_str(), i, l); // decrements l
-      U16_GET(str.c_str(), 0, l, str.size(), c);
+      U16_BACK_1(str.data(), i, l); // decrements l
+      U16_GET(str.data(), 0, l, str.size(), c);
       if (u_isupper(c)) {
         ret[1] = 'A';
       }
@@ -214,21 +214,21 @@ StringUtils::getcase(const UString& str)
 }
 
 UString
-StringUtils::copycase(const UString& source, const UString& target)
+StringUtils::copycase(UStringView source, UStringView target)
 {
   if (source.empty() || target.empty()) {
-    return target;
+    return US(target);
   }
   size_t i = 0;
   size_t l = source.size();
   UChar32 c;
-  U16_NEXT(source.c_str(), i, l, c);
+  U16_NEXT(source.data(), i, l, c);
   bool firstupper = u_isupper(c);
   bool uppercase = false;
   if (firstupper) {
     if (i != l) {
-      U16_BACK_1(source.c_str(), i, l); // decrements l
-      U16_GET(source.c_str(), 0, l, source.size(), c);
+      U16_BACK_1(source.data(), i, l); // decrements l
+      U16_GET(source.data(), 0, l, source.size(), c);
       uppercase = u_isupper(c);
     }
   }
@@ -244,10 +244,10 @@ StringUtils::copycase(const UString& source, const UString& target)
 }
 
 bool
-StringUtils::caseequal(const UString& a, const UString& b)
+StringUtils::caseequal(UStringView a, UStringView b)
 {
   UErrorCode err = U_ZERO_ERROR;
-  int cmp = u_strCaseCompare(a.c_str(), -1, b.c_str(), -1, 0, &err);
+  int cmp = u_strCaseCompare(a.data(), a.size(), b.data(), b.size(), 0, &err);
   if (U_FAILURE(err)) {
     std::cerr << "Error: caseless string comparison failed on '";
     std::cerr << a << "' and '" << b << "'" << std::endl;
@@ -258,25 +258,25 @@ StringUtils::caseequal(const UString& a, const UString& b)
 }
 
 bool
-StringUtils::startswith(const UString& str, const UString& prefix)
+StringUtils::startswith(UStringView str, UStringView prefix)
 {
   return (prefix.size() <= str.size() &&
           str.substr(0, prefix.size()) == prefix);
 }
 
 bool
-StringUtils::endswith(const UString& str, const UString& suffix)
+StringUtils::endswith(UStringView str, UStringView suffix)
 {
   return (suffix.size() <= str.size() &&
           str.substr(str.size()-suffix.size()) == suffix);
 }
 
 UString
-StringUtils::merge_wblanks(const UString& w1, const UString& w2)
+StringUtils::merge_wblanks(UStringView w1, UStringView w2)
 {
-  if (w1.empty()) return w2;
-  if (w2.empty()) return w1;
-  UString ret = w1.substr(0, w1.size()-2);
+  if (w1.empty()) return US(w2);
+  if (w2.empty()) return US(w1);
+  UString ret = US(w1.substr(0, w1.size()-2));
   ret += "; "_u;
   ret += w2.substr(2);
   return ret;

@@ -25,22 +25,6 @@
 #include <libxml/encoding.h>
 
 
-UString const TMXCompiler::TMX_COMPILER_TMX_ELEM     = "tmx"_u;
-UString const TMXCompiler::TMX_COMPILER_HEADER_ELEM  = "header"_u;
-UString const TMXCompiler::TMX_COMPILER_BODY_ELEM    = "body"_u;
-UString const TMXCompiler::TMX_COMPILER_TU_ELEM      = "tu"_u;
-UString const TMXCompiler::TMX_COMPILER_TUV_ELEM     = "tuv"_u;
-UString const TMXCompiler::TMX_COMPILER_HI_ELEM      = "hi"_u;
-UString const TMXCompiler::TMX_COMPILER_PH_ELEM      = "ph"_u;
-UString const TMXCompiler::TMX_COMPILER_XMLLANG_ATTR = "xml:lang"_u;
-UString const TMXCompiler::TMX_COMPILER_LANG_ATTR    = "lang"_u;
-UString const TMXCompiler::TMX_COMPILER_SEG_ELEM     = "seg"_u;
-UString const TMXCompiler::TMX_COMPILER_PROP_ELEM    = "prop"_u;
-UString const TMXCompiler::TMX_COMPILER_TEXT_NODE    = "#text"_u;
-UString const TMXCompiler::TMX_COMPILER_COMMENT_NODE = "#comment"_u;
-UString const TMXCompiler::TMX_COMPILER_NUMBER_TAG   = "<n>"_u;
-UString const TMXCompiler::TMX_COMPILER_BLANK_TAG    = "<b>"_u;
-
 TMXCompiler::TMXCompiler() :
 reader(0),
 default_weight(0.0000)
@@ -57,7 +41,7 @@ TMXCompiler::~TMXCompiler()
 }
 
 void
-TMXCompiler::parse(std::string const &file, UString const &lo, UString const &lm)
+TMXCompiler::parse(std::string const &file, UStringView lo, UStringView lm)
 {
   origin_language = lo;
   meta_language = lm;
@@ -88,7 +72,7 @@ TMXCompiler::parse(std::string const &file, UString const &lo, UString const &lm
 }
 
 void
-TMXCompiler::requireEmptyError(UString const &name)
+TMXCompiler::requireEmptyError(UStringView name)
 {
   if(!xmlTextReaderIsEmptyElement(reader))
   {
@@ -133,7 +117,7 @@ TMXCompiler::skipBlanks(UString &name)
 }
 
 void
-TMXCompiler::skip(UString &name, UString const &elem)
+TMXCompiler::skip(UString &name, UStringView elem)
 {
   xmlTextReaderRead(reader);
   name = XMLParseUtil::readName(reader);
@@ -162,14 +146,13 @@ TMXCompiler::skip(UString &name, UString const &elem)
 }
 
 UString
-TMXCompiler::attrib(UString const &name)
+TMXCompiler::attrib(UStringView name)
 {
   return XMLParseUtil::attrib(reader, name);
 }
 
 void
-TMXCompiler::requireAttribute(UString const &value, UString const &attrname,
-                           UString const &elemname)
+TMXCompiler::requireAttribute(UStringView value, UStringView attrname, UStringView elemname)
 {
   if(value.empty())
   {
@@ -599,9 +582,9 @@ TMXCompiler::numberLength(std::vector<int> &v, unsigned int const position) cons
 }
 
 bool
-TMXCompiler::vectorcmp(std::vector<int> const &orig, unsigned int const begin_orig,
-                       std::vector<int> const &meta, unsigned int const begin_meta,
-                       unsigned const int length) const
+TMXCompiler::vectorcmp(std::vector<int> const &orig, unsigned int begin_orig,
+                       std::vector<int> const &meta, unsigned int begin_meta,
+                       unsigned int length) const
 {
   for(unsigned int i = begin_orig, j = begin_meta, count = 0; count != length;
       i++, j++, count++)
@@ -616,13 +599,13 @@ TMXCompiler::vectorcmp(std::vector<int> const &orig, unsigned int const begin_or
 }
 
 void
-TMXCompiler::setOriginLanguageCode(UString const &code)
+TMXCompiler::setOriginLanguageCode(UStringView code)
 {
   // nada
 }
 
 void
-TMXCompiler::setMetaLanguageCode(UString const &code)
+TMXCompiler::setMetaLanguageCode(UStringView code)
 {
   // nada
 }

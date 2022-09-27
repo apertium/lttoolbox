@@ -39,7 +39,7 @@ void expand(Transducer& inter, int state, const std::set<int>& past_states,
       if (out != nullptr) {
         u_fprintf(out, "%S:%S\n", r.c_str(), l.c_str());
       } else {
-        outset.insert(std::make_pair(r, l));
+        outset.insert({r, l});
       }
     }
   }
@@ -55,13 +55,13 @@ void expand(Transducer& inter, int state, const std::set<int>& past_states,
   }
 }
 
-void process(const UString& pattern, std::map<UString, Transducer>& trans,
+void process(UStringView pattern, std::map<UString, Transducer>& trans,
              Alphabet& alpha,
              const std::set<UChar32>& letters, const std::set<int32_t>& tags,
              UFILE* output, bool sort)
 {
   int32_t any_char = static_cast<int32_t>('*');
-  int32_t any_tag = alpha("<*>"_u);
+  int32_t any_tag = alpha(u"<*>");
   std::vector<int32_t> pat = alpha.tokenize(pattern);
   Transducer other;
   int state = other.getInitial();
@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
   readTransducerSet(fst, letters, alpha, trans);
   fclose(fst);
 
-  alpha.includeSymbol("<*>"_u);
+  alpha.includeSymbol(u"<*>");
   std::set<int32_t> tags;
   for (int32_t i = 1; i <= alpha.size(); i++) {
     if (!skip_tags.empty()) {

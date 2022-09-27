@@ -21,20 +21,22 @@
 #include <unicode/ustdio.h>
 #include <unicode/uchar.h>
 #include <string>
+#include <string_view>
 #include <utf8.h>
 #include <vector>
 #include <cstdint>
 #include <iomanip>
 
 typedef std::basic_string<UChar> UString;
+typedef std::basic_string_view<UChar> UStringView;
 
-void write(const UString& str, UFILE* output);
+void write(UStringView str, UFILE* output);
 
 UString to_ustring(const char* str);
 UString to_ustring(const uint8_t* str);
 
 // append UTF-16 string to UTF-32 vector of symbols
-void ustring_to_vec32(const UString& str, std::vector<int32_t>& vec);
+void ustring_to_vec32(UStringView str, std::vector<int32_t>& vec);
 
 inline std::ostream&
 operator<<(std::ostream& ostr, char16_t c)
@@ -44,7 +46,7 @@ operator<<(std::ostream& ostr, char16_t c)
 }
 
 inline std::ostream&
-operator<<(std::ostream& ostr, const UString& str)
+operator<<(std::ostream& ostr, UStringView str)
 {
   std::string res;
   utf8::utf16to8(str.begin(), str.end(), std::back_inserter(res));
@@ -66,6 +68,14 @@ inline UString operator "" _u(const char16_t* str, std::size_t len) {
 		us[i] = str[i];
 	}
 	return us;
+}
+
+inline UStringView operator "" _uv(const char16_t* str, std::size_t len) {
+	return UStringView(str, len);
+}
+
+inline UString US(UStringView usv) {
+	return UString(usv);
 }
 
 inline void operator+=(UString& str, UChar32 c)

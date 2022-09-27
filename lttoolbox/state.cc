@@ -15,6 +15,7 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 #include <lttoolbox/state.h>
+#include <lttoolbox/string_utils.h>
 
 #include <cstring>
 #include <climits>
@@ -108,7 +109,7 @@ State::apply_into(std::vector<TNodeState>* new_state, int const input, int index
       *new_v = *(state[index].sequence);
       if(it->first != 0)
       {
-        new_v->push_back(std::make_pair(it->second.out_tag[j], it->second.out_weight[j]));
+        new_v->push_back({it->second.out_tag[j], it->second.out_weight[j]});
       }
       new_state->push_back(TNodeState(it->second.dest[j], new_v, state[index].dirty||dirty));
     }
@@ -132,11 +133,11 @@ State::apply_into_override(std::vector<TNodeState>* new_state, int const input, 
       {
         if(it->second.out_tag[j] == old_sym)
         {
-          new_v->push_back(std::make_pair(new_sym, it->second.out_weight[j]));
+          new_v->push_back({new_sym, it->second.out_weight[j]});
         }
         else
         {
-          new_v->push_back(std::make_pair(it->second.out_tag[j], it->second.out_weight[j]));
+          new_v->push_back({it->second.out_tag[j], it->second.out_weight[j]});
         }
       }
       new_state->push_back(TNodeState(it->second.dest[j], new_v, state[index].dirty||dirty));
@@ -274,7 +275,7 @@ State::epsilonClosure()
         *tmp = *(state[i].sequence);
         if(it2->second.out_tag[j] != 0)
         {
-          tmp->push_back(std::make_pair(it2->second.out_tag[j], it2->second.out_weight[j]));
+          tmp->push_back({it2->second.out_tag[j], it2->second.out_weight[j]});
         }
         state.push_back(TNodeState(it2->second.dest[j], tmp, state[i].dirty));
       }
@@ -458,7 +459,7 @@ State::NFinals(std::vector<std::pair<UString, double>> lf, int maxAnalyses, int 
     double last_weight = 0.0000;
     if(maxAnalyses > 0 && maxWeightClasses > 0)
     {
-      result.push_back(make_pair(it->first, it->second));
+      result.push_back({it->first, it->second});
       maxAnalyses--;
       if(last_weight!=it->second)
       {
@@ -531,7 +532,7 @@ State::filterFinals(std::map<Node *, double> const &finals,
 
       // Add the weight of the final state
       cost += (*(finals.find(state[i].where))).second;
-      response.push_back(make_pair(result, cost));
+      response.push_back({result, cost});
     }
   }
 
@@ -586,7 +587,7 @@ State::filterFinalsLRX(std::map<Node *, double> const &finals,
         }
         UString sym;
         alphabet.getSymbol(sym, ((*(state[i].sequence))[j]).first, uppercase);
-        if(sym == "<$>"_u)
+        if(sym == u"<$>"_uv)
         {
           if(!current_word.empty())
           {
@@ -600,7 +601,7 @@ State::filterFinalsLRX(std::map<Node *, double> const &finals,
         }
       }
       rule_id = current_word;
-      results.insert(make_pair(rule_id, current_result));
+      results.insert({rule_id, current_result});
     }
   }
 
@@ -705,7 +706,7 @@ State::filterFinalsTM(std::map<Node *, double> const &finals,
   {
     if(i != limit -1)
     {
-      if(fragment[i].size() >=2 && fragment[i].substr(fragment[i].size()-2) == "(#"_u)
+      if(fragment[i].size() >=2 && StringUtils::endswith(fragment[i], u"(#"))
       {
         UString whitespace = " "_u;
         if(blankqueue.size() != 0)
@@ -909,7 +910,7 @@ State::restartFinals(const std::map<Node *, double> &finals, int requiredSymbol,
               tnvec->push_back(state_i.sequence->at(k));
             }
             TNodeState tn(initst.where, tnvec, state_i.dirty);
-            tn.sequence->push_back(std::make_pair(separationSymbol, 0.0000));
+            tn.sequence->push_back({separationSymbol, 0.0});
             state.push_back(tn);
           }
         }

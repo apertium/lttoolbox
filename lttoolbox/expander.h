@@ -107,7 +107,7 @@ private:
    * @param name the name of the attribute
    * @return the value of the attribute
    */
-  UString attrib(UString const &name);
+  UString attrib(UStringView name);
 
   /**
    * Parse the &lt;p&gt; element
@@ -139,7 +139,7 @@ private:
    * @param name the name of the node
    * @param elem the name of the expected node
    */
-  void skip(UString &name, UString const &elem);
+  void skip(UString &name, UStringView elem);
 
   /**
    * Skip all blank #text nodes before "name"
@@ -148,13 +148,13 @@ private:
   void skipBlanks(UString &name);
 
 
-  void readString(UString &result, UString const &name);
+  void readString(UString &result, UStringView name);
 
   /**
    * Force an element to be empty, and check for it
    * @param name the element
    */
-  void requireEmptyError(UString const &name);
+  void requireEmptyError(UStringView name);
 
   /**
    * Force an attribute to be specified, amd check for it
@@ -162,8 +162,7 @@ private:
    * @param attrname the name of the attribute
    * @param elemname the parent of the attribute
    */
-  void requireAttribute(UString const &value, UString const &attrname,
-                        UString const &elemname);
+  void requireAttribute(UStringView value, UStringView attrname, UStringView elemname);
 
   /**
    * True if all the elements in the current node are blanks
@@ -186,8 +185,7 @@ private:
    *               this method, the result of concatenations.
    * @param endings the endings to be appended.
    */
-  static void append(EntList &result,
-                     UString const &endings);
+  static void append(EntList &result, UStringView endings);
 
   /**
    * Append a list of endings to a list of current transductions.
@@ -218,25 +216,25 @@ public:
    * Set the alt value to use in compilation
    * @param a the value
    */
-   void setAltValue(UString const &a);
+   void setAltValue(UStringView a);
 
   /**
    * Set the variant value to use in expansion
    * @param v the value
    */
-   void setVariantValue(UString const &v);
+   void setVariantValue(UStringView v);
 
   /**
    * Set the variant_left value to use in expansion
    * @param v the value
    */
-   void setVariantLeftValue(UString const &v);
+   void setVariantLeftValue(UStringView v);
 
   /**
    * Set the variant_right value to use in expansion
    * @param v the value
    */
-   void setVariantRightValue(UString const &v);
+   void setVariantRightValue(UStringView v);
 
   /**
    * Set if we are going to keep morpheme boundaries

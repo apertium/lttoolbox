@@ -27,7 +27,7 @@ UFILE* openOutTextFile(const std::string& fname);
 FILE* openOutBinFile(const std::string& fname);
 FILE* openInBinFile(const std::string& fname);
 
-void writeTransducerSet(FILE* output, const UString& letters,
+void writeTransducerSet(FILE* output, UStringView letters,
                         Alphabet& alpha,
                         std::map<UString, Transducer>& trans);
 void writeTransducerSet(FILE* output, const std::set<UChar32>& letters,

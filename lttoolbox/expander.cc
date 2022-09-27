@@ -69,7 +69,7 @@ Expander::procParDef()
 }
 
 void
-Expander::requireEmptyError(UString const &name)
+Expander::requireEmptyError(UStringView name)
 {
   if(!xmlTextReaderIsEmptyElement(reader))
   {
@@ -86,7 +86,7 @@ Expander::allBlanks()
 }
 
 void
-Expander::readString(UString &result, UString const &name)
+Expander::readString(UString &result, UStringView name)
 {
   if(name == Compiler::COMPILER_TEXT_NODE)
   {
@@ -173,7 +173,7 @@ Expander::skipBlanks(UString &name)
 }
 
 void
-Expander::skip(UString &name, UString const &elem)
+Expander::skip(UString &name, UStringView elem)
 {
   xmlTextReaderRead(reader);
   name = XMLParseUtil::readName(reader);
@@ -297,7 +297,7 @@ Expander::procTransduction()
 }
 
 UString
-Expander::attrib(UString const &name)
+Expander::attrib(UStringView name)
 {
   return XMLParseUtil::attrib(reader, name);
 }
@@ -311,8 +311,7 @@ Expander::procPar()
 }
 
 void
-Expander::requireAttribute(UString const &value, UString const &attrname,
-                           UString const &elemname)
+Expander::requireAttribute(UStringView value, UStringView attrname, UStringView elemname)
 {
   if(value.empty())
   {
@@ -614,7 +613,7 @@ Expander::append(EntList &result,
 }
 
 void
-Expander::append(EntList &result, UString const &endings)
+Expander::append(EntList &result, UStringView endings)
 {
   for(auto& it : result)
   {
@@ -635,25 +634,25 @@ Expander::append(EntList &result,
 }
 
 void
-Expander::setAltValue(UString const &a)
+Expander::setAltValue(UStringView a)
 {
   alt = a;
 }
 
 void
-Expander::setVariantValue(UString const &v)
+Expander::setVariantValue(UStringView v)
 {
   variant = v;
 }
 
 void
-Expander::setVariantLeftValue(UString const &v)
+Expander::setVariantLeftValue(UStringView v)
 {
   variant_left = v;
 }
 
 void
-Expander::setVariantRightValue(UString const &v)
+Expander::setVariantRightValue(UStringView v)
 {
   variant_right = v;
 }

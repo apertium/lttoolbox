@@ -186,9 +186,9 @@ private:
   // if a character should be in the alphabet, add it
   void update_alphabet(UChar32 c);
   // convert a string to a symbol code, splitting non-tag multichars
-  void symbol_code(const UString& symbol, std::vector<int32_t>& split);
+  void symbol_code(UStringView symbol, std::vector<int32_t>& split);
   void add_transition(int from, int to,
-                      const UString& upper, const UString& lower,
+                      UStringView upper, UStringView lower,
                       double weight);
 };
 

@@ -1,13 +1,11 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 project(lttoolbox
-	VERSION 3.5.2
+	VERSION 3.7.0
 	LANGUAGES CXX C
 	)
 set(VERSION ${PROJECT_VERSION})
-set(VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
-set(VERSION_API "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
-set(SOVERSION 1.0.0)
+set(VERSION_ABI 3)
 set(PACKAGE_BUGREPORT "apertium-stuff@lists.sourceforge.net")
 
 add_definitions("-DPACKAGE_VERSION=\"${PROJECT_VERSION}\"")
@@ -68,7 +66,7 @@ else()
 	endforeach()
 
 	# Require latest possible C++ standard
-	foreach(flag "-std=c++20" "-std=c++2a" "-std=c++17" "-std=c++1z" "-std=c++14" "-std=c++1y")
+	foreach(flag "-std=c++23" "-std=c++2b"  "-std=c++20" "-std=c++2a" "-std=c++17")
 		string(REGEX REPLACE "[^a-z0-9]" "-" _flag ${flag})
 		CHECK_CXX_COMPILER_FLAG(${flag} COMPILER_SUPPORTS_${_flag})
 		if(COMPILER_SUPPORTS_${_flag})
@@ -78,7 +76,7 @@ else()
 		endif()
 	endforeach()
 	if(NOT _ENABLED_CXX)
-		message(FATAL_ERROR "Could not enable at least C++14 (C++1y) - upgrade your compiler")
+		message(FATAL_ERROR "Could not enable at least C++17 - upgrade your compiler")
 	endif()
 
 	# Generate pkg-config file
@@ -106,6 +104,10 @@ else()
 	add_definitions(-D_POSIX_C_SOURCE=200112 -D_GNU_SOURCE)
 endif()
 
+if(NOT APPLE)
+	find_package(Threads REQUIRED)
+endif()
+
 # Unlocked I/O functions
 include(CheckSymbolExists)
 set(CMAKE_REQUIRED_DEFINITIONS -D_POSIX_C_SOURCE=200112 -D_GNU_SOURCE)
@@ -127,6 +129,9 @@ if(VCPKG_TOOLCHAIN)
 else()
 	set(GETOPT_LIB)
 endif()
+
+# ICU
+find_package(ICU COMPONENTS i18n io uc REQUIRED)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 

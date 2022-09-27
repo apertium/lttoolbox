@@ -104,7 +104,7 @@ TransExe::read(FILE *input, Alphabet const &alphabet)
     {
       base_weight = Compression::long_multibyte_read(input);
     }
-    myfinals.insert(std::make_pair(base, base_weight));
+    myfinals.insert({base, base_weight});
   }
 
 
@@ -117,7 +117,7 @@ TransExe::read(FILE *input, Alphabet const &alphabet)
   for(auto it = myfinals.begin(), limit = myfinals.end();
       it != limit; it++)
   {
-    new_t.finals.insert(std::make_pair(&new_t.node_list[it->first], it->second));
+    new_t.finals.insert({&new_t.node_list[it->first], it->second});
   }
 
   while(number_of_states > 0)
@@ -158,7 +158,7 @@ TransExe::unifyFinals()
   }
 
   finals.clear();
-  finals.insert(std::make_pair(newfinal, default_weight));
+  finals.insert({newfinal, default_weight});
 }
 
 Node *

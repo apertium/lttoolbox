@@ -180,7 +180,7 @@ public:
    * @param str the string to write.
    * @param output the output stream.
    */
-  static void string_write(UString const &str, FILE *output);
+  static void string_write(UStringView str, FILE *output);
 
   /**
    * This method reads a plain string from the input stream.

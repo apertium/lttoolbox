@@ -38,7 +38,7 @@ private:
    * Symbol-identifier relationship. Only contains <tags>.
    * @see slexicinv
    */
-  std::map<UString, int32_t> slexic;
+  std::map<UString, int32_t, std::less<>> slexic;
 
   /**
    * Identifier-symbol relationship. Only contains <tags>.
@@ -89,7 +89,7 @@ public:
   /**
    * Include a symbol into the alphabet.
    */
-  void includeSymbol(UString const &s);
+  void includeSymbol(UStringView s);
 
   /**
    * Get an unique code for every symbol pair.  This flavour is for
@@ -99,7 +99,7 @@ public:
    * @return code for (c1, c2).
    */
   int32_t operator()(int32_t const c1, int32_t const c2);
-  int32_t operator()(UString const &s) const;
+  int32_t operator()(UStringView s) const;
 
   /**
    * Gets the individual symbol identifier. Assumes it already exists!
@@ -107,14 +107,14 @@ public:
    * @param s symbol to be identified.
    * @return symbol identifier.
    */
-  int32_t operator()(UString const &s);
+  int32_t operator()(UStringView s);
 
   /**
    * Check wether the symbol is defined in the alphabet.
    * @param s symbol
    * @return true if defined
    */
-  bool isSymbolDefined(UString const &s) const;
+  bool isSymbolDefined(UStringView s) const;
 
   /**
    * Returns the size of the alphabet (number of symbols).
@@ -142,7 +142,7 @@ public:
    * @param symbol symbol code.
    * @param output output stream.
    */
-  void writeSymbol(int32_t const symbol, UFILE *output) const;
+  void writeSymbol(int32_t symbol, UFILE *output) const;
 
   /**
    * Concat a symbol in the string that is passed by reference.
@@ -150,7 +150,7 @@ public:
    * @param symbol code of the symbol
    * @param uppercase true if we want an uppercase symbol
    */
-  void getSymbol(UString &result, int32_t const symbol,
+  void getSymbol(UString &result, int32_t symbol,
 		 bool uppercase = false) const;
 
   /**
@@ -158,14 +158,14 @@ public:
    * @param symbol the code of the symbol
    * @return true if the symbol is a tag
    */
-  bool isTag(int32_t const symbol) const;
+  bool isTag(int32_t symbol) const;
 
   /**
    * Sets an already existing symbol to represent a new value.
    * @param symbol the code of the symbol to set
    * @param newSymbolString the new string for this symbol
    */
-  void setSymbol(const int32_t symbol, const UString& newSymbolString);
+  void setSymbol(int32_t symbol, UStringView newSymbolString);
 
   /**
    * Note: both the symbol int and int-pair are specific to this alphabet instance.
@@ -173,7 +173,7 @@ public:
    * @param code a symbol
    * @return the pair which code represents in this alphabet
    */
-  std::pair<int32_t, int32_t> const & decode(int32_t const code) const;
+  std::pair<int32_t, int32_t> const & decode(int32_t code) const;
 
   /**
    * Get all symbols where the left-hand side of the symbol-pair is l.
@@ -197,9 +197,9 @@ public:
    */
   void createLoopbackSymbols(std::set<int32_t> &symbols, const Alphabet &basis, Side s = right, bool nonTagsToo = false);
 
-  std::vector<int32_t> tokenize(const UString& str) const;
+  std::vector<int32_t> tokenize(UStringView str) const;
 
-  bool sameSymbol(const int32_t tsym, const Alphabet& other, const int32_t osym,
+  bool sameSymbol(int32_t tsym, const Alphabet& other, int32_t osym,
                   bool allow_anys=false) const;
 };
 

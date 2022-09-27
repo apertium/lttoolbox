@@ -25,10 +25,10 @@
 using namespace icu;
 
 void
-write(const UString& str, UFILE* output)
+write(UStringView str, UFILE* output)
 {
   // u_fputs() inserts a newline
-  u_fprintf(output, "%S", str.c_str());
+  u_fprintf(output, "%.*S", str.size(), str.data());
 }
 
 UString
@@ -48,7 +48,7 @@ to_ustring(const uint8_t* s)
 }
 
 void
-ustring_to_vec32(const UString& str, std::vector<int32_t>& vec)
+ustring_to_vec32(UStringView str, std::vector<int32_t>& vec)
 {
   if (str.empty()) {
     return;

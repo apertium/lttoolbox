@@ -98,7 +98,7 @@ AttCompiler::update_alphabet(UChar32 c)
 }
 
 void
-AttCompiler::symbol_code(const UString& symbol, std::vector<int32_t>& split)
+AttCompiler::symbol_code(UStringView symbol, std::vector<int32_t>& split)
 {
   if (symbol.empty()) {
     split.push_back(0);
@@ -110,7 +110,7 @@ AttCompiler::symbol_code(const UString& symbol, std::vector<int32_t>& split)
     size_t end = symbol.size();
     UChar32 c;
     while (i < end) {
-      U16_NEXT(symbol.c_str(), i, end, c);
+      U16_NEXT(symbol.data(), i, end, c);
       update_alphabet(c);
       split.push_back(c);
     }
@@ -119,7 +119,7 @@ AttCompiler::symbol_code(const UString& symbol, std::vector<int32_t>& split)
 
 void
 AttCompiler::add_transition(int from, int to,
-                            const UString& upper, const UString& lower,
+                            UStringView upper, UStringView lower,
                             double weight)
 {
   AttNode* src = get_node(from);

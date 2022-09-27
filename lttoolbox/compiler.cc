@@ -24,57 +24,6 @@
 #include <iostream>
 #include <thread>
 
-UString const Compiler::COMPILER_DICTIONARY_ELEM    = "dictionary"_u;
-UString const Compiler::COMPILER_ALPHABET_ELEM      = "alphabet"_u;
-UString const Compiler::COMPILER_SDEFS_ELEM         = "sdefs"_u;
-UString const Compiler::COMPILER_SDEF_ELEM          = "sdef"_u;
-UString const Compiler::COMPILER_N_ATTR             = "n"_u;
-UString const Compiler::COMPILER_PARDEFS_ELEM       = "pardefs"_u;
-UString const Compiler::COMPILER_PARDEF_ELEM        = "pardef"_u;
-UString const Compiler::COMPILER_PAR_ELEM           = "par"_u;
-UString const Compiler::COMPILER_ENTRY_ELEM         = "e"_u;
-UString const Compiler::COMPILER_RESTRICTION_ATTR   = "r"_u;
-UString const Compiler::COMPILER_RESTRICTION_LR_VAL = "LR"_u;
-UString const Compiler::COMPILER_RESTRICTION_RL_VAL = "RL"_u;
-UString const Compiler::COMPILER_RESTRICTION_U_VAL  = "U"_u;
-UString const Compiler::COMPILER_PAIR_ELEM          = "p"_u;
-UString const Compiler::COMPILER_LEFT_ELEM          = "l"_u;
-UString const Compiler::COMPILER_RIGHT_ELEM         = "r"_u;
-UString const Compiler::COMPILER_S_ELEM             = "s"_u;
-UString const Compiler::COMPILER_M_ELEM             = "m"_u;
-UString const Compiler::COMPILER_REGEXP_ELEM        = "re"_u;
-UString const Compiler::COMPILER_SECTION_ELEM       = "section"_u;
-UString const Compiler::COMPILER_ID_ATTR            = "id"_u;
-UString const Compiler::COMPILER_TYPE_ATTR          = "type"_u;
-UString const Compiler::COMPILER_SEQUENTIAL_VAL     = "sequential"_u;
-UString const Compiler::COMPILER_SEPARABLE_VAL      = "separable"_u;
-UString const Compiler::COMPILER_IDENTITY_ELEM      = "i"_u;
-UString const Compiler::COMPILER_IDENTITYGROUP_ELEM = "ig"_u;
-UString const Compiler::COMPILER_JOIN_ELEM          = "j"_u;
-UString const Compiler::COMPILER_BLANK_ELEM         = "b"_u;
-UString const Compiler::COMPILER_POSTGENERATOR_ELEM = "a"_u;
-UString const Compiler::COMPILER_GROUP_ELEM         = "g"_u;
-UString const Compiler::COMPILER_LEMMA_ATTR         = "lm"_u;
-UString const Compiler::COMPILER_IGNORE_ATTR        = "i"_u;
-UString const Compiler::COMPILER_IGNORE_YES_VAL     = "yes"_u;
-UString const Compiler::COMPILER_ALT_ATTR           = "alt"_u;
-UString const Compiler::COMPILER_V_ATTR             = "v"_u;
-UString const Compiler::COMPILER_VL_ATTR            = "vl"_u;
-UString const Compiler::COMPILER_VR_ATTR            = "vr"_u;
-UString const Compiler::COMPILER_WEIGHT_ATTR        = "w"_u;
-UString const Compiler::COMPILER_TEXT_NODE          = "#text"_u;
-UString const Compiler::COMPILER_COMMENT_NODE       = "#comment"_u;
-UString const Compiler::COMPILER_ACX_ANALYSIS_ELEM  = "analysis-chars"_u;
-UString const Compiler::COMPILER_ACX_CHAR_ELEM      = "char"_u;
-UString const Compiler::COMPILER_ACX_EQUIV_CHAR_ELEM= "equiv-char"_u;
-UString const Compiler::COMPILER_ACX_VALUE_ATTR     = "value"_u;
-UString const Compiler::COMPILER_LSX_WB_ELEM        = "d"_u;
-UString const Compiler::COMPILER_LSX_CHAR_ELEM      = "w"_u;
-UString const Compiler::COMPILER_LSX_TAG_ELEM       = "t"_u;
-UString const Compiler::COMPILER_LSX_SPACE_ATTR     = "space"_u;
-UString const Compiler::COMPILER_LSX_SPACE_YES_VAL  = "yes"_u;
-UString const Compiler::COMPILER_LSX_SPACE_NO_VAL   = "no"_u;
-
 Compiler::Compiler()
 {
 }
@@ -84,7 +33,7 @@ Compiler::~Compiler()
 }
 
 void
-Compiler::parseACX(std::string const &file, UString const &dir)
+Compiler::parseACX(std::string const &file, UStringView dir)
 {
   if(dir == COMPILER_RESTRICTION_LR_VAL)
   {
@@ -93,7 +42,7 @@ Compiler::parseACX(std::string const &file, UString const &dir)
 }
 
 void
-Compiler::parse(std::string const &file, UString const &dir)
+Compiler::parse(std::string const &file, UStringView dir)
 {
   if (dir == COMPILER_RESTRICTION_U_VAL) {
     direction = COMPILER_RESTRICTION_LR_VAL;
@@ -123,7 +72,7 @@ Compiler::parse(std::string const &file, UString const &dir)
   // its own thread. This is the major bottleneck of lt-comp and sections
   // are completely independent transducers.
   std::vector<std::thread> minimisations;
-  for(std::pair<const UString, Transducer>& it : sections)
+  for(auto& it : sections)
   {
     if(jobs) {
       minimisations.push_back(
@@ -158,9 +107,9 @@ Compiler::parse(std::string const &file, UString const &dir)
 }
 
 bool
-Compiler::valid(UString const& dir) const
+Compiler::valid(UStringView dir) const
 {
-  const char* side = dir == COMPILER_RESTRICTION_RL_VAL ? "right" : "left";
+  const char* side = (dir == COMPILER_RESTRICTION_RL_VAL ? "right" : "left");
   const std::set<int> epsilonSymbols = alphabet.symbolsWhereLeftIs(0);
   const std::set<int> spaceSymbols = alphabet.symbolsWhereLeftIs(' ');
   for (auto &section : sections) {
@@ -349,7 +298,7 @@ Compiler::matchTransduction(std::vector<int> const &pi,
 
 
 void
-Compiler::requireEmptyError(UString const &name)
+Compiler::requireEmptyError(UStringView name)
 {
   if(!xmlTextReaderIsEmptyElement(reader))
   {
@@ -366,7 +315,7 @@ Compiler::allBlanks()
 }
 
 void
-Compiler::readString(std::vector<int> &result, UString const &name)
+Compiler::readString(std::vector<int> &result, UStringView name)
 {
   if(name == COMPILER_TEXT_NODE)
   {
@@ -466,13 +415,7 @@ Compiler::skipBlanks(UString &name)
 }
 
 void
-Compiler::skip(UString &name, UString const &elem)
-{
-  skip(name, elem, true);
-}
-
-void
-Compiler::skip(UString &name, UString const &elem, bool open)
+Compiler::skip(UString &name, UStringView elem, bool open)
 {
   xmlTextReaderRead(reader);
   name = XMLParseUtil::readName(reader);
@@ -603,7 +546,7 @@ Compiler::procTransduction(double const entry_weight)
 }
 
 UString
-Compiler::attrib(UString const &name)
+Compiler::attrib(UStringView name)
 {
   return XMLParseUtil::attrib(reader, name);
 }
@@ -732,8 +675,7 @@ Compiler::insertEntryTokens(std::vector<EntryToken> const &elements)
 
 
 void
-Compiler::requireAttribute(UString const &value, UString const &attrname,
-                           UString const &elemname)
+Compiler::requireAttribute(UStringView value, UStringView attrname, UStringView elemname)
 {
   if(value.empty())
   {
@@ -753,8 +695,8 @@ Compiler::procSection()
 
   if(type != XML_READER_TYPE_END_ELEMENT)
   {
-    UString const &id = attrib(COMPILER_ID_ATTR);
-    UString const &type = attrib(COMPILER_TYPE_ATTR);
+    const auto& id = attrib(COMPILER_ID_ATTR);
+    const auto& type = attrib(COMPILER_TYPE_ATTR);
     requireAttribute(id, COMPILER_ID_ATTR, COMPILER_SECTION_ELEM);
     requireAttribute(type, COMPILER_TYPE_ATTR, COMPILER_SECTION_ELEM);
 
@@ -769,12 +711,11 @@ Compiler::procSection()
 }
 
 bool
-Compiler::filterEntry(const UString& value, const UString& filter,
-                      bool keep_on_empty_filter)
+Compiler::filterEntry(UStringView value, UStringView filter, bool keep_on_empty_filter)
 {
   if (value.empty()) return true;
   else if (keep_on_empty_filter && filter.empty()) return true;
-  auto ops = StringUtils::split(value, " "_u);
+  auto ops = StringUtils::split(value, u" ");
   for (auto& it : ops) {
     if (it == filter) return true;
   }
@@ -782,12 +723,11 @@ Compiler::filterEntry(const UString& value, const UString& filter,
 }
 
 void
-Compiler::symbolFilters(const UString& value, const UString& prefix,
-                        std::vector<std::vector<int32_t>>& symbols)
+Compiler::symbolFilters(UStringView value, UStringView prefix, std::vector<std::vector<int32_t>>& symbols)
 {
   if (value.empty()) return;
   std::vector<int32_t> syms;
-  for (auto& it : StringUtils::split(value, " "_u)) {
+  for (auto& it : StringUtils::split(value, u" ")) {
     if (it.empty()) continue;
     UString tag;
     tag += '<';
@@ -804,24 +744,24 @@ Compiler::symbolFilters(const UString& value, const UString& prefix,
 void
 Compiler::procEntry()
 {
-  UString attribute = this->attrib(COMPILER_RESTRICTION_ATTR);
-  UString ignore    = this->attrib(COMPILER_IGNORE_ATTR);
-  UString altval    = this->attrib(COMPILER_ALT_ATTR);
-  UString varval    = this->attrib(COMPILER_V_ATTR);
-  UString varl      = this->attrib(COMPILER_VL_ATTR);
-  UString varr      = this->attrib(COMPILER_VR_ATTR);
-  UString wsweight  = this->attrib(COMPILER_WEIGHT_ATTR);
+  UString attribute = attrib(COMPILER_RESTRICTION_ATTR);
+  UString ignore    = attrib(COMPILER_IGNORE_ATTR);
+  UString altval    = attrib(COMPILER_ALT_ATTR);
+  UString varval    = attrib(COMPILER_V_ATTR);
+  UString varl      = attrib(COMPILER_VL_ATTR);
+  UString varr      = attrib(COMPILER_VR_ATTR);
+  UString wsweight  = attrib(COMPILER_WEIGHT_ATTR);
 
   std::vector<EntryToken> elements;
 
   // if entry is masked by a restriction of direction or an ignore mark
   if (unified_compilation && ignore != COMPILER_IGNORE_YES_VAL) {
     std::vector<std::vector<int32_t>> symbols;
-    symbolFilters(attribute, "r"_u, symbols);
-    symbolFilters(altval, "alt"_u, symbols);
-    symbolFilters(varval, "v"_u, symbols);
-    symbolFilters(varl, "vl"_u, symbols);
-    symbolFilters(varr, "vr"_u, symbols);
+    symbolFilters(attribute, u"r", symbols);
+    symbolFilters(altval, u"alt", symbols);
+    symbolFilters(varval, u"v", symbols);
+    symbolFilters(varl, u"vl", symbols);
+    symbolFilters(varr, u"vr", symbols);
     if (!symbols.empty()) {
       bool multi = false;
       for (auto& it : symbols) {
@@ -906,7 +846,7 @@ Compiler::procEntry()
     // This function actually returns the current line of the *parser*
     // which is probably several lines past the element we're currently
     // looking at.
-    UString c = this->attrib("c"_u);
+    UString c = attrib(u"c");
     if (!c.empty()) {
       ln += ' ';
       ln += c;
@@ -964,16 +904,17 @@ Compiler::procEntry()
 
       // detection of the use of undefined paradigms
 
-      UString const &p = elements.rbegin()->paradigmName();
+      const auto& p = elements.rbegin()->paradigmName();
 
-      if(paradigms.find(p) == paradigms.end())
+      auto it = paradigms.find(p);
+      if(it == paradigms.end())
       {
         std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
         std::cerr << "): Undefined paradigm '" << p << "'." << std::endl;
         exit(EXIT_FAILURE);
       }
       // discard entries with empty paradigms (by the directions, normally)
-      if(paradigms[p].isEmpty())
+      if(it->second.isEmpty())
       {
         while(name != COMPILER_ENTRY_ELEM || type != XML_READER_TYPE_END_ELEMENT)
         {
@@ -1095,25 +1036,25 @@ Compiler::write(FILE *output)
 }
 
 void
-Compiler::setAltValue(UString const &a)
+Compiler::setAltValue(UStringView a)
 {
   alt = a;
 }
 
 void
-Compiler::setVariantValue(UString const &v)
+Compiler::setVariantValue(UStringView v)
 {
   variant = v;
 }
 
 void
-Compiler::setVariantLeftValue(UString const &v)
+Compiler::setVariantLeftValue(UStringView v)
 {
   variant_left = v;
 }
 
 void
-Compiler::setVariantRightValue(UString const &v)
+Compiler::setVariantRightValue(UStringView v)
 {
   variant_right = v;
 }

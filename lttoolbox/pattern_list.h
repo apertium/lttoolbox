@@ -43,29 +43,27 @@ private:
 
   void copy(PatternList const &o);
   void destroy();
-  void insertOutOfSequence(UString const &lemma, UString const &tags,
-                           std::vector<int> &result);
-  void insertIntoSequence(int const id, UString const &lemma,
-                          UString const &tags);
+  void insertOutOfSequence(UStringView lemma, UStringView tags, std::vector<int> &result);
+  void insertIntoSequence(int id, UStringView lemma, UStringView tags);
 
-  static int tagCount(UString const &tags);
-  static UString tagAt(UString const &tags, int const index);
+  static int tagCount(UStringView tags);
+  static UStringView tagAt(UStringView tags, int index);
 
 public:
   /**
    * This symbol stands for any char
    */
-  static UString const ANY_CHAR;
+  static constexpr UStringView ANY_CHAR = u"<ANY_CHAR>";
 
   /**
    * This symbol stands for any tag
    */
-  static UString const ANY_TAG;
+  static constexpr UStringView ANY_TAG = u"<ANY_TAG>";
 
   /**
    * This symbol marks a word queue
    */
-  static UString const QUEUE;
+  static constexpr UStringView QUEUE = u"<QUEUE>";
 
   /**
    * Constructor
@@ -104,14 +102,14 @@ public:
    * @param lemma
    * @param tags
    */
-  void insert(int const id, UString const &lemma, UString const &tags);
+  void insert(int id, UStringView lemma, UStringView tags);
 
   /**
    * Insertion method
    * @param id
    * @param otherid
    */
-  void insert(int const id, int const otherid);
+  void insert(int id, int otherid);
 
   /**
    * Get the PatternStore

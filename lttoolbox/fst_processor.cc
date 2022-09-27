@@ -26,16 +26,6 @@
 #include <climits>
 
 
-UString const FSTProcessor::XML_TEXT_NODE           = "#text"_u;
-UString const FSTProcessor::XML_COMMENT_NODE        = "#comment"_u;
-UString const FSTProcessor::XML_IGNORED_CHARS_ELEM  = "ignored-chars"_u;
-UString const FSTProcessor::XML_RESTORE_CHAR_ELEM   = "restore-char"_u;
-UString const FSTProcessor::XML_RESTORE_CHARS_ELEM  = "restore-chars"_u;
-UString const FSTProcessor::XML_VALUE_ATTR          = "value"_u;
-UString const FSTProcessor::XML_CHAR_ELEM           = "char"_u;
-UString const FSTProcessor::WBLANK_FINAL            = "[[/]]"_u;
-
-
 FSTProcessor::FSTProcessor()
 {
   // escaped_chars chars
@@ -304,9 +294,9 @@ FSTProcessor::readTMAnalysis(InputFile& input)
             val = input.get();
           } while(u_isdigit(val));
           input.unget(val);
-          input_buffer.add(alphabet("<n>"_u));
+          input_buffer.add(alphabet(u"<n>"));
           numbers.push_back(ws);
-          return alphabet("<n>"_u);
+          return alphabet(u"<n>");
         }
         break;
 
@@ -654,22 +644,22 @@ void
 FSTProcessor::classifyFinals()
 {
   for(auto& it : transducers) {
-    if(StringUtils::endswith(it.first, "@inconditional"_u))
+    if(StringUtils::endswith(it.first, u"@inconditional"))
     {
       inconditional.insert(it.second.getFinals().begin(),
                            it.second.getFinals().end());
     }
-    else if(StringUtils::endswith(it.first, "@standard"_u))
+    else if(StringUtils::endswith(it.first, u"@standard"))
     {
       standard.insert(it.second.getFinals().begin(),
                       it.second.getFinals().end());
     }
-    else if(StringUtils::endswith(it.first, "@postblank"_u))
+    else if(StringUtils::endswith(it.first, u"@postblank"))
     {
       postblank.insert(it.second.getFinals().begin(),
                        it.second.getFinals().end());
     }
-    else if(StringUtils::endswith(it.first, "@preblank"_u))
+    else if(StringUtils::endswith(it.first, u"@preblank"))
     {
       preblank.insert(it.second.getFinals().begin(),
                       it.second.getFinals().end());
@@ -684,7 +674,7 @@ FSTProcessor::classifyFinals()
 }
 
 UString
-FSTProcessor::filterFinals(const State& state, const UString& casefrom)
+FSTProcessor::filterFinals(const State& state, UStringView casefrom)
 {
   bool firstupper = false, uppercase = false;
   if (!dictionaryCase) {
@@ -698,7 +688,7 @@ FSTProcessor::filterFinals(const State& state, const UString& casefrom)
 }
 
 void
-FSTProcessor::writeEscaped(UString const &str, UFILE *output)
+FSTProcessor::writeEscaped(UStringView str, UFILE *output)
 {
   for(unsigned int i = 0, limit = str.size(); i < limit; i++)
   {
@@ -711,7 +701,7 @@ FSTProcessor::writeEscaped(UString const &str, UFILE *output)
 }
 
 size_t
-FSTProcessor::writeEscapedPopBlanks(UString const &str, UFILE *output)
+FSTProcessor::writeEscapedPopBlanks(UStringView str, UFILE *output)
 {
   size_t postpop = 0;
   for (unsigned int i = 0, limit = str.size(); i < limit; i++)
@@ -732,7 +722,7 @@ FSTProcessor::writeEscapedPopBlanks(UString const &str, UFILE *output)
 }
 
 void
-FSTProcessor::writeEscapedWithTags(UString const &str, UFILE *output)
+FSTProcessor::writeEscapedWithTags(UStringView str, UFILE *output)
 {
   for(unsigned int i = 0, limit = str.size(); i < limit; i++)
   {
@@ -753,7 +743,7 @@ FSTProcessor::writeEscapedWithTags(UString const &str, UFILE *output)
 
 
 void
-FSTProcessor::printWord(UString const &sf, UString const &lf, UFILE *output)
+FSTProcessor::printWord(UStringView sf, UStringView lf, UFILE *output)
 {
   u_fputc('^', output);
   writeEscaped(sf, output);
@@ -762,11 +752,11 @@ FSTProcessor::printWord(UString const &sf, UString const &lf, UFILE *output)
 }
 
 void
-FSTProcessor::printWordPopBlank(UString const &sf, UString const &lf, UFILE *output)
+FSTProcessor::printWordPopBlank(UStringView sf, UStringView lf, UFILE *output)
 {
   u_fputc('^', output);
   size_t postpop = writeEscapedPopBlanks(sf, output);
-  u_fprintf(output, "%S$", lf.c_str());
+  u_fprintf(output, "%.*S$", lf.size(), lf.data());
   while (postpop-- && blankqueue.size() > 0)
   {
     write(blankqueue.front(), output);
@@ -775,13 +765,13 @@ FSTProcessor::printWordPopBlank(UString const &sf, UString const &lf, UFILE *out
 }
 
 void
-FSTProcessor::printWordBilingual(UString const &sf, UString const &lf, UFILE *output)
+FSTProcessor::printWordBilingual(UStringView sf, UStringView lf, UFILE *output)
 {
-  u_fprintf(output, "^%S%S$", sf.c_str(), lf.c_str());
+  u_fprintf(output, "^%.*S%.*S$", sf.size(), sf.data(), lf.size(), lf.data());
 }
 
 void
-FSTProcessor::printUnknownWord(UString const &sf, UFILE *output)
+FSTProcessor::printUnknownWord(UStringView sf, UFILE *output)
 {
   u_fputc('^', output);
   writeEscaped(sf, output);
@@ -792,7 +782,7 @@ FSTProcessor::printUnknownWord(UString const &sf, UFILE *output)
 }
 
 unsigned int
-FSTProcessor::lastBlank(UString const &str)
+FSTProcessor::lastBlank(UStringView str)
 {
   for(int i = static_cast<int>(str.size())-1; i >= 0; i--)
   {
@@ -806,7 +796,7 @@ FSTProcessor::lastBlank(UString const &str)
 }
 
 void
-FSTProcessor::printSpace(UChar32 const val, UFILE *output)
+FSTProcessor::printSpace(UChar32 val, UFILE *output)
 {
   if(blankqueue.size() > 0)
   {
@@ -819,7 +809,7 @@ FSTProcessor::printSpace(UChar32 const val, UFILE *output)
 }
 
 void
-FSTProcessor::printChar(const UChar32 val, UFILE* output)
+FSTProcessor::printChar(UChar32 val, UFILE* output)
 {
   if (u_isspace(val)) {
     if (blankqueue.size() > 0) {
@@ -839,13 +829,13 @@ FSTProcessor::printChar(const UChar32 val, UFILE* output)
 }
 
 bool
-FSTProcessor::isEscaped(UChar32 const c) const
+FSTProcessor::isEscaped(UChar32 c) const
 {
   return escaped_chars.find(c) != escaped_chars.end();
 }
 
 bool
-FSTProcessor::isAlphabetic(UChar32 const c) const
+FSTProcessor::isAlphabetic(UChar32 c) const
 {
   return u_isalnum(c) || alphabetic_chars.find(c) != alphabetic_chars.end();
 }
@@ -945,30 +935,30 @@ FSTProcessor::compoundAnalysis(UString input_word)
 void
 FSTProcessor::initDecompositionSymbols()
 {
-  if((compoundOnlyLSymbol=alphabet("<:co:only-L>"_u)) == 0
-     && (compoundOnlyLSymbol=alphabet("<:compound:only-L>"_u)) == 0
-     && (compoundOnlyLSymbol=alphabet("<@co:only-L>"_u)) == 0
-     && (compoundOnlyLSymbol=alphabet("<@compound:only-L>"_u)) == 0
-     && (compoundOnlyLSymbol=alphabet("<compound-only-L>"_u)) == 0)
+  if((compoundOnlyLSymbol=alphabet(u"<:co:only-L>")) == 0
+     && (compoundOnlyLSymbol=alphabet(u"<:compound:only-L>")) == 0
+     && (compoundOnlyLSymbol=alphabet(u"<@co:only-L>")) == 0
+     && (compoundOnlyLSymbol=alphabet(u"<@compound:only-L>")) == 0
+     && (compoundOnlyLSymbol=alphabet(u"<compound-only-L>")) == 0)
   {
     std::cerr << "Warning: Decomposition symbol <:compound:only-L> not found" << std::endl;
   }
   else if(!showControlSymbols)
   {
-    alphabet.setSymbol(compoundOnlyLSymbol, ""_u);
+    alphabet.setSymbol(compoundOnlyLSymbol, u"");
   }
 
-  if((compoundRSymbol=alphabet("<:co:R>"_u)) == 0
-     && (compoundRSymbol=alphabet("<:compound:R>"_u)) == 0
-     && (compoundRSymbol=alphabet("<@co:R>"_u)) == 0
-     && (compoundRSymbol=alphabet("<@compound:R>"_u)) == 0
-     && (compoundRSymbol=alphabet("<compound-R>"_u)) == 0)
+  if((compoundRSymbol=alphabet(u"<:co:R>")) == 0
+     && (compoundRSymbol=alphabet(u"<:compound:R>")) == 0
+     && (compoundRSymbol=alphabet(u"<@co:R>")) == 0
+     && (compoundRSymbol=alphabet(u"<@compound:R>")) == 0
+     && (compoundRSymbol=alphabet(u"<compound-R>")) == 0)
   {
     std::cerr << "Warning: Decomposition symbol <:compound:R> not found" << std::endl;
   }
   else if(!showControlSymbols)
   {
-    alphabet.setSymbol(compoundRSymbol, ""_u);
+    alphabet.setSymbol(compoundRSymbol, u"");
   }
 }
 
@@ -1817,7 +1807,7 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
 }
 
 UString
-FSTProcessor::biltransfull(UString const &input_word, bool with_delim)
+FSTProcessor::biltransfull(UStringView input_word, bool with_delim)
 {
   State current_state = initial_state;
   UString result;
@@ -1834,7 +1824,7 @@ FSTProcessor::biltransfull(UString const &input_word, bool with_delim)
 
   if(input_word[start_point] == '*')
   {
-    return input_word;
+    return US(input_word);
   }
 
   if(input_word[start_point] == '=')
@@ -1911,11 +1901,11 @@ FSTProcessor::biltransfull(UString const &input_word, bool with_delim)
         // word is not present
         if(with_delim)
         {
-          result = "^@"_u + input_word.substr(1);
+          result = "^@"_u + US(input_word.substr(1));
         }
         else
         {
-          result = "@"_u + input_word;
+          result = "@"_u + US(input_word);
         }
         return result;
       }
@@ -1970,7 +1960,7 @@ FSTProcessor::biltransfull(UString const &input_word, bool with_delim)
 
 
 UString
-FSTProcessor::biltrans(UString const &input_word, bool with_delim)
+FSTProcessor::biltrans(UStringView input_word, bool with_delim)
 {
   State current_state = initial_state;
   UString result;
@@ -1987,7 +1977,7 @@ FSTProcessor::biltrans(UString const &input_word, bool with_delim)
 
   if(input_word[start_point] == '*')
   {
-    return input_word;
+    return US(input_word);
   }
 
   if(input_word[start_point] == '=')
@@ -2064,11 +2054,11 @@ FSTProcessor::biltrans(UString const &input_word, bool with_delim)
         // word is not present
         if(with_delim)
         {
-          result = "^@"_u + input_word.substr(1);
+          result = "^@"_u + US(input_word.substr(1));
         }
         else
         {
-          result = "@"_u + input_word;
+          result = "@"_u + US(input_word);
         }
         return result;
       }
@@ -2131,7 +2121,7 @@ FSTProcessor::bilingual_wrapper_null_flush(InputFile& input, UFILE *output, Gene
 }
 
 UString
-FSTProcessor::compose(UString const &lexforms, UString const &queue) const
+FSTProcessor::compose(UStringView lexforms, UStringView queue) const
 {
   UString result;
   result.reserve(lexforms.size() + 2 * queue.size());
@@ -2325,7 +2315,7 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
 }
 
 std::pair<UString, int>
-FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
+FSTProcessor::biltransWithQueue(UStringView input_word, bool with_delim)
 {
   State current_state = initial_state;
   UString result;
@@ -2343,7 +2333,7 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
 
   if(input_word[start_point] == '*')
   {
-    return std::pair<UString, int>(input_word, 0);
+    return {US(input_word), 0};
   }
 
   if(input_word[start_point] == '=')
@@ -2421,11 +2411,11 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
         // word is not present
         if(with_delim)
         {
-          result = "^@"_u + input_word.substr(1);
+          result = "^@"_u + US(input_word.substr(1));
         }
         else
         {
-          result = "@"_u + input_word;
+          result = "@"_u + US(input_word);
         }
         return std::pair<UString, int>(result, 0);
       }
@@ -2440,13 +2430,13 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
     // word is not present
     if(with_delim)
     {
-      result = "^@"_u + input_word.substr(1);
+      result = "^@"_u + US(input_word.substr(1));
     }
     else
     {
-      result = "@"_u + input_word;
+      result = "@"_u + US(input_word);
     }
-    return std::pair<UString, int>(result, 0);
+    return {result, 0};
   }
 
 
@@ -2480,7 +2470,7 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
     {
       result_with_queue += '$';
     }
-    return std::pair<UString, int>(result_with_queue, queue.size());
+    return {result_with_queue, queue.size()};
   }
   else
   {
@@ -2488,12 +2478,12 @@ FSTProcessor::biltransWithQueue(UString const &input_word, bool with_delim)
     {
       result += '$';
     }
-    return std::pair<UString, int>(result, 0);
+    return {result, 0};
   }
 }
 
 UString
-FSTProcessor::biltransWithoutQueue(UString const &input_word, bool with_delim)
+FSTProcessor::biltransWithoutQueue(UStringView input_word, bool with_delim)
 {
   State current_state = initial_state;
   UString result;
@@ -2509,7 +2499,7 @@ FSTProcessor::biltransWithoutQueue(UString const &input_word, bool with_delim)
 
   if(input_word[start_point] == '*')
   {
-    return input_word;
+    return US(input_word);
   }
 
   if(input_word[start_point] == '=')
@@ -2582,11 +2572,11 @@ FSTProcessor::biltransWithoutQueue(UString const &input_word, bool with_delim)
         // word is not present
         if(with_delim)
         {
-          result = "^@"_u + input_word.substr(1);
+          result = "^@"_u + US(input_word.substr(1));
         }
         else
         {
-          result = "@"_u + input_word;
+          result = "@"_u + US(input_word);
         }
         return result;
       }
@@ -2642,9 +2632,9 @@ FSTProcessor::readSAO(InputFile& input)
     if(val == '<')
     {
       UString str = input.readBlock('<', '>');
-      if(str.substr(0, 9) == "<![CDATA["_u)
+      if(StringUtils::startswith(str, u"<![CDATA["))
       {
-        while(str.substr(str.size()-3) != "]]>"_u)
+        while(!StringUtils::endswith(str, u"]]>"))
         {
           str.append(input.readBlock('<', '>').substr(1));
         }
@@ -2678,7 +2668,7 @@ FSTProcessor::readSAO(InputFile& input)
 }
 
 void
-FSTProcessor::printSAOWord(UString const &lf, UFILE *output)
+FSTProcessor::printSAOWord(UStringView lf, UFILE *output)
 {
   for(unsigned int i = 1, limit = lf.size(); i != limit; i++)
   {
@@ -2831,8 +2821,8 @@ FSTProcessor::SAO(InputFile& input, UFILE *output)
   flushBlanks(output);
 }
 
-UString
-FSTProcessor::removeTags(UString const &str)
+UStringView
+FSTProcessor::removeTags(UStringView str)
 {
   for(unsigned int i = 0; i < str.size(); i++)
   {
@@ -2847,61 +2837,61 @@ FSTProcessor::removeTags(UString const &str)
 
 
 void
-FSTProcessor::setBiltransSurfaceForms(bool const value)
+FSTProcessor::setBiltransSurfaceForms(bool value)
 {
   biltransSurfaceForms = value;
 }
 
 void
-FSTProcessor::setCaseSensitiveMode(bool const value)
+FSTProcessor::setCaseSensitiveMode(bool value)
 {
   caseSensitive = value;
 }
 
 void
-FSTProcessor::setDictionaryCaseMode(bool const value)
+FSTProcessor::setDictionaryCaseMode(bool value)
 {
   dictionaryCase = value;
 }
 
 void
-FSTProcessor::setNullFlush(bool const value)
+FSTProcessor::setNullFlush(bool value)
 {
   nullFlush = value;
 }
 
 void
-FSTProcessor::setIgnoredChars(bool const value)
+FSTProcessor::setIgnoredChars(bool value)
 {
   useIgnoredChars = value;
 }
 
 void
-FSTProcessor::setRestoreChars(bool const value)
+FSTProcessor::setRestoreChars(bool value)
 {
   useRestoreChars = value;
 }
 
 void
-FSTProcessor::setUseDefaultIgnoredChars(bool const value)
+FSTProcessor::setUseDefaultIgnoredChars(bool value)
 {
   useDefaultIgnoredChars = value;
 }
 
 void
-FSTProcessor::setDisplayWeightsMode(bool const value)
+FSTProcessor::setDisplayWeightsMode(bool value)
 {
   displayWeightsMode = value;
 }
 
 void
-FSTProcessor::setMaxAnalysesValue(int const value)
+FSTProcessor::setMaxAnalysesValue(int value)
 {
   maxAnalyses = value;
 }
 
 void
-FSTProcessor::setMaxWeightClassesValue(int const value)
+FSTProcessor::setMaxWeightClassesValue(int value)
 {
   maxWeightClasses = value;
 }
@@ -2919,10 +2909,10 @@ FSTProcessor::getNullFlush()
 }
 
 FSTProcessor::Indices
-FSTProcessor::firstNotAlpha(UString const &sf)
+FSTProcessor::firstNotAlpha(UStringView sf)
 {
   FSTProcessor::Indices ix = { 0, 0 };
-  UCharCharacterIterator it = UCharCharacterIterator(sf.c_str(), sf.size());
+  UCharCharacterIterator it = UCharCharacterIterator(sf.data(), sf.size());
   while (it.hasNext()) {
     UChar32 c = it.next32PostInc();
     if(!isAlphabetic(c))

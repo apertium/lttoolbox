@@ -91,18 +91,12 @@ getattr(xmlNode* node, const char* attr)
 }
 
 UString
-getattr(xmlNode* node, const UString& attr, const UString& fallback)
+getattr(xmlNode* node, UStringView attr, UStringView fallback)
 {
   for (xmlAttr* i = node->properties; i != NULL; i = i->next) {
     if (to_ustring((const char*) i->name) == attr) {
       return to_ustring((const char*) i->children->content);
     }
   }
-  return fallback;
-}
-
-UString
-getattr(xmlNode* node, const UString& attr)
-{
-  return getattr(node, attr, ""_u);
+  return US(fallback);
 }

@@ -255,7 +255,7 @@ Compression::multibyte_read(std::istream &input)
 
 
 void
-Compression::string_write(UString const &str, FILE *output)
+Compression::string_write(UStringView str, FILE *output)
 {
   std::vector<int32_t> vec;
   ustring_to_vec32(str, vec);

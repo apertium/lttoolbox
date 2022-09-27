@@ -31,13 +31,10 @@ public:
 
   static xmlTextReaderPtr open_or_exit(const char* fname);
 
-  /* If attrib does not exist (or other error), returns an empty string: */
-  static UString attrib(xmlTextReaderPtr reader, UString const &name);
-
   /* If attrib does not exist (or other error), returns fallback: */
-  static UString attrib(xmlTextReaderPtr reader, UString const &name, const UString& fallback);
+  static UString attrib(xmlTextReaderPtr reader, UStringView name, UStringView fallback=u"");
 
-  static std::string attrib_str(xmlTextReaderPtr reader, const UString& name);
+  static std::string attrib_str(xmlTextReaderPtr reader, UStringView name);
 
   static UString readName(xmlTextReaderPtr reader);
   static UString readValue(xmlTextReaderPtr reader);

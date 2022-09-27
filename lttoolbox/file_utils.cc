@@ -66,7 +66,7 @@ openInBinFile(const std::string& fname)
 }
 
 void
-writeTransducerSet(FILE* output, const UString& letters,
+writeTransducerSet(FILE* output, UStringView letters,
                    Alphabet& alpha,
                    std::map<UString, Transducer>& trans)
 {

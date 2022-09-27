@@ -80,16 +80,16 @@ int main(int argc, char* argv[])
   for (int32_t i = 1; i <= alpha.size(); i++) {
     UString t;
     alpha.getSymbol(t, -i);
-    if (StringUtils::startswith(t, "<r:"_u) ||
-        (has_var && StringUtils::startswith(t, "<v:"_u)) ||
-        StringUtils::startswith(t, "<alt:"_u) ||
-        StringUtils::startswith(t, "<vl:"_u) ||
-        StringUtils::startswith(t, "<vr:"_u)) {
+    if (StringUtils::startswith(t, u"<r:") ||
+        (has_var && StringUtils::startswith(t, u"<v:")) ||
+        StringUtils::startswith(t, u"<alt:") ||
+        StringUtils::startswith(t, u"<vl:") ||
+        StringUtils::startswith(t, u"<vr:")) {
       int32_t s = alpha(-i, -i);
       if (!keep.count(s)) {
         drop.insert(s);
       }
-    } else if (!has_var && StringUtils::startswith(t, "<v:"_u)) {
+    } else if (!has_var && StringUtils::startswith(t, u"<v:")) {
       keep.insert(alpha(-i, -i));
     }
   }

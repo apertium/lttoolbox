@@ -11,16 +11,16 @@ cc_sources = acx.cc alphabet.cc att_compiler.cc cli.cc compiler.cc compression.c
              regexp_compiler.cc sorted_vector.cc state.cc string_utils.cc transducer.cc \
              trans_exe.cc xml_parse_util.cc xml_walk_util.cc tmx_compiler.cc ustring.cc
 
-library_includedir = $(includedir)/$(PACKAGE_NAME)-$(VERSION_API)/$(PACKAGE_NAME)
+library_includedir = $(includedir)/$(PACKAGE_NAME)
 library_include_HEADERS = $(h_sources)
 
 bin_PROGRAMS = lt-comp lt-proc lt-expand lt-paradigm lt-tmxcomp lt-tmxproc lt-print lt-trim lt-compose lt-append lsx-comp lt-invert lt-restrict lt-apply-acx
 instdir = lttoolbox
 
-lib_LTLIBRARIES= liblttoolbox3.la
-liblttoolbox3_la_SOURCES= $(h_sources) $(cc_sources)
-liblttoolbox3_la_LDFLAGS= -version-info $(SOVERSION) -release $(VERSION_API)
-liblttoolbox3_la_LIBADD= $(ICU_LIBS)
+lib_LTLIBRARIES= liblttoolbox.la
+liblttoolbox_la_SOURCES= $(h_sources) $(cc_sources)
+liblttoolbox_la_LDFLAGS= -version-info $(VERSION_ABI)
+liblttoolbox_la_LIBADD= $(ICU_LIBS)
 
 lttoolboxdir = $(prefix)/share/lttoolbox
 lttoolboxinclude = $(prefix)/include
@@ -28,8 +28,8 @@ lttoolboxlib = $(prefix)/lib
 
 lttoolbox_DATA = dix.dtd dix.rng dix.rnc acx.rng xsd/dix.xsd xsd/acx.xsd
 
-LDADD = liblttoolbox$(VERSION_MAJOR).la $(PTHREAD_LIBS)
-AM_LDFLAGS = -llttoolbox$(VERSION_MAJOR) $(LIBXML_LIBS) $(ICU_LIBS)
+LDADD = liblttoolbox.la $(PTHREAD_LIBS)
+AM_LDFLAGS = -llttoolbox $(LIBXML_LIBS) $(ICU_LIBS)
 
 lt_append_SOURCES = lt_append.cc
 lt_print_SOURCES = lt_print.cc

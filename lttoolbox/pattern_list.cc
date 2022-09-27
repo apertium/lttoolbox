@@ -22,10 +22,6 @@
 #include <cstdlib>
 #include <iostream>
 
-UString const PatternList::ANY_CHAR  = "<ANY_CHAR>"_u;
-UString const PatternList::ANY_TAG   = "<ANY_TAG>"_u;
-UString const PatternList::QUEUE     = "<QUEUE>"_u;
-
 void
 PatternList::copy(PatternList const &o)
 {
@@ -102,12 +98,12 @@ PatternList::endSequence()
       it != limit; it++)
   {
     it->push_back(alphabet(QUEUE));
-    patterns.insert(make_pair(sequence_id, *it));
+    patterns.insert({sequence_id, *it});
   }
 }
 
 void
-PatternList::insertOutOfSequence(UString const &lemma, UString const &tags,
+PatternList::insertOutOfSequence(UStringView lemma, UStringView tags,
                                  std::vector<int> &result)
 {
   if(lemma.empty())
@@ -136,9 +132,9 @@ PatternList::insertOutOfSequence(UString const &lemma, UString const &tags,
   {
     for(unsigned int i = 0, limit = tagCount(tags); i < limit; i++)
     {
-      UString tag = "<"_u + tagAt(tags, i) + ">"_u;
+      UString tag = "<"_u + US(tagAt(tags, i)) + ">"_u;
 
-      if(tag == "<*>"_u)
+      if(tag == u"<*>"_uv)
       {
         result.push_back(alphabet(ANY_TAG));
       }
@@ -152,8 +148,7 @@ PatternList::insertOutOfSequence(UString const &lemma, UString const &tags,
 }
 
 void
-PatternList::insertIntoSequence(int const id, UString const &lemma,
-				UString const &tags)
+PatternList::insertIntoSequence(int id, UStringView lemma, UStringView tags)
 {
   sequence_id = id;
 
@@ -176,14 +171,14 @@ PatternList::insertIntoSequence(int const id, UString const &lemma,
 }
 
 void
-PatternList::insert(int const id, UString const &lemma, UString const &tags)
+PatternList::insert(int id, UStringView lemma, UStringView tags)
 {
   if(!sequence)
   {
     std::vector<int> local;
     insertOutOfSequence(lemma, tags, local);
     local.push_back(alphabet(QUEUE));
-    patterns.insert(make_pair(id, local));
+    patterns.insert({id, local});
   }
   else
   {
@@ -192,7 +187,7 @@ PatternList::insert(int const id, UString const &lemma, UString const &tags)
 }
 
 void
-PatternList::insert(int const id, int const otherid)
+PatternList::insert(int id, int otherid)
 {
   if(!sequence)
   {
@@ -233,7 +228,7 @@ PatternList::insert(int const id, int const otherid)
 }
 
 int
-PatternList::tagCount(UString const &tags)
+PatternList::tagCount(UStringView tags)
 {
   int count = 0;
 
@@ -252,8 +247,8 @@ PatternList::tagCount(UString const &tags)
   return count;
 }
 
-UString
-PatternList::tagAt(UString const &tags, int const index)
+UStringView
+PatternList::tagAt(UStringView tags, int index)
 {
   int start = 0;
   int end = 0;
@@ -282,7 +277,7 @@ PatternList::tagAt(UString const &tags, int const index)
 
   if(index > count)
   {
-    return ""_u;
+    return u"";
   }
   if(end != 0)
   {
@@ -366,7 +361,7 @@ void
 PatternList::write(FILE *output)
 {
   alphabet.write(output);
-  UString const tagger_name = "tagger"_u;
+  UStringView tagger_name = u"tagger";
 
   Compression::multibyte_write(1, output);
   Compression::string_write(tagger_name, output);

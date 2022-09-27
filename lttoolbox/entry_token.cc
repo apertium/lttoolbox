@@ -61,7 +61,7 @@ EntryToken::destroy()
 }
 
 void
-EntryToken::setParadigm(UString const &np)
+EntryToken::setParadigm(UStringView np)
 {
   parName = np;
   type = paradigm;
@@ -77,7 +77,7 @@ EntryToken::setSingleTransduction(std::vector<int> const &pi, std::vector<int> c
 }
 
 void
-EntryToken::setRegexp(UString const &r)
+EntryToken::setRegexp(UStringView r)
 {
   myregexp.clear();
   ustring_to_vec32(r, myregexp);

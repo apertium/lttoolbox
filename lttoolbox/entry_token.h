@@ -99,7 +99,7 @@ public:
    * Sets the name of the paradigm.
    * @param np the paradigm name
    */
-  void setParadigm(UString const &np);
+  void setParadigm(UStringView np);
 
   /**
    * Set both parts of a single transduction.
@@ -113,7 +113,7 @@ public:
    * Set regular expression.
    * @param r the regular expression specification.
    */
-  void setRegexp(UString const &r);
+  void setRegexp(UStringView r);
   void setRegexp(const std::vector<int32_t>& r);
 
   /**

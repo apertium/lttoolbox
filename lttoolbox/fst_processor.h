@@ -322,14 +322,14 @@ private:
    * Shortcut for filtering on all final states with current settings
    * Assumes that casefrom is non-empty
    */
-  UString filterFinals(const State& state, const UString& casefrom);
+  UString filterFinals(const State& state, UStringView casefrom);
 
   /**
    * Write a string to an output stream,
    * @param str the string to write, escaping characters
    * @param output the stream to write in
    */
-  void writeEscaped(UString const &str, UFILE *output);
+  void writeEscaped(UStringView str, UFILE *output);
 
   /**
    * Write a string to an output stream.
@@ -340,7 +340,7 @@ private:
    * @param output the stream to write in
    * @return how many blanks to pop and print after printing lu
    */
-  size_t writeEscapedPopBlanks(UString const &str, UFILE *output);
+  size_t writeEscapedPopBlanks(UStringView str, UFILE *output);
 
   /**
    * Write a string to an output stream, escaping all escapable characters
@@ -348,7 +348,7 @@ private:
    * @param str the string to write, escaping characters
    * @param output the stream to write in
    */
-  void writeEscapedWithTags(UString const &str, UFILE *output);
+  void writeEscapedWithTags(UStringView str, UFILE *output);
 
   /**
    * Prints a word
@@ -356,7 +356,7 @@ private:
    * @param lf lexical form of the word
    * @param output stream where the word is written
    */
-  void printWord(UString const &sf, UString const &lf, UFILE *output);
+  void printWord(UStringView sf, UStringView lf, UFILE *output);
 
   /**
    * Prints a word.
@@ -366,7 +366,7 @@ private:
    * @param lf lexical form of the word
    * @param output stream where the word is written
    */
-  void printWordPopBlank(UString const &sf, UString const &lf, UFILE *output);
+  void printWordPopBlank(UStringView sf, UStringView lf, UFILE *output);
 
   /**
    * Prints a word (Bilingual version)
@@ -374,7 +374,7 @@ private:
    * @param lf lexical form of the word
    * @param output stream where the word is written
    */
-  void printWordBilingual(UString const &sf, UString const &lf, UFILE *output);
+  void printWordBilingual(UStringView sf, UStringView lf, UFILE *output);
 
 
   /**
@@ -382,21 +382,21 @@ private:
    * @param lf lexical form
    * @param output stream where the word is written
    */
-  void printSAOWord(UString const &lf, UFILE *output);
+  void printSAOWord(UStringView lf, UFILE *output);
 
   /**
    * Prints an unknown word
    * @param sf surface form of the word
    * @param output stream where the word is written
    */
-  void printUnknownWord(UString const &sf, UFILE *output);
+  void printUnknownWord(UStringView sf, UFILE *output);
 
   void initDecompositionSymbols();
 
   std::vector<UString> numbers;
   int readTMAnalysis(InputFile& input);
 
-  unsigned int lastBlank(UString const &str);
+  unsigned int lastBlank(UStringView str);
 
   /**
    * Print one blankqueue item if there is one, or a given "space" value.
@@ -404,16 +404,16 @@ private:
    * @param val the space character to use if no blank queue
    * @param output stream where the word is written
    */
-  void printSpace(UChar32 const val, UFILE *output);
+  void printSpace(UChar32 val, UFILE *output);
   /**
    * Print one possibly escaped character
    * if it's a space and the blank queue is non-empty,
    * pop the first blank and print that instead
    */
-  void printChar(const UChar32 val, UFILE* output);
+  void printChar(UChar32 val, UFILE* output);
 
-  void skipUntil(InputFile& input, UFILE *output, UChar32 const character);
-  static UString removeTags(UString const &str);
+  void skipUntil(InputFile& input, UFILE *output, UChar32 character);
+  static UStringView removeTags(UStringView str);
   UString compoundAnalysis(UString str);
 
   struct Indices {
@@ -428,13 +428,13 @@ private:
    *
    * @return index of first non-alpha char, or string size, as a tuple of number of characters and index in string
    */
-  Indices firstNotAlpha(UString const &sf);
+  Indices firstNotAlpha(UStringView sf);
 
   void analysis_wrapper_null_flush(InputFile& input, UFILE *output);
   void bilingual_wrapper_null_flush(InputFile& input, UFILE *output, GenerationMode mode = gm_unknown);
   void generation_wrapper_null_flush(InputFile& input, UFILE *output,
                                      GenerationMode mode);
-  UString compose(UString const &lexforms, UString const &queue) const;
+  UString compose(UStringView lexforms, UStringView queue) const;
 
   void procNodeICX();
   void procNodeRCX();
@@ -448,14 +448,14 @@ public:
   /*
    * String constants
    */
-  static UString const XML_TEXT_NODE;
-  static UString const XML_COMMENT_NODE;
-  static UString const XML_IGNORED_CHARS_ELEM;
-  static UString const XML_RESTORE_CHAR_ELEM;
-  static UString const XML_RESTORE_CHARS_ELEM;
-  static UString const XML_VALUE_ATTR;
-  static UString const XML_CHAR_ELEM;
-  static UString const WBLANK_FINAL;
+  static constexpr UStringView XML_TEXT_NODE           = u"#text";
+  static constexpr UStringView XML_COMMENT_NODE        = u"#comment";
+  static constexpr UStringView XML_IGNORED_CHARS_ELEM  = u"ignored-chars";
+  static constexpr UStringView XML_RESTORE_CHAR_ELEM   = u"restore-char";
+  static constexpr UStringView XML_RESTORE_CHARS_ELEM  = u"restore-chars";
+  static constexpr UStringView XML_VALUE_ATTR          = u"value";
+  static constexpr UStringView XML_CHAR_ELEM           = u"char";
+  static constexpr UStringView WBLANK_FINAL            = u"[[/]]";
 
   FSTProcessor();
 
@@ -474,11 +474,11 @@ public:
   void postgeneration(InputFile& input, UFILE *output);
   void intergeneration(InputFile& input, UFILE *output);
   void transliteration(InputFile& input, UFILE *output);
-  UString biltrans(UString const &input_word, bool with_delim = true);
-  UString biltransfull(UString const &input_word, bool with_delim = true);
+  UString biltrans(UStringView input_word, bool with_delim = true);
+  UString biltransfull(UStringView input_word, bool with_delim = true);
   void bilingual(InputFile& input, UFILE *output, GenerationMode mode = gm_unknown);
-  std::pair<UString, int> biltransWithQueue(UString const &input_word, bool with_delim = true);
-  UString biltransWithoutQueue(UString const &input_word, bool with_delim = true);
+  std::pair<UString, int> biltransWithQueue(UStringView input_word, bool with_delim = true);
+  UString biltransWithoutQueue(UStringView input_word, bool with_delim = true);
   void SAO(InputFile& input, UFILE *output);
   void parseICX(std::string const &file);
   void parseRCX(std::string const &file);
@@ -487,16 +487,16 @@ public:
 
   bool valid() const;
 
-  void setCaseSensitiveMode(bool const value);
-  void setDictionaryCaseMode(bool const value);
-  void setBiltransSurfaceForms(bool const value);
-  void setIgnoredChars(bool const value);
-  void setRestoreChars(bool const value);
-  void setNullFlush(bool const value);
-  void setUseDefaultIgnoredChars(bool const value);
-  void setDisplayWeightsMode(bool const value);
-  void setMaxAnalysesValue(int const value);
-  void setMaxWeightClassesValue(int const value);
+  void setCaseSensitiveMode(bool value);
+  void setDictionaryCaseMode(bool value);
+  void setBiltransSurfaceForms(bool value);
+  void setIgnoredChars(bool value);
+  void setRestoreChars(bool value);
+  void setNullFlush(bool value);
+  void setUseDefaultIgnoredChars(bool value);
+  void setDisplayWeightsMode(bool value);
+  void setMaxAnalysesValue(int value);
+  void setMaxWeightClassesValue(int value);
   bool getNullFlush();
   bool getDecompoundingMode();
 };

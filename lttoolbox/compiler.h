@@ -27,16 +27,6 @@
 #include <set>
 #include <libxml/xmlreader.h>
 
-#ifdef _MSC_VER
-  #if !defined(LTTOOLBOX_EXPORTS)
-    #define LTTOOLBOX_IMPORTS __declspec(dllimport)
-  #else
-    #define LTTOOLBOX_IMPORTS
-  #endif
-#else
-  #define LTTOOLBOX_IMPORTS
-#endif
-
 /**
  * A compiler of dictionaries to letter transducers
  */
@@ -151,7 +141,7 @@ private:
   /**
    * List of named transducers-paradigms
    */
-  std::map<UString, Transducer> paradigms;
+  std::map<UString, Transducer, std::less<>> paradigms;
 
   /**
    * List of named dictionary sections
@@ -166,7 +156,7 @@ private:
   /**
    * List of named suffix copy of a paradigm
    */
-  std::map<UString, std::map<UString, int> > suffix_paradigms;
+  std::map<UString, std::map<UString, int>, std::less<>> suffix_paradigms;
 
   /**
    * List of named endings of a suffix copy of a paradgim
@@ -216,10 +206,8 @@ private:
    * Return true if the filter (command line) is consistent with
    * the value (attribute) and false otherwise
    */
-  bool filterEntry(const UString& value, const UString& filter,
-                   bool keep_on_empty_filter);
-  void symbolFilters(const UString& value, const UString& prefix,
-                     std::vector<std::vector<int32_t>>& symbols);
+  bool filterEntry(UStringView value, UStringView filter, bool keep_on_empty_filter);
+  void symbolFilters(UStringView value, UStringView prefix, std::vector<std::vector<int32_t>>& symbols);
 
   /**
    * Parse the &lt;re&gt; element
@@ -237,7 +225,7 @@ private:
    * @param name the name of the attribute
    * @return the value of the attribute
    */
-  UString attrib(UString const &name);
+  UString attrib(UStringView name);
 
   /**
    * Construct symbol pairs by align left side of both parts and insert
@@ -278,16 +266,9 @@ private:
    * Skip all document #text nodes before "elem"
    * @param name the name of the node
    * @param elem the name of the expected node
-   */
-  void skip(UString &name, UString const &elem);
-
-  /**
-   * Skip all document #text nodes before "elem"
-   * @param name the name of the node
-   * @param elem the name of the expected node
    * @param open true for open element, false for closed
    */
-  void skip(UString &name, UString const &elem, bool open);
+  void skip(UString &name, UStringView elem, bool open = true);
 
   /**
    * Skip all blank #text nodes before "name"
@@ -296,13 +277,13 @@ private:
   void skipBlanks(UString &name);
 
 
-  void readString(std::vector<int> &result, UString const &name);
+  void readString(std::vector<int> &result, UStringView name);
 
   /**
    * Force an element to be empty, and check for it
    * @param name the element
    */
-  void requireEmptyError(UString const &name);
+  void requireEmptyError(UStringView name);
 
   /**
    * Force an attribute to be specified, amd check for it
@@ -310,8 +291,7 @@ private:
    * @param attrname the name of the attribute
    * @param elemname the parent of the attribute
    */
-  void requireAttribute(UString const &value, UString const &attrname,
-                        UString const &elemname);
+  void requireAttribute(UStringView value, UStringView attrname, UStringView elemname);
 
   /**
    * True if all the elements in the current node are blanks
@@ -319,7 +299,7 @@ private:
    */
   bool allBlanks();
 
-  bool valid(UString const& dir) const;
+  bool valid(UStringView dir) const;
 
 public:
 
@@ -327,56 +307,56 @@ public:
    * Constants to represent the element and the attributes of
    * dictionaries
    */
-  LTTOOLBOX_IMPORTS static UString const COMPILER_DICTIONARY_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_ALPHABET_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_SDEFS_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_SDEF_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_N_ATTR;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_PARDEFS_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_PARDEF_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_PAR_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_ENTRY_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_RESTRICTION_ATTR;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_RESTRICTION_LR_VAL;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_RESTRICTION_RL_VAL;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_RESTRICTION_U_VAL;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_PAIR_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_LEFT_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_RIGHT_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_S_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_M_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_REGEXP_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_SECTION_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_ID_ATTR;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_TYPE_ATTR;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_SEPARABLE_VAL;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_SEQUENTIAL_VAL;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_IDENTITY_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_IDENTITYGROUP_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_JOIN_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_BLANK_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_POSTGENERATOR_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_GROUP_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_LEMMA_ATTR;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_IGNORE_ATTR;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_IGNORE_YES_VAL;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_ALT_ATTR;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_V_ATTR;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_VL_ATTR;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_VR_ATTR;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_WEIGHT_ATTR;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_TEXT_NODE;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_COMMENT_NODE;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_ACX_ANALYSIS_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_ACX_CHAR_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_ACX_EQUIV_CHAR_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_ACX_VALUE_ATTR;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_LSX_WB_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_LSX_CHAR_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_LSX_TAG_ELEM;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_LSX_SPACE_ATTR;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_LSX_SPACE_YES_VAL;
-  LTTOOLBOX_IMPORTS static UString const COMPILER_LSX_SPACE_NO_VAL;
+  static constexpr UStringView COMPILER_DICTIONARY_ELEM    = u"dictionary";
+  static constexpr UStringView COMPILER_ALPHABET_ELEM      = u"alphabet";
+  static constexpr UStringView COMPILER_SDEFS_ELEM         = u"sdefs";
+  static constexpr UStringView COMPILER_SDEF_ELEM          = u"sdef";
+  static constexpr UStringView COMPILER_N_ATTR             = u"n";
+  static constexpr UStringView COMPILER_PARDEFS_ELEM       = u"pardefs";
+  static constexpr UStringView COMPILER_PARDEF_ELEM        = u"pardef";
+  static constexpr UStringView COMPILER_PAR_ELEM           = u"par";
+  static constexpr UStringView COMPILER_ENTRY_ELEM         = u"e";
+  static constexpr UStringView COMPILER_RESTRICTION_ATTR   = u"r";
+  static constexpr UStringView COMPILER_RESTRICTION_LR_VAL = u"LR";
+  static constexpr UStringView COMPILER_RESTRICTION_RL_VAL = u"RL";
+  static constexpr UStringView COMPILER_RESTRICTION_U_VAL  = u"U";
+  static constexpr UStringView COMPILER_PAIR_ELEM          = u"p";
+  static constexpr UStringView COMPILER_LEFT_ELEM          = u"l";
+  static constexpr UStringView COMPILER_RIGHT_ELEM         = u"r";
+  static constexpr UStringView COMPILER_S_ELEM             = u"s";
+  static constexpr UStringView COMPILER_M_ELEM             = u"m";
+  static constexpr UStringView COMPILER_REGEXP_ELEM        = u"re";
+  static constexpr UStringView COMPILER_SECTION_ELEM       = u"section";
+  static constexpr UStringView COMPILER_ID_ATTR            = u"id";
+  static constexpr UStringView COMPILER_TYPE_ATTR          = u"type";
+  static constexpr UStringView COMPILER_SEQUENTIAL_VAL     = u"sequential";
+  static constexpr UStringView COMPILER_SEPARABLE_VAL      = u"separable";
+  static constexpr UStringView COMPILER_IDENTITY_ELEM      = u"i";
+  static constexpr UStringView COMPILER_IDENTITYGROUP_ELEM = u"ig";
+  static constexpr UStringView COMPILER_JOIN_ELEM          = u"j";
+  static constexpr UStringView COMPILER_BLANK_ELEM         = u"b";
+  static constexpr UStringView COMPILER_POSTGENERATOR_ELEM = u"a";
+  static constexpr UStringView COMPILER_GROUP_ELEM         = u"g";
+  static constexpr UStringView COMPILER_LEMMA_ATTR         = u"lm";
+  static constexpr UStringView COMPILER_IGNORE_ATTR        = u"i";
+  static constexpr UStringView COMPILER_IGNORE_YES_VAL     = u"yes";
+  static constexpr UStringView COMPILER_ALT_ATTR           = u"alt";
+  static constexpr UStringView COMPILER_V_ATTR             = u"v";
+  static constexpr UStringView COMPILER_VL_ATTR            = u"vl";
+  static constexpr UStringView COMPILER_VR_ATTR            = u"vr";
+  static constexpr UStringView COMPILER_WEIGHT_ATTR        = u"w";
+  static constexpr UStringView COMPILER_TEXT_NODE          = u"#text";
+  static constexpr UStringView COMPILER_COMMENT_NODE       = u"#comment";
+  static constexpr UStringView COMPILER_ACX_ANALYSIS_ELEM  = u"analysis-chars";
+  static constexpr UStringView COMPILER_ACX_CHAR_ELEM      = u"char";
+  static constexpr UStringView COMPILER_ACX_EQUIV_CHAR_ELEM= u"equiv-char";
+  static constexpr UStringView COMPILER_ACX_VALUE_ATTR     = u"value";
+  static constexpr UStringView COMPILER_LSX_WB_ELEM        = u"d";
+  static constexpr UStringView COMPILER_LSX_CHAR_ELEM      = u"w";
+  static constexpr UStringView COMPILER_LSX_TAG_ELEM       = u"t";
+  static constexpr UStringView COMPILER_LSX_SPACE_ATTR     = u"space";
+  static constexpr UStringView COMPILER_LSX_SPACE_YES_VAL  = u"yes";
+  static constexpr UStringView COMPILER_LSX_SPACE_NO_VAL   = u"no";
 
   /**
    * Constructor
@@ -391,12 +371,12 @@ public:
   /**
    * Compile dictionary to letter transducers
    */
-  void parse(std::string const &file, UString const &dir);
+  void parse(std::string const &file, UStringView dir);
 
   /**
    * Read ACX file
    */
-  void parseACX(std::string const &file, UString const &dir);
+  void parseACX(std::string const &file, UStringView dir);
 
 
   /**
@@ -429,27 +409,27 @@ public:
    * Set the alt value to use in compilation
    * @param a the value
    */
-  void setAltValue(UString const &a);
+  void setAltValue(UStringView a);
 
   /**
    * Set the variant value to use in compilation
    * @param v the value
    */
-  void setVariantValue(UString const &v);
+  void setVariantValue(UStringView v);
 
   /**
    * Set the variant_left value to use in compilation
    * @param v the value
    */
-  void setVariantLeftValue(UString const &v);
+  void setVariantLeftValue(UStringView v);
 
   /**
    * Set the variant_right value to use in compilation
    * @param v the value
    */
-  void setVariantRightValue(UString const &v);
+  void setVariantRightValue(UStringView v);
 
-  void setEntryDebugging(const bool b);
+  void setEntryDebugging(bool b);
 };
 
 

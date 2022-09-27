@@ -70,13 +70,14 @@ Alphabet::copy(Alphabet const &a)
 }
 
 void
-Alphabet::includeSymbol(UString const &s)
+Alphabet::includeSymbol(UStringView s)
 {
   if(slexic.find(s) == slexic.end())
   {
     int32_t slexic_size = slexic.size();
-    slexic[s] = -(slexic_size+1);
-    slexicinv.push_back(s);
+    UString st{s};
+    slexic[st] = -(slexic_size+1);
+    slexicinv.push_back(st);
   }
 }
 
@@ -95,13 +96,18 @@ Alphabet::operator()(int32_t const c1, int32_t const c2)
 }
 
 int32_t
-Alphabet::operator()(UString const &s)
+Alphabet::operator()(UStringView s)
 {
-  return slexic[s];
+  // While the documentation says this assumes existence, there are clearly code paths that call it with an unknown symbol and thus get 0 back AND create an entry for that 0. Changing it to just return 0 still passes all tests.
+  auto it = slexic.find(s);
+  if (it == slexic.end()) {
+    return 0;
+  }
+  return it->second;
 }
 
 int32_t
-Alphabet::operator()(UString const &s) const
+Alphabet::operator()(UStringView s) const
 {
   auto it = slexic.find(s);
   if (it == slexic.end()) {
@@ -111,7 +117,7 @@ Alphabet::operator()(UString const &s) const
 }
 
 bool
-Alphabet::isSymbolDefined(const UString& s) const
+Alphabet::isSymbolDefined(UStringView s) const
 {
   return slexic.find(s) != slexic.end();
 }
@@ -219,7 +225,7 @@ Alphabet::writeSymbol(int32_t const symbol, UFILE *output) const
 }
 
 void
-Alphabet::getSymbol(UString &result, int32_t const symbol, bool uppercase) const
+Alphabet::getSymbol(UString &result, int32_t symbol, bool uppercase) const
 {
   if (symbol == 0) {
     return;
@@ -233,13 +239,13 @@ Alphabet::getSymbol(UString &result, int32_t const symbol, bool uppercase) const
 }
 
 bool
-Alphabet::isTag(int32_t const symbol) const
+Alphabet::isTag(int32_t symbol) const
 {
   return symbol < 0;
 }
 
 std::pair<int32_t, int32_t> const &
-Alphabet::decode(int32_t const code) const
+Alphabet::decode(int32_t code) const
 {
   return spairinv[code];
 }
@@ -255,7 +261,7 @@ Alphabet::symbolsWhereLeftIs(UChar32 l) const {
   return eps;
 }
 
-void Alphabet::setSymbol(const int32_t symbol, const UString& newSymbolString) {
+void Alphabet::setSymbol(int32_t symbol, UStringView newSymbolString) {
   //Should be a special character!
   if (symbol < 0) slexicinv[-symbol-1] = newSymbolString;
 }
@@ -302,19 +308,19 @@ Alphabet::createLoopbackSymbols(std::set<int32_t> &symbols, const Alphabet &basi
 }
 
 std::vector<int32_t>
-Alphabet::tokenize(const UString& str) const
+Alphabet::tokenize(UStringView str) const
 {
   std::vector<int32_t> ret;
   size_t end = str.size();
   size_t i = 0;
   UChar32 c;
   while (i < end) {
-    U16_NEXT(str.c_str(), i, end, c);
+    U16_NEXT(str.data(), i, end, c);
     if (c == '\\') {
     } else if (c == '<') {
       size_t j = i;
       while (c != '>' && j < end) {
-        U16_NEXT(str.c_str(), j, end, c);
+        U16_NEXT(str.data(), j, end, c);
       }
       if (c == '>') {
         ret.push_back(operator()(str.substr(i-1, j-i+1)));
@@ -328,7 +334,7 @@ Alphabet::tokenize(const UString& str) const
 }
 
 bool
-Alphabet::sameSymbol(const int32_t tsym, const Alphabet& other, int32_t osym,
+Alphabet::sameSymbol(int32_t tsym, const Alphabet& other, int32_t osym,
                      bool allow_anys) const
 {
   // if it's a letter, then it's equal across alphabets
@@ -338,10 +344,10 @@ Alphabet::sameSymbol(const int32_t tsym, const Alphabet& other, int32_t osym,
     return true;
   }
   if (allow_anys &&
-      ((tsym < 0 && this->slexicinv[-tsym-1] == "<ANY_CHAR>"_u && osym > 0) ||
-       (tsym < 0 && this->slexicinv[-tsym-1] == "<ANY_TAG>"_u && osym < 0) ||
-       (osym < 0 && other.slexicinv[-osym-1] == "<ANY_CHAR>"_u && tsym > 0) ||
-       (osym < 0 && other.slexicinv[-osym-1] == "<ANY_TAG>"_u && tsym < 0))) {
+      ((tsym < 0 && this->slexicinv[-tsym-1] == u"<ANY_CHAR>"_uv && osym > 0) ||
+       (tsym < 0 && this->slexicinv[-tsym-1] == u"<ANY_TAG>"_uv && osym < 0) ||
+       (osym < 0 && other.slexicinv[-osym-1] == u"<ANY_CHAR>"_uv && tsym > 0) ||
+       (osym < 0 && other.slexicinv[-osym-1] == u"<ANY_TAG>"_uv && tsym < 0))) {
     return true;
   }
   return false;

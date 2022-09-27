@@ -19,7 +19,7 @@ lttoolbox_module = Extension(
     swig_opts = ["-c++", '-I..', "-I@top_srcdir@", "-Wall"],
     include_dirs=['@top_srcdir@', '@top_srcdir@/lttoolbox'] + '@LIBXML_CFLAGS@'.replace('-I', '').split() + '@ICU_CFLAGS@'.replace('-I', '').split(),
     library_dirs=['@top_srcdir@/lttoolbox/.libs'],
-	libraries=['lttoolbox@VERSION_MAJOR@', 'xml2', 'icuio', 'icui18n', 'icuuc', 'icudata'],
+	libraries=['lttoolbox', 'xml2', 'icuio', 'icui18n', 'icuuc', 'icudata'],
     extra_compile_args=compile_args,
     extra_link_args=link_args,
 )

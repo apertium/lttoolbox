@@ -28,7 +28,6 @@ xmlNode* load_xml(const char* fname);
 void error_and_die(xmlNode* node, const char* fmt, ...);
 
 UString getattr(xmlNode* node, const char* attr);
-UString getattr(xmlNode* node, const UString& attr, const UString& fallback);
-UString getattr(xmlNode* node, const UString& attr);
+UString getattr(xmlNode* node, UStringView attr, UStringView fallback = u"");
 
 #endif

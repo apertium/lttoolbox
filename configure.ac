@@ -1,22 +1,20 @@
 AC_PREREQ(2.52)
 
 m4_define([PKG_VERSION_MAJOR], [3])
-m4_define([PKG_VERSION_MINOR], [6])
-m4_define([PKG_VERSION_PATCH], [10])
-m4_include([m4/ax_pthread.m4])
+m4_define([PKG_VERSION_MINOR], [7])
+m4_define([PKG_VERSION_PATCH], [0])
+
+# Bump if the ABI (not API) changed in a backwards-incompatible manner
+m4_define([PKG_VERSION_ABI], [3])
 
 AC_INIT([lttoolbox], [PKG_VERSION_MAJOR.PKG_VERSION_MINOR.PKG_VERSION_PATCH], [apertium-stuff@lists.sourceforge.net], [lttoolbox], [https://wiki.apertium.org/wiki/Lttoolbox])
 
 VERSION=$PACKAGE_VERSION
-VERSION_MAJOR=PKG_VERSION_MAJOR
-VERSION_API=PKG_VERSION_MAJOR.PKG_VERSION_MINOR
-SOVERSION=1:0:0
+VERSION_ABI=PKG_VERSION_ABI
 
 AC_SUBST(PACKAGE_NAME)
 AC_SUBST(PACKAGE_VERSION)
-AC_SUBST(VERSION_MAJOR)
-AC_SUBST(VERSION_API)
-AC_SUBST(SOVERSION)
+AC_SUBST(VERSION_ABI)
 
 AM_INIT_AUTOMAKE
 AC_CONFIG_MACRO_DIR([m4])
@@ -72,12 +70,12 @@ AM_CONDITIONAL([WINDOWS], [test x$version_type = xwindows])
 
 # Require highest supported C++ standard
 AC_LANG(C++)
-for version in 23 2b 20 2a 17 1z 14 1y; do
+for version in 23 2b 20 2a 17; do
   version_flag="-std=c++${version}"
   AX_CHECK_COMPILE_FLAG([${version_flag}], [break], [version_flag=none])
 done
 AS_IF([test "$version_flag" == none], [
-  AC_MSG_ERROR([Could not enable at least C++1y (C++14) - upgrade your compiler])
+  AC_MSG_ERROR([Could not enable at least C++17 - upgrade your compiler])
 ])
 CXXFLAGS="$CXXFLAGS ${version_flag}"
 

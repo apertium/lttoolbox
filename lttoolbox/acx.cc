@@ -54,7 +54,7 @@ std::map<int32_t, sorted_vector<int32_t>> readACX(const char* file)
       vec.insert(get_val(equiv_node));
     }
     if (!vec.empty()) {
-      acx.insert(std::make_pair(key, vec));
+      acx.insert({key, vec});
     }
   }
   return acx;

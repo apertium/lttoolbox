@@ -101,14 +101,14 @@ private:
    * @param name the name of the attribute
    * @return the value of the attribute
    */
-  UString attrib(UString const &name);
+  UString attrib(UStringView name);
 
   /**
    * Skip all document #text nodes before "elem"
    * @param name the name of the node
    * @param elem the name of the expected node
    */
-  void skip(UString &name, UString const &elem);
+  void skip(UString &name, UStringView elem);
 
   /**
    * Skip all blank #text nodes before "name"
@@ -120,7 +120,7 @@ private:
    * Force an element to be empty, and check for it
    * @param name the element
    */
-  void requireEmptyError(UString const &name);
+  void requireEmptyError(UStringView name);
 
   /**
    * Force an attribute to be specified, amd check for it
@@ -128,8 +128,7 @@ private:
    * @param attrname the name of the attribute
    * @param elemname the parent of the attribute
    */
-  void requireAttribute(UString const &value, UString const &attrname,
-                        UString const &elemname);
+  void requireAttribute(UStringView value, UStringView attrname, UStringView elemname);
 
   /**
    * True if all the elements in the current node are blanks
@@ -154,21 +153,21 @@ public:
    * Constants to represent the element and the attributes of
    * translation memories in TMX format
    */
-  static UString const TMX_COMPILER_TMX_ELEM;
-  static UString const TMX_COMPILER_HEADER_ELEM;
-  static UString const TMX_COMPILER_BODY_ELEM;
-  static UString const TMX_COMPILER_TU_ELEM;
-  static UString const TMX_COMPILER_TUV_ELEM;
-  static UString const TMX_COMPILER_HI_ELEM;
-  static UString const TMX_COMPILER_PH_ELEM;
-  static UString const TMX_COMPILER_XMLLANG_ATTR;
-  static UString const TMX_COMPILER_LANG_ATTR;
-  static UString const TMX_COMPILER_SEG_ELEM;
-  static UString const TMX_COMPILER_PROP_ELEM;
-  static UString const TMX_COMPILER_TEXT_NODE;
-  static UString const TMX_COMPILER_COMMENT_NODE;
-  static UString const TMX_COMPILER_NUMBER_TAG;
-  static UString const TMX_COMPILER_BLANK_TAG;
+  static constexpr UStringView TMX_COMPILER_TMX_ELEM     = u"tmx";
+  static constexpr UStringView TMX_COMPILER_HEADER_ELEM  = u"header";
+  static constexpr UStringView TMX_COMPILER_BODY_ELEM    = u"body";
+  static constexpr UStringView TMX_COMPILER_TU_ELEM      = u"tu";
+  static constexpr UStringView TMX_COMPILER_TUV_ELEM     = u"tuv";
+  static constexpr UStringView TMX_COMPILER_HI_ELEM      = u"hi";
+  static constexpr UStringView TMX_COMPILER_PH_ELEM      = u"ph";
+  static constexpr UStringView TMX_COMPILER_XMLLANG_ATTR = u"xml:lang";
+  static constexpr UStringView TMX_COMPILER_LANG_ATTR    = u"lang";
+  static constexpr UStringView TMX_COMPILER_SEG_ELEM     = u"seg";
+  static constexpr UStringView TMX_COMPILER_PROP_ELEM    = u"prop";
+  static constexpr UStringView TMX_COMPILER_TEXT_NODE    = u"#text";
+  static constexpr UStringView TMX_COMPILER_COMMENT_NODE = u"#comment";
+  static constexpr UStringView TMX_COMPILER_NUMBER_TAG   = u"<n>";
+  static constexpr UStringView TMX_COMPILER_BLANK_TAG    = u"<b>";
 
 
   /**
@@ -184,7 +183,7 @@ public:
   /**
    * Compile dictionary to letter transducers
    */
-  void parse(std::string const &file, UString const &lo, UString const &lm);
+  void parse(std::string const &file, UStringView lo, UStringView lm);
 
   /**
    * Write the result of compilation
@@ -196,13 +195,13 @@ public:
    * Set origin language inner code
    * @param code the code of the origin language into the TMX file being compiled
    */
-  void setOriginLanguageCode(UString const &code);
+  void setOriginLanguageCode(UStringView code);
 
   /**
    * Set meta language inner code
    * @param code the code of the meta language into the TMX file being compiled
    */
-  void setMetaLanguageCode(UString const &code);
+  void setMetaLanguageCode(UStringView code);
 
 };
 

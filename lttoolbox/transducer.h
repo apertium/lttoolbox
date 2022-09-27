@@ -87,20 +87,20 @@ public:
   /**
    * String constants
    */
-  static UString const HFST_EPSILON_SYMBOL_SHORT;
-  static UString const HFST_EPSILON_SYMBOL_LONG;
-  static UString const LTTB_EPSILON_SYMBOL;
-  static UString const HFST_SPACE_SYMBOL;
-  static UString const HFST_TAB_SYMBOL;
-  static UString const GROUP_SYMBOL;
-  static UString const JOIN_SYMBOL;
-  static UString const ANY_TAG_SYMBOL;
-  static UString const ANY_CHAR_SYMBOL;
-  static UString const LSX_BOUNDARY_SYMBOL;
-  static UString const LSX_BOUNDARY_SPACE_SYMBOL;
-  static UString const LSX_BOUNDARY_NO_SPACE_SYMBOL;
-  static UString const COMPOUND_ONLY_L_SYMBOL;
-  static UString const COMPOUND_R_SYMBOL;
+  static constexpr UStringView HFST_EPSILON_SYMBOL_SHORT   = u"@0@";
+  static constexpr UStringView HFST_EPSILON_SYMBOL_LONG    = u"@_EPSILON_SYMBOL_@";
+  static constexpr UStringView LTTB_EPSILON_SYMBOL         = u"ε";
+  static constexpr UStringView HFST_SPACE_SYMBOL           = u"@_SPACE_@";
+  static constexpr UStringView HFST_TAB_SYMBOL             = u"@_TAB_@";
+  static constexpr UStringView GROUP_SYMBOL                = u"#";
+  static constexpr UStringView JOIN_SYMBOL                 = u"+";
+  static constexpr UStringView ANY_TAG_SYMBOL              = u"<ANY_TAG>";
+  static constexpr UStringView ANY_CHAR_SYMBOL             = u"<ANY_CHAR>";
+  static constexpr UStringView LSX_BOUNDARY_SYMBOL         = u"<$>";
+  static constexpr UStringView LSX_BOUNDARY_SPACE_SYMBOL   = u"<$_>";
+  static constexpr UStringView LSX_BOUNDARY_NO_SPACE_SYMBOL= u"<$->";
+  static constexpr UStringView COMPOUND_ONLY_L_SYMBOL      = u"<compound-only-L>";
+  static constexpr UStringView COMPOUND_R_SYMBOL           = u"<compound-R>";
 
   /**
    * Constructor
@@ -139,7 +139,7 @@ public:
    * @param weight the weight value for the new transduction
    * @return the target state
    */
-  int insertSingleTransduction(int const tag, int const source, double const weight = 0.0000);
+  int insertSingleTransduction(int tag, int source, double weight = 0.0000);
 
   /**
    * Insertion of a single transduction, forcing create a new target
@@ -149,7 +149,7 @@ public:
    * @param weight the weight value for the new transduction
    * @return the target state
    */
-  int insertNewSingleTransduction(int const tag, int const source, double const weight = 0.0000);
+  int insertNewSingleTransduction(int tag, int source, double weight = 0.0000);
 
   /**
    * Insertion of a transducer in a given source state, unifying their
@@ -159,8 +159,8 @@ public:
    * @param epsilon_tag the epsilon tag
    * @return the new target state
    */
-  int insertTransducer(int const source, Transducer &t,
-                       int const epsilon_tag = 0);
+  int insertTransducer(int source, Transducer &t,
+                       int epsilon_tag = 0);
 
   /**
    * Link two existing states by a transduction
@@ -169,21 +169,21 @@ public:
    * @param tag the tag of the transduction
    * @param weight the weight value for the new transduction
    */
-  void linkStates(int const source, int const target, int const tag, double const weight = 0.0000);
+  void linkStates(int source, int target, int tag, double weight = 0.0000);
 
   /**
    * Test if the state is a final state
    * @param state the state
    * @return true if is a final state
    */
-  bool isFinal(int const state) const;
+  bool isFinal(int state) const;
 
   /**
    * Test if a pattern is recognised by the FST
    * @param a widestring of the pattern to be recognised
    * @return true if the pattern is recognised by the transducer
    */
-  bool recognise(const UString& pattern, Alphabet &a, FILE *err = stderr) const;
+  bool recognise(UStringView pattern, Alphabet &a, FILE *err = stderr) const;
 
   /**
    * Set the state as a final or not, yes by default
@@ -191,7 +191,7 @@ public:
    * @param weight the weight value for the final state
    * @param value if true, the state is set as final state
    */
-  void setFinal(int const state, double const weight = 0.0000, bool value = true);
+  void setFinal(int state, double weight = 0.0000, bool value = true);
 
   /**
    * Returns the initial state of a transducer
@@ -205,7 +205,7 @@ public:
    * @param epsilon_tag the tag to take as epsilon
    * @return the epsilon-connected states
    */
-  std::set<int> closure(int const state, int const epsilon_tag = 0) const;
+  std::set<int> closure(int state, int epsilon_tag = 0) const;
 
   /**
    * Returns the epsilon closure of a given state
@@ -213,15 +213,15 @@ public:
    * @param epsilon_tags the tags to treat as epsilon
    * @return the epsilon-connected states
    */
-  std::set<int> closure(int const state, std::set<int> const &epsilon_tags) const;
+  std::set<int> closure(int state, std::set<int> const &epsilon_tags) const;
 
-  std::vector<sorted_vector<int>> closure_all(const int epsilon_tag) const;
+  std::vector<sorted_vector<int>> closure_all(int epsilon_tag) const;
 
   /**
    * Join all finals in one using epsilon transductions
    * @param epsilon_tag the tag to take as epsilon
    */
-  void joinFinals(int const epsilon_tag = 0);
+  void joinFinals(int epsilon_tag = 0);
 
 
   /**
@@ -238,26 +238,26 @@ public:
    * Reverse all the transductions of a transducer
    * @param epsilon_tag the tag to take as epsilon
    */
-  void reverse(int const epsilon_tag = 0);
+  void reverse(int epsilon_tag = 0);
 
   /**
    * Print all the transductions of a transducer in ATT format
    * @param epsilon_tag the tag to take as epsilon
    * @param hfst if true, use HFST-compatible escape characters
    */
-  void show(Alphabet const &a, UFILE *output, int const epsilon_tag = 0, bool hfst = false) const;
+  void show(Alphabet const &a, UFILE *output, int epsilon_tag = 0, bool hfst = false) const;
 
   /**
    * Determinize the transducer
    * @param epsilon_tag the tag to take as epsilon
    */
-  void determinize(int const epsilon_tag = 0);
+  void determinize(int epsilon_tag = 0);
 
   /**
    * Minimize = reverse + determinize + reverse + determinize
    * @param epsilon_tag the tag to take as epsilon
    */
-  void minimize(int const epsilon_tag = 0);
+  void minimize(int epsilon_tag = 0);
 
 
   /**
@@ -265,20 +265,20 @@ public:
    * empty transductions)
    * @param epsilon_tag the tag to take as epsilon
    */
-  void optional(int const epsilon_tag = 0);
+  void optional(int epsilon_tag = 0);
 
   /**
    * Make a transducer cyclic (link final states with initial state with
    * empty transductions)
    * @param epsilon_tag the tag to take as epsilon
    */
-  void oneOrMore(int const epsilon_tag = 0);
+  void oneOrMore(int epsilon_tag = 0);
 
   /**
    * zeroOrMore = oneOrMore + optional
    * @param epsilon_tag the tag to take as epsilon
    */
-  void zeroOrMore(int const epsilon_tag = 0);
+  void zeroOrMore(int epsilon_tag = 0);
 
   /**
    * Clear transducer
@@ -314,27 +314,27 @@ public:
    * @param state the state to check
    * @return true if the state is empty
    */
-  bool isEmpty(int const state) const;
+  bool isEmpty(int state) const;
 
   /**
    * Returns the number of transitions from a given state
    * @return the number of transitions
    */
-  int getStateSize(int const state);
+  int getStateSize(int state);
 
   /**
    * Write method
    * @param output the stream to write to
    * @param decalage offset to sum to the tags
    */
-  void write(FILE *output, int const decalage = 0);
+  void write(FILE *output, int decalage = 0);
 
   /**
    * Read method
    * @param input the stream to read from
    * @param decalage offset to sum to the tags
    */
-  void read(FILE *input, int const decalage = 0);
+  void read(FILE *input, int decalage = 0);
 
   void serialise(std::ostream &serialised) const;
   void deserialise(std::istream &serialised);
@@ -348,7 +348,7 @@ public:
    */
   void unionWith(Alphabet &my_a,
                  Transducer &t,
-                 int const epsilon_tag = 0);
+                 int epsilon_tag = 0);
 
   /**
    * Converts this class into a "prefix transducer", ie. for any final
@@ -364,7 +364,7 @@ public:
    * @return the prefix transducer
    */
   Transducer appendDotStar(std::set<int> const &loopback_symbols,
-                           int const epsilon_tag = 0);
+                           int epsilon_tag = 0);
 
 
   /**
@@ -377,7 +377,7 @@ public:
    * @return the prefix transducer
    */
   Transducer moveLemqsLast(Alphabet const &alphabet,
-                           int const epsilon_tag = 0);
+                           int epsilon_tag = 0);
   /**
    * Helper for moveLemqsLast. Starting from a certain state, make all
    * the tags go before the non-tags, so if " bar<tag1><tag2>" is a
@@ -393,7 +393,7 @@ public:
   Transducer copyWithTagsFirst(int start,
                                int group_label,
                                Alphabet const &alphabet,
-                               int const epsilon_tag = 0);
+                               int epsilon_tag = 0);
 
   /**
    * Intersect with a bidix transducer, retaining only those analyses
@@ -419,7 +419,7 @@ public:
   Transducer trim(Transducer &bi,
                        Alphabet const &my_a,
                        Alphabet const &bi_a,
-                       int const epsilon_tag = 0);
+                       int epsilon_tag = 0);
 
   /**
    * Composes two finite-state transducers
@@ -443,7 +443,7 @@ public:
                      Alphabet const &g_a,
                      bool f_inverted = false,
                      bool g_anywhere = false,
-                     int const epsilon_tag = 0);
+                     int epsilon_tag = 0);
 
   /**
    * Helper for creating the arc label when composing g ∘ f, used by compose.

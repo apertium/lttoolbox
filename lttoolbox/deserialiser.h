@@ -119,7 +119,7 @@ Deserialiser<std::pair<first_type, second_type> >::deserialise(
     std::istream &Stream_) {
   first_type a = Deserialiser<typename std::remove_const<first_type>::type>::deserialise(Stream_);
   second_type b = Deserialiser<typename std::remove_const<second_type>::type>::deserialise(Stream_);
-  return std::make_pair(a, b);
+  return {a, b};
 }
 
 template <typename integer_type>
