@@ -83,7 +83,7 @@ void process(const UString& pattern, std::map<UString, Transducer>& trans,
   other.setFinal(state);
   std::set<std::pair<UString, UString>> outset;
   for (auto& it : trans) {
-    Transducer inter = it.second.intersect(other, alpha, alpha);
+    Transducer inter = it.second.trim(other, alpha, alpha);
     if (!inter.getFinals().empty()) {
       std::set<int> states;
       std::vector<int32_t> syms;

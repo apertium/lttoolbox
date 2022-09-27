@@ -62,7 +62,7 @@ trim(FILE* file_mono, FILE* file_bi, FILE* file_out)
       continue;
     }
     // TODO: parallelise this loop (as in lt_compose.cc)
-    Transducer trimmed = it.second.intersect(moved_transducer,
+    Transducer trimmed = it.second.trim(moved_transducer,
                                              alph_mono,
                                              alph_prefix);
     if (trimmed.hasNoFinals()) {

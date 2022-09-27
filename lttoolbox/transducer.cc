@@ -1063,7 +1063,7 @@ Transducer::moveLemqsLast(Alphabet const &alphabet,
 
 
 Transducer
-Transducer::intersect(Transducer &trimmer,
+Transducer::trim(Transducer &trimmer,
                       Alphabet const &this_a,
                       Alphabet const &trimmer_a,
                       int const epsilon_tag)

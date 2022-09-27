@@ -397,20 +397,29 @@ public:
                                int const epsilon_tag = 0);
 
   /**
-   * Intersects two finite-state transducers
+   * Intersect with a bidix transducer, retaining only those analyses
+   * which would pass through the bidix, respecting multiwords.
+   *
+   * This is "intersection-and-then-some" – we assume this transducer
+   * is a monolingual analyser, and &t is a bidix, where outputs from
+   * the analyser would go through apertium-pretransfer before being
+   * sent to the bidix. So it has to handle the same transformations
+   * that apertium-pretransfer applies, e.g. "^a<n>+b<n>#c$" from the
+   * monodix analyser has to match "^a#c<n>$" and "^b<n>$" in the
+   * bidix.
    *
    * The returned transducer is not minimized! Minimization will exit
    * with failure if there are no finals, but we might want to
    * continue with intersecting the other sections.
    *
-   * @param t the Transducer with which this class is intersected
+   * @param bi the Transducer with which this class is intersected
    * @param my_a the alphabet of this transducer
-   * @param t_a the alphabet of the transducer t
+   * @param bi_a the alphabet of the transducer bi
    * @return the trimmed transducer
    */
-  Transducer intersect(Transducer &t,
+  Transducer trim(Transducer &bi,
                        Alphabet const &my_a,
-                       Alphabet const &t_a,
+                       Alphabet const &bi_a,
                        int const epsilon_tag = 0);
 
   /**
