@@ -114,9 +114,6 @@ public:
    * @param s symbol
    * @return true if defined
    */
-  bool isSymbolDefined(UString const &s);
-  // TODO: This should always be const.
-  // But binary compatibility, so have 2 copies for now.
   bool isSymbolDefined(UString const &s) const;
 
   /**
@@ -129,7 +126,7 @@ public:
    * Write method.
    * @param output output stream.
    */
-  void write(FILE *output);
+  void write(FILE *output) const;
 
   /**
    * Read method.
@@ -168,7 +165,7 @@ public:
    * @param symbol the code of the symbol to set
    * @param newSymbolString the new string for this symbol
    */
-  void setSymbol(int32_t symbol, UString newSymbolString);
+  void setSymbol(const int32_t symbol, const UString& newSymbolString);
 
   /**
    * Note: both the symbol int and int-pair are specific to this alphabet instance.
@@ -198,7 +195,7 @@ public:
    * @param s whether to loopback on the left or right side of the symbol-pair
    * @param nonTagsToo by default only tags are included, but if this is true we include all symbols
    */
-  void createLoopbackSymbols(std::set<int32_t> &symbols, Alphabet &basis, Side s = right, bool nonTagsToo = false);
+  void createLoopbackSymbols(std::set<int32_t> &symbols, const Alphabet &basis, Side s = right, bool nonTagsToo = false);
 
   std::vector<int32_t> tokenize(const UString& str) const;
 

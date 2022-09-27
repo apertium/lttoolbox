@@ -111,12 +111,6 @@ Alphabet::operator()(UString const &s) const
 }
 
 bool
-Alphabet::isSymbolDefined(UString const &s)
-{
-  return slexic.find(s) != slexic.end();
-}
-
-bool
 Alphabet::isSymbolDefined(const UString& s) const
 {
   return slexic.find(s) != slexic.end();
@@ -129,7 +123,7 @@ Alphabet::size() const
 }
 
 void
-Alphabet::write(FILE *output)
+Alphabet::write(FILE *output) const
 {
   // First, we write the taglist
   Compression::multibyte_write(slexicinv.size(), output);  // taglist size
@@ -261,13 +255,13 @@ Alphabet::symbolsWhereLeftIs(UChar32 l) const {
   return eps;
 }
 
-void Alphabet::setSymbol(int32_t symbol, UString newSymbolString) {
+void Alphabet::setSymbol(const int32_t symbol, const UString& newSymbolString) {
   //Should be a special character!
   if (symbol < 0) slexicinv[-symbol-1] = newSymbolString;
 }
 
 void
-Alphabet::createLoopbackSymbols(std::set<int32_t> &symbols, Alphabet &basis, Side s, bool nonTagsToo)
+Alphabet::createLoopbackSymbols(std::set<int32_t> &symbols, const Alphabet &basis, Side s, bool nonTagsToo)
 {
   // Non-tag letters get the same int32_t in spairinv across alphabets,
   // but tags may differ, so do those separately afterwards.

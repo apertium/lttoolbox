@@ -526,7 +526,7 @@ Transducer::isEmpty(int const state) const
 }
 
 // Determine whether any weights are non-default (0)
-bool Transducer::weighted() {
+bool Transducer::weighted() const {
   for (auto& it : finals) {
     if (it.second != default_weight) {
       return true;
@@ -791,12 +791,6 @@ Transducer::show(Alphabet const &alphabet, UFILE *output, int const epsilon_tag,
   }
 }
 
-void
-Transducer::show(Alphabet const &alphabet, UFILE *output, int const epsilon_tag) const
-{
-  return show(alphabet, output, epsilon_tag, false);
-}
-
 int
 Transducer::getStateSize(int const state)
 {
@@ -814,7 +808,7 @@ Transducer::getStateSize(int const state)
 }
 
 bool
-Transducer::recognise(UString pattern, Alphabet &a, FILE *err)
+Transducer::recognise(const UString& pattern, Alphabet &a, FILE *err) const
 {
   bool accepted = false;
   std::set<int> states;
@@ -829,7 +823,7 @@ Transducer::recognise(UString pattern, Alphabet &a, FILE *err)
     //fprintf(err, "step: %ls %lc (%d)\n", pattern.c_str(), *it, sym);
     for(auto& it2 : states)
     {
-      auto& p = transitions[it2];
+      auto& p = transitions.at(it2);
       // For each of the transitions in the state
 
       for(auto& it3 : p)

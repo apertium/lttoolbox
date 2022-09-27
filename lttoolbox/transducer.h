@@ -129,7 +129,7 @@ public:
    * Determine whether any weight is non-default
    * @return bool true or false
    */
-  bool weighted();
+  bool weighted() const;
 
   /**
    * Insertion of a single transduction, creating a new target state
@@ -183,7 +183,7 @@ public:
    * @param a widestring of the pattern to be recognised
    * @return true if the pattern is recognised by the transducer
    */
-  bool recognise(UString pattern, Alphabet &a, FILE *err = stderr);
+  bool recognise(const UString& pattern, Alphabet &a, FILE *err = stderr) const;
 
   /**
    * Set the state as a final or not, yes by default
@@ -242,11 +242,10 @@ public:
 
   /**
    * Print all the transductions of a transducer in ATT format
-   * @param hfst if true, use HFST-compatible escape characters
    * @param epsilon_tag the tag to take as epsilon
+   * @param hfst if true, use HFST-compatible escape characters
    */
   void show(Alphabet const &a, UFILE *output, int const epsilon_tag = 0, bool hfst = false) const;
-  void show(Alphabet const &a, UFILE *output, int const epsilon_tag = 0) const;
 
   /**
    * Determinize the transducer
@@ -454,7 +453,7 @@ public:
   inline
   int32_t composeLabel(Alphabet &f_a, Alphabet const &g_a,
                        int32_t f_input, int32_t g_right,
-                       bool f_inverted)
+                       bool f_inverted) const
   {
     int32_t gf_label;
     if (g_right >= 0) { // optimisation: non-symbols are equal across alphabets
