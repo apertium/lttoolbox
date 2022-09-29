@@ -85,6 +85,24 @@ You should not trim a generator unless you have a
 .Em very
 simple translator pipeline,
 since the output of bidix seldom goes unchanged through transfer.
+.Sh OPTIONS
+.Bl -tag -width Ds
+.It Fl s , Fl Fl match-section
+A section with this name (id@type) in the analyser will only be
+trimmed against a section with the same id in the bidix. (The default
+is to trim all sections of the analyser against all sections of the
+bidix.) Using this option can some times speed up trimming
+considerably. For example, if you have some complicated regular
+expressions, try putting them in a
+
+  <section id="regex" type="standard">
+
+in both .dix files and passing
+.Dq regex@standard
+to \fI--match-section\fP.
+.Pp
+This argument may be used multiple times to specify multiple sections
+that must match by name.
 .Sh FILES
 .Bl -tag -width Ds
 .It Ar analyser_binary
