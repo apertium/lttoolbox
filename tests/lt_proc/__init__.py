@@ -431,5 +431,14 @@ class BufferIndex(ProcTest):
                        "^ab/*ab$",
                        ]
 
+
+class Bigen(ProcTest):
+    """Test that we can run -b with -g before, and -b should override it."""
+    procdix = "data/minimal-mono.dix"
+    procflags = ['-g', '-b', '-z']
+    procdir = "rl"
+    inputs = ["^ab<n><def>$"]
+    expectedOutputs = ["^ab<n><def>/abc$"]
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *
