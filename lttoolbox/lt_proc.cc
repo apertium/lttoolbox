@@ -76,12 +76,12 @@ int main(int argc, char *argv[])
   }
   if (args["surf-bilingual"]) {
     if (cmd && cmd != 'b') cli.print_usage();
-    cmd = 'b';
+    if (!cmd) cmd = 'b';
     fstp.setBiltransSurfaceForms(true);
   }
   if (args["generation"]) {
     if (cmd && cmd != 'b') cli.print_usage();
-    cmd = 'g';
+    if (!cmd) cmd = 'g';
   }
   if (args["decompose-nouns"]) {
     if (cmd) cli.print_usage();
