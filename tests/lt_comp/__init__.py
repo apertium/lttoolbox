@@ -71,6 +71,23 @@ class CompLSX(unittest.TestCase, PrintTest):
 14	0.000000
 '''
 
+
+class VariantNoTest(unittest.TestCase, ProcTest):
+    procdix = 'data/variants.dix'
+    procdir = 'lr'
+    compflags = []
+    inputs = ['y']
+    expectedOutputs = ['^y/*y$']
+
+
+class VariantHoTest(unittest.TestCase, ProcTest):
+    procdix = 'data/variants.dix'
+    procdir = 'lr'
+    compflags = ['--var-right="ho"']
+    inputs = ['y']
+    expectedOutputs = ['^y/y<n><ind>$']
+
+
 class RestrictTest(unittest.TestCase, ProcTest):
     procdix = 'data/variants.dix'
     procdir = 'lr'

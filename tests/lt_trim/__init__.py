@@ -142,7 +142,7 @@ class Empty(TrimProcTest):
             self.callProc('lt-trim', [tmpd+"/empty-mono.bin",
                                       tmpd+"/empty-bi.bin",
                                       tmpd+"/empty-trimmed.bin"],
-                          retCode=1)
+                          expectFail=True)
 
 class PlusLemma(TrimProcTest):
     monodix = 'data/plus-lemma-mono.dix'

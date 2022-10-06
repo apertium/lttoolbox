@@ -5,6 +5,7 @@ import signal
 from subprocess import run, call, PIPE, Popen
 from sys import stderr
 from tempfile import mkdtemp
+from typing import List
 
 class Alarm(Exception):
     pass
@@ -63,27 +64,29 @@ class BasicTest:
 
     def compileDix(self, dir, dix, flags=None, binName='compiled.bin',
                    expectFail=False):
-        code = call([os.environ['LTTOOLBOX_PATH']+'/lt-comp']
-                    + (flags or []) + [dir, dix, binName],
-                    stdout=PIPE, stderr=PIPE)
-        if expectFail:
-            self.assertNotEqual(0, code)
-        else:
-            self.assertEqual(0, code)
-        return code == 0
+        return self.callProc('lt-comp',
+                             [dir, dix, binName],
+                             flags,
+                             expectFail)
 
-    def callProc(self, name, bins, flags=None, retCode=0):
+    def callProc(self, name, bins, flags=None, expectFail=False):
         cmd = [os.environ['LTTOOLBOX_PATH']+'/'+name] + (flags or []) + bins
         res = run(cmd, capture_output=True)
-        if res.returncode != retCode:
+        if (res.returncode == 0) == expectFail:
+            print("\nFAILED CMD: " + " ".join(cmd))
             print("\nSTDOUT:", res.stdout)
             print("STDERR:", res.stderr)
-        self.assertEqual(retCode, res.returncode)
+        if expectFail:
+            self.assertNotEqual(res.returncode, 0)
+        else:
+            self.assertEqual(res.returncode, 0)
+
 
 class TempDir:
     def __enter__(self):
         self.tmpd = mkdtemp()
         return self.tmpd
+
     def __exit__(self, *args):
         rmtree(self.tmpd)
 
@@ -121,6 +124,7 @@ class ProcTest(BasicTest):
 
     procdix = "data/minimal-mono.dix"
     procdir = "lr"
+    compflags = []              # type: List[str]
     procflags = ["-z"]
     inputs = [""]
     expectedOutputs = [""]
@@ -130,6 +134,7 @@ class ProcTest(BasicTest):
 
     def compileTest(self, tmpd):
         return self.compileDix(self.procdir, self.procdix,
+                               flags=self.compflags,
                                binName=tmpd+'/compiled.bin',
                                expectFail=self.expectedCompRetCodeFail)
 
