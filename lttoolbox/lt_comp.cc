@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 
   if(opc == "lr")
   {
-    if (have_vr && !have_vl) {
+    if (have_vl) {
       std::cout << "Error: -l specified, but mode is lr" << std::endl;
       cli.print_usage();
     }
@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
   }
   else if(opc == "rl")
   {
-    if (have_vl && !have_vr) {
+    if (have_vr) {
       std::cout << "Error: -r specified, but mode is rl" << std::endl;
       cli.print_usage();
     }
