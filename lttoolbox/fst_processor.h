@@ -60,11 +60,6 @@ private:
   std::map<UString, TransExe> transducers;
 
   /**
-   * Current state of lexical analysis
-   */
-  State current_state;
-
-  /**
    * Initial state of every token
    */
   State initial_state;
@@ -443,6 +438,19 @@ private:
   bool isLastBlankTM = false;
 
   xmlTextReaderPtr reader;
+
+  static constexpr size_t max_case_insensitive_state_size = 65536;
+  /*
+   * Including lowercased versions for every character can potentially create very large states
+   * (See https://github.com/apertium/lttoolbox/issues/167 ). As a sanity-check we don't do
+   * case-insensitive matching if the state size exceeds max_case_insensitive_state_size.
+   *
+   * @return running with --case-sensitive or state size exceeds max
+   */
+  bool beCaseSensitive(const State& state) {
+    return caseSensitive || state.size() >= max_case_insensitive_state_size;
+  }
+
 public:
 
   /*

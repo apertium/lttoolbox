@@ -81,7 +81,7 @@ State::copy(State const &s)
   }
 }
 
-int
+size_t
 State::size() const
 {
   return state.size();

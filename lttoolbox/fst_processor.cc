@@ -903,7 +903,7 @@ FSTProcessor::compoundAnalysis(UString input_word)
   {
     UChar val=input_word[i];
 
-    current_state.step_case(val, caseSensitive);
+    current_state.step_case(val, beCaseSensitive(current_state));
 
     if(current_state.size() > MAX_COMBINATIONS)
     {
@@ -1068,7 +1068,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
     {
       rcx_map_ptr = rcx_map.find(val);
       std::set<int> tmpset = rcx_map_ptr->second;
-      if(!u_isupper(val) || caseSensitive)
+      if(!u_isupper(val) || beCaseSensitive(current_state))
       {
         current_state.step(val, tmpset);
       }
@@ -1087,7 +1087,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
     }
     else
     {
-      current_state.step_case(val, caseSensitive);
+       	    current_state.step_case(val, beCaseSensitive(current_state));
     }
 
     if(current_state.size() != 0)
@@ -1580,7 +1580,7 @@ FSTProcessor::generation(InputFile& input, UFILE *output, GenerationMode mode)
       alphabet.getSymbol(sf,val);
       if(current_state.size() > 0)
       {
-        if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
+        if(!alphabet.isTag(val) && u_isupper(val) && !(beCaseSensitive(current_state)))
         {
           if(mode == gm_carefulcase)
           {
@@ -1621,7 +1621,7 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
   size_t cur_word = 0;
   size_t cur_pos = 0;
   size_t match_pos = 0;
-  current_state = initial_state;
+  State current_state = initial_state;
   UString last_match;
   int space_diff = 0;
 
@@ -1712,7 +1712,7 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
       }
     }
 
-    current_state.step_case_override(sym, caseSensitive);
+    current_state.step_case_override(sym, beCaseSensitive(current_state));
 
     if (current_state.size() == 0 || is_end) {
       if (last_match.empty()) {
@@ -1866,7 +1866,7 @@ FSTProcessor::biltransfull(UStringView input_word, bool with_delim)
     }
     if(current_state.size() != 0)
     {
-      if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
+      if(!alphabet.isTag(val) && u_isupper(val) && !beCaseSensitive(current_state))
       {
         current_state.step(val, u_tolower(val));
       }
@@ -2019,7 +2019,7 @@ FSTProcessor::biltrans(UStringView input_word, bool with_delim)
     }
     if(current_state.size() != 0)
     {
-      if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
+      if(!alphabet.isTag(val) && u_isupper(val) && !beCaseSensitive(current_state))
       {
         current_state.step(val, u_tolower(val));
       }
@@ -2277,7 +2277,7 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
       }
       if(current_state.size() != 0)
       {
-        current_state.step_case(val, caseSensitive);
+        current_state.step_case(val, beCaseSensitive(current_state));
       }
       if(current_state.isFinal(all_finals))
       {
@@ -2376,7 +2376,7 @@ FSTProcessor::biltransWithQueue(UStringView input_word, bool with_delim)
     }
     if(current_state.size() != 0)
     {
-      if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
+      if(!alphabet.isTag(val) && u_isupper(val) && !beCaseSensitive(current_state))
       {
         current_state.step(val, u_tolower(val));
       }
@@ -2541,7 +2541,7 @@ FSTProcessor::biltransWithoutQueue(UStringView input_word, bool with_delim)
     }
     if(current_state.size() != 0)
     {
-      if(!alphabet.isTag(val) && u_isupper(val) && !caseSensitive)
+      if(!alphabet.isTag(val) && u_isupper(val) && !beCaseSensitive(current_state))
       {
         current_state.step(val, u_tolower(val));
       }
@@ -2744,7 +2744,7 @@ FSTProcessor::SAO(InputFile& input, UFILE *output)
       last = input_buffer.getPos();
     }
 
-    current_state.step_case(val, caseSensitive);
+    current_state.step_case(val, beCaseSensitive(current_state));
 
     if(current_state.size() != 0)
     {
