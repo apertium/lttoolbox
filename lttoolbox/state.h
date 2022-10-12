@@ -165,7 +165,7 @@ public:
    * Number of alive transductions
    * @return the size
    */
-  int size() const;
+  size_t size() const;
 
   /**
    * step = apply + epsilonClosure
