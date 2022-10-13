@@ -118,6 +118,56 @@ State::apply_into(std::vector<TNodeState>* new_state, int const input, int index
   return false;
 }
 
+std::multimap<int, Node*> // returns the Node's to be avoided by the following apply_into(alt)
+State::apply_into_upper(std::vector<TNodeState>* new_state, int const input, int index, bool dirty)
+{
+  std::multimap<int, Node*> avoid;
+  std::map<int, Dest>::const_iterator it;
+  it = state[index].where->transitions.find(input);
+  if(it != state[index].where->transitions.end())
+  {
+    for(int j = 0; j != it->second.size; j++)
+    {
+      std::vector<std::pair<int, double>> *new_v = new std::vector<std::pair<int, double>>();
+      *new_v = *(state[index].sequence);
+      if(it->first != 0)
+      {
+        new_v->push_back({it->second.out_tag[j], it->second.out_weight[j]});
+        avoid.emplace(it->first, it->second.dest[j]);
+      }
+      new_state->push_back(TNodeState(it->second.dest[j], new_v, state[index].dirty||dirty));
+    }
+    return avoid;
+  }
+  return avoid;
+}
+
+bool // returns the Node's to be avoided by the following apply_into(alt)
+State::apply_into_upper(std::vector<TNodeState>* new_state, int const input, int index, bool dirty, const std::multimap<int, Node*>& avoid)
+{
+  std::map<int, Dest>::const_iterator it;
+  it = state[index].where->transitions.find(input);
+  if(it != state[index].where->transitions.end())
+  {
+    const auto& a = avoid.equal_range(it->first);
+    for(int j = 0; j != it->second.size; j++)
+    {
+      bool skip = false;
+      for(auto& ait = a.first; ait != a.second; ++ait) if(ait->second == it->second.dest[j]) { skip = true; }
+      if(skip) { continue; }
+      std::vector<std::pair<int, double>> *new_v = new std::vector<std::pair<int, double>>();
+      *new_v = *(state[index].sequence);
+      if(it->first != 0)
+      {
+        new_v->push_back({it->second.out_tag[j], it->second.out_weight[j]});
+      }
+      new_state->push_back(TNodeState(it->second.dest[j], new_v, state[index].dirty||dirty));
+    }
+    return true;
+  }
+  return false;
+}
+
 bool
 State::apply_into_override(std::vector<TNodeState>* new_state, int const input, int const old_sym, int const new_sym, int index, bool dirty)
 {
@@ -231,8 +281,8 @@ State::apply(int const input, int const alt)
 
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
-    apply_into(&new_state, input, i, false);
-    apply_into(&new_state, alt, i, true);
+    auto & avoid = apply_into_upper(&new_state, input, i, false);
+    apply_into_avoid(&new_state, alt, i, true, avoid);
     delete state[i].sequence;
   }
 
