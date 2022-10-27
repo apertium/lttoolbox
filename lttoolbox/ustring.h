@@ -41,16 +41,14 @@ void ustring_to_vec32(UStringView str, std::vector<int32_t>& vec);
 inline std::ostream&
 operator<<(std::ostream& ostr, char16_t c)
 {
-  ostr << std::hex << static_cast<uint16_t>(c);
+  utf8::utf16to8(&c, &c+1, std::ostream_iterator<char>(ostr));
   return ostr;
 }
 
 inline std::ostream&
 operator<<(std::ostream& ostr, UStringView str)
 {
-  std::string res;
-  utf8::utf16to8(str.begin(), str.end(), std::back_inserter(res));
-  ostr << res;
+  utf8::utf16to8(str.begin(), str.end(), std::ostream_iterator<char>(ostr));
   return ostr;
 }
 
