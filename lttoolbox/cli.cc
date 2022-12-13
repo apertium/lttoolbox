@@ -63,15 +63,15 @@ void CLI::set_epilog(std::string e)
   epilog = e;
 }
 
-void CLI::print_usage()
+void CLI::print_usage(std::ostream& out)
 {
   if (!prog_name.empty()) {
-    std::cout << prog_name;
+    out << prog_name;
     if (!version.empty()) {
-      std::cout << " v" << version;
+      out << " v" << version;
     }
-    std::cout << ": " << description << std::endl;
-    std::cout << "USAGE: " << prog_name;
+    out << ": " << description << std::endl;
+    out << "USAGE: " << prog_name;
     std::string bargs;
     std::string sargs;
     for (auto& it : options) {
@@ -86,34 +86,34 @@ void CLI::print_usage()
       }
     }
     if (!bargs.empty()) {
-      std::cout << " [-" << bargs << "]";
+      out << " [-" << bargs << "]";
     }
-    std::cout << sargs;
+    out << sargs;
     int depth = 0;
     for (auto& it : file_args) {
-      std::cout << ' ';
+      out << ' ';
       if (it.second) {
-        std::cout << '[';
+        out << '[';
         depth += 1;
       }
-      std::cout << it.first;
+      out << it.first;
     }
-    while (depth-- > 0) std::cout << "]";
-    std::cout << std::endl;
+    while (depth-- > 0) out << "]";
+    out << std::endl;
     for (auto& it : options) {
-      std::cout << "  -" << it.short_opt;
+      out << "  -" << it.short_opt;
 #if HAVE_GETOPT_LONG
-      std::cout << ", --" << it.long_opt << ':';
+      out << ", --" << it.long_opt << ':';
       for (size_t i = it.long_opt.size(); i < 20; i++) {
-        std::cout << ' ';
+        out << ' ';
       }
 #else
-      std::cout << ":    ";
+      out << ":    ";
 #endif
-      std::cout << it.desc << std::endl;
+      out << it.desc << std::endl;
     }
     if (!epilog.empty()) {
-      std::cout << epilog << std::endl;
+      out << epilog << std::endl;
     }
   }
   exit(EXIT_FAILURE);
@@ -162,8 +162,11 @@ void CLI::parse_args(int argc, char* argv[])
         break;
       }
     }
-    if (!found || cnt == 'h') {
-      print_usage();
+    if (!found) {
+      print_usage(std::cerr);
+    }
+    else if (cnt == 'h') {
+      print_usage(std::cout);
     }
   }
   while (optind < argc) {

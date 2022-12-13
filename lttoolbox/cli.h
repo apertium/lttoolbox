@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <iostream>
 
 class CLI {
 private:
@@ -52,7 +53,7 @@ public:
   void add_bool_arg(char short_flag, std::string long_flag, std::string desc);
   void add_file_arg(std::string name, bool optional = true);
   void set_epilog(std::string e);
-  void print_usage();
+  void print_usage(std::ostream& out = std::cerr);
   void parse_args(int argc, char* argv[]);
   std::map<std::string, std::vector<std::string>>& get_strs();
   std::map<std::string, bool>& get_bools();
