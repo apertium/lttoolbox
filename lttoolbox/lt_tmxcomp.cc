@@ -27,18 +27,18 @@ void endProgram(char *name)
 {
   if(name != NULL)
   {
-    std::cout << basename(name) << " v" << PACKAGE_VERSION <<": build a letter transducer from a TMX translation memory" << std::endl;
-    std::cout << "USAGE: " << basename(name) << " [OPTIONS] lang1-lang2 tmx_file output_file" << std::endl;
-    std::cout << "Modes:" << std::endl;
-    std::cout << "  lang1:     input language" << std::endl;
-    std::cout << "  lang2:     output language" << std::endl;
-    std::cout << "Options:" << std::endl;
+    std::cerr << basename(name) << " v" << PACKAGE_VERSION <<": build a letter transducer from a TMX translation memory" << std::endl;
+    std::cerr << "USAGE: " << basename(name) << " [OPTIONS] lang1-lang2 tmx_file output_file" << std::endl;
+    std::cerr << "Modes:" << std::endl;
+    std::cerr << "  lang1:     input language" << std::endl;
+    std::cerr << "  lang2:     output language" << std::endl;
+    std::cerr << "Options:" << std::endl;
 #if HAVE_GETOPT_LONG
-    std::cout << "  -o, --origin-code code   the language code to be taken as lang1" << std::endl;
-    std::cout << "  -m, --meta-code code     the language code to be taken as lang2" << std::endl;
+    std::cerr << "  -o, --origin-code code   the language code to be taken as lang1" << std::endl;
+    std::cerr << "  -m, --meta-code code     the language code to be taken as lang2" << std::endl;
 #else
-    std::cout << "  -o code   the language code to be taken as lang1" << std::endl;
-    std::cout << "  -m code   the language code to be taken as lang2" << std::endl;
+    std::cerr << "  -o code   the language code to be taken as lang1" << std::endl;
+    std::cerr << "  -m code   the language code to be taken as lang2" << std::endl;
 #endif
   }
   exit(EXIT_FAILURE);

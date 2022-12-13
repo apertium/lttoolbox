@@ -66,12 +66,12 @@ void CLI::set_epilog(std::string e)
 void CLI::print_usage()
 {
   if (!prog_name.empty()) {
-    std::cout << prog_name;
+    std::cerr << prog_name;
     if (!version.empty()) {
-      std::cout << " v" << version;
+      std::cerr << " v" << version;
     }
-    std::cout << ": " << description << std::endl;
-    std::cout << "USAGE: " << prog_name;
+    std::cerr << ": " << description << std::endl;
+    std::cerr << "USAGE: " << prog_name;
     std::string bargs;
     std::string sargs;
     for (auto& it : options) {
@@ -86,34 +86,34 @@ void CLI::print_usage()
       }
     }
     if (!bargs.empty()) {
-      std::cout << " [-" << bargs << "]";
+      std::cerr << " [-" << bargs << "]";
     }
-    std::cout << sargs;
+    std::cerr << sargs;
     int depth = 0;
     for (auto& it : file_args) {
-      std::cout << ' ';
+      std::cerr << ' ';
       if (it.second) {
-        std::cout << '[';
+        std::cerr << '[';
         depth += 1;
       }
-      std::cout << it.first;
+      std::cerr << it.first;
     }
-    while (depth-- > 0) std::cout << "]";
-    std::cout << std::endl;
+    while (depth-- > 0) std::cerr << "]";
+    std::cerr << std::endl;
     for (auto& it : options) {
-      std::cout << "  -" << it.short_opt;
+      std::cerr << "  -" << it.short_opt;
 #if HAVE_GETOPT_LONG
-      std::cout << ", --" << it.long_opt << ':';
+      std::cerr << ", --" << it.long_opt << ':';
       for (size_t i = it.long_opt.size(); i < 20; i++) {
-        std::cout << ' ';
+        std::cerr << ' ';
       }
 #else
-      std::cout << ":    ";
+      std::cerr << ":    ";
 #endif
-      std::cout << it.desc << std::endl;
+      std::cerr << it.desc << std::endl;
     }
     if (!epilog.empty()) {
-      std::cout << epilog << std::endl;
+      std::cerr << epilog << std::endl;
     }
   }
   exit(EXIT_FAILURE);
@@ -151,7 +151,7 @@ void CLI::parse_args(int argc, char* argv[])
       if (it.short_opt == cnt) {
         found = true;
         if (it.short_opt == 'v' && it.long_opt == "version") {
-          std::cout << prog_name << " version " << version << std::endl;
+          std::cerr << prog_name << " version " << version << std::endl;
           exit(EXIT_SUCCESS);
         }
         if (it.is_bool) {

@@ -430,9 +430,9 @@ TMXCompiler::write(FILE *output)
   Compression::multibyte_write(0, output); // keeping file format
   transducer.write(output);
 
-  std::cout << origin_language << "->" << meta_language << " ";
-  std::cout << transducer.size() << " " << transducer.numberOfTransitions();
-  std::cout << std::endl;
+  std::cerr << origin_language << "->" << meta_language << " ";
+  std::cerr << transducer.size() << " " << transducer.numberOfTransitions();
+  std::cerr << std::endl;
 }
 
 void
