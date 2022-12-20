@@ -67,6 +67,29 @@ StringUtils::split(UStringView str, UStringView delim)
   return result;
 }
 
+std::vector<UString>
+StringUtils::split_escaped(UStringView str, UChar delim)
+{
+  std::vector<UString> result;
+  size_t start = 0;
+  for (size_t i = 0; i < str.size(); i++) {
+    if (str[i] == '\\') {
+      i++;
+      continue;
+    }
+    if (str[i] == delim) {
+      if (i > start) {
+        result.push_back(US(str.substr(start, i-start)));
+      }
+      start = i+1;
+    }
+  }
+  if (start < str.size()) {
+    result.push_back(US(str.substr(start)));
+  }
+  return result;
+}
+
 UString
 StringUtils::join(const std::vector<UString>& vec, UStringView delim)
 {

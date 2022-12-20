@@ -201,6 +201,8 @@ public:
 
   void step_case_override(const int val, const bool caseSensitive);
 
+  void closure(const sorted_vector<int32_t>& symbols);
+
   /**
    * Init the state with the initial node and empty output
    * @param initial the initial node of the transducer
@@ -221,6 +223,12 @@ public:
     * @param forbiddenSymbol the symbol forbidden
     */
   void pruneStatesWithForbiddenSymbol(int forbiddenSymbol);
+
+  /**
+   * Remove states not containing a particular symbol
+   * @param symbol the symbol that is required
+   */
+  void requireSymbol(int32_t symbol);
 
   /**
     * Whether any of the analyses contains a certain symbol
@@ -342,6 +350,11 @@ public:
                          std::set<UChar32> const &escaped_chars,
                          std::queue<UString> &blanks,
                          std::vector<UString> &numbers) const;
+
+  /**
+   * Add all paths in other to self
+   */
+  void merge(const State& other);
 
 };
 

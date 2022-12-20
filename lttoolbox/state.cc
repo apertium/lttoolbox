@@ -946,3 +946,14 @@ State::getReadableString(const Alphabet &a)
   retval += ']';
   return retval;
 }
+
+void
+State::merge(const State& other)
+{
+  for (auto& it : other.state) {
+    std::vector<std::pair<int, double>>* tmp = new std::vector<std::pair<int, double>>();
+    *tmp = *(it.sequence);
+    TNodeState ns(it.where, tmp, it.dirty);
+    this->state.push_back(std::move(ns));
+  }
+}
