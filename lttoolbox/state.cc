@@ -431,6 +431,19 @@ State::step_case_override(UChar32 val, bool caseSensitive)
   }
 }
 
+void
+State::step_optional(UChar32 val)
+{
+  if (val == 0) return;
+  std::vector<TNodeState> new_state;
+  for (size_t i = 0; i < state.size(); i++) {
+    apply_into(&new_state, val, i, false);
+  }
+  new_state.swap(state);
+  epsilonClosure();
+  new_state.swap(state);
+  state.insert(state.end(), new_state.begin(), new_state.end());
+}
 
 bool
 State::isFinal(std::map<Node *, double> const &finals) const

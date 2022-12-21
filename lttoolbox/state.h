@@ -201,6 +201,8 @@ public:
 
   void step_case_override(const int val, const bool caseSensitive);
 
+  void step_optional(UChar32 val);
+
   void closure(const sorted_vector<int32_t>& symbols);
 
   /**
