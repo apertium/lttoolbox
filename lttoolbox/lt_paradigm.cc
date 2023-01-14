@@ -21,6 +21,8 @@
 #include <lttoolbox/state.h>
 #include <lttoolbox/trans_exe.h>
 #include <lttoolbox/cli.h>
+#include <lttoolbox/symbol_iter.h>
+#include <lttoolbox/string_utils.h>
 
 #include <queue>
 
@@ -62,10 +64,10 @@ void process(UStringView pattern, std::map<UString, Transducer>& trans,
 {
   int32_t any_char = static_cast<int32_t>('*');
   int32_t any_tag = alpha(u"<*>");
-  std::vector<int32_t> pat = alpha.tokenize(pattern);
   Transducer other;
   int state = other.getInitial();
-  for (auto& it : pat) {
+  for (auto sym : symbol_iter(pattern)) {
+    int32_t it = (sym.size() == 1 ? sym[0] : alpha(sym));
     if (it == any_char) {
       state = other.insertNewSingleTransduction(0, state);
       for (auto& sym : letters) {
@@ -75,6 +77,22 @@ void process(UStringView pattern, std::map<UString, Transducer>& trans,
       state = other.insertNewSingleTransduction(0, state);
       for (auto& sym : tags) {
         other.linkStates(state, state, alpha(sym, sym));
+      }
+    } else if (it == 0 && StringUtils::startswith(sym, "<*"_u)) {
+      auto names = StringUtils::split_escaped(sym.substr(2, sym.size()-3), '-');
+      std::set<int32_t> del_tags;
+      for (auto& tg : names) {
+        UString tag;
+        tag += '<';
+        tag += tg;
+        tag += '>';
+        del_tags.insert(alpha(tag));
+      }
+      state = other.insertNewSingleTransduction(0, state);
+      for (auto& t : tags) {
+        if (del_tags.find(t) == del_tags.end()) {
+          other.linkStates(state, state, alpha(t, t));
+        }
       }
     } else {
       state = other.insertNewSingleTransduction(alpha(it, it), state);

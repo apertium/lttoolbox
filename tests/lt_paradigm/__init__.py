@@ -37,3 +37,12 @@ class SortTest(ParadigmTest):
     inputs = ['*<n><*>']
     expectedOutputs = ['ab<n><def>:abc\nab<n><ind>:ab\nn<n><ind>:n\ny<n><ind>:y']
     sortoutput = False
+
+class ExcludeSingleTest(ParadigmTest):
+    procdix = 'data/unbalanced-epsilons-mono.dix'
+    inputs = ['*<vblex><*>', '*<vblex><*-pres>', '*<vblex><*-inf-pret>']
+    expectedOutputs = [
+        're<vblex><inf>:re\nre<vblex><pres>:rer\nre<vblex><pres>:res\nre<vblex><pret>:ret',
+        're<vblex><inf>:re\nre<vblex><pret>:ret',
+        're<vblex><pres>:rer\nre<vblex><pres>:res'
+    ]

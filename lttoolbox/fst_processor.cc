@@ -20,6 +20,7 @@
 #include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/file_utils.h>
 #include <lttoolbox/string_utils.h>
+#include <lttoolbox/symbol_iter.h>
 
 #include <iostream>
 #include <cerrno>
@@ -1806,10 +1807,38 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
   }
 }
 
+bool
+FSTProcessor::step_biltrans(UStringView word, UString& result, UString& queue,
+                            bool delim, bool mark)
+{
+  State current_state = initial_state;
+  bool firstupper = u_isupper(word[0]);
+  bool uppercase = firstupper && u_isupper(word[1]);
+  for (auto symbol : symbol_iter(word)) {
+    int32_t val = (symbol.size() == 1 ? symbol[0] : alphabet(symbol));
+    if (current_state.size() != 0) {
+      current_state.step(val, beCaseSensitive(current_state));
+    }
+    if (current_state.isFinal(all_finals)) {
+      result.clear();
+      if (delim) result += '^';
+      if (mark) result += '=';
+      result += current_state.filterFinals(all_finals, alphabet,
+                                           escaped_chars,
+                                           displayWeightsMode, maxAnalyses, maxWeightClasses,
+                                           uppercase, firstupper, 0).substr(1);
+    }
+    if (current_state.size() == 0) {
+      if (!result.empty()) queue.append(symbol);
+      else return false;
+    }
+  }
+  return !result.empty();
+}
+
 UString
 FSTProcessor::biltransfull(UStringView input_word, bool with_delim)
 {
-  State current_state = initial_state;
   UString result;
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
@@ -1833,83 +1862,11 @@ FSTProcessor::biltransfull(UStringView input_word, bool with_delim)
     mark = true;
   }
 
-  bool firstupper = u_isupper(input_word[start_point]);
-  bool uppercase = firstupper && u_isupper(input_word[start_point+1]);
-
-  for(unsigned int i = start_point; i <= end_point; i++)
-  {
-    int val;
-    UString symbol;
-
-    if(input_word[i] == '\\')
-    {
-      i++;
-      val = static_cast<int32_t>(input_word[i]);
-    }
-    else if(input_word[i] == '<')
-    {
-      symbol = '<';
-      for(unsigned int j = i + 1; j <= end_point; j++)
-      {
-        symbol += input_word[j];
-        if(input_word[j] == '>')
-        {
-          i = j;
-          break;
-        }
-      }
-      val = alphabet(symbol);
-    }
-    else
-    {
-      val = static_cast<int32_t>(input_word[i]);
-    }
-    if(current_state.size() != 0)
-    {
-      if(!alphabet.isTag(val) && u_isupper(val) && !beCaseSensitive(current_state))
-      {
-        current_state.step(val, u_tolower(val));
-      }
-      else
-      {
-        current_state.step(val);
-      }
-    }
-    if(current_state.isFinal(all_finals))
-    {
-      result.clear();
-      if(with_delim) {
-        result += '^';
-      }
-      if(mark) {
-        result += '=';
-      }
-      result += current_state.filterFinals(all_finals, alphabet,
-                                           escaped_chars,
-                                           displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                           uppercase, firstupper, 0).substr(1);
-    }
-
-    if(current_state.size() == 0)
-    {
-      if(!symbol.empty() && !result.empty())
-      {
-        queue.append(symbol);
-      }
-      else
-      {
-        // word is not present
-        if(with_delim)
-        {
-          result = "^@"_u + US(input_word.substr(1));
-        }
-        else
-        {
-          result = "@"_u + US(input_word);
-        }
-        return result;
-      }
-    }
+  auto word = input_word.substr(start_point, end_point-start_point);
+  bool exists = step_biltrans(word, result, queue, with_delim, mark);
+  if (!exists) {
+    if (with_delim) return "^@"_u + US(input_word.substr(1));
+    else return "@"_u + US(input_word);
   }
 
   if(start_point < (end_point - 3))
@@ -1920,27 +1877,7 @@ FSTProcessor::biltransfull(UStringView input_word, bool with_delim)
 
   if(!queue.empty())
   {
-    UString result_with_queue;
-    for(unsigned int i = 0, limit = result.size(); i != limit; i++)
-    {
-      switch(result[i])
-      {
-        case '\\':
-          result_with_queue += '\\';
-          i++;
-          break;
-
-        case '/':
-          result_with_queue.append(queue);
-          break;
-
-        default:
-          break;
-      }
-      result_with_queue += result[i];
-    }
-    result_with_queue.append(queue);
-
+    UString result_with_queue = compose(result, queue);
     if(with_delim)
     {
       result_with_queue += '$';
@@ -1986,110 +1923,18 @@ FSTProcessor::biltrans(UStringView input_word, bool with_delim)
     mark = true;
   }
 
-  bool firstupper = u_isupper(input_word[start_point]);
-  bool uppercase = firstupper && u_isupper(input_word[start_point+1]);
-
-  for(unsigned int i = start_point; i <= end_point; i++)
-  {
-    int val;
-    UString symbol;
-
-    if(input_word[i] == '\\')
-    {
-      i++;
-      val = static_cast<int32_t>(input_word[i]);
-    }
-    else if(input_word[i] == '<')
-    {
-      symbol = '<';
-      for(unsigned int j = i + 1; j <= end_point; j++)
-      {
-        symbol += input_word[j];
-        if(input_word[j] == '>')
-        {
-          i = j;
-          break;
-        }
-      }
-      val = alphabet(symbol);
-    }
-    else
-    {
-      val = static_cast<int32_t>(input_word[i]);
-    }
-    if(current_state.size() != 0)
-    {
-      if(!alphabet.isTag(val) && u_isupper(val) && !beCaseSensitive(current_state))
-      {
-        current_state.step(val, u_tolower(val));
-      }
-      else
-      {
-        current_state.step(val);
-      }
-    }
-    if(current_state.isFinal(all_finals))
-    {
-      result.clear();
-      if (with_delim) {
-        result += '^';
-      }
-      if (mark) {
-        result += '=';
-      }
-      result += current_state.filterFinals(all_finals, alphabet,
-                                           escaped_chars,
-                                           displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                           uppercase, firstupper, 0).substr(1);
-    }
-
-    if(current_state.size() == 0)
-    {
-      if(!symbol.empty() && !result.empty())
-      {
-        queue.append(symbol);
-      }
-      else
-      {
-        // word is not present
-        if(with_delim)
-        {
-          result = "^@"_u + US(input_word.substr(1));
-        }
-        else
-        {
-          result = "@"_u + US(input_word);
-        }
-        return result;
-      }
-    }
+  UStringView word = input_word.substr(start_point, end_point-start_point);
+  bool exists = step_biltrans(word, result, queue, with_delim, mark);
+  if (!exists) {
+    if (with_delim) return "^@"_u + US(input_word.substr(1));
+    else return "@"_u + US(input_word);
   }
 
   // attach unmatched queue automatically
 
   if(!queue.empty())
   {
-    UString result_with_queue;
-    for(unsigned int i = 0, limit = result.size(); i != limit; i++)
-    {
-      switch(result[i])
-      {
-        case '\\':
-          result_with_queue += '\\';
-          i++;
-          break;
-
-        case '/':
-          result_with_queue.append(queue);
-          break;
-
-        default:
-          break;
-      }
-      result_with_queue += result[i];
-    }
-    result_with_queue.append(queue);
-
+    UString result_with_queue = compose(result, queue);
     if(with_delim)
     {
       result_with_queue += '$';
@@ -2345,45 +2190,18 @@ FSTProcessor::biltransWithQueue(UStringView input_word, bool with_delim)
   bool firstupper = u_isupper(input_word[start_point]);
   bool uppercase = firstupper && u_isupper(input_word[start_point+1]);
 
-  for(unsigned int i = start_point; i <= end_point; i++)
-  {
-    int val = 0;
-    UString symbol;
-
-    if(input_word[i] == '\\')
-    {
-      i++;
-      val = input_word[i];
-    }
-    else if(input_word[i] == '<')
-    {
-      seentags = true;
-      symbol = '<';
-      for(unsigned int j = i + 1; j <= end_point; j++)
-      {
-        symbol += input_word[j];
-        if(input_word[j] == '>')
-        {
-          i = j;
-          break;
-        }
-      }
+  UStringView word = input_word.substr(start_point, end_point-start_point);
+  for (auto symbol : symbol_iter(word)) {
+    int32_t val;
+    if (symbol.size() == 1) {
+      val = symbol[0];
+    } else {
       val = alphabet(symbol);
-    }
-    else
-    {
-      val = input_word[i];
+      seentags = true;
     }
     if(current_state.size() != 0)
     {
-      if(!alphabet.isTag(val) && u_isupper(val) && !beCaseSensitive(current_state))
-      {
-        current_state.step(val, u_tolower(val));
-      }
-      else
-      {
-        current_state.step(val);
-      }
+      current_state.step_case(val, beCaseSensitive(current_state));
     }
     if(current_state.isFinal(all_finals))
     {
@@ -2445,27 +2263,7 @@ FSTProcessor::biltransWithQueue(UStringView input_word, bool with_delim)
 
   if(!queue.empty())
   {
-    UString result_with_queue;
-    for(unsigned int i = 0, limit = result.size(); i != limit; i++)
-    {
-      switch(result[i])
-      {
-        case '\\':
-          result_with_queue += '\\';
-          i++;
-          break;
-
-        case '/':
-          result_with_queue.append(queue);
-          break;
-
-        default:
-          break;
-      }
-      result_with_queue += result[i];
-    }
-    result_with_queue.append(queue);
-
+    UString result_with_queue = compose(result, queue);
     if(with_delim)
     {
       result_with_queue += '$';
@@ -2508,79 +2306,12 @@ FSTProcessor::biltransWithoutQueue(UStringView input_word, bool with_delim)
     mark = true;
   }
 
-  bool firstupper = u_isupper(input_word[start_point]);
-  bool uppercase = firstupper && u_isupper(input_word[start_point+1]);
-
-  for(unsigned int i = start_point; i <= end_point; i++)
-  {
-    int val;
-    UString symbol;
-
-    if(input_word[i] == '\\')
-    {
-      i++;
-      val = static_cast<int32_t>(input_word[i]);
-    }
-    else if(input_word[i] == '<')
-    {
-      symbol = '<';
-      for(unsigned int j = i + 1; j <= end_point; j++)
-      {
-        symbol += input_word[j];
-        if(input_word[j] == '>')
-        {
-          i = j;
-          break;
-        }
-      }
-      val = alphabet(symbol);
-    }
-    else
-    {
-      val = static_cast<int32_t>(input_word[i]);
-    }
-    if(current_state.size() != 0)
-    {
-      if(!alphabet.isTag(val) && u_isupper(val) && !beCaseSensitive(current_state))
-      {
-        current_state.step(val, u_tolower(val));
-      }
-      else
-      {
-        current_state.step(val);
-      }
-    }
-    if(current_state.isFinal(all_finals))
-    {
-      result.clear();
-      if (with_delim) {
-        result += '^';
-      }
-      if (mark) {
-        result += '=';
-      }
-      result += current_state.filterFinals(all_finals, alphabet,
-                                           escaped_chars,
-                                           displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                           uppercase, firstupper, 0).substr(1);
-    }
-
-    if(current_state.size() == 0)
-    {
-      if(symbol.empty())
-      {
-        // word is not present
-        if(with_delim)
-        {
-          result = "^@"_u + US(input_word.substr(1));
-        }
-        else
-        {
-          result = "@"_u + US(input_word);
-        }
-        return result;
-      }
-    }
+  auto word = input_word.substr(start_point, end_point-start_point);
+  UString queue;
+  bool exists = step_biltrans(word, result, queue, with_delim, mark);
+  if (!exists || !queue.empty()) {
+    if (with_delim) return "^@"_u + US(input_word.substr(1));
+    else return "@"_u + US(input_word);
   }
 
   if(with_delim)

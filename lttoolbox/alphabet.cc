@@ -19,6 +19,7 @@
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/serialiser.h>
 #include <lttoolbox/deserialiser.h>
+#include <lttoolbox/symbol_iter.h>
 
 #include <cctype>
 #include <cstdlib>
@@ -311,24 +312,9 @@ std::vector<int32_t>
 Alphabet::tokenize(UStringView str) const
 {
   std::vector<int32_t> ret;
-  size_t end = str.size();
-  size_t i = 0;
-  UChar32 c;
-  while (i < end) {
-    U16_NEXT(str.data(), i, end, c);
-    if (c == '\\') {
-    } else if (c == '<') {
-      size_t j = i;
-      while (c != '>' && j < end) {
-        U16_NEXT(str.data(), j, end, c);
-      }
-      if (c == '>') {
-        ret.push_back(operator()(str.substr(i-1, j-i+1)));
-        i = j;
-      }
-    } else {
-      ret.push_back(static_cast<int32_t>(c));
-    }
+  for (auto sym : symbol_iter(str)) {
+    if (sym.size() > 1) ret.push_back(operator()(sym));
+    else ret.push_back(static_cast<int32_t>(sym[0]));
   }
   return ret;
 }

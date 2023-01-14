@@ -430,6 +430,8 @@ private:
   void generation_wrapper_null_flush(InputFile& input, UFILE *output,
                                      GenerationMode mode);
   UString compose(UStringView lexforms, UStringView queue) const;
+  bool step_biltrans(UStringView word, UString& result, UString& queue,
+                     bool delim, bool mark);
 
   void procNodeICX();
   void procNodeRCX();
