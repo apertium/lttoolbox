@@ -1,21 +1,21 @@
 #include <lttoolbox/symbol_iter.h>
 #include <unicode/uchar.h>
 
-symbol_iter::symbol_iter(UStringView s) : str(s)
+symbol_iter::iterator::iterator(UStringView s) : str(s)
 {
   ++*this;
 }
 
-symbol_iter::symbol_iter(const symbol_iter& other)
+symbol_iter::iterator::iterator(const symbol_iter::iterator& other)
   : str(other.str), sloc(other.sloc), eloc(other.eloc) {}
 
-symbol_iter::~symbol_iter() {}
+symbol_iter::iterator::~iterator() {}
 
-UStringView symbol_iter::operator*() {
+UStringView symbol_iter::iterator::operator*() const {
   return str.substr(sloc, eloc-sloc);
 }
 
-symbol_iter& symbol_iter::operator++()
+symbol_iter::iterator& symbol_iter::iterator::operator++()
 {
   if (sloc < str.size()) {
     sloc = eloc;
@@ -34,24 +34,24 @@ symbol_iter& symbol_iter::operator++()
   return *this;
 }
 
-bool symbol_iter::operator!=(const symbol_iter& o) const
+bool symbol_iter::iterator::operator!=(const symbol_iter::iterator& o) const
 {
   return str != o.str || sloc != o.sloc || eloc != o.eloc;
 }
 
-bool symbol_iter::operator==(const symbol_iter& o) const
+bool symbol_iter::iterator::operator==(const symbol_iter::iterator& o) const
 {
   return str == o.str && sloc == o.sloc && eloc == o.eloc;
 }
 
-symbol_iter symbol_iter::begin()
+symbol_iter::iterator symbol_iter::begin() const
 {
-  return symbol_iter(str);
+  return symbol_iter::iterator(str);
 }
 
-symbol_iter symbol_iter::end()
+symbol_iter::iterator symbol_iter::end() const
 {
-  symbol_iter ret(str);
+  symbol_iter::iterator ret(str);
   ret.sloc = str.size();
   ret.eloc = str.size();
   return ret;
