@@ -18,6 +18,7 @@
 #define _ACXPARSEUTIL_
 
 #include <lttoolbox/sorted_vector.hpp>
+#include <cstdint>
 #include <map>
 
 std::map<int32_t, sorted_vector<int32_t>> readACX(const char* file);
