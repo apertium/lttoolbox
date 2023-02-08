@@ -57,9 +57,25 @@ void expand(Transducer& inter, int state, const std::set<int>& past_states,
   }
 }
 
+sorted_vector<int32_t> split_tag(UStringView sym, Alphabet& alpha, int prefix,
+                                 UChar32 sep)
+{
+  sorted_vector<int32_t> ret;
+  auto names = StringUtils::split_escaped(sym.substr(prefix+1, sym.size()-prefix-2), sep);
+  for (auto& tg : names) {
+    UString tag;
+    tag += '<';
+    tag += tg;
+    tag += '>';
+    ret.insert(alpha(tag));
+  }
+  return ret;
+}
+
 void process(UStringView pattern, std::map<UString, Transducer>& trans,
              Alphabet& alpha,
-             const std::set<UChar32>& letters, const std::set<int32_t>& tags,
+             const std::set<UChar32>& letters,
+             const sorted_vector<int32_t>& tags,
              UFILE* output, bool sort)
 {
   int32_t any_char = static_cast<int32_t>('*');
@@ -78,20 +94,28 @@ void process(UStringView pattern, std::map<UString, Transducer>& trans,
       for (auto& sym : tags) {
         other.linkStates(state, state, alpha(sym, sym));
       }
-    } else if (it == 0 && StringUtils::startswith(sym, "<*"_u)) {
-      auto names = StringUtils::split_escaped(sym.substr(2, sym.size()-3), '-');
-      std::set<int32_t> del_tags;
-      for (auto& tg : names) {
-        UString tag;
-        tag += '<';
-        tag += tg;
-        tag += '>';
-        del_tags.insert(alpha(tag));
+    } else if (it == 0 && StringUtils::startswith(sym, "<*|"_u)) {
+      auto or_tags = split_tag(sym, alpha, 2, '|');
+      state = other.insertNewSingleTransduction(0, state);
+      for (auto& t : or_tags) {
+        other.linkStates(state, state, alpha(t, t));
       }
+    } else if (it == 0 && StringUtils::startswith(sym, "<*"_u)) {
+      auto del_tags = split_tag(sym, alpha, 1, '-');
       state = other.insertNewSingleTransduction(0, state);
       for (auto& t : tags) {
         if (del_tags.find(t) == del_tags.end()) {
           other.linkStates(state, state, alpha(t, t));
+        }
+      }
+    } else if (it == 0 && StringUtils::startswith(sym, "<|"_u)) {
+      auto or_tags = split_tag(sym, alpha, 1, '|');
+      auto old_state = state;
+      for (auto& t : or_tags) {
+        if (old_state == state) {
+          state = other.insertNewSingleTransduction(alpha(t, t), state);
+        } else {
+          other.linkStates(old_state, state, alpha(t, t));
         }
       }
     } else {
@@ -146,7 +170,7 @@ int main(int argc, char* argv[])
   fclose(fst);
 
   alpha.includeSymbol(u"<*>");
-  std::set<int32_t> tags;
+  sorted_vector<int32_t> tags;
   for (int32_t i = 1; i <= alpha.size(); i++) {
     if (!skip_tags.empty()) {
       UString t;

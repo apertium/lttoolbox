@@ -46,3 +46,25 @@ class ExcludeSingleTest(ParadigmTest):
         're<vblex><inf>:re\nre<vblex><pret>:ret',
         're<vblex><pres>:rer\nre<vblex><pres>:res'
     ]
+
+class OrTagTest(ParadigmTest):
+    procdix = 'data/unbalanced-epsilons-mono.dix'
+    inputs = ['re<vblex><|pres|pret>', 're<vblex><|inf>', 're<vblex><|xqz>']
+    expectedOutputs = [
+        're<vblex><pres>:rer\nre<vblex><pres>:res\nre<vblex><pret>:ret',
+        're<vblex><inf>:re\nre<vblex><pret>:ret',
+        ''
+    ]
+
+class OrTagRepeatTest(ParadigmTest):
+    procdix = 'data/unbalanced-epsilons-mono.dix'
+    inputs = [
+        're<*|vblex|pres|pret>',
+        're<*|inf|vblex>',
+        're<*|n|adj|vblex|inf>'
+    ]
+    expectedOutputs = [
+        're<vblex><pres>:rer\nre<vblex><pres>:res\nre<vblex><pret>:ret',
+        're<vblex><inf>:re\nre<vblex><pret>:ret',
+        're<vblex><inf>:re\nre<vblex><pret>:ret',
+    ]
