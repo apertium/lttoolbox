@@ -1,0 +1,20 @@
+root {
+  apertium_usage {
+    "USAGE: {0} [-d datadir] [-f format] [-u] <direction> [in [out]]\n"
+    " -d datadir       directory of linguistic data\n"
+    " -f format        one of: txt (default), html, rtf, odt, odp, docx, wxml, xlsx, pptx,\n"
+    "                  xpresstag, html-noent, html-alt, latex, latex-raw, line\n"
+    " -a               display ambiguity\n"
+    " -u               don\'t display marks \'*\' for unknown words\n"
+    " -n               don\'t insert period before possible sentence-ends\n"
+    " -m memory.tmx    use a translation memory to recycle translations\n"
+    " -o direction     translation direction using the translation memory,\n"
+    "                  by default \'direction\' is used instead\n"
+    " -l               lists the available translation directions and exits\n"
+    " -V               print Apertium version\n"
+    " -z               force null-flush mode on all parts of the pipe\n"
+    " direction        typically, LANG1-LANG2, but see modes.xml in language data\n"
+    " in               input file (stdin by default)\n"
+    " out              output file (stdout by default)\n"
+  }
+}

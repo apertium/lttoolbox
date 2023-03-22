@@ -7,6 +7,8 @@ if HAVE_PYTHON_BINDINGS
 SUBDIRS += python
 endif
 
+SUBDIRS += locales
+
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = lttoolbox.pc
 

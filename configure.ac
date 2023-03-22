@@ -105,4 +105,4 @@ then
   PYTHON_INSTALL_PARAMS="--prefix=\$(prefix) --root=\$(DESTDIR)/"
 fi
 
-AC_OUTPUT([Makefile lttoolbox.pc lttoolbox/Makefile python/Makefile])
+AC_OUTPUT([Makefile lttoolbox.pc lttoolbox/Makefile python/Makefile locales/Makefile])

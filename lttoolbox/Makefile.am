@@ -14,7 +14,7 @@ cc_sources = acx.cc alphabet.cc att_compiler.cc cli.cc compiler.cc compression.c
 library_includedir = $(includedir)/$(PACKAGE_NAME)
 library_include_HEADERS = $(h_sources)
 
-bin_PROGRAMS = lt-comp lt-proc lt-expand lt-paradigm lt-tmxcomp lt-tmxproc lt-print lt-trim lt-compose lt-append lsx-comp lt-invert lt-restrict lt-apply-acx
+bin_PROGRAMS = lt-comp lt-proc lt-expand lt-paradigm lt-tmxcomp lt-tmxproc lt-print lt-trim lt-compose lt-append lsx-comp lt-invert lt-restrict lt-apply-acx icuformat
 instdir = lttoolbox
 
 lib_LTLIBRARIES= liblttoolbox.la
@@ -45,6 +45,7 @@ lsx_comp_SOURCES = lt_comp.cc
 lt_invert_SOURCES = lt_invert.cc
 lt_restrict_SOURCES = lt_restrict.cc
 lt_apply_acx_SOURCES = lt_apply_acx.cc
+icuformat_SOURCES = icuformat.cc
 
 #lt-validate-dictionary: Makefile.am validate-header.sh
 #	@echo "Creating lt-validate-dictionary script"
