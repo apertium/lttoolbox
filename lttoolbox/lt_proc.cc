@@ -59,6 +59,7 @@ int main(int argc, char *argv[])
   cli.add_bool_arg('W', "show-weights", "Print final analysis weights (if any)");
   cli.add_str_arg('N', "analyses", "Output no more than N analyses (if the transducer is weighted, the N best analyses)", "N");
   cli.add_str_arg('L', "weight-classes", "Output no more than N best weight classes (where analyses with equal weight constitute a class)", "N");
+  cli.add_str_arg('M', "compound-max-elements", "Set compound max elements", "N");
   cli.add_bool_arg('h', "help", "show this help");
   cli.parse_args(argc, argv);
 
@@ -156,6 +157,14 @@ int main(int argc, char *argv[])
       exit(EXIT_FAILURE);
     }
     fstp.setMaxWeightClassesValue(n);
+  }
+  if (strs.find("compound-max-elements") != strs.end()) { // Test
+    int n = atoi(strs["compound-max-elements"].back().c_str());
+    if (n < 1) {
+      std::cerr << "Invalid or no argument for compound max elements" << std::endl;
+      exit(EXIT_FAILURE);
+    }
+    fstp.setCompoundMaxElements(n);
   }
 
   FILE* in = openInBinFile(cli.get_files()[0]);

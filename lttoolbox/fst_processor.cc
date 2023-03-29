@@ -2627,6 +2627,12 @@ FSTProcessor::setMaxWeightClassesValue(int value)
   maxWeightClasses = value;
 }
 
+void
+FSTProcessor::setCompoundMaxElements(int value)
+{
+  compound_max_elements = value;
+}
+
 bool
 FSTProcessor::getDecompoundingMode()
 {
