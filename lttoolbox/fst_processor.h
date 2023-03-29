@@ -507,6 +507,7 @@ public:
   void setDisplayWeightsMode(bool value);
   void setMaxAnalysesValue(int value);
   void setMaxWeightClassesValue(int value);
+  void setCompoundMaxElements(int value);
   bool getNullFlush();
   bool getDecompoundingMode();
 };
