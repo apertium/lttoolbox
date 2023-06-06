@@ -442,6 +442,7 @@ private:
   xmlTextReaderPtr reader;
 
   static constexpr size_t max_case_insensitive_state_size = 65536;
+  bool max_case_insensitive_state_size_warned = false;
   /*
    * Including lowercased versions for every character can potentially create very large states
    * (See https://github.com/apertium/lttoolbox/issues/167 ). As a sanity-check we don't do
@@ -450,7 +451,20 @@ private:
    * @return running with --case-sensitive or state size exceeds max
    */
   bool beCaseSensitive(const State& state) {
-    return caseSensitive || state.size() >= max_case_insensitive_state_size;
+    if(caseSensitive) {
+      return true;
+    }
+    else if(state.size() < max_case_insensitive_state_size)  {
+      return false;             // ie. do case-folding
+    }
+    else {
+      if(!max_case_insensitive_state_size_warned) {
+        max_case_insensitive_state_size_warned = true; // only warn once
+        UFILE* err_out = u_finit(stderr, NULL, NULL);
+        u_fprintf(err_out, "Warning: matching case-sensitively since processor state size >= %d\n", max_case_insensitive_state_size);
+      }
+      return true;
+    }
   }
 
 public:
