@@ -1,0 +1,30 @@
+root{
+    lt_proc_desc{"process a stream with a letter transducer"}
+    analysis_desc{"morphological analysis (default behavior)"}
+    bilingual_desc{"lexical transfer"}
+    case_sensitive_desc{"use the literal case of the incoming characters"}
+    debugged_gen_desc{"morph. generation with all the stuff"}
+    decompose_nouns_desc{"Try to decompound unknown words"}
+    generation_desc{"morphological generation"}
+    ignored_chars_desc{"specify file with characters to ignore"}
+    restore_chars_desc{"specify file with characters to diacritic restoration"}
+    tagged_gen_desc{"morphological generation keeping lexical forms"}
+    tagged_nm_gen_desc{"same as -l but without unknown word marks"}
+    non_marked_gen_desc{"morph. generation without unknown word marks"}
+    surf_bilingual_desc{"lexical transfer with surface forms"}
+    post_generation_desc{"post-generation"}
+    inter_generation_desc{"inter-generation"}
+    sao_desc{"SAO annotation system input processing"}
+    transliteration_desc{"apply transliteration dictionary"}
+    version_desc{"version"}
+    null_flush_desc{"flush output on the null character"}
+    dictionary_case_desc{"use dictionary case instead of surface"}
+    careful_case_desc{"use dictionary case if present, else surface"}
+    no_default_ignore_desc{"skips loading the default ignore characters"}
+    show_weights_desc{"Print final analysis weights (if any)"}
+    analyses_desc{"Output no more than N analyses (if the transducer is weighted, the N best analyses)"}
+    weight_classes_desc{"Output no more than N best weight classes (where analyses with equal weight constitute a class)"}
+    compound_max_elements_desc{"Set compound max elements"}
+    help_desc{"show this help"}
+    LTTB1000{"LTTB1000: Invalid or no argument for {option}"}
+}

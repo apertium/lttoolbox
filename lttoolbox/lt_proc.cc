@@ -18,6 +18,7 @@
 #include <lttoolbox/file_utils.h>
 #include <lttoolbox/cli.h>
 #include <lttoolbox/lt_locale.h>
+#include <i18n.h>
 
 void checkValidity(FSTProcessor const &fstp)
 {
@@ -30,37 +31,38 @@ void checkValidity(FSTProcessor const &fstp)
 int main(int argc, char *argv[])
 {
   LtLocale::tryToSetLocale();
+  I18n i18n {LOCALES_DATA};
 
-  CLI cli("process a stream with a letter transducer", PACKAGE_VERSION);
+  CLI cli(i18n.format("lt_proc_desc"), PACKAGE_VERSION);
   cli.add_file_arg("fst_file", false);
   cli.add_file_arg("input_file");
   cli.add_file_arg("output_file");
-  cli.add_bool_arg('a', "analysis", "morphological analysis (default behavior)");
-  cli.add_bool_arg('b', "bilingual", "lexical transfer");
-  cli.add_bool_arg('c', "case-sensitive", "use the literal case of the incoming characters");
-  cli.add_bool_arg('d', "debugged-gen", "morph. generation with all the stuff");
-  cli.add_bool_arg('e', "decompose-nouns", "Try to decompound unknown words");
-  cli.add_bool_arg('g', "generation", "morphological generation");
-  cli.add_str_arg('i', "ignored-chars", "specify file with characters to ignore", "icx_file");
-  cli.add_str_arg('r', "restore-chars", "specify file with characters to diacritic restoration", "rcx_file");
-  cli.add_bool_arg('l', "tagged-gen", "morphological generation keeping lexical forms");
-  cli.add_bool_arg('m', "tagged-nm-gen", "same as -l but without unknown word marks");
-  cli.add_bool_arg('n', "non-marked-gen", "morph. generation without unknown word marks");
-  cli.add_bool_arg('o', "surf-bilingual", "lexical transfer with surface forms");
-  cli.add_bool_arg('p', "post-generation", "post-generation");
-  cli.add_bool_arg('x', "inter-generation", "inter-generation");
-  cli.add_bool_arg('s', "sao", "SAO annotation system input processing");
-  cli.add_bool_arg('t', "transliteration", "apply transliteration dictionary");
-  cli.add_bool_arg('v', "version", "version");
-  cli.add_bool_arg('z', "null-flush", "flush output on the null character");
-  cli.add_bool_arg('w', "dictionary-case", "use dictionary case instead of surface");
-  cli.add_bool_arg('C', "careful-case", "use dictionary case if present, else surface");
-  cli.add_bool_arg('I', "no-default-ignore", "skips loading the default ignore characters");
-  cli.add_bool_arg('W', "show-weights", "Print final analysis weights (if any)");
-  cli.add_str_arg('N', "analyses", "Output no more than N analyses (if the transducer is weighted, the N best analyses)", "N");
-  cli.add_str_arg('L', "weight-classes", "Output no more than N best weight classes (where analyses with equal weight constitute a class)", "N");
-  cli.add_str_arg('M', "compound-max-elements", "Set compound max elements", "N");
-  cli.add_bool_arg('h', "help", "show this help");
+  cli.add_bool_arg('a', "analysis", i18n.format("analysis_desc"));
+  cli.add_bool_arg('b', "bilingual", i18n.format("bilingual_desc"));
+  cli.add_bool_arg('c', "case-sensitive", i18n.format("case_sensitive_desc"));
+  cli.add_bool_arg('d', "debugged-gen", i18n.format("debugged_gen_desc"));
+  cli.add_bool_arg('e', "decompose-nouns", i18n.format("decompose_nouns_desc"));
+  cli.add_bool_arg('g', "generation", i18n.format("generation_desc"));
+  cli.add_str_arg('i', "ignored-chars", i18n.format("ignored_chars_desc"), "icx_file");
+  cli.add_str_arg('r', "restore-chars", i18n.format("restore_chars_desc"), "rcx_file");
+  cli.add_bool_arg('l', "tagged-gen", i18n.format("tagged_gen_desc"));
+  cli.add_bool_arg('m', "tagged-nm-gen", i18n.format("tagged_nm_gen_desc"));
+  cli.add_bool_arg('n', "non-marked-gen", i18n.format("non_marked_gen_desc"));
+  cli.add_bool_arg('o', "surf-bilingual", i18n.format("surf_bilingual_desc"));
+  cli.add_bool_arg('p', "post-generation", i18n.format("post_generation_desc"));
+  cli.add_bool_arg('x', "inter-generation", i18n.format("inter_generation_desc"));
+  cli.add_bool_arg('s', "sao", i18n.format("sao_desc"));
+  cli.add_bool_arg('t', "transliteration", i18n.format("transliteration_desc"));
+  cli.add_bool_arg('v', "version", i18n.format("version_desc"));
+  cli.add_bool_arg('z', "null-flush", i18n.format("null_flush_desc"));
+  cli.add_bool_arg('w', "dictionary-case", i18n.format("dictionary_case_desc"));
+  cli.add_bool_arg('C', "careful-case", i18n.format("careful_case_desc"));
+  cli.add_bool_arg('I', "no-default-ignore", i18n.format("no_default_ignore_desc"));
+  cli.add_bool_arg('W', "show-weights", i18n.format("show_weights_desc"));
+  cli.add_str_arg('N', "analyses", i18n.format("analyses_desc"), "N");
+  cli.add_str_arg('L', "weight-classes", i18n.format("weight_classes_desc"), "N");
+  cli.add_str_arg('M', "compound-max-elements", i18n.format("compound_max_elements_desc"), "N");
+  cli.add_bool_arg('h', "help", i18n.format("help_desc"));
   cli.parse_args(argc, argv);
 
   FSTProcessor fstp;
@@ -145,7 +147,7 @@ int main(int argc, char *argv[])
   if (strs.find("analyses") != strs.end()) {
     int n = atoi(strs["analyses"].back().c_str());
     if (n < 1) {
-      std::cerr << "Invalid or no argument for analyses count" << std::endl;
+      std::cerr << i18n.format("LTTB1000", {"option"}, {"analyses"}) << std::endl;
       exit(EXIT_FAILURE);
     }
     fstp.setMaxAnalysesValue(n);
@@ -153,7 +155,7 @@ int main(int argc, char *argv[])
   if (strs.find("weight-classes") != strs.end()) {
     int n = atoi(strs["weight-classes"].back().c_str());
     if (n < 1) {
-      std::cerr << "Invalid or no argument for weight class count" << std::endl;
+      std::cerr << i18n.format("LTTB1000", {"option"}, {"weight-classes"})<< std::endl;
       exit(EXIT_FAILURE);
     }
     fstp.setMaxWeightClassesValue(n);
@@ -161,7 +163,7 @@ int main(int argc, char *argv[])
   if (strs.find("compound-max-elements") != strs.end()) { // Test
     int n = atoi(strs["compound-max-elements"].back().c_str());
     if (n < 1) {
-      std::cerr << "Invalid or no argument for compound max elements" << std::endl;
+      std::cerr << i18n.format("LTTB1000", {"option"}, {"compound-max-elements"})<< std::endl;
       exit(EXIT_FAILURE);
     }
     fstp.setCompoundMaxElements(n);

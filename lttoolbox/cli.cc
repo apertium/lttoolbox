@@ -22,14 +22,16 @@
 #include <libgen.h>
 #include <string>
 #include <getopt.h>
+#include <unicode/ustream.h>
+#include <unicode/ustring.h>
 
-CLI::CLI(std::string desc, std::string ver)
+CLI::CLI(icu::UnicodeString desc, std::string ver)
 {
   description = desc;
   version = ver;
 }
 
-CLI::CLI(std::string desc)
+CLI::CLI(icu::UnicodeString desc)
 {
   description = desc;
 }
@@ -39,14 +41,14 @@ CLI::~CLI()
 }
 
 void CLI::add_str_arg(char short_flag, std::string long_flag,
-                         std::string desc, std::string arg)
+                         icu::UnicodeString desc, std::string arg)
 {
   options.push_back({.short_opt=short_flag, .long_opt=long_flag,
                      .desc=desc, .is_bool=false, .var=arg});
 }
 
 void CLI::add_bool_arg(char short_flag, std::string long_flag,
-                       std::string desc)
+                       icu::UnicodeString desc)
 {
   options.push_back({.short_opt=short_flag, .long_opt=long_flag,
                      .desc=desc, .is_bool=true, .var=""});
