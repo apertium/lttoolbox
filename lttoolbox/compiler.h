@@ -27,6 +27,8 @@
 #include <set>
 #include <libxml/xmlreader.h>
 
+#include <i18n.h>
+
 /**
  * A compiler of dictionaries to letter transducers
  */
@@ -176,6 +178,8 @@ private:
   int32_t word_boundary = 0;
   int32_t word_boundary_s = 0;
   int32_t word_boundary_ns = 0;
+
+  I18n i18n;
 
   /**
    * Method to parse an XML Node

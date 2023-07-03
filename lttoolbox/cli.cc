@@ -24,6 +24,7 @@
 #include <getopt.h>
 #include <unicode/ustream.h>
 #include <unicode/ustring.h>
+#include <i18n.h>
 
 CLI::CLI(icu::UnicodeString desc, std::string ver)
 {
@@ -67,13 +68,14 @@ void CLI::set_epilog(std::string e)
 
 void CLI::print_usage(std::ostream& out)
 {
+  I18n i18n {LOCALES_DATA};
   if (!prog_name.empty()) {
     out << prog_name;
     if (!version.empty()) {
       out << " v" << version;
     }
     out << ": " << description << std::endl;
-    out << "USAGE: " << prog_name;
+    out << i18n.format("usage") << prog_name;
     std::string bargs;
     std::string sargs;
     for (auto& it : options) {
@@ -123,6 +125,7 @@ void CLI::print_usage(std::ostream& out)
 
 void CLI::parse_args(int argc, char* argv[])
 {
+  I18n i18n {LOCALES_DATA};
   prog_name = basename(argv[0]);
   std::string arg_str;
 #if HAVE_GETOPT_LONG
@@ -153,7 +156,7 @@ void CLI::parse_args(int argc, char* argv[])
       if (it.short_opt == cnt) {
         found = true;
         if (it.short_opt == 'v' && it.long_opt == "version") {
-          std::cout << prog_name << " version " << version << std::endl;
+          std::cout << prog_name << i18n.format("version") << version << std::endl;
           exit(EXIT_SUCCESS);
         }
         if (it.is_bool) {

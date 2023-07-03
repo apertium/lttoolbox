@@ -20,7 +20,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
-
+#include <unicode/ustream.h>
+#include <i18n.h>
 /**
  * Generic circular buffer class
  */
@@ -71,9 +72,10 @@ public:
    */
   Buffer(unsigned int const buf_size=2048)
     {
+      I18n i18n {LOCALES_DATA};
       if(buf_size == 0)
       {
-        std::cerr << "Error: Cannot create empty buffer." << std::endl;
+        std::cerr << i18n.format("LTTB1010") << std::endl;
         exit(EXIT_FAILURE);
       }
       buf = new T[buf_size];

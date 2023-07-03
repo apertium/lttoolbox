@@ -29,6 +29,7 @@
 #include <lttoolbox/compression.h>
 
 #include <cstdlib>
+#include <i18n.h>
 
 #define UNDECIDED 0
 #define WORD      1
@@ -136,6 +137,8 @@ private:
 
   /** Stores the transducer graph. */
   std::map<int, AttNode*> graph;
+
+  I18n i18n;
 
   /** Clears the data associated with the current transducer. */
   void clear();

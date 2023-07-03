@@ -26,5 +26,36 @@ root{
     weight_classes_desc{"Output no more than N best weight classes (where analyses with equal weight constitute a class)"}
     compound_max_elements_desc{"Set compound max elements"}
     help_desc{"show this help"}
-    LTTB1000{"LTTB1000: Invalid or no argument for {option}"}
+    usage{"USAGE: "}
+    version{" version "}
+
+    LTTB1000{"ERROR LTTB1000: Invalid or no argument for {option}"}
+    LTTB1001{"ERROR LTTB1001: In {node_doc_url} on line {line_number}: Missing value attribute."}
+    LTTB1002{"ERROR LTTB1002: In {node_doc_url} on line {line_number}: Expected a single character in value attribute, but found {value_size}."}
+    LTTB1003{"ERROR LTTB1003: In {node_doc_url} on line {line_number}: Expected <char> but found <{node_name}>."}
+    LTTB1004{"ERROR LTTB1004: In {node_doc_url} on line {line_number}: Expected <equiv-char> but found <{node_name}>."}
+    LTTB1005{"ERROR LTTB1005: Unable to access \"{file_name}\"."}
+    LTTB1006{"ERROR LTTB1006: Invalid format in file \"{file_name}\" on line {line_number}."}
+    LTTB1007{"WARNING LTTB1007: Multiple fsts in \"{file_name}\" will be disjuncted."}
+    LTTB1008{"ERROR LTTB1008: Transducer contains epsilon transition to a final state. Aborting."}
+    LTTB1009{"ERROR LTTB1009: Transducer contains initial epsilon loop. Aborting."}
+    LTTB1010{"ERROR LTTB1010: Cannot create empty buffer."}
+    LTTB1011{"ERROR LTTB1011: Parse error at the end of input."}
+    LTTB1012{"ERROR LTTB1012: Invalid dictionary (hint: the {side} side of an entry is empty)."}
+    LTTB1013{"ERROR LTTB1013: Invalid dictionary (hint: entry on the {side} beginning with whitespace)."}
+    LTTB1014{"ERROR LTTB1014: On line {line_number}: Missing alphabet symbols."}
+    LTTB1015{"WARNING LTTB1015: Cannot insert <t/> from empty input. Ignoring. (You probably want to specify exact tags when deleting a word.)"}
+    LTTB1016{"ERROR LTTB1016: On line {line_number}: Non-empty element \"<{name}>\" should be empty."}
+    LTTB1017{"ERROR LTTB1017: On line {line_number}: Undefined symbol \"{symbol}\"."}
+    LTTB1018{"ERROR LTTB1018: On line {line_number}: Invalid specification of element \"<{name}>\" in this context."}
+    LTTB1019{"ERROR LTTB1019: On line {line_number}: Invalid construction."}
+    LTTB1020{"ERROR LTTB1020: On line {line_number}: Expected \"<{slash_element}>\"."}
+    LTTB1021{"ERROR LTTB1021: On line {line_number}: Entry begins with space."}
+    LTTB1022{"ERROR LTTB1022: On line {line_number}: Paradigm refers to itself \"{paradigm_name}\"."}
+    LTTB1023{"ERROR LTTB1023: On line {line_number}: Undefined paradigm \"{paradigm_name}\"."}
+    LTTB1024{"ERROR LTTB1024: On line {line_number}: Invalid entry token."}
+    LTTB1025{"ERROR LTTB1025: On line {line_number}: \"<{element_name}>\" element must specify non-void \"{attr_name}\" attribute."}
+    LTTB1026{"ERROR LTTB1026: On line {line_number}: Parse error."}
+    LTTB1027{"ERROR LTTB1027: On line {line_number}: Invalid inclusion of \"<{element_name}>\" into \"<{compiler_entry_element}>\"."}
+    LTTB1028{"ERROR LTTB1028: On line {line_number}: Invalid node \"<{element_name}>\"."}
 }

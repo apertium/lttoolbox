@@ -23,8 +23,10 @@
 
 #include <iostream>
 #include <thread>
+#include <unicode/ustream.h>
+#include <i18n.h>
 
-Compiler::Compiler()
+Compiler::Compiler(): i18n(LOCALES_DATA)
 {
 }
 
@@ -61,7 +63,7 @@ Compiler::parse(std::string const &file, UStringView dir)
 
   if(ret != 0)
   {
-    std::cerr << "Error: Parse error at the end of input." << std::endl;
+    std::cerr << i18n.format("LTTB1011") << std::endl;
   }
 
   xmlFreeTextReader(reader);
@@ -109,6 +111,7 @@ Compiler::parse(std::string const &file, UStringView dir)
 bool
 Compiler::valid(UStringView dir) const
 {
+  I18n i18n {LOCALES_DATA};
   const char* side = (dir == COMPILER_RESTRICTION_RL_VAL ? "right" : "left");
   const std::set<int> epsilonSymbols = alphabet.symbolsWhereLeftIs(0);
   const std::set<int> spaceSymbols = alphabet.symbolsWhereLeftIs(' ');
@@ -118,11 +121,11 @@ Compiler::valid(UStringView dir) const
     auto initial = fst.getInitial();
     for(const auto i : fst.closure(initial, epsilonSymbols)) {
       if (finals.count(i)) {
-        std::cerr << "Error: Invalid dictionary (hint: the " << side << " side of an entry is empty)" << std::endl;
+        std::cerr << i18n.format("LTTB1012", {"side"}, {side}) << std::endl;
         return false;
       }
       if(fst.closure(i, spaceSymbols).size() > 1) { // >1 since closure always includes self
-        std::cerr << "Error: Invalid dictionary (hint: entry on the " << side << " beginning with whitespace)" << std::endl;
+        std::cerr << i18n.format("LTTB1013", {"side"}, {side}) << std::endl;
         return false;
       }
     }
@@ -157,8 +160,7 @@ Compiler::procAlphabet()
     }
     else
     {
-      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      std::cerr << "): Missing alphabet symbols." << std::endl;
+      std::cerr << i18n.format("LTTB1014", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)}) << std::endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -273,7 +275,7 @@ Compiler::matchTransduction(std::vector<int> const &pi,
           // rl compilation of a badly written rule
           // having an epsilon with wildcard output will produce
           // garbage output -- see https://github.com/apertium/apertium-separable/issues/8
-          std::cerr << "Warning: Cannot insert <t/> from empty input. Ignoring. (You probably want to specify exact tags when deleting a word.)" << std::endl;
+          std::cerr << i18n.format("LTTB1015") << std::endl;
         } else if (tag == alphabet(any_tag, any_tag) ||
                    tag == alphabet(any_char, any_char) ||
                    tag == alphabet(any_tag, 0) ||
@@ -302,8 +304,8 @@ Compiler::requireEmptyError(UStringView name)
 {
   if(!xmlTextReaderIsEmptyElement(reader))
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Non-empty element '<" << name << ">' should be empty." << std::endl;
+    std::cerr << i18n.format("LTTB1016", {"line_number", "name"}, {xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(name.data())})
+              << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -359,8 +361,9 @@ Compiler::readString(std::vector<int> &result, UStringView name)
 
     if(!alphabet.isSymbolDefined(symbol))
     {
-      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      std::cerr << "): Undefined symbol '" << symbol << "'." << std::endl;
+      std::cerr << i18n.format("LTTB1017", {"line_number", "symbol"},
+                              {xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(symbol.data())})
+                << std::endl;
       exit(EXIT_FAILURE);
     }
 
@@ -387,9 +390,8 @@ Compiler::readString(std::vector<int> &result, UStringView name)
   }
   else
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Invalid specification of element '<" << name;
-    std::cerr << ">' in this context." << std::endl;
+    std::cerr << i18n.format("LTTB1018", {"line_number", "name"}, {xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(name.data())})
+              << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -403,8 +405,8 @@ Compiler::skipBlanks(UString &name)
     {
       if(!allBlanks())
       {
-        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        std::cerr << "): Invalid construction." << std::endl;
+        std::cerr << i18n.format("LTTB1019", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)})
+                  << std::endl;
         exit(EXIT_FAILURE);
       }
     }
@@ -432,8 +434,8 @@ Compiler::skip(UString &name, UStringView elem, bool open)
     {
       if(!allBlanks())
       {
-        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        std::cerr << "): Invalid construction." << std::endl;
+        std::cerr << i18n.format("LTTB1019", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)})
+                  << std::endl;
         exit(EXIT_FAILURE);
       }
     }
@@ -443,8 +445,10 @@ Compiler::skip(UString &name, UStringView elem, bool open)
 
   if(name != elem)
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Expected '<" << slash << elem << ">'." << std::endl;
+    std::cerr << i18n.format("LTTB1020", {"line_number", "slash_element"},
+                            {xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(slash.data()) +
+                                                                       icu::UnicodeString(elem.data())})
+              << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -472,8 +476,8 @@ Compiler::procIdentity(double const entry_weight, bool ig)
 
   if(verbose && first_element && (both_sides.front() == (int)' '))
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Entry begins with space." << std::endl;
+    std::cerr << i18n.format("LTTB1021", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)})
+              << std::endl;
   }
   first_element = false;
   EntryToken e;
@@ -516,8 +520,7 @@ Compiler::procTransduction(double const entry_weight)
 
   if(verbose && first_element && (lhs.front() == (int)' '))
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Entry begins with space." << std::endl;
+    std::cerr << i18n.format("LTTB1021", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)}) << std::endl;
   }
   first_element = false;
 
@@ -560,15 +563,19 @@ Compiler::procPar()
 
   if(!current_paradigm.empty() && paradigm_name == current_paradigm)
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Paradigm refers to itself '" << paradigm_name << "'." << std::endl;
+    std::cerr << i18n.format("LTTB1022", {"line_number", "paradigm_name"},
+                                         {xmlTextReaderGetParserLineNumber(reader),
+                                         icu::UnicodeString(paradigm_name.data())})
+              << std::endl;
     exit(EXIT_FAILURE);
   }
 
   if(paradigms.find(paradigm_name) == paradigms.end())
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Undefined paradigm '" << paradigm_name << "'." << std::endl;
+    std::cerr << i18n.format("LTTB1023", {"line_number", "paradigm_name"},
+                                         {xmlTextReaderGetParserLineNumber(reader),
+                                         icu::UnicodeString(paradigm_name.data())})
+              << std::endl;
     exit(EXIT_FAILURE);
   }
   e.setParadigm(paradigm_name);
@@ -604,8 +611,7 @@ Compiler::insertEntryTokens(std::vector<EntryToken> const &elements)
       }
       else
       {
-        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        std::cerr << "): Invalid entry token." << std::endl;
+        std::cerr << i18n.format("LTTB1024", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)}) << std::endl;
         exit(EXIT_FAILURE);
       }
     }
@@ -679,10 +685,11 @@ Compiler::requireAttribute(UStringView value, UStringView attrname, UStringView 
 {
   if(value.empty())
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): '<" << elemname;
-    std::cerr << "' element must specify non-void '";
-    std::cerr << attrname << "' attribute." << std::endl;
+    std::cerr << i18n.format("LTTB1025", {"line_number", "element_name", "attr_name"},
+                                         {xmlTextReaderGetParserLineNumber(reader),
+                                         icu::UnicodeString(elemname.data()),
+                                         icu::UnicodeString(attrname.data())})
+              << std::endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -869,8 +876,7 @@ Compiler::procEntry()
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      std::cerr << "): Parse error." << std::endl;
+      std::cerr << i18n.format("LTTB1026", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)}) << std::endl;
       exit(EXIT_FAILURE);
     }
     UString name = XMLParseUtil::readName(reader);
@@ -909,8 +915,10 @@ Compiler::procEntry()
       auto it = paradigms.find(p);
       if(it == paradigms.end())
       {
-        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        std::cerr << "): Undefined paradigm '" << p << "'." << std::endl;
+        std::cerr << i18n.format("LTTB1023", {"line_number", "paradigm_name"},
+                                             {xmlTextReaderGetParserLineNumber(reader),
+                                             icu::UnicodeString(p.data())})
+                  << std::endl;
         exit(EXIT_FAILURE);
       }
       // discard entries with empty paradigms (by the directions, normally)
@@ -936,9 +944,11 @@ Compiler::procEntry()
     }
     else
     {
-      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      std::cerr << "): Invalid inclusion of '<" << name << ">' into '<" << COMPILER_ENTRY_ELEM;
-      std::cerr << ">'." << std::endl;
+    std::cerr << i18n.format("LTTB1027", {"line_number", "element_name", "compiler_entry_element"},
+                                         {xmlTextReaderGetParserLineNumber(reader),
+                                         icu::UnicodeString(name.data()),
+                                         icu::UnicodeString(COMPILER_ENTRY_ELEM.data())})
+              << std::endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -1013,8 +1023,10 @@ Compiler::procNode()
   }
   else
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Invalid node '<" << name << ">'." << std::endl;
+    std::cerr << i18n.format("LTTB1028", {"line_number", "element_name"},
+                                         {xmlTextReaderGetParserLineNumber(reader),
+                                         icu::UnicodeString(name.data())})
+              << std::endl;
     exit(EXIT_FAILURE);
   }
 }

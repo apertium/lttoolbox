@@ -27,10 +27,12 @@
 #include <unicode/ustring.h>
 #include <utf8.h>
 #include <unicode/utf16.h>
+#include <unicode/ustream.h>
+#include <i18n.h>
 
 using namespace icu;
 
-AttCompiler::AttCompiler()
+AttCompiler::AttCompiler(): i18n(LOCALES_DATA)
 {}
 
 AttCompiler::~AttCompiler()
@@ -148,7 +150,7 @@ AttCompiler::parse(std::string const &file_name, bool read_rl)
 
   UFILE* infile = u_fopen(file_name.c_str(), "r", NULL, NULL);
   if (infile == NULL) {
-    std::cerr << "Error: unable to open '" << file_name << "' for reading." << std::endl;
+    std::cerr << i18n.format("LTTB1005", {"file_name"}, {file_name.c_str()}) << std::endl;
   }
   std::vector<UString> tokens;
   bool first_line_in_fst = true;       // First line -- see below
@@ -185,7 +187,7 @@ AttCompiler::parse(std::string const &file_name, bool read_rl)
 
     if (first_line_in_fst && tokens.size() == 1)
     {
-      std::cerr << "Error: invalid format in file '" << file_name << "' on line " << line_number << "." << std::endl;
+      std::cerr << i18n.format("LTTB1006", {"file_name", "line_number"}, {file_name.c_str(), line_number}) << std::endl;
       exit(EXIT_FAILURE);
     }
 
@@ -193,7 +195,7 @@ AttCompiler::parse(std::string const &file_name, bool read_rl)
     {
       if (state_id_offset == 1) {
         // this is the first split we've seen
-        std::cerr << "Warning: Multiple fsts in '" << file_name << "' will be disjuncted." << std::endl;
+        std::cerr << i18n.format("LTTB1007", {"file_name"}, {file_name.c_str()}) << std::endl;
         multiple_transducers = true;
       }
       // Update the offset for the new FST
@@ -421,7 +423,7 @@ TransducerType
 AttCompiler::classify_backwards(int state, std::set<int>& path)
 {
   if(finals.find(state) != finals.end()) {
-    std::cerr << "ERROR: Transducer contains epsilon transition to a final state. Aborting." << std::endl;
+    std::cerr << i18n.format("LTTB1008") << std::endl;
     exit(EXIT_FAILURE);
   }
   AttNode* node = get_node(state);
@@ -430,7 +432,7 @@ AttCompiler::classify_backwards(int state, std::set<int>& path)
     if(t1.type != UNDECIDED) {
       type |= t1.type;
     } else if(path.find(t1.to) != path.end()) {
-      std::cerr << "ERROR: Transducer contains initial epsilon loop. Aborting." << std::endl;
+      std::cerr << i18n.format("LTTB1009") << std::endl;
       exit(EXIT_FAILURE);
     } else {
       path.insert(t1.to);
