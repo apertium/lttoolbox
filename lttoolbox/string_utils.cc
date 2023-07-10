@@ -5,6 +5,8 @@
 #include <unicode/ustring.h>
 #include <iostream>
 #include <limits>
+#include <i18n.h>
+#include <unicode/ustream.h>
 
 UStringView
 StringUtils::trim(UStringView str)
@@ -177,9 +179,8 @@ StringUtils::tolower(UStringView str)
   UErrorCode err = U_ZERO_ERROR;
   u_strToLower(buf, str.size()*2, str.data(), str.size(), NULL, &err);
   if (U_FAILURE(err)) {
-    std::cerr << "Error: unable to lowercase string '" << str << "'.\n";
-    std::cerr << "error code: " << u_errorName(err) << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(LOCALES_DATA).error("LTTB1051", {"string", "errer_name"},
+                                         {icu::UnicodeString(str.data()), u_errorName(err)}, true);
   }
   return buf;
 }
@@ -191,9 +192,8 @@ StringUtils::toupper(UStringView str)
   UErrorCode err = U_ZERO_ERROR;
   u_strToUpper(buf, str.size()*2, str.data(), str.size(), NULL, &err);
   if (U_FAILURE(err)) {
-    std::cerr << "Error: unable to uppercase string '" << str << "'.\n";
-    std::cerr << "error code: " << u_errorName(err) << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(LOCALES_DATA).error("LTTB1052", {"string", "errer_name"},
+                                         {icu::UnicodeString(str.data()), u_errorName(err)}, true);
   }
   return buf;
 }
@@ -205,9 +205,8 @@ StringUtils::totitle(UStringView str)
   UErrorCode err = U_ZERO_ERROR;
   u_strToTitle(buf, str.size()*2, str.data(), str.size(), NULL, NULL, &err);
   if (U_FAILURE(err)) {
-    std::cerr << "Error: unable to titlecase string '" << str << "'.\n";
-    std::cerr << "error code: " << u_errorName(err) << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(LOCALES_DATA).error("LTTB1053", {"string", "errer_name"},
+                                         {icu::UnicodeString(str.data()), u_errorName(err)}, true);
   }
   return buf;
 }
@@ -272,10 +271,9 @@ StringUtils::caseequal(UStringView a, UStringView b)
   UErrorCode err = U_ZERO_ERROR;
   int cmp = u_strCaseCompare(a.data(), a.size(), b.data(), b.size(), 0, &err);
   if (U_FAILURE(err)) {
-    std::cerr << "Error: caseless string comparison failed on '";
-    std::cerr << a << "' and '" << b << "'" << std::endl;
-    std::cerr << "error code: " << u_errorName(err) << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(LOCALES_DATA).error("LTTB1054", {"string_a", "string_b", "errer_name"},
+                                         {icu::UnicodeString(a.data()),
+                                          icu::UnicodeString(b.data()), u_errorName(err)}, true);
   }
   return (cmp == 0);
 }

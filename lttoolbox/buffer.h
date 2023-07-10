@@ -75,8 +75,7 @@ public:
       I18n i18n {LOCALES_DATA};
       if(buf_size == 0)
       {
-        std::cerr << i18n.format("LTTB1010") << std::endl;
-        exit(EXIT_FAILURE);
+        i18n.error("LTTB1010", {}, {}, true);
       }
       buf = new T[buf_size];
       size = buf_size;

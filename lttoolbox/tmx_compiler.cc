@@ -23,6 +23,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <libxml/encoding.h>
+#include <i18n.h>
 
 
 TMXCompiler::TMXCompiler() :
@@ -48,8 +49,7 @@ TMXCompiler::parse(std::string const &file, UStringView lo, UStringView lm)
   reader = xmlReaderForFile(file.c_str(), NULL, 0);
   if(reader == NULL)
   {
-    std::cerr << "Error: Cannot open '" << file << "'." << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(LOCALES_DATA).error("LTTB1005", {"file_name"}, {file.c_str()}, true);
   }
 
   int ret = xmlTextReaderRead(reader);
@@ -61,7 +61,7 @@ TMXCompiler::parse(std::string const &file, UStringView lo, UStringView lm)
 
   if(ret != 0)
   {
-    std::cerr << "Error: Parse error at the end of input." << std::endl;
+    I18n(LOCALES_DATA).error("LTTB1011", {}, {}, false);
   }
 
   xmlFreeTextReader(reader);
@@ -76,9 +76,8 @@ TMXCompiler::requireEmptyError(UStringView name)
 {
   if(!xmlTextReaderIsEmptyElement(reader))
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Non-empty element '<" << name << ">' should be empty." << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(LOCALES_DATA).error("LTTB1016", {"line_number", "name"}, 
+                            {xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(name.data())}, true);
   }
 }
 
@@ -105,9 +104,7 @@ TMXCompiler::skipBlanks(UString &name)
     {
       if(!allBlanks())
       {
-        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        std::cerr << "): Invalid construction." << std::endl;
-        exit(EXIT_FAILURE);
+        I18n(LOCALES_DATA).error("LTTB1019", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)}, true);
       }
     }
 
@@ -128,9 +125,7 @@ TMXCompiler::skip(UString &name, UStringView elem)
     {
       if(!allBlanks())
       {
-        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        std::cerr << "): Invalid construction." << std::endl;
-        exit(EXIT_FAILURE);
+        I18n(LOCALES_DATA).error("LTTB1019", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)}, true);
       }
     }
     xmlTextReaderRead(reader);
@@ -139,9 +134,8 @@ TMXCompiler::skip(UString &name, UStringView elem)
 
   if(name != elem)
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Expected '<" << elem << ">'." << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(LOCALES_DATA).error("LTTB1020", {"line_number", "slash_element"},
+                           {xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(elem.data())}, true);
   }
 }
 
@@ -156,11 +150,10 @@ TMXCompiler::requireAttribute(UStringView value, UStringView attrname, UStringVi
 {
   if(value.empty())
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): '<" << elemname;
-    std::cerr << "' element must specify non-void '";
-    std::cerr << attrname << "' attribute." << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(LOCALES_DATA).error("LTTB1025", {"line_number", "element_name", "attr_name"},
+                                         {xmlTextReaderGetParserLineNumber(reader),
+                                         icu::UnicodeString(elemname.data()),
+                                         icu::UnicodeString(attrname.data())}, true);
   }
 }
 
@@ -406,9 +399,9 @@ TMXCompiler::procNode()
   }
   else
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Invalid node '<" << name << ">'." << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(LOCALES_DATA).error("LTTB1028", {"line_number", "element_name"},
+                                         {xmlTextReaderGetParserLineNumber(reader),
+                                         icu::UnicodeString(name.data())}, true);
   }
 }
 

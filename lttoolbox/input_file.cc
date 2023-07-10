@@ -22,6 +22,7 @@
 #include <cstring>
 #include <iostream>
 #include <lttoolbox/my_stdio.h>
+#include <i18n.h>
 
 InputFile::InputFile()
   : infile(stdin), buffer_size(0)
@@ -48,8 +49,7 @@ void
 InputFile::open_or_exit(const char* fname)
 {
   if (!open(fname)) {
-    std::cerr << "Error: Unable to open '" << fname << "' for reading." << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(LOCALES_DATA).error("LTTB1031", {"file_name"}, {fname}, true);
   }
 }
 
@@ -150,8 +150,7 @@ InputFile::rewind()
 {
   if (infile != nullptr) {
     if (std::fseek(infile, 0, SEEK_SET) != 0) {
-      std::cerr << "Error: Unable to rewind file" << std::endl;
-      exit(EXIT_FAILURE);
+      I18n(LOCALES_DATA).error("LTTB1036", {}, {}, true);
     }
   }
 }
@@ -226,8 +225,7 @@ InputFile::readBlank(bool readwblank)
       ret += c;
       if (c == '\\') {
         if (eof() || peek() == '\0') {
-          std::cerr << "Unexpected trailing backslash" << std::endl;
-          exit(EXIT_FAILURE);
+          I18n(LOCALES_DATA).error("LTTB1037", {}, {}, true);
         }
         ret += get();
       }

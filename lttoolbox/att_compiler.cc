@@ -150,7 +150,7 @@ AttCompiler::parse(std::string const &file_name, bool read_rl)
 
   UFILE* infile = u_fopen(file_name.c_str(), "r", NULL, NULL);
   if (infile == NULL) {
-    std::cerr << i18n.format("LTTB1005", {"file_name"}, {file_name.c_str()}) << std::endl;
+    i18n.error("LTTB1005", {"file_name"}, {file_name.c_str()}, false);
   }
   std::vector<UString> tokens;
   bool first_line_in_fst = true;       // First line -- see below
@@ -187,15 +187,14 @@ AttCompiler::parse(std::string const &file_name, bool read_rl)
 
     if (first_line_in_fst && tokens.size() == 1)
     {
-      std::cerr << i18n.format("LTTB1006", {"file_name", "line_number"}, {file_name.c_str(), line_number}) << std::endl;
-      exit(EXIT_FAILURE);
+      i18n.error("LTTB1006", {"file_name", "line_number"}, {file_name.c_str(), line_number}, true);
     }
 
     if (tokens[0].find('-') == 0)
     {
       if (state_id_offset == 1) {
         // this is the first split we've seen
-        std::cerr << i18n.format("LTTB1007", {"file_name"}, {file_name.c_str()}) << std::endl;
+        i18n.error("LTTB1007", {"file_name"}, {file_name.c_str()}, false);
         multiple_transducers = true;
       }
       // Update the offset for the new FST
@@ -423,8 +422,7 @@ TransducerType
 AttCompiler::classify_backwards(int state, std::set<int>& path)
 {
   if(finals.find(state) != finals.end()) {
-    std::cerr << i18n.format("LTTB1008") << std::endl;
-    exit(EXIT_FAILURE);
+    i18n.error("LTTB1008", {}, {}, true);
   }
   AttNode* node = get_node(state);
   TransducerType type = UNDECIDED;
@@ -432,8 +430,7 @@ AttCompiler::classify_backwards(int state, std::set<int>& path)
     if(t1.type != UNDECIDED) {
       type |= t1.type;
     } else if(path.find(t1.to) != path.end()) {
-      std::cerr << i18n.format("LTTB1009") << std::endl;
-      exit(EXIT_FAILURE);
+      i18n.error("LTTB1009", {}, {}, true);
     } else {
       path.insert(t1.to);
       t1.type = classify_backwards(t1.to, path);

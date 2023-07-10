@@ -19,14 +19,14 @@
 #include <cstdlib>
 #include <iostream>
 #include <utf8.h>
+#include <i18n.h>
 
 xmlTextReaderPtr
 XMLParseUtil::open_or_exit(const char* fname)
 {
   xmlTextReaderPtr reader = xmlReaderForFile(fname, NULL, 0);
   if (reader == NULL) {
-    std::cerr << "Error: cannot open '" << fname << "' for reading." << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(LOCALES_DATA).error("LTTB1005", {"file_name"}, {fname}, true);
   }
   return reader;
 }

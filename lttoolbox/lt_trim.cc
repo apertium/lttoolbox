@@ -19,10 +19,13 @@
 #include <lttoolbox/cli.h>
 #include <lttoolbox/lt_locale.h>
 #include <iostream>
+#include <i18n.h>
+#include <unicode/ustream.h>
 
 void
 trim(FILE* file_mono, FILE* file_bi, FILE* file_out, std::set<UString> match_sections)
 {
+  I18n i18n {LOCALES_DATA};
   Alphabet alph_mono;
   std::set<UChar32> letters_mono;
   std::map<UString, Transducer> trans_mono;
@@ -66,7 +69,7 @@ trim(FILE* file_mono, FILE* file_bi, FILE* file_out, std::set<UString> match_sec
 
   for (auto& it : trans_mono) {
     if (it.second.numberOfTransitions() == 0) {
-      std::cerr << "Warning: section " << it.first << " is empty! Skipping it..." << std::endl;
+      i18n.error("LTTB1041", {"section_name"}, {icu::UnicodeString(it.first.data())}, false);
       continue;
     }
     if (moved_bi_transducers.count(it.first)) {
@@ -79,21 +82,18 @@ trim(FILE* file_mono, FILE* file_bi, FILE* file_out, std::set<UString> match_sec
                                         alph_mono,
                                         alph_prefix);
     if (trimmed.hasNoFinals()) {
-      std::cerr << "Warning: section " << it.first << " had no final state after trimming! Skipping it..." << std::endl;
+      i18n.error("LTTB1042", {"section_name"}, {icu::UnicodeString(it.first.data())}, false);
       continue;
     }
     trimmed.minimize();
     trans_trim[it.first] = trimmed;
   }
   for (const auto &name : sections_unmatched) {
-    std::cerr << "Warning: section " << name << " was not found in both transducers! Skipping if in just one..." << std::endl;
+    i18n.error("LTTB1045", {"section_name"}, {icu::UnicodeString(name.data())}, false);
   }
 
   if (trans_trim.empty()) {
-    std::cerr << "Error: Trimming gave empty transducer!" << std::endl;
-    std::cerr << "Hint: There are no words in bilingual dictionary that match "
-      "words in both monolingual dictionaries?" << std::endl;
-    exit(EXIT_FAILURE);
+    i18n.error("LTTB1046", {}, {}, true);
   }
 
   writeTransducerSet(file_out, letters_mono, alph_mono, trans_trim);
@@ -102,12 +102,13 @@ trim(FILE* file_mono, FILE* file_bi, FILE* file_out, std::set<UString> match_sec
 
 int main(int argc, char *argv[])
 {
+  I18n i18n {LOCALES_DATA};
   LtLocale::tryToSetLocale();
-  CLI cli("trim a transducer to another transducer", PACKAGE_VERSION);
+  CLI cli(i18n.format("lt_trim_desc"), PACKAGE_VERSION);
   cli.add_file_arg("analyser_bin_file", false);
   cli.add_file_arg("bidix_bin_file");
   cli.add_file_arg("trimmed_bin_file");
-  cli.add_str_arg('s', "match-section", "A section with this name (id@type) will only be trimmed against a section with the same name. This argument may be used multiple times.", "section_name");
+  cli.add_str_arg('s', "match-section", i18n.format("match_section_desc"), "section_name");
   cli.parse_args(argc, argv);
 
   auto strs = cli.get_strs();

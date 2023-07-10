@@ -1,5 +1,6 @@
 #include <lttoolbox/xml_walk_util.h>
 #include <iostream>
+#include <i18n.h>
 
 children::children(xmlNode* node_)
   : node(node_), cur(node->children)
@@ -59,8 +60,7 @@ load_xml(const char* fname)
 {
   xmlDoc* doc = xmlReadFile(fname, NULL, 0);
   if (doc == nullptr) {
-    std::cerr << "Error: Could not parse file '" << fname << "'." << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(LOCALES_DATA).error("LTTB1005", {"file_name"}, {fname}, true);
   }
   return xmlDocGetRootElement(doc);
 }

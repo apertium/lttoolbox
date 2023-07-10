@@ -25,6 +25,7 @@
 #include <iostream>
 #include <vector>
 #include <cstring>
+#include <i18n.h>
 
 
 int
@@ -169,9 +170,7 @@ Transducer::linkStates(int const source, int const target,
   }
   else
   {
-    std::cerr << "Error: Trying to link nonexistent states (" << source;
-    std::cerr << ", " << target << ", " << tag << ")" << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(LOCALES_DATA).error("LTTB1055", {"source", "target", "tag"}, {source, target, tag}, true);
   }
 }
 
@@ -294,8 +293,7 @@ Transducer::joinFinals(int const epsilon_tag)
   }
   else if(finals.size() == 0)
   {
-    std::cerr << "Error: empty set of final states" << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(LOCALES_DATA).error("LTTB1056",{}, {}, true);
   }
 }
 
@@ -1094,8 +1092,7 @@ Transducer::trim(Transducer &trimmer,
         trimmer_preplus_next = trimmer_preplus;
 
     if(states_this_trimmed.find(current) == states_this_trimmed.end()) {
-      std::cerr <<"Error: couldn't find "<<this_src<<","<<trimmer_src<<" in state map"<< std::endl;
-      exit(EXIT_FAILURE);
+      I18n(LOCALES_DATA).error("LTTB1057",{"f_src", "g_src"}, {this_src, trimmer_src}, true);
     }
     int trimmed_src = states_this_trimmed[current];
 
@@ -1434,8 +1431,7 @@ Transducer::compose(Transducer const &g,
         g_src     = current.second;
 
     if(states_f_g_gf.find(current) == states_f_g_gf.end()) {
-      std::cerr <<"Error: couldn't find "<<f_src<<","<<g_src<<" in state map"<< std::endl;
-      exit(EXIT_FAILURE);
+      I18n(LOCALES_DATA).error("LTTB1057",{"f_src", "g_src"}, {f_src, g_src}, true);
     }
     int gf_src = states_f_g_gf[current];
 

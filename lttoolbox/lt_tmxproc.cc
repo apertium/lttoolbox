@@ -18,11 +18,13 @@
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/cli.h>
 #include <lttoolbox/file_utils.h>
+#include <i18n.h>
 
 int main(int argc, char *argv[])
 {
+  I18n i18n {LOCALES_DATA};
   LtLocale::tryToSetLocale();
-  CLI cli("process a stream with a letter transducer");
+  CLI cli(i18n.format("lt_tmxproc_desc"));
   cli.add_file_arg("fst_file", false);
   cli.add_file_arg("input_file");
   cli.add_file_arg("output_file");

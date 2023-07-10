@@ -26,6 +26,8 @@
 
 #include <queue>
 
+#include <i18n.h>
+
 void expand(Transducer& inter, int state, const std::set<int>& past_states,
             const std::vector<int32_t>& syms, const Alphabet& alpha, UFILE* out,
             std::set<std::pair<UString, UString>>& outset)
@@ -142,13 +144,14 @@ void process(UStringView pattern, std::map<UString, Transducer>& trans,
 
 int main(int argc, char* argv[])
 {
+  I18n i18n {LOCALES_DATA};
   LtLocale::tryToSetLocale();
-  CLI cli("generate listings from a compiled transducer", PACKAGE_VERSION);
-  cli.add_bool_arg('a', "analyser", "FST is an analyser (tags on the right)");
-  cli.add_str_arg('e', "exclude", "disregard paths containing TAG", "TAG");
-  cli.add_bool_arg('s', "sort", "alphabetize the paths for each pattern");
-  cli.add_bool_arg('z', "null-flush", "flush output on \\0");
-  cli.add_bool_arg('h', "help", "show this help and exit");
+  CLI cli(i18n.format("lt_paradigm_desc"), PACKAGE_VERSION);
+  cli.add_bool_arg('a', "analyser", i18n.format("analyser_desc"));
+  cli.add_str_arg('e', "exclude", i18n.format("exclude_desc"), "TAG");
+  cli.add_bool_arg('s', "sort", i18n.format("sort_desc"));
+  cli.add_bool_arg('z', "null-flush", i18n.format("null_flush_desc"));
+  cli.add_bool_arg('h', "help", i18n.format("help_desc"));
   cli.add_file_arg("FST", false);
   cli.add_file_arg("input");
   cli.add_file_arg("output");

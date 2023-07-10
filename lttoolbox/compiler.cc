@@ -63,7 +63,7 @@ Compiler::parse(std::string const &file, UStringView dir)
 
   if(ret != 0)
   {
-    std::cerr << i18n.format("LTTB1011") << std::endl;
+    i18n.error("LTTB1011", {}, {}, true);
   }
 
   xmlFreeTextReader(reader);
@@ -121,11 +121,11 @@ Compiler::valid(UStringView dir) const
     auto initial = fst.getInitial();
     for(const auto i : fst.closure(initial, epsilonSymbols)) {
       if (finals.count(i)) {
-        std::cerr << i18n.format("LTTB1012", {"side"}, {side}) << std::endl;
+        i18n.error("LTTB1012", {"side"}, {side}, false);
         return false;
       }
       if(fst.closure(i, spaceSymbols).size() > 1) { // >1 since closure always includes self
-        std::cerr << i18n.format("LTTB1013", {"side"}, {side}) << std::endl;
+        i18n.error("LTTB1013", {"side"}, {side}, false);
         return false;
       }
     }
@@ -160,8 +160,7 @@ Compiler::procAlphabet()
     }
     else
     {
-      std::cerr << i18n.format("LTTB1014", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)}) << std::endl;
-      exit(EXIT_FAILURE);
+      i18n.error("LTTB1014", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)}, true);
     }
   }
 }
@@ -275,7 +274,7 @@ Compiler::matchTransduction(std::vector<int> const &pi,
           // rl compilation of a badly written rule
           // having an epsilon with wildcard output will produce
           // garbage output -- see https://github.com/apertium/apertium-separable/issues/8
-          std::cerr << i18n.format("LTTB1015") << std::endl;
+          i18n.error("LTTB1015", {}, {}, false);
         } else if (tag == alphabet(any_tag, any_tag) ||
                    tag == alphabet(any_char, any_char) ||
                    tag == alphabet(any_tag, 0) ||
@@ -304,9 +303,8 @@ Compiler::requireEmptyError(UStringView name)
 {
   if(!xmlTextReaderIsEmptyElement(reader))
   {
-    std::cerr << i18n.format("LTTB1016", {"line_number", "name"}, {xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(name.data())})
-              << std::endl;
-    exit(EXIT_FAILURE);
+    i18n.error("LTTB1016", {"line_number", "name"}, 
+                           {xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(name.data())}, true);
   }
 }
 
@@ -361,10 +359,8 @@ Compiler::readString(std::vector<int> &result, UStringView name)
 
     if(!alphabet.isSymbolDefined(symbol))
     {
-      std::cerr << i18n.format("LTTB1017", {"line_number", "symbol"},
-                              {xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(symbol.data())})
-                << std::endl;
-      exit(EXIT_FAILURE);
+      i18n.error("LTTB1017", {"line_number", "symbol"},
+                             {xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(symbol.data())}, true);
     }
 
     result.push_back(alphabet(symbol));
@@ -390,9 +386,8 @@ Compiler::readString(std::vector<int> &result, UStringView name)
   }
   else
   {
-    std::cerr << i18n.format("LTTB1018", {"line_number", "name"}, {xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(name.data())})
-              << std::endl;
-    exit(EXIT_FAILURE);
+    i18n.error("LTTB1018", {"line_number", "name"},
+                           {xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(name.data())}, true);
   }
 }
 
@@ -405,9 +400,7 @@ Compiler::skipBlanks(UString &name)
     {
       if(!allBlanks())
       {
-        std::cerr << i18n.format("LTTB1019", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)})
-                  << std::endl;
-        exit(EXIT_FAILURE);
+        i18n.error("LTTB1019", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)}, true);
       }
     }
 
@@ -434,9 +427,7 @@ Compiler::skip(UString &name, UStringView elem, bool open)
     {
       if(!allBlanks())
       {
-        std::cerr << i18n.format("LTTB1019", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)})
-                  << std::endl;
-        exit(EXIT_FAILURE);
+        i18n.error("LTTB1019", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)}, true);
       }
     }
     xmlTextReaderRead(reader);
@@ -445,11 +436,9 @@ Compiler::skip(UString &name, UStringView elem, bool open)
 
   if(name != elem)
   {
-    std::cerr << i18n.format("LTTB1020", {"line_number", "slash_element"},
-                            {xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(slash.data()) +
-                                                                       icu::UnicodeString(elem.data())})
-              << std::endl;
-    exit(EXIT_FAILURE);
+    i18n.error("LTTB1020", {"line_number", "slash_element"},
+                           {xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(slash.data()) +
+                                                                      icu::UnicodeString(elem.data())}, true);
   }
 }
 
@@ -476,8 +465,7 @@ Compiler::procIdentity(double const entry_weight, bool ig)
 
   if(verbose && first_element && (both_sides.front() == (int)' '))
   {
-    std::cerr << i18n.format("LTTB1021", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)})
-              << std::endl;
+    i18n.error("LTTB1021", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)}, false);
   }
   first_element = false;
   EntryToken e;
@@ -520,7 +508,7 @@ Compiler::procTransduction(double const entry_weight)
 
   if(verbose && first_element && (lhs.front() == (int)' '))
   {
-    std::cerr << i18n.format("LTTB1021", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)}) << std::endl;
+    i18n.error("LTTB1021", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)}, false);
   }
   first_element = false;
 
@@ -563,20 +551,16 @@ Compiler::procPar()
 
   if(!current_paradigm.empty() && paradigm_name == current_paradigm)
   {
-    std::cerr << i18n.format("LTTB1022", {"line_number", "paradigm_name"},
+    i18n.error("LTTB1022", {"line_number", "paradigm_name"},
                                          {xmlTextReaderGetParserLineNumber(reader),
-                                         icu::UnicodeString(paradigm_name.data())})
-              << std::endl;
-    exit(EXIT_FAILURE);
+                                         icu::UnicodeString(paradigm_name.data())}, true);
   }
 
   if(paradigms.find(paradigm_name) == paradigms.end())
   {
-    std::cerr << i18n.format("LTTB1023", {"line_number", "paradigm_name"},
+    i18n.error("LTTB1023", {"line_number", "paradigm_name"},
                                          {xmlTextReaderGetParserLineNumber(reader),
-                                         icu::UnicodeString(paradigm_name.data())})
-              << std::endl;
-    exit(EXIT_FAILURE);
+                                         icu::UnicodeString(paradigm_name.data())}, true);
   }
   e.setParadigm(paradigm_name);
   return e;
@@ -611,8 +595,7 @@ Compiler::insertEntryTokens(std::vector<EntryToken> const &elements)
       }
       else
       {
-        std::cerr << i18n.format("LTTB1024", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)}) << std::endl;
-        exit(EXIT_FAILURE);
+        i18n.error("LTTB1024", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)}, true);
       }
     }
     t.setFinal(e, default_weight);
@@ -685,12 +668,10 @@ Compiler::requireAttribute(UStringView value, UStringView attrname, UStringView 
 {
   if(value.empty())
   {
-    std::cerr << i18n.format("LTTB1025", {"line_number", "element_name", "attr_name"},
+    i18n.error("LTTB1025", {"line_number", "element_name", "attr_name"},
                                          {xmlTextReaderGetParserLineNumber(reader),
                                          icu::UnicodeString(elemname.data()),
-                                         icu::UnicodeString(attrname.data())})
-              << std::endl;
-    exit(EXIT_FAILURE);
+                                         icu::UnicodeString(attrname.data())}, true);
   }
 }
 
@@ -876,8 +857,7 @@ Compiler::procEntry()
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      std::cerr << i18n.format("LTTB1026", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)}) << std::endl;
-      exit(EXIT_FAILURE);
+      i18n.error("LTTB1026", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)}, true);
     }
     UString name = XMLParseUtil::readName(reader);
     skipBlanks(name);
@@ -915,11 +895,9 @@ Compiler::procEntry()
       auto it = paradigms.find(p);
       if(it == paradigms.end())
       {
-        std::cerr << i18n.format("LTTB1023", {"line_number", "paradigm_name"},
+        i18n.error("LTTB1023", {"line_number", "paradigm_name"},
                                              {xmlTextReaderGetParserLineNumber(reader),
-                                             icu::UnicodeString(p.data())})
-                  << std::endl;
-        exit(EXIT_FAILURE);
+                                             icu::UnicodeString(p.data())}, true);
       }
       // discard entries with empty paradigms (by the directions, normally)
       if(it->second.isEmpty())
@@ -944,12 +922,10 @@ Compiler::procEntry()
     }
     else
     {
-    std::cerr << i18n.format("LTTB1027", {"line_number", "element_name", "compiler_entry_element"},
+    i18n.error("LTTB1027", {"line_number", "element_name", "compiler_entry_element"},
                                          {xmlTextReaderGetParserLineNumber(reader),
                                          icu::UnicodeString(name.data()),
-                                         icu::UnicodeString(COMPILER_ENTRY_ELEM.data())})
-              << std::endl;
-      exit(EXIT_FAILURE);
+                                         icu::UnicodeString(COMPILER_ENTRY_ELEM.data())}, true);
     }
   }
 }
@@ -1023,11 +999,9 @@ Compiler::procNode()
   }
   else
   {
-    std::cerr << i18n.format("LTTB1028", {"line_number", "element_name"},
+    i18n.error("LTTB1028", {"line_number", "element_name"},
                                          {xmlTextReaderGetParserLineNumber(reader),
-                                         icu::UnicodeString(name.data())})
-              << std::endl;
-    exit(EXIT_FAILURE);
+                                         icu::UnicodeString(name.data())}, true);
   }
 }
 

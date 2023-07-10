@@ -21,6 +21,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <i18n.h>
 
 void
 PatternList::copy(PatternList const &o)
@@ -76,8 +77,7 @@ PatternList::beginSequence()
 {
   if(sequence)
   {
-    std::cerr << "Error: opening an unended sequence" << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(LOCALES_DATA).error("LTTB1047", {}, {}, true);
   }
   sequence = true;
   sequence_data.clear();
@@ -88,8 +88,7 @@ PatternList::endSequence()
 {
   if(!sequence)
   {
-    std::cerr << "Error: ending an unopened sequence" << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(LOCALES_DATA).error("LTTB1048", {}, {}, true);
   }
   sequence = false;
 
@@ -191,8 +190,7 @@ PatternList::insert(int id, int otherid)
 {
   if(!sequence)
   {
-    std::cerr << "Error: using labels outside of a sequence" << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(LOCALES_DATA).error("LTTB1049", {}, {}, true);
   }
 
   sequence_id = id;

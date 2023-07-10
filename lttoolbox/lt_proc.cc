@@ -147,24 +147,21 @@ int main(int argc, char *argv[])
   if (strs.find("analyses") != strs.end()) {
     int n = atoi(strs["analyses"].back().c_str());
     if (n < 1) {
-      std::cerr << i18n.format("LTTB1000", {"option"}, {"analyses"}) << std::endl;
-      exit(EXIT_FAILURE);
+      i18n.error("LTTB1000", {"option"}, {"analyses"}, true);
     }
     fstp.setMaxAnalysesValue(n);
   }
   if (strs.find("weight-classes") != strs.end()) {
     int n = atoi(strs["weight-classes"].back().c_str());
     if (n < 1) {
-      std::cerr << i18n.format("LTTB1000", {"option"}, {"weight-classes"})<< std::endl;
-      exit(EXIT_FAILURE);
+      i18n.error("LTTB1000", {"option"}, {"weight-classes"}, true);
     }
     fstp.setMaxWeightClassesValue(n);
   }
   if (strs.find("compound-max-elements") != strs.end()) { // Test
     int n = atoi(strs["compound-max-elements"].back().c_str());
     if (n < 1) {
-      std::cerr << i18n.format("LTTB1000", {"option"}, {"compound-max-elements"})<< std::endl;
-      exit(EXIT_FAILURE);
+      i18n.error("LTTB1000", {"option"}, {"compound-max-elements"}, true);
     }
     fstp.setCompoundMaxElements(n);
   }

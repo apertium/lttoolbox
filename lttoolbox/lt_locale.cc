@@ -24,6 +24,7 @@
 #include <windows.h>
 #endif
 
+#include <i18n.h>
 
 void
 LtLocale::tryToSetLocale()
@@ -45,8 +46,7 @@ LtLocale::tryToSetLocale()
     return;
   }
 
-  std::cerr << "Warning: unsupported locale, fallback to \"C\"" << std::endl;
-
+  I18n(LOCALES_DATA).error("LTTB1044", {}, {}, false);
   setlocale(LC_ALL, "C");
 #endif
 #ifdef __CYGWIN__

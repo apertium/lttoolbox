@@ -18,14 +18,16 @@
 #include <lttoolbox/file_utils.h>
 #include <lttoolbox/cli.h>
 #include <lttoolbox/lt_locale.h>
+#include <i18n.h>
 
 int main(int argc, char *argv[])
 {
+  I18n i18n {LOCALES_DATA};
   LtLocale::tryToSetLocale();
-  CLI cli("dump a transducer to text in ATT format", PACKAGE_VERSION);
-  cli.add_bool_arg('a', "alpha", "print transducer alphabet");
-  cli.add_bool_arg('H', "hfst", "use HFST-compatible character escapes");
-  cli.add_bool_arg('h', "help", "print this message and exit");
+  CLI cli(i18n.format("lt_print_desc"), PACKAGE_VERSION);
+  cli.add_bool_arg('a', "alpha", i18n.format("alpha_desc"));
+  cli.add_bool_arg('H', "hfst", i18n.format("use_hfst_desc"));
+  cli.add_bool_arg('h', "help", i18n.format("help_desc"));
   cli.add_file_arg("bin_file");
   cli.add_file_arg("output_file");
   cli.parse_args(argc, argv);

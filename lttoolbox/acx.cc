@@ -29,18 +29,14 @@ int32_t get_val(xmlNode* node)
   I18n i18n {LOCALES_DATA};
   UString s = getattr(node, VALUE_ATTR);
   if (s.empty()) {
-    //error_and_die(node, i18n.format("LTTB1001"));
-    std::cerr << i18n.format("LTTB1001", {"node_doc_url", "line_number"},
-                            {(char*)node->doc->URL, node->line}) << std::endl;
-    exit(EXIT_FAILURE);
+    i18n.error("LTTB1001", {"node_doc_url", "line_number"},
+                           {(char*)node->doc->URL, node->line}, true);
   }
   std::vector<int32_t> v;
   ustring_to_vec32(s, v);
   if (v.size() > 1) {
-    //error_and_die(node, i18n.format("LTTB1002"), v.size());
-    std::cerr << i18n.format("LTTB1002", {"node_doc_url", "line_number", "value_size"},
-                            {(char*)node->doc->URL, node->line, std::to_string(v.size()).c_str()}) << std::endl;
-    exit(EXIT_FAILURE);
+    i18n.error("LTTB1002", {"node_doc_url", "line_number", "value_size"},
+                           {(char*)node->doc->URL, node->line, std::to_string(v.size()).c_str()}, true);
   }
   return v[0];
 }
@@ -52,23 +48,15 @@ std::map<int32_t, sorted_vector<int32_t>> readACX(const char* file)
   xmlNode* top_node = load_xml(file);
   for (auto char_node : children(top_node)) {
     if (!xmlStrEqual(char_node->name, CHAR_NODE)) {
-      //error_and_die(char_node, i18n.format("LTTB1003"),
-      //              (const char*)char_node->name);
-      std::cerr << i18n.format("LTTB1003", {"node_doc_url", "line_number", "node_name"},
-                              {(char*)char_node->doc->URL, char_node->line, (const char*)char_node->name})
-                << std::endl;
-      exit(EXIT_FAILURE);
+      i18n.error("LTTB1003", {"node_doc_url", "line_number", "node_name"},
+                             {(char*)char_node->doc->URL, char_node->line, (const char*)char_node->name}, true);
     }
     int32_t key = get_val(char_node);
     sorted_vector<int32_t> vec;
     for (auto equiv_node : children(char_node)) {
       if (!xmlStrEqual(equiv_node->name, EQUIV_NODE)) {
-        //error_and_die(char_node, i18n.format("LTTB1004"),
-        //              (const char*)equiv_node->name);
-        std::cerr << i18n.format("LTTB1004", {"node_doc_url", "line_number", "node_name"},
-                                {(char*)char_node->doc->URL, char_node->line, (const char*)equiv_node->name})
-                  << std::endl;
-        exit(EXIT_FAILURE);
+        i18n.error("LTTB1004", {"node_doc_url", "line_number", "node_name"},
+                               {(char*)char_node->doc->URL, char_node->line, (const char*)equiv_node->name}, true);
       }
       vec.insert(get_val(equiv_node));
     }

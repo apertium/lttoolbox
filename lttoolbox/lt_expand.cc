@@ -19,16 +19,18 @@
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/file_utils.h>
 #include <lttoolbox/cli.h>
+#include <i18n.h>
 
 int main(int argc, char *argv[])
 {
+  I18n i18n {LOCALES_DATA};
   LtLocale::tryToSetLocale();
-  CLI cli("expand the contents of a dictionary file", PACKAGE_VERSION);
-  cli.add_bool_arg('m', "keep-boundaries", "keep morpheme boundaries");
-  cli.add_str_arg('v', "var", "set language variant", "VAR");
-  cli.add_str_arg('a', "alt", "set alternative (monodix)", "ALT");
-  cli.add_str_arg('l', "var-left", "set left language variant (bidix)", "VAR");
-  cli.add_str_arg('r', "var-right", "set right language variant (bidix)", "VAR");
+  CLI cli(i18n.format("lt_expand"), PACKAGE_VERSION);
+  cli.add_bool_arg('m', "keep-boundaries", i18n.format("keep_boundaries_desc"));
+  cli.add_str_arg('v', "var", i18n.format("var_desc"), "VAR");
+  cli.add_str_arg('a', "alt", i18n.format("alt_desc"), "ALT");
+  cli.add_str_arg('l', "var-left", i18n.format("var_left_desc"), "VAR");
+  cli.add_str_arg('r', "var-right", i18n.format("var_right_desc"), "VAR");
   cli.add_file_arg("dictionary_file", false);
   cli.add_file_arg("output_file");
   cli.parse_args(argc, argv);

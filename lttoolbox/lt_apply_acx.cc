@@ -20,11 +20,12 @@
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/string_utils.h>
 #include <lttoolbox/acx.h>
+#include <i18n.h>
 
 int main(int argc, char* argv[])
 {
   LtLocale::tryToSetLocale();
-  CLI cli("apply an ACX file to a compiled transducer", PACKAGE_VERSION);
+  CLI cli(I18n(LOCALES_DATA).format("lt_apply_acx_desc"), PACKAGE_VERSION);
   cli.add_file_arg("input_file", false);
   cli.add_file_arg("acx_file");
   cli.add_file_arg("output_file");

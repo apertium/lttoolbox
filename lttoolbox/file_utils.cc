@@ -19,6 +19,8 @@
 #include <lttoolbox/compression.h>
 
 #include <cstring>
+#include <i18n.h>
+#include <unicode/ustring.h>
 
 UFILE*
 openOutTextFile(const std::string& fname)
@@ -28,8 +30,7 @@ openOutTextFile(const std::string& fname)
   } else {
     UFILE* ret = u_fopen(fname.c_str(), "wb", NULL, NULL);
     if (!ret) {
-      std::cerr << "Error: Cannot open file '" << fname << "' for writing." << std::endl;
-      exit(EXIT_FAILURE);
+      I18n(LOCALES_DATA).error("LTTB1031", {"file_name"}, {fname.c_str()}, true);
     }
     return ret;
   }
@@ -43,8 +44,7 @@ openOutBinFile(const std::string& fname)
   } else {
     FILE* ret = fopen(fname.c_str(), "wb");
     if (!ret) {
-      std::cerr << "Error: Cannot open file '" << fname << "' for writing." << std::endl;
-      exit(EXIT_FAILURE);
+      I18n(LOCALES_DATA).error("LTTB1031", {"file_name"}, {fname.c_str()}, true);
     }
     return ret;
   }
@@ -58,8 +58,7 @@ openInBinFile(const std::string& fname)
   } else {
     FILE* ret = fopen(fname.c_str(), "rb");
     if (!ret) {
-      std::cerr << "Error: Cannot open file '" << fname << "' for reading." << std::endl;
-      exit(EXIT_FAILURE);
+      I18n(LOCALES_DATA).error("LTTB1031", {"file_name"}, {fname.c_str()}, true);
     }
     return ret;
   }

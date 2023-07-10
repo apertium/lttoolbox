@@ -29,6 +29,55 @@ root{
     usage{"USAGE: "}
     version{" version "}
 
+
+    lt_append_desc{"add sections to a compiled transducer"}
+    keep_desc{"in case of section name conflicts, keep the one from the first transducer"}
+    single_desc{"treat input transducers as one-sided"}
+
+    lt_apply_acx_desc{"apply an ACX file to a compiled transducer"}
+
+    lt_comp_desc{"build a letter transducer from a dictionary"}
+    debug_desc{"insert line numbers before each entry"}
+    keep_boundaries_desc{"keep morpheme boundaries"}
+    var_desc{"set language variant"}
+    alt_desc{"set alternative (monodix)"}
+    var_left_desc{"set left language variant (bidix)"}
+    var_right_desc{"set right language variant (bidix)"}
+    expect_hfst_desc{"expect HFST symbols"}
+    no_split_desc{"don't attempt to split into word and punctuation sections"}
+    jobs_desc{"use one cpu core per section when minimising, new section after 50k entries"}
+    verbose_desc{"compile verbosely"}
+
+    lt_compose_desc{"compose transducer1 with transducer2"}
+    inverted_desc{"run composition right-to-left on transducer1"}
+    anywhere_desc{"don't require anchored matches, let transducer2 optionally compose at any sub-path"}
+
+    lt_expand{"expand the contents of a dictionary file"}
+    lt_invert_desc{"reverse the direction of a compiled transducer"}
+
+    lt_paradigm_desc{"generate listings from a compiled transducer"}
+    analyser_desc{"FST is an analyser (tags on the right)"}
+    exclude_desc{"disregard paths containing TAG"}
+    sort_desc{"alphabetize the paths for each pattern"}
+
+    lt_print_desc{"dump a transducer to text in ATT format"}
+    alpha_desc{"print transducer alphabet"}
+    use_hfst_desc{"use HFST-compatible character escapes"}
+
+    lt_restrict_desc{"remove paths from a transducer"}
+    minimise_desc{"minimise transducers after deleting paths"}
+
+    lt_tmxcomp_desc{"build a letter transducer from a TMX translation memory"}
+    origin_code_desc{"the language code to be taken as lang1"}
+    meta_code_desc{"the language code to be taken as lang2"}
+    input_language{"input language"}
+    output_language{"output language"}
+
+    lt_tmxproc_desc{"process a stream with a letter transducer"}
+
+    lt_trim_desc{"trim a transducer to another transducer"}
+    match_section_desc{"A section with this name (id@type) will only be trimmed against a section with the same name. This argument may be used multiple times."}
+
     LTTB1000{"ERROR LTTB1000: Invalid or no argument for {option}"}
     LTTB1001{"ERROR LTTB1001: In {node_doc_url} on line {line_number}: Missing value attribute."}
     LTTB1002{"ERROR LTTB1002: In {node_doc_url} on line {line_number}: Expected a single character in value attribute, but found {value_size}."}
@@ -50,7 +99,7 @@ root{
     LTTB1018{"ERROR LTTB1018: On line {line_number}: Invalid specification of element \"<{name}>\" in this context."}
     LTTB1019{"ERROR LTTB1019: On line {line_number}: Invalid construction."}
     LTTB1020{"ERROR LTTB1020: On line {line_number}: Expected \"<{slash_element}>\"."}
-    LTTB1021{"ERROR LTTB1021: On line {line_number}: Entry begins with space."}
+    LTTB1021{"WARNING LTTB1021: On line {line_number}: Entry begins with space."}
     LTTB1022{"ERROR LTTB1022: On line {line_number}: Paradigm refers to itself \"{paradigm_name}\"."}
     LTTB1023{"ERROR LTTB1023: On line {line_number}: Undefined paradigm \"{paradigm_name}\"."}
     LTTB1024{"ERROR LTTB1024: On line {line_number}: Invalid entry token."}
@@ -58,4 +107,39 @@ root{
     LTTB1026{"ERROR LTTB1026: On line {line_number}: Parse error."}
     LTTB1027{"ERROR LTTB1027: On line {line_number}: Invalid inclusion of \"<{element_name}>\" into \"<{compiler_entry_element}>\"."}
     LTTB1028{"ERROR LTTB1028: On line {line_number}: Invalid node \"<{element_name}>\"."}
+    LTTB1029{"ERROR LTTB1029: I/O Error writing."}
+    LTTB1030{"ERROR LTTB1030: Out of range: {value}."}
+    LTTB1031{"ERROR LTTB1031: Can't access file {file_name}."}
+    LTTB1032{"WARNING LTTB1032: Matching case-sensitively since processor state size >= {max_case_insensitive_state_size}"}
+    LTTB1033{"ERROR LTTB1033: Unsupported transducer type for \"{transducer_first}\"."}
+    LTTB1034{"WARNING LTTB1034: CompoundAnalysis's MAX_COMBINATIONS exceeded for \"{input_word}\"\n"
+             "                  gave up at char {index} \"{char}\"."}
+    LTTB1035{"WARNING LTTB1035: Decomposition symbol {symbol} not found."}
+    LTTB1036{"ERROR LTTB1036: Unable to rewind file."}
+    LTTB1037{"ERROR LTTB1037: Unexpected trailing backslash."}
+    LTTB1038{"WARNING LTTB1038: section \"{section}\" appears in both transducers and will be overwritten!"}
+    LTTB1039{"ERROR LTTB1039: -l specified, but mode is lr."}
+    LTTB1040{"ERROR LTTB1040: -r specified, but mode is rl."}
+    LTTB1041{"WARNING LTTB1041: section {section_name} is empty! Skipping it..."}
+    LTTB1042{"WARNING LTTB1042: section {section_name} had no final state after composing! Skipping it..."}
+    LTTB1043{"ERROR LTTB1043: Composition gave empty transducer!"}
+    LTTB1044{"WARNING LTTB1044: unsupported locale, fallback to \"C\""}
+    LTTB1045{"WARNING LTTB1045: section {section_name} was not found in both transducers! Skipping if in just one..."}
+    LTTB1046{"ERROR LTTB1046: Trimming gave empty transducer!\n"
+             "Hint: There are no words in bilingual dictionary that match words in both monolingual dictionaries?"}
+    LTTB1047{"ERROR LTTB1047: Opening an unended sequence."}
+    LTTB1048{"ERROR LTTB1048: Ending an unopened sequence."}
+    LTTB1049{"ERROR LTTB1049: Using labels outside of a sequence."}
+    LTTB1050{"ERROR LTTB1050: Parsing regexp."}
+    LTTB1051{"ERROR LTTB1051: Unable to lowercase string \"{string}\".\n"
+             "Error code: {error_name}"}
+    LTTB1052{"ERROR LTTB1052: Unable to uppercase string \"{string}\".\n"
+             "Error code: {error_name}"}
+    LTTB1053{"ERROR LTTB1053: Unable to titlecase string \"{string}\".\n"
+             "Error code: {error_name}"}
+    LTTB1054{"ERROR LTTB1054: Caseless string comparison failed on \"{string_a}\" and \"{string_b}\".\n"
+             "Error code: {error_name}"}
+    LTTB1055{"ERROR LTTB1055: Trying to link nonexistent states ({source}, {target}, {tag})."}
+    LTTB1056{"ERROR LTTB1056: Empty set of final states."}
+    LTTB1057{"ERROR LTTB1057: Couldn't find {f_src}, {g_src} in state map."}
 }

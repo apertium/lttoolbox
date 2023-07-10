@@ -21,10 +21,12 @@
 #include <iostream>
 #include <thread>
 #include <future>
+#include <i18n.h>
 
 void
 compose(FILE* file_f, FILE* file_g, FILE* file_gf, bool f_inverted, bool g_anywhere, bool jobs)
 {
+  I18n i18n(LOCALES_DATA);
   Alphabet alph_f;
   std::set<UChar32> letters_f;
   std::map<UString, Transducer> trans_f;
@@ -49,7 +51,7 @@ compose(FILE* file_f, FILE* file_g, FILE* file_gf, bool f_inverted, bool g_anywh
   std::vector<std::future<std::pair<UString, Transducer>>> compositions;
   for (auto& it : trans_f) {
     if (it.second.numberOfTransitions() == 0) {
-      std::cerr << "Warning: section " << it.first << " is empty! Skipping it..." << std::endl;
+      i18n.error("LTTB1041", {"section_name"}, {icu::UnicodeString(it.first.data())}, false);
       continue;
     }
     if(jobs) {
@@ -58,10 +60,7 @@ compose(FILE* file_f, FILE* file_g, FILE* file_gf, bool f_inverted, bool g_anywh
              bool f_inverted, bool g_anywhere, UString name) {
             Transducer gf = f.compose(g, alph_f, alph_g, f_inverted, g_anywhere);
             if (gf.hasNoFinals()) {
-              std::cerr << "Warning: section " << name
-                        << " had no final state after composing! Skipping it..."
-                        << std::endl;
-              ;
+              I18n(LOCALES_DATA).error("LTTB1042", {"section_name"}, {icu::UnicodeString(name.data())}, false);
             } else {
               gf.minimize();
             }
@@ -72,9 +71,7 @@ compose(FILE* file_f, FILE* file_g, FILE* file_gf, bool f_inverted, bool g_anywh
     } else {
       Transducer gf = it.second.compose(union_g, alph_f, alph_g, f_inverted, g_anywhere);
       if (gf.hasNoFinals()) {
-        std::cerr << "Warning: section " << it.first
-                  << " had no final state after composing! Skipping it..."
-                  << std::endl;
+        i18n.error("LTTB1042", {"section_name"}, {icu::UnicodeString(it.first.data())}, false);
         continue;
       }
       gf.minimize();
@@ -89,8 +86,7 @@ compose(FILE* file_f, FILE* file_g, FILE* file_gf, bool f_inverted, bool g_anywh
   }
 
   if (trans_gf.empty()) {
-    std::cerr << "Error: Composition gave empty transducer!" << std::endl;
-    exit(EXIT_FAILURE);
+    i18n.error("LTTB1043", {}, {}, true);
   }
 
   writeTransducerSet(file_gf, letters_f, alph_f, trans_gf);
@@ -99,10 +95,11 @@ compose(FILE* file_f, FILE* file_g, FILE* file_gf, bool f_inverted, bool g_anywh
 
 int main(int argc, char *argv[])
 {
+  I18n i18n(LOCALES_DATA);
   LtLocale::tryToSetLocale();
-  CLI cli("compose transducer1 with transducer2", PACKAGE_VERSION);
-  cli.add_bool_arg('i', "inverted", "run composition right-to-left on transducer1");
-  cli.add_bool_arg('a', "anywhere", "don't require anchored matches, let transducer2 optionally compose at any sub-path");
+  CLI cli(i18n.format("lt_compose_desc"), PACKAGE_VERSION);
+  cli.add_bool_arg('i', "inverted", i18n.format("inverted_desc"));
+  cli.add_bool_arg('a', "anywhere", i18n.format("anywhere_desc"));
   cli.add_file_arg("transducer1_bin_file", false);
   cli.add_file_arg("transducer2_bin_file");
   cli.add_file_arg("trimmed_bin_file");
