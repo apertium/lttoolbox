@@ -75,7 +75,7 @@ TransExe::read(FILE *input, Alphabet const &alphabet)
       if (strncmp(header, HEADER_TRANSDUCER, 4) == 0) {
           auto features = read_le<uint64_t>(input);
           if (features >= TDF_UNKNOWN) {
-              throw std::runtime_error("Transducer has features that are unknown to this version of lttoolbox - upgrade!");
+            I18n(LOCALES_DATA).error("LTTB1059", {}, {}, true);
           }
           read_weights = (features & TDF_WEIGHTS);
       }

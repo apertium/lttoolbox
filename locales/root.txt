@@ -142,4 +142,14 @@ root{
     LTTB1055{"ERROR LTTB1055: Trying to link nonexistent states ({source}, {target}, {tag})."}
     LTTB1056{"ERROR LTTB1056: Empty set of final states."}
     LTTB1057{"ERROR LTTB1057: Couldn't find {f_src}, {g_src} in state map."}
+    LTTB1058{"ERROR LTTB1058: Failed to write uint64_t."}
+    LTTB1059{"ERROR LTTB1059: Transducer has features that are unknown to this version of lttoolbox - upgrade!"}
+    LTTB1060{"ERROR LTTB1060: Unable to parse {type}."}
+    LTTB1061{"ERROR LTTB1061: Malformed input stream."}
+    LTTB1062{"ERROR LTTB1062: FST has features that are unknown to this version of lttoolbox - upgrade!"}
+    LTTB1063{"ERROR LTTB1063: Could not read {number} expected bytes from stream."}
+    LTTB1064{"ERROR LTTB1064: Can't deserialise {size} byte integer type: Can't deserialise size."}
+    LTTB1065{"ERROR LTTB1065: Can't deserialise {size} byte integer type: Can't deserialise byte."}
+    LTTB1066{"ERROR LTTB1066: Can't serialise const {size_a} byte integer type: Can't serialise size {size_b}."}
+    LTTB1067{"ERROR LTTB1067: Can't serialise const {size} byte integer type: Can't serialise byte {byte}."}
 }

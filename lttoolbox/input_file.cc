@@ -96,17 +96,17 @@ InputFile::internal_read()
   if ((first & 0xF0) == 0xF0) {
     i += 3;
     if (fread_unlocked(cbuffer+1, 1, 3, infile) != 3) {
-      throw std::runtime_error("Could not read 3 expected bytes from stream");
+      I18n(LOCALES_DATA).error("LTTB1063", {"number"}, {3}, true);
     }
   } else if ((first & 0xE0) == 0xE0) {
     i += 2;
     if (fread_unlocked(cbuffer+1, 1, 2, infile) != 2) {
-      throw std::runtime_error("Could not read 2 expected bytes from stream");
+      I18n(LOCALES_DATA).error("LTTB1063", {"number"}, {2}, true);
     }
   } else if ((first & 0xC0) == 0xC0) {
     i += 1;
     if (fread_unlocked(cbuffer+1, 1, 1, infile) != 1) {
-      throw std::runtime_error("Could not read 1 expected byte from stream");
+      I18n(LOCALES_DATA).error("LTTB1063", {"number"}, {1}, true);
     }
   }
   memset(ubuffer, 0, 3*sizeof(UChar));

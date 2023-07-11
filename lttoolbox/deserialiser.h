@@ -34,6 +34,7 @@
 #include <iterator>
 
 #include <unicode/uchar.h>
+#include <i18n.h>
 
 template <typename DeserialisedType> class Deserialiser;
 
@@ -124,28 +125,22 @@ Deserialiser<std::pair<first_type, second_type> >::deserialise(
 
 template <typename integer_type>
 integer_type int_deserialise(std::istream &Stream_) {
-  try {
-    integer_type SerialisedType_ = 0;
-    unsigned char SerialisedTypeSize = Stream_.get();
+  integer_type SerialisedType_ = 0;
+  unsigned char SerialisedTypeSize = Stream_.get();
+
+  if (!Stream_)
+    I18n(LOCALES_DATA).error("LTTB1064", {"size"}, {std::to_string(sizeof(integer_type)).c_str()}, true);
+
+  for (; SerialisedTypeSize != 0;) {
+    SerialisedType_ +=
+        static_cast<integer_type>(Stream_.get())
+        << std::numeric_limits<unsigned char>::digits * --SerialisedTypeSize;
 
     if (!Stream_)
-      throw DeserialisationException("can't deserialise size");
-
-    for (; SerialisedTypeSize != 0;) {
-      SerialisedType_ +=
-          static_cast<integer_type>(Stream_.get())
-          << std::numeric_limits<unsigned char>::digits * --SerialisedTypeSize;
-
-      if (!Stream_)
-        throw DeserialisationException("can't deserialise byte");
-    }
-
-    return SerialisedType_;
-  } catch (const std::exception &exc) {
-    std::stringstream what_;
-    what_ << "can't deserialise " << sizeof(integer_type) << " byte integer type: " << exc.what();
-    throw DeserialisationException(what_.str().c_str());
+      I18n(LOCALES_DATA).error("LTTB1065", {"size"}, {std::to_string(sizeof(integer_type)).c_str()}, true);
   }
+
+  return SerialisedType_;
 }
 
 #ifdef SIZET_NOT_CSTDINT

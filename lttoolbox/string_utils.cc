@@ -148,7 +148,7 @@ StringUtils::stoi(const UString& str)
   int ret;
   int c = u_sscanf(str.c_str(), "%d", &ret);
   if (c != 1) {
-    throw std::invalid_argument("unable to parse int");
+    I18n(LOCALES_DATA).error("LTTB1060", {"type"}, {"int"}, true);
   }
   return ret;
 }
@@ -167,7 +167,7 @@ StringUtils::stod(const UString& str)
     c = 1;
   }
   if (c != 1) {
-    throw std::invalid_argument("unable to parse float");
+    I18n(LOCALES_DATA).error("LTTB1060", {"type"}, {"float"}, true);
   }
   return ret;
 }

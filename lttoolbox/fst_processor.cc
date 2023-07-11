@@ -25,6 +25,7 @@
 #include <iostream>
 #include <cerrno>
 #include <climits>
+#include <i18n.h>
 
 
 FSTProcessor::FSTProcessor()
@@ -51,7 +52,7 @@ FSTProcessor::FSTProcessor()
 void
 FSTProcessor::streamError()
 {
-  throw Exception("Error: Malformed input stream.");
+  I18n(LOCALES_DATA).error("LTTB1061", {}, {}, true);
 }
 
 void

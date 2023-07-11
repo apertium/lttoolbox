@@ -102,7 +102,7 @@ readShared(FILE* input, std::set<UChar32>& letters, Alphabet& alpha)
     if (strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
       auto features = read_le<uint64_t>(input);
       if (features >= LTF_UNKNOWN) {
-        throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
+        I18n(LOCALES_DATA).error("LTTB1062", {}, {}, true);
       }
     } else {
       // Old binary format

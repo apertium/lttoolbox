@@ -23,6 +23,7 @@
 #include <stdexcept>
 #include <lttoolbox/ustring.h>
 #include <lttoolbox/my_stdio.h>
+#include <i18n.h>
 
 // Global lttoolbox features
 constexpr char HEADER_LTTOOLBOX[4]{'L', 'T', 'T', 'B'};
@@ -43,7 +44,7 @@ enum TD_FEATURES : uint64_t {
 inline auto write_u64(FILE *out, uint64_t value) {
   auto rv = fwrite_unlocked(reinterpret_cast<const char*>(&value), 1, sizeof(value), out);
   if (rv != sizeof(value)) {
-    throw std::runtime_error("Failed to write uint64_t");
+    I18n(LOCALES_DATA).error("LTTB1058", {}, {}, true);
   }
   return rv;
 }
@@ -77,7 +78,7 @@ inline auto write_le(Stream& out, uint64_t value) {
 inline auto read_u64(FILE *in) {
   uint64_t value = 0;
   if (fread_unlocked(reinterpret_cast<char*>(&value), 1, sizeof(value), in) != sizeof(value)) {
-    throw std::runtime_error("Failed to read uint64_t");
+    I18n(LOCALES_DATA).error("LTTB1058", {}, {}, true);
   }
   return value;
 }

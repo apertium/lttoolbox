@@ -154,35 +154,29 @@ void Serialiser<std::pair<first_type, second_type> >::serialise(
 template <typename integer_type>
 void int_serialise(const integer_type &SerialisedType_,
                    std::ostream &Output) {
-  try {
-    Output.put(compressedSize(SerialisedType_));
+  Output.put(compressedSize(SerialisedType_));
 
+  if (!Output) {
+    std::stringstream what_;
+    what_ << std::hex << /* [1] */ +compressedSize(SerialisedType_) << std::dec;
+    I18n(LOCALES_DATA).error("LTTB1066", {"size_a", "size_b"},
+                             {std::to_string(sizeof(integer_type)).c_str(), what_.str().c_str()}, true);
+  }
+
+  for (unsigned char CompressedSize = compressedSize(SerialisedType_);
+       CompressedSize != 0; Output.put(static_cast<unsigned char>(
+           SerialisedType_ >>
+           std::numeric_limits<unsigned char>::digits * --CompressedSize))) {
     if (!Output) {
       std::stringstream what_;
-      what_ << "can't serialise size " << std::hex
-            << /* [1] */ +compressedSize(SerialisedType_) << std::dec;
-      throw SerialisationException(what_.str().c_str());
+      what_ << std::hex << /* [1] */ +static_cast<unsigned char>(
+                   SerialisedType_ >>
+                   std::numeric_limits<unsigned char>::digits *
+                       CompressedSize) << std::dec;
+        
+      I18n(LOCALES_DATA).error("LTTB1067", {"size", "byte"},
+                               {std::to_string(sizeof(integer_type)).c_str(), what_.str().c_str()}, true);
     }
-
-    for (unsigned char CompressedSize = compressedSize(SerialisedType_);
-         CompressedSize != 0; Output.put(static_cast<unsigned char>(
-             SerialisedType_ >>
-             std::numeric_limits<unsigned char>::digits * --CompressedSize))) {
-      if (!Output) {
-        std::stringstream what_;
-        what_ << "can't serialise byte " << std::hex
-              << /* [1] */ +static_cast<unsigned char>(
-                     SerialisedType_ >>
-                     std::numeric_limits<unsigned char>::digits *
-                         CompressedSize) << std::dec;
-        throw SerialisationException(what_.str().c_str());
-      }
-    }
-  } catch (const SerialisationException &exc) {
-    std::stringstream what_;
-    what_ << "can't serialise const " << sizeof(integer_type) << " byte integer type: "
-          << exc.what();
-    throw SerialisationException(what_.str().c_str());
   }
 }
 
