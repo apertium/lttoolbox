@@ -121,11 +121,17 @@ Compiler::valid(UStringView dir) const
     auto initial = fst.getInitial();
     for(const auto i : fst.closure(initial, epsilonSymbols)) {
       if (finals.count(i)) {
-        i18n.error("LTTB1012", {"side"}, {side}, false);
+        if (side = "right")
+          i18n.error("LTTB1012", {}, {}, false);
+        else
+          i18n.error("LTTB1068", {}, {}, false);
         return false;
       }
       if(fst.closure(i, spaceSymbols).size() > 1) { // >1 since closure always includes self
-        i18n.error("LTTB1013", {"side"}, {side}, false);
+        if (side = "right")
+          i18n.error("LTTB1013", {}, {}, false);
+        else
+          i18n.error("LTTB1069", {}, {}, false);
         return false;
       }
     }
@@ -999,8 +1005,9 @@ Compiler::procNode()
   }
   else
   {
-    i18n.error("LTTB1028", {"line_number", "element_name"},
-                                         {xmlTextReaderGetParserLineNumber(reader),
+    I18n(LOCALES_DATA).error("LTTB1028", {"file_name", "line_number", "element_name"},
+                                         {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                                         xmlTextReaderGetParserLineNumber(reader),
                                          icu::UnicodeString(name.data())}, true);
   }
 }

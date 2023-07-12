@@ -399,8 +399,9 @@ TMXCompiler::procNode()
   }
   else
   {
-    I18n(LOCALES_DATA).error("LTTB1028", {"line_number", "element_name"},
-                                         {xmlTextReaderGetParserLineNumber(reader),
+    I18n(LOCALES_DATA).error("LTTB1028", {"file_name", "line_number", "element_name"},
+                                         {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                                         xmlTextReaderGetParserLineNumber(reader),
                                          icu::UnicodeString(name.data())}, true);
   }
 }

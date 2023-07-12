@@ -120,8 +120,9 @@ FSTProcessor::procNodeICX()
   }
   else
   {
-    I18n(LOCALES_DATA).error("LTTB1028", {"line_number", "element_name"},
-                                         {xmlTextReaderGetParserLineNumber(reader),
+    I18n(LOCALES_DATA).error("LTTB1028", {"file_name", "line_number", "element_name"},
+                                         {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                                         xmlTextReaderGetParserLineNumber(reader),
                                          icu::UnicodeString(name.data())}, true);
   }
 }
@@ -158,8 +159,9 @@ FSTProcessor::procNodeRCX()
   }
   else
   {
-    I18n(LOCALES_DATA).error("LTTB1028", {"line_number", "element_name"},
-                                         {xmlTextReaderGetParserLineNumber(reader),
+    I18n(LOCALES_DATA).error("LTTB1028", {"file_name", "line_number", "element_name"},
+                                         {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                                         xmlTextReaderGetParserLineNumber(reader),
                                          icu::UnicodeString(name.data())}, true);
   }
 }
@@ -2325,7 +2327,7 @@ FSTProcessor::valid() const
 {
   if(initial_state.isFinal(all_finals))
   {
-    I18n(LOCALES_DATA).error("LTTB1012", {"side"}, {"left"}, false);
+    I18n(LOCALES_DATA).error("LTTB1068", {}, {}, false);
     return false;
   }
   else
@@ -2334,7 +2336,7 @@ FSTProcessor::valid() const
     s.step(' ');
     if(s.size() != 0)
     {
-      I18n(LOCALES_DATA).error("LTTB1013", {"side"}, {"left"}, false);
+      I18n(LOCALES_DATA).error("LTTB1070", {}, {}, false);
       return false;
     }
   }
