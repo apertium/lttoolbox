@@ -17,4 +17,4 @@ test: tests/run_tests.py
 	$(PYTHON) $<
 
 export LOCALES_DIR=$(datadir)/$(PACKAGE_NAME)
-export LOCALES_DATA=$(LOCALES_DIR)/locales.dat
+export LTTB_I18N_DATA=$(LOCALES_DIR)/lttoolbox.dat

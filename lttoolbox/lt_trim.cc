@@ -25,7 +25,7 @@
 void
 trim(FILE* file_mono, FILE* file_bi, FILE* file_out, std::set<UString> match_sections)
 {
-  I18n i18n {LOCALES_DATA};
+  I18n i18n {LTTB_I18N_DATA, "lttoolbox"};
   Alphabet alph_mono;
   std::set<UChar32> letters_mono;
   std::map<UString, Transducer> trans_mono;
@@ -102,7 +102,7 @@ trim(FILE* file_mono, FILE* file_bi, FILE* file_out, std::set<UString> match_sec
 
 int main(int argc, char *argv[])
 {
-  I18n i18n {LOCALES_DATA};
+  I18n i18n {LTTB_I18N_DATA, "lttoolbox"};
   LtLocale::tryToSetLocale();
   CLI cli(i18n.format("lt_trim_desc"), PACKAGE_VERSION);
   cli.add_file_arg("analyser_bin_file", false);

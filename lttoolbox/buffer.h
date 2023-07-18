@@ -72,7 +72,7 @@ public:
    */
   Buffer(unsigned int const buf_size=2048)
     {
-      I18n i18n {LOCALES_DATA};
+      I18n i18n {LTTB_I18N_DATA, "lttoolbox"};
       if(buf_size == 0)
       {
         i18n.error("LTTB1010", {}, {}, true);

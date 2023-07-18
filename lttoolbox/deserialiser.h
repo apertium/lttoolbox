@@ -129,7 +129,7 @@ integer_type int_deserialise(std::istream &Stream_) {
   unsigned char SerialisedTypeSize = Stream_.get();
 
   if (!Stream_)
-    I18n(LOCALES_DATA).error("LTTB1064", {"size"}, {std::to_string(sizeof(integer_type)).c_str()}, true);
+    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1064", {"size"}, {std::to_string(sizeof(integer_type)).c_str()}, true);
 
   for (; SerialisedTypeSize != 0;) {
     SerialisedType_ +=
@@ -137,7 +137,8 @@ integer_type int_deserialise(std::istream &Stream_) {
         << std::numeric_limits<unsigned char>::digits * --SerialisedTypeSize;
 
     if (!Stream_)
-      I18n(LOCALES_DATA).error("LTTB1065", {"size"}, {std::to_string(sizeof(integer_type)).c_str()}, true);
+      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1065", {"size"},
+                                                          {std::to_string(sizeof(integer_type)).c_str()}, true);
   }
 
   return SerialisedType_;

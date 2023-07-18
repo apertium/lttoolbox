@@ -144,7 +144,7 @@ void process(UStringView pattern, std::map<UString, Transducer>& trans,
 
 int main(int argc, char* argv[])
 {
-  I18n i18n {LOCALES_DATA};
+  I18n i18n {LTTB_I18N_DATA, "lttoolbox"};
   LtLocale::tryToSetLocale();
   CLI cli(i18n.format("lt_paradigm_desc"), PACKAGE_VERSION);
   cli.add_bool_arg('a', "analyser", i18n.format("analyser_desc"));

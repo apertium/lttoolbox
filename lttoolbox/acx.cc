@@ -26,7 +26,7 @@ const char* VALUE_ATTR = "value";
 
 int32_t get_val(xmlNode* node)
 {
-  I18n i18n {LOCALES_DATA};
+  I18n i18n {LTTB_I18N_DATA, "lttoolbox"};
   UString s = getattr(node, VALUE_ATTR);
   if (s.empty()) {
     i18n.error("LTTB1001", {"node_doc_url", "line_number"},
@@ -43,7 +43,7 @@ int32_t get_val(xmlNode* node)
 
 std::map<int32_t, sorted_vector<int32_t>> readACX(const char* file)
 {
-  I18n i18n {LOCALES_DATA};
+  I18n i18n {LTTB_I18N_DATA, "lttoolbox"};
   std::map<int32_t, sorted_vector<int32_t>> acx;
   xmlNode* top_node = load_xml(file);
   for (auto char_node : children(top_node)) {

@@ -32,7 +32,7 @@
 
 using namespace icu;
 
-AttCompiler::AttCompiler(): i18n(LOCALES_DATA)
+AttCompiler::AttCompiler(): i18n(LTTB_I18N_DATA, "lttoolbox")
 {}
 
 AttCompiler::~AttCompiler()

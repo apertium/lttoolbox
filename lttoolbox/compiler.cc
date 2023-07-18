@@ -26,7 +26,7 @@
 #include <unicode/ustream.h>
 #include <i18n.h>
 
-Compiler::Compiler(): i18n(LOCALES_DATA)
+Compiler::Compiler(): i18n(LTTB_I18N_DATA, "lttoolbox")
 {
 }
 
@@ -111,7 +111,7 @@ Compiler::parse(std::string const &file, UStringView dir)
 bool
 Compiler::valid(UStringView dir) const
 {
-  I18n i18n {LOCALES_DATA};
+  I18n i18n {LTTB_I18N_DATA, "lttoolbox"};
   const char* side = (dir == COMPILER_RESTRICTION_RL_VAL ? "right" : "left");
   const std::set<int> epsilonSymbols = alphabet.symbolsWhereLeftIs(0);
   const std::set<int> spaceSymbols = alphabet.symbolsWhereLeftIs(' ');
@@ -1005,7 +1005,7 @@ Compiler::procNode()
   }
   else
   {
-    I18n(LOCALES_DATA).error("LTTB1028", {"file_name", "line_number", "element_name"},
+    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1028", {"file_name", "line_number", "element_name"},
                                          {(char*)xmlTextReaderCurrentDoc(reader)->URL,
                                          xmlTextReaderGetParserLineNumber(reader),
                                          icu::UnicodeString(name.data())}, true);

@@ -30,7 +30,7 @@ openOutTextFile(const std::string& fname)
   } else {
     UFILE* ret = u_fopen(fname.c_str(), "wb", NULL, NULL);
     if (!ret) {
-      I18n(LOCALES_DATA).error("LTTB1031", {"file_name"}, {fname.c_str()}, true);
+      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1031", {"file_name"}, {fname.c_str()}, true);
     }
     return ret;
   }
@@ -44,7 +44,7 @@ openOutBinFile(const std::string& fname)
   } else {
     FILE* ret = fopen(fname.c_str(), "wb");
     if (!ret) {
-      I18n(LOCALES_DATA).error("LTTB1031", {"file_name"}, {fname.c_str()}, true);
+      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1031", {"file_name"}, {fname.c_str()}, true);
     }
     return ret;
   }
@@ -58,7 +58,7 @@ openInBinFile(const std::string& fname)
   } else {
     FILE* ret = fopen(fname.c_str(), "rb");
     if (!ret) {
-      I18n(LOCALES_DATA).error("LTTB1031", {"file_name"}, {fname.c_str()}, true);
+      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1031", {"file_name"}, {fname.c_str()}, true);
     }
     return ret;
   }
@@ -102,7 +102,7 @@ readShared(FILE* input, std::set<UChar32>& letters, Alphabet& alpha)
     if (strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
       auto features = read_le<uint64_t>(input);
       if (features >= LTF_UNKNOWN) {
-        I18n(LOCALES_DATA).error("LTTB1062", {}, {}, true);
+        I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1062", {}, {}, true);
       }
     } else {
       // Old binary format

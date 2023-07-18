@@ -60,7 +60,7 @@ load_xml(const char* fname)
 {
   xmlDoc* doc = xmlReadFile(fname, NULL, 0);
   if (doc == nullptr) {
-    I18n(LOCALES_DATA).error("LTTB1005", {"file_name"}, {fname}, true);
+    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1005", {"file_name"}, {fname}, true);
   }
   return xmlDocGetRootElement(doc);
 }

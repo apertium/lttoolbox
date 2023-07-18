@@ -26,7 +26,7 @@ XMLParseUtil::open_or_exit(const char* fname)
 {
   xmlTextReaderPtr reader = xmlReaderForFile(fname, NULL, 0);
   if (reader == NULL) {
-    I18n(LOCALES_DATA).error("LTTB1005", {"file_name"}, {fname}, true);
+    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1005", {"file_name"}, {fname}, true);
   }
   return reader;
 }

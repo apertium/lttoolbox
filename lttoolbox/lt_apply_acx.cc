@@ -25,7 +25,7 @@
 int main(int argc, char* argv[])
 {
   LtLocale::tryToSetLocale();
-  CLI cli(I18n(LOCALES_DATA).format("lt_apply_acx_desc"), PACKAGE_VERSION);
+  CLI cli(I18n(LTTB_I18N_DATA, "lttoolbox").format("lt_apply_acx_desc"), PACKAGE_VERSION);
   cli.add_file_arg("input_file", false);
   cli.add_file_arg("acx_file");
   cli.add_file_arg("output_file");

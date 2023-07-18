@@ -27,7 +27,7 @@
 
 void endProgram(char *name)
 {
-  I18n i18n {LOCALES_DATA};
+  I18n i18n {LTTB_I18N_DATA, "lttoolbox"};
   if(name != NULL)
   {
     std::cout << basename(name) << " v" << PACKAGE_VERSION << ": " << i18n.format("lt_tmxcomp_desc") << std::endl;
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
   FILE *output = fopen(argv[argc-1], "wb");
   if(!output)
   {
-    I18n(LOCALES_DATA).error("LTTB1005", {"file_name"}, {argv[2]}, true);
+    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1005", {"file_name"}, {argv[2]}, true);
   }
   c.write(output);
   fclose(output);

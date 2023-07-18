@@ -35,7 +35,7 @@ void errorFunc(void *ctx, const char *msg, ...)
 
 int main(int argc, char *argv[])
 {
-  I18n i18n(LOCALES_DATA);
+  I18n i18n(LTTB_I18N_DATA, "lttoolbox");
   LtLocale::tryToSetLocale();
   CLI cli(i18n.format("lt_comp_desc"), PACKAGE_VERSION);
   cli.add_bool_arg('d', "debug", i18n.format("debug_desc"));

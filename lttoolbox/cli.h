@@ -34,7 +34,7 @@ private:
 
   icu::UnicodeString description;
   std::string version;
-  std::string epilog;
+  icu::UnicodeString epilog;
 
   std::vector<CLIOption> options;
   std::vector<std::pair<std::string, bool>> file_args;
@@ -54,7 +54,7 @@ public:
                    std::string arg);
   void add_bool_arg(char short_flag, std::string long_flag, icu::UnicodeString desc);
   void add_file_arg(std::string name, bool optional = true);
-  void set_epilog(std::string e);
+  void set_epilog(icu::UnicodeString e);
   void print_usage(std::ostream& out = std::cerr);
   void parse_args(int argc, char* argv[]);
   std::map<std::string, std::vector<std::string>>& get_strs();

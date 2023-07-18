@@ -30,6 +30,7 @@
 #include <utility>
 #include <vector>
 #include <unicode/uchar.h>
+#include <i18n.h>
 
 namespace {
 template <typename SerialisedType>
@@ -159,7 +160,7 @@ void int_serialise(const integer_type &SerialisedType_,
   if (!Output) {
     std::stringstream what_;
     what_ << std::hex << /* [1] */ +compressedSize(SerialisedType_) << std::dec;
-    I18n(LOCALES_DATA).error("LTTB1066", {"size_a", "size_b"},
+    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1066", {"size_a", "size_b"},
                              {std::to_string(sizeof(integer_type)).c_str(), what_.str().c_str()}, true);
   }
 
@@ -174,7 +175,7 @@ void int_serialise(const integer_type &SerialisedType_,
                    std::numeric_limits<unsigned char>::digits *
                        CompressedSize) << std::dec;
         
-      I18n(LOCALES_DATA).error("LTTB1067", {"size", "byte"},
+      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1067", {"size", "byte"},
                                {std::to_string(sizeof(integer_type)).c_str(), what_.str().c_str()}, true);
     }
   }

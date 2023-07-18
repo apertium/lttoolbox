@@ -31,7 +31,7 @@ void checkValidity(FSTProcessor const &fstp)
 int main(int argc, char *argv[])
 {
   LtLocale::tryToSetLocale();
-  I18n i18n {LOCALES_DATA};
+  I18n i18n {LTTB_I18N_DATA, "lttoolbox"};
 
   CLI cli(i18n.format("lt_proc_desc"), PACKAGE_VERSION);
   cli.add_file_arg("fst_file", false);
