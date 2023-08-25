@@ -154,5 +154,5 @@ root{
     LTTB1067{"ERROR LTTB1067: Can't serialise const {size} byte integer type: Can't serialise byte {byte}."}
     LTTB1068{"ERROR LTTB1068: Invalid dictionary (hint: the left side of an entry is empty)."}
     LTTB1069{"ERROR LTTB1069: Invalid dictionary (hint: entry on the left beginning with whitespace)."}
-    LTTB1070{"ERROR LTTB1069: Invalid dictionary (hint: entry on the beginning with whitespace)."}
+    LTTB1070{"ERROR LTTB1070: Invalid dictionary (hint: entry on the beginning with whitespace)."}
 }
