@@ -63,7 +63,7 @@ Compiler::parse(std::string const &file, UStringView dir)
 
   if(ret != 0)
   {
-    i18n.error("LTTB1011", {}, {}, true);
+    i18n.error("LTTB1011", {}, {}, false);
   }
 
   xmlFreeTextReader(reader);
