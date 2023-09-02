@@ -18,7 +18,7 @@
 #include <lttoolbox/file_utils.h>
 #include <lttoolbox/cli.h>
 #include <lttoolbox/lt_locale.h>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 int main(int argc, char *argv[])
 {

@@ -21,7 +21,7 @@
 #include <iostream>
 #include <thread>
 #include <future>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 void
 compose(FILE* file_f, FILE* file_g, FILE* file_gf, bool f_inverted, bool g_anywhere, bool jobs)

@@ -24,7 +24,7 @@
 #include <getopt.h>
 #include <unicode/ustream.h>
 #include <unicode/ustring.h>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 CLI::CLI(icu::UnicodeString desc, std::string ver)
 {

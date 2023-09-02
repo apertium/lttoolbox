@@ -24,7 +24,7 @@
 #include <windows.h>
 #endif
 
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 void
 LtLocale::tryToSetLocale()

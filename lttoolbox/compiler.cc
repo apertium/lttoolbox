@@ -24,7 +24,7 @@
 #include <iostream>
 #include <thread>
 #include <unicode/ustream.h>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 Compiler::Compiler(): i18n(LTTB_I18N_DATA, "lttoolbox")
 {

@@ -23,7 +23,7 @@
 #include <stdexcept>
 #include <lttoolbox/ustring.h>
 #include <lttoolbox/my_stdio.h>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 // Global lttoolbox features
 constexpr char HEADER_LTTOOLBOX[4]{'L', 'T', 'T', 'B'};

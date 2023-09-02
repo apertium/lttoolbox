@@ -23,7 +23,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <libxml/encoding.h>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 
 TMXCompiler::TMXCompiler() :

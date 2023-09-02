@@ -1,0 +1,31 @@
+es{
+    lt_proc_desc{"procesar una corriente con un transductor de letras"}
+    analysis_desc{"análisis morfológico (comportamiento predeterminado)"}
+    bilingual_desc{"transferencia léxica"}
+    case_sensitive_desc{"utilizar el caso literal de los caracteres entrantes"}
+    debugged_gen_desc{"transformarse. generación con todas las cosas"}
+    decompose_nouns_desc{"Intenta descomponer palabras desconocidas."}
+    generation_desc{"generación morfológica"}
+    ignored_chars_desc{"especificar archivo con caracteres para ignorar"}
+    restore_chars_desc{"especificar archivo con caracteres para restauración diacrítica"}
+    tagged_gen_desc{"generación morfológica manteniendo formas léxicas"}
+    tagged_nm_gen_desc{"igual que -l pero sin marcas denominativas desconocidas"}
+    non_marked_gen_desc{"transformarse. generación sin marcas denominativas desconocidas"}
+    surf_bilingual_desc{"transferencia léxica con formas superficiales"}
+    post_generation_desc{"posgeneración"}
+    inter_generation_desc{"intergeneracional"}
+    sao_desc{"Procesamiento de entrada del sistema de anotaciones SAO"}
+    transliteration_desc{"aplicar diccionario de transliteración"}
+    version_desc{"versión"}
+    null_flush_desc{"salida de vaciado en el carácter nulo"}
+    dictionary_case_desc{"usar mayúsculas y minúsculas del diccionario en lugar de superficie"}
+    careful_case_desc{"usar mayúsculas y minúsculas del diccionario si están presentes; de lo contrario, superficie"}
+    no_default_ignore_desc{"omite la carga de los caracteres ignorados predeterminados"}
+    show_weights_desc{"Imprimir los pesos del análisis final (si corresponde)"}
+    analyses_desc{"No generar más de N análisis (si el transductor está ponderado, los N mejores análisis)"}
+    weight_classes_desc{"No generar más de N mejores clases de ponderación (donde los análisis con igual ponderación constituyen una clase)"}
+    compound_max_elements_desc{"Establecer elementos máximos compuestos"}
+    help_desc{"muestra esta ayuda"}
+    usage{"USO: "}
+    version{" versión "}
+}

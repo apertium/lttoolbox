@@ -21,7 +21,7 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 void
 PatternList::copy(PatternList const &o)

@@ -26,7 +26,7 @@
 
 #include <queue>
 
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 void expand(Transducer& inter, int state, const std::set<int>& past_states,
             const std::vector<int32_t>& syms, const Alphabet& alpha, UFILE* out,

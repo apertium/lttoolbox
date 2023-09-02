@@ -19,7 +19,7 @@
 #include <lttoolbox/cli.h>
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/string_utils.h>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 void get_symbol(const std::string& s, Alphabet& alpha, const char* prefix,
                 sorted_vector<int32_t>& vec)

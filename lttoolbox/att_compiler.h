@@ -29,7 +29,7 @@
 #include <lttoolbox/compression.h>
 
 #include <cstdlib>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 #define UNDECIDED 0
 #define WORD      1

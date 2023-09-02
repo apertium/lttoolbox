@@ -18,7 +18,7 @@
 #include <lttoolbox/xml_walk_util.h>
 #include <iostream>
 #include <unicode/ustream.h>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 const xmlChar* CHAR_NODE = (const xmlChar*)"char";
 const xmlChar* EQUIV_NODE = (const xmlChar*)"equiv-char";

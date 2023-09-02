@@ -21,7 +21,7 @@
 #include <libgen.h>
 #include <string>
 #include <getopt.h>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 #include <unicode/ustream.h>
 
 

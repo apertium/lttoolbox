@@ -20,7 +20,7 @@
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/string_utils.h>
 #include <lttoolbox/acx.h>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 int main(int argc, char* argv[])
 {

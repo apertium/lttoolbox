@@ -19,7 +19,7 @@
 #include <lttoolbox/cli.h>
 #include <lttoolbox/lt_locale.h>
 #include <iostream>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 #include <unicode/ustream.h>
 
 void

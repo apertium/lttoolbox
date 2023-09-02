@@ -19,7 +19,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <climits>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 #define FIN_FICHERO INT_MAX
 

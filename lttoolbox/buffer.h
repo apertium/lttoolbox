@@ -21,7 +21,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <unicode/ustream.h>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 /**
  * Generic circular buffer class
  */

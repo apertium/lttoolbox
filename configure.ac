@@ -39,7 +39,6 @@ AC_ARG_ENABLE(profile,
 
 PKG_CHECK_MODULES(LIBXML, [libxml-2.0 >= 2.6.17])
 PKG_CHECK_MODULES(ICU, [icu-i18n, icu-io, icu-uc])
-PKG_CHECK_MODULES(I18N, [i18n], CPPFLAGS="$CPPFLAGS $I18N_CFLAGS"; LIBS="$LIBS $I18N_LIBS")
 
 # Checks for libraries.
 AC_CHECK_LIB(xml2, xmlReaderForFile)

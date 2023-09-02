@@ -5,7 +5,7 @@
 #include <unicode/ustring.h>
 #include <iostream>
 #include <limits>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 #include <unicode/ustream.h>
 
 UStringView

@@ -25,7 +25,7 @@
 #include <iostream>
 #include <cerrno>
 #include <climits>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 
 FSTProcessor::FSTProcessor()

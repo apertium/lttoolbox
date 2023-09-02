@@ -19,7 +19,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <utf8.h>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 xmlTextReaderPtr
 XMLParseUtil::open_or_exit(const char* fname)

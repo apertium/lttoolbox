@@ -22,7 +22,7 @@
 #include <cstring>
 #include <iostream>
 #include <lttoolbox/my_stdio.h>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 InputFile::InputFile()
   : infile(stdin), buffer_size(0)

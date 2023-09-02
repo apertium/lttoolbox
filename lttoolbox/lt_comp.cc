@@ -21,7 +21,7 @@
 #include <lttoolbox/file_utils.h>
 
 #include <iostream>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 /*
  * Error function that does nothing so that when we fallback from

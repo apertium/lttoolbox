@@ -1,6 +1,6 @@
 #include <lttoolbox/xml_walk_util.h>
 #include <iostream>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 children::children(xmlNode* node_)
   : node(node_), cur(node->children)

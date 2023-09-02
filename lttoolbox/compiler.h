@@ -27,7 +27,7 @@
 #include <set>
 #include <libxml/xmlreader.h>
 
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 /**
  * A compiler of dictionaries to letter transducers

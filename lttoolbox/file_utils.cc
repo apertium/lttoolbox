@@ -19,7 +19,7 @@
 #include <lttoolbox/compression.h>
 
 #include <cstring>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 #include <unicode/ustring.h>
 
 UFILE*

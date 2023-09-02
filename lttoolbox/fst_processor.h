@@ -34,7 +34,7 @@
 #include <set>
 #include <string>
 #include <cstdint>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 /**
  * Kind of output of the generator module

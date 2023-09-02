@@ -28,7 +28,7 @@
 #include <utf8.h>
 #include <unicode/utf16.h>
 #include <unicode/ustream.h>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 using namespace icu;
 

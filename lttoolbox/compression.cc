@@ -22,7 +22,7 @@
 #include <iostream>
 #include <utf8.h>
 #include <vector>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 #include <unicode/ustring.h>
 #include <unicode/ustream.h>
 

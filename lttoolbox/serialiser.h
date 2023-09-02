@@ -30,7 +30,7 @@
 #include <utility>
 #include <vector>
 #include <unicode/uchar.h>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 namespace {
 template <typename SerialisedType>

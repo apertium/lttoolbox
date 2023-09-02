@@ -80,6 +80,7 @@
 /lttoolbox/lt-invert
 /lttoolbox/lt-restrict
 /lttoolbox/lt-apply-acx
+/lttoolbox/icuformat
 /python/Makefile
 /python/Makefile.in
 /python/lttoolbox.i
