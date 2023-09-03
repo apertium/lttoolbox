@@ -1,10 +1,10 @@
 #include <iostream>
-#include "lttoolbox/i18n.h"
+#include <lttoolbox/i18n.h>
 
 int main(int argc, char* argv[])
 {
     if (argc < 4 || argc % 2 != 0) {
-        std::cout << "USAGE: icuformat <data-path> <package-name> <key> <arg-names> <arg-values>\n";
+        std::cout << "USAGE: formatmsg <data-path> <package-name> <key> <arg-names> <arg-values>\n";
         return 0;
     }
 
