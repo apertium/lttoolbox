@@ -78,81 +78,79 @@ root{
     lt_trim_desc{"trim a transducer to another transducer"}
     match_section_desc{"A section with this name (id@type) will only be trimmed against a section with the same name. This argument may be used multiple times."}
 
-    LTTB1000{"ERROR LTTB1000: Invalid or no argument for {option}"}
-    LTTB1001{"ERROR LTTB1001: In {node_doc_url} on line {line_number}: Missing value attribute."}
-    LTTB1002{"ERROR LTTB1002: In {node_doc_url} on line {line_number}: Expected a single character in value attribute, but found {value_size}."}
-    LTTB1003{"ERROR LTTB1003: In {node_doc_url} on line {line_number}: Expected <char> but found <{node_name}>."}
-    LTTB1004{"ERROR LTTB1004: In {node_doc_url} on line {line_number}: Expected <equiv-char> but found <{node_name}>."}
-    LTTB1005{"ERROR LTTB1005: Unable to access \"{file_name}\"."}
-    LTTB1006{"ERROR LTTB1006: Invalid format in file \"{file_name}\" on line {line_number}."}
-    LTTB1007{"WARNING LTTB1007: Multiple fsts in \"{file_name}\" will be disjuncted."}
-    LTTB1008{"ERROR LTTB1008: Transducer contains epsilon transition to a final state. Aborting."}
-    LTTB1009{"ERROR LTTB1009: Transducer contains initial epsilon loop. Aborting."}
-    LTTB1010{"ERROR LTTB1010: Cannot create empty buffer."}
-    LTTB1011{"ERROR LTTB1011: Parse error at the end of input."}
-    LTTB1012{"ERROR LTTB1012: Invalid dictionary (hint: the right side of an entry is empty)."}
-    LTTB1013{"ERROR LTTB1013: Invalid dictionary (hint: entry on the right beginning with whitespace)."}
-    LTTB1014{"ERROR LTTB1014: On line {line_number}: Missing alphabet symbols."}
-    LTTB1015{"WARNING LTTB1015: Cannot insert <t/> from empty input. Ignoring. (You probably want to specify exact tags when deleting a word.)"}
-    LTTB1016{"ERROR LTTB1016: On line {line_number}: Non-empty element \"<{name}>\" should be empty."}
-    LTTB1017{"ERROR LTTB1017: On line {line_number}: Undefined symbol \"{symbol}\"."}
-    LTTB1018{"ERROR LTTB1018: On line {line_number}: Invalid specification of element \"<{name}>\" in this context."}
-    LTTB1019{"ERROR LTTB1019: On line {line_number}: Invalid construction."}
-    LTTB1020{"ERROR LTTB1020: On line {line_number}: Expected \"<{slash_element}>\"."}
-    LTTB1021{"WARNING LTTB1021: On line {line_number}: Entry begins with space."}
-    LTTB1022{"ERROR LTTB1022: On line {line_number}: Paradigm refers to itself \"{paradigm_name}\"."}
-    LTTB1023{"ERROR LTTB1023: On line {line_number}: Undefined paradigm \"{paradigm_name}\"."}
-    LTTB1024{"ERROR LTTB1024: On line {line_number}: Invalid entry token."}
-    LTTB1025{"ERROR LTTB1025: On line {line_number}: \"<{element_name}>\" element must specify non-void \"{attr_name}\" attribute."}
-    LTTB1026{"ERROR LTTB1026: On line {line_number}: Parse error."}
-    LTTB1027{"ERROR LTTB1027: On line {line_number}: Invalid inclusion of \"<{element_name}>\" into \"<{compiler_entry_element}>\"."}
-    LTTB1028{"ERROR LTTB1028: On file \"{file_name}\" line {line_number}: Invalid node \"<{element_name}>\"."}
-    LTTB1029{"ERROR LTTB1029: I/O Error writing."}
-    LTTB1030{"ERROR LTTB1030: Out of range: {value}."}
-    LTTB1031{"ERROR LTTB1031: Can't access file {file_name}."}
-    LTTB1032{"WARNING LTTB1032: Matching case-sensitively since processor state size >= {max_case_insensitive_state_size}"}
-    LTTB1033{"ERROR LTTB1033: Unsupported transducer type for \"{transducer_first}\"."}
-    LTTB1034{"WARNING LTTB1034: CompoundAnalysis's MAX_COMBINATIONS exceeded for \"{input_word}\"\n"
+    ALT80000{"ERROR ALT80000: Invalid or no argument for {option}"}
+    ALT80010{"ERROR ALT80010: In {node_doc_url} on line {line_number}: Missing value attribute."}
+    ALT80020{"ERROR ALT80020: In {node_doc_url} on line {line_number}: Expected a single character in value attribute, but found {value_size}."}
+    ALT80030{"ERROR ALT80030: In {node_doc_url} on line {line_number}: Expected <{expected}> but found <{found}>."}
+    ALT80050{"ERROR ALT80050: Unable to access \"{file_name}\"."}
+    ALT80060{"ERROR ALT80060: Invalid format in file \"{file_name}\" on line {line_number}."}
+    ALT60070{"WARNING ALT60070: Multiple fsts in \"{file_name}\" will be disjuncted."}
+    ALT80080{"ERROR ALT80080: Transducer contains epsilon transition to a final state. Aborting."}
+    ALT80090{"ERROR ALT80090: Transducer contains initial epsilon loop. Aborting."}
+    ALT80100{"ERROR ALT80100: Cannot create empty buffer."}
+    ALT80110{"ERROR ALT80110: Parse error at the end of input."}
+    ALT80120{"ERROR ALT80120: Invalid dictionary (hint: the right side of an entry is empty)."}
+    ALT80121{"ERROR ALT80121: Invalid dictionary (hint: entry on the right beginning with whitespace)."}
+    ALT80122{"ERROR ALT80122: Invalid dictionary (hint: the left side of an entry is empty)."}
+    ALT80123{"ERROR ALT80123: Invalid dictionary (hint: entry on the left beginning with whitespace)."}
+    ALT80124{"ERROR ALT80124: Invalid dictionary (hint: entry on the beginning with whitespace)."}
+    ALT80140{"ERROR ALT80140: In file \"{file_name}\" on line {line_number}: Missing alphabet symbols."}
+    ALT60150{"WARNING ALT60150: Cannot insert <t/> from empty input. Ignoring. (You probably want to specify exact tags when deleting a word.)"}
+    ALT80160{"ERROR ALT80160: In file \"{file_name}\" on line {line_number}: Non-empty element \"<{name}>\" should be empty."}
+    ALT80170{"ERROR ALT80170: In file \"{file_name}\" on line {line_number}: Undefined symbol \"{symbol}\"."}
+    ALT80180{"ERROR ALT80180: In file \"{file_name}\" on line {line_number}: Invalid specification of element \"<{name}>\" in this context."}
+    ALT80190{"ERROR ALT80190: In file \"{file_name}\" on line {line_number}: Invalid construction."}
+    ALT80200{"ERROR ALT80200: In file \"{file_name}\" on line {line_number}: Expected \"<{slash_element}>\"."}
+    ALT60210{"WARNING ALT60210: In file \"{file_name}\" on line {line_number}: Entry begins with space."}
+    ALT80220{"ERROR ALT80220: In file \"{file_name}\" on line {line_number}: Paradigm refers to itself \"{paradigm_name}\"."}
+    ALT80230{"ERROR ALT80230: In file \"{file_name}\" on line {line_number}: Undefined paradigm \"{paradigm_name}\"."}
+    ALT80240{"ERROR ALT80240: In file \"{file_name}\" on line {line_number}: Invalid entry token."}
+    ALT80250{"ERROR ALT80250: In file \"{file_name}\" on line {line_number}: \"<{element_name}>\" element must specify non-void \"{attr_name}\" attribute."}
+    ALT80260{"ERROR ALT80260: In file \"{file_name}\" on line {line_number}: Parse error."}
+    ALT80270{"ERROR ALT80270: In file \"{file_name}\" on line {line_number}: Invalid inclusion of \"<{element_name}>\" into \"<{compiler_entry_element}>\"."}
+    ALT80280{"ERROR ALT80280: In file \"{file_name}\" on line {line_number}: Invalid node \"<{element_name}>\"."}
+    ALT80290{"ERROR ALT80290: I/O Error."}
+    ALT80300{"ERROR ALT80300: Out of range: {value}."}
+    ALT60320{"WARNING ALT60320: Matching case-sensitively since processor state size >= {max_case_insensitive_state_size}"}
+    ALT80330{"ERROR ALT80330: Unsupported transducer type for \"{transducer_first}\"."}
+    ALT60340{"WARNING ALT60340: CompoundAnalysis's MAX_COMBINATIONS exceeded for \"{input_word}\"\n"
              "                  gave up at char {index} \"{char}\"."}
-    LTTB1035{"WARNING LTTB1035: Decomposition symbol {symbol} not found."}
-    LTTB1036{"ERROR LTTB1036: Unable to rewind file."}
-    LTTB1037{"ERROR LTTB1037: Unexpected trailing backslash."}
-    LTTB1038{"WARNING LTTB1038: section \"{section}\" appears in both transducers and will be overwritten!"}
-    LTTB1039{"ERROR LTTB1039: -l specified, but mode is lr."}
-    LTTB1040{"ERROR LTTB1040: -r specified, but mode is rl."}
-    LTTB1041{"WARNING LTTB1041: section {section_name} is empty! Skipping it..."}
-    LTTB1042{"WARNING LTTB1042: section {section_name} had no final state after composing! Skipping it..."}
-    LTTB1043{"ERROR LTTB1043: Composition gave empty transducer!"}
-    LTTB1044{"WARNING LTTB1044: unsupported locale, fallback to \"C\""}
-    LTTB1045{"WARNING LTTB1045: section {section_name} was not found in both transducers! Skipping if in just one..."}
-    LTTB1046{"ERROR LTTB1046: Trimming gave empty transducer!\n"
+    ALT60350{"WARNING ALT60350: Decomposition symbol {symbol} not found."}
+    ALT80360{"ERROR ALT80360: Unable to rewind file."}
+    ALT80370{"ERROR ALT80370: Unexpected trailing backslash."}
+    ALT60380{"WARNING ALT60380: section \"{section}\" appears in both transducers and will be overwritten!"}
+    ALT80390{"ERROR ALT80390: -l specified, but mode is lr."}
+    ALT80391{"ERROR ALT80391: -r specified, but mode is rl."}
+    ALT60410{"WARNING ALT60410: section {section_name} is empty! Skipping it..."}
+    ALT60420{"WARNING ALT60420: section {section_name} had no final state after composing! Skipping it..."}
+    ALT80430{"ERROR ALT80430: Composition gave empty transducer!"}
+    ALT60440{"WARNING ALT60440: unsupported locale, fallback to \"C\""}
+    ALT60450{"WARNING ALT60450: section {section_name} was not found in both transducers! Skipping if in just one..."}
+    ALT80460{"ERROR ALT80460: Trimming gave empty transducer!\n"
              "Hint: There are no words in bilingual dictionary that match words in both monolingual dictionaries?"}
-    LTTB1047{"ERROR LTTB1047: Opening an unended sequence."}
-    LTTB1048{"ERROR LTTB1048: Ending an unopened sequence."}
-    LTTB1049{"ERROR LTTB1049: Using labels outside of a sequence."}
-    LTTB1050{"ERROR LTTB1050: Parsing regexp."}
-    LTTB1051{"ERROR LTTB1051: Unable to lowercase string \"{string}\".\n"
+    ALT80470{"ERROR ALT80470: Opening an unended sequence."}
+    ALT80471{"ERROR ALT80471: Ending an unopened sequence."}
+    ALT80490{"ERROR ALT80490: Using labels outside of a sequence."}
+    ALT80500{"ERROR ALT80500: Parsing regexp."}
+    ALT80510{"ERROR ALT80510: Unable to lowercase string \"{string}\".\n"
              "Error code: {error_name}"}
-    LTTB1052{"ERROR LTTB1052: Unable to uppercase string \"{string}\".\n"
+    ALT80511{"ERROR ALT80511: Unable to uppercase string \"{string}\".\n"
              "Error code: {error_name}"}
-    LTTB1053{"ERROR LTTB1053: Unable to titlecase string \"{string}\".\n"
+    ALT80512{"ERROR ALT80512: Unable to titlecase string \"{string}\".\n"
              "Error code: {error_name}"}
-    LTTB1054{"ERROR LTTB1054: Caseless string comparison failed on \"{string_a}\" and \"{string_b}\".\n"
+    ALT80513{"ERROR ALT80513: Caseless string comparison failed on \"{string_a}\" and \"{string_b}\".\n"
              "Error code: {error_name}"}
-    LTTB1055{"ERROR LTTB1055: Trying to link nonexistent states ({source}, {target}, {tag})."}
-    LTTB1056{"ERROR LTTB1056: Empty set of final states."}
-    LTTB1057{"ERROR LTTB1057: Couldn't find {f_src}, {g_src} in state map."}
-    LTTB1058{"ERROR LTTB1058: Failed to write uint64_t."}
-    LTTB1059{"ERROR LTTB1059: Transducer has features that are unknown to this version of lttoolbox - upgrade!"}
-    LTTB1060{"ERROR LTTB1060: Unable to parse {type}."}
-    LTTB1061{"ERROR LTTB1061: Malformed input stream."}
-    LTTB1062{"ERROR LTTB1062: FST has features that are unknown to this version of lttoolbox - upgrade!"}
-    LTTB1063{"ERROR LTTB1063: Could not read {number} expected bytes from stream."}
-    LTTB1064{"ERROR LTTB1064: Can't deserialise {size} byte integer type: Can't deserialise size."}
-    LTTB1065{"ERROR LTTB1065: Can't deserialise {size} byte integer type: Can't deserialise byte."}
-    LTTB1066{"ERROR LTTB1066: Can't serialise const {size_a} byte integer type: Can't serialise size {size_b}."}
-    LTTB1067{"ERROR LTTB1067: Can't serialise const {size} byte integer type: Can't serialise byte {byte}."}
-    LTTB1068{"ERROR LTTB1068: Invalid dictionary (hint: the left side of an entry is empty)."}
-    LTTB1069{"ERROR LTTB1069: Invalid dictionary (hint: entry on the left beginning with whitespace)."}
-    LTTB1070{"ERROR LTTB1070: Invalid dictionary (hint: entry on the beginning with whitespace)."}
+    ALT80550{"ERROR ALT80550: Trying to link nonexistent states ({source}, {target}, {tag})."}
+    ALT80560{"ERROR ALT80560: Empty set of final states."}
+    ALT80570{"ERROR ALT80570: Couldn't find {f_src}, {g_src} in state map."}
+    ALT80580{"ERROR ALT80580: Failed to read/write uint64_t."}
+    ALT80590{"ERROR ALT80590: Transducer has features that are unknown to this version of lttoolbox - upgrade!"}
+    ALT80600{"ERROR ALT80600: Unable to parse {type}."}
+    ALT80610{"ERROR ALT80610: Malformed input stream."}
+    ALT80620{"ERROR ALT80620: FST has features that are unknown to this version of lttoolbox - upgrade!"}
+    ALT80630{"ERROR ALT80630: Could not read {number} expected bytes from stream."}
+    ALT80640{"ERROR ALT80640: Can't deserialise {size} byte integer type: Can't deserialise size."}
+    ALT80650{"ERROR ALT80650: Can't deserialise {size} byte integer type: Can't deserialise byte."}
+    ALT80660{"ERROR ALT80660: Can't serialise const {size_a} byte integer type: Can't serialise size {size_b}."}
+    ALT80670{"ERROR ALT80670: Can't serialise const {size} byte integer type: Can't serialise byte {byte}."}
 }

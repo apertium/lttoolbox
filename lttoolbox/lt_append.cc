@@ -23,7 +23,7 @@
 
 int main(int argc, char *argv[])
 {
-  I18n i18n {LTTB_I18N_DATA, "lttoolbox"};
+  I18n i18n {ALT_I18N_DATA, "lttoolbox"};
   LtLocale::tryToSetLocale();
   CLI cli(i18n.format("lt_append_desc"), PACKAGE_VERSION);
   cli.add_bool_arg('k', "keep", i18n.format("keep_desc"));
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
       if (keep) {
         continue;
       } else {
-        i18n.error("LTTB1038", {"section"}, {icu::UnicodeString(it.first.data())}, false);
+        i18n.error("ALT60380", {"section"}, {icu::UnicodeString(it.first.data())}, false);
       }
     }
     it.second.updateAlphabet(alpha2, alpha1, pairs);

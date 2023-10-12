@@ -44,7 +44,7 @@ enum TD_FEATURES : uint64_t {
 inline auto write_u64(FILE *out, uint64_t value) {
   auto rv = fwrite_unlocked(reinterpret_cast<const char*>(&value), 1, sizeof(value), out);
   if (rv != sizeof(value)) {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1058", {}, {}, true);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80580", {}, {}, true);
   }
   return rv;
 }
@@ -78,7 +78,7 @@ inline auto write_le(Stream& out, uint64_t value) {
 inline auto read_u64(FILE *in) {
   uint64_t value = 0;
   if (fread_unlocked(reinterpret_cast<char*>(&value), 1, sizeof(value), in) != sizeof(value)) {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1058", {}, {}, true);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80580", {}, {}, true);
   }
   return value;
 }

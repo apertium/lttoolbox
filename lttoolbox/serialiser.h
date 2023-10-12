@@ -160,7 +160,7 @@ void int_serialise(const integer_type &SerialisedType_,
   if (!Output) {
     std::stringstream what_;
     what_ << std::hex << /* [1] */ +compressedSize(SerialisedType_) << std::dec;
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1066", {"size_a", "size_b"},
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80660", {"size_a", "size_b"},
                              {std::to_string(sizeof(integer_type)).c_str(), what_.str().c_str()}, true);
   }
 
@@ -175,7 +175,7 @@ void int_serialise(const integer_type &SerialisedType_,
                    std::numeric_limits<unsigned char>::digits *
                        CompressedSize) << std::dec;
         
-      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1067", {"size", "byte"},
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80670", {"size", "byte"},
                                {std::to_string(sizeof(integer_type)).c_str(), what_.str().c_str()}, true);
     }
   }

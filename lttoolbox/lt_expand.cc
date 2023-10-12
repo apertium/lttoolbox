@@ -23,7 +23,7 @@
 
 int main(int argc, char *argv[])
 {
-  I18n i18n {LTTB_I18N_DATA, "lttoolbox"};
+  I18n i18n {ALT_I18N_DATA, "lttoolbox"};
   LtLocale::tryToSetLocale();
   CLI cli(i18n.format("lt_expand"), PACKAGE_VERSION);
   cli.add_bool_arg('m', "keep-boundaries", i18n.format("keep_boundaries_desc"));

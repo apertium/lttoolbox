@@ -47,7 +47,7 @@ Expander::expand(std::string const &file, UFILE* output)
 
   if(ret != 0)
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1011", {}, {}, false);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80110", {}, {}, false);
   }
 
   xmlFreeTextReader(reader);
@@ -74,8 +74,9 @@ Expander::requireEmptyError(UStringView name)
 {
   if(!xmlTextReaderIsEmptyElement(reader))
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1016", {"line_number", "name"}, 
-                            {xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(name.data())}, true);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80160", {"file_name", "line_number", "name"}, 
+                           {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                            xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(name.data())}, true);
   }
 }
 
@@ -149,8 +150,9 @@ Expander::readString(UString &result, UStringView name)
   }
   else
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1018", {"line_number", "name"},
-                            {xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(name.data())}, true);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80180", {"file_name", "line_number", "name"},
+                            {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                             xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(name.data())}, true);
   }
 }
 
@@ -161,8 +163,8 @@ Expander::skipBlanks(UString &name)
   {
     if(!allBlanks())
     {
-      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1019", {"line_number"},
-                                                          {xmlTextReaderGetParserLineNumber(reader)}, true);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80190", {"file_name", "line_number"},
+        {(char*)xmlTextReaderCurrentDoc(reader)->URL, xmlTextReaderGetParserLineNumber(reader)}, true);
     }
     xmlTextReaderRead(reader);
     name = XMLParseUtil::readName(reader);
@@ -179,7 +181,8 @@ Expander::skip(UString &name, UStringView elem)
   {
     if(!allBlanks())
     {
-      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1019", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)}, true);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80190", {"file_name", "line_number"},
+        {(char*)xmlTextReaderCurrentDoc(reader)->URL, xmlTextReaderGetParserLineNumber(reader)}, true);
     }
     xmlTextReaderRead(reader);
     name = XMLParseUtil::readName(reader);
@@ -187,8 +190,9 @@ Expander::skip(UString &name, UStringView elem)
 
   if(name != elem)
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1020", {"line_number", "slash_element"},
-                           {xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(elem.data())}, true);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80200", {"file_name", "line_number", "slash_element"},
+                           {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                            xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(elem.data())}, true);
   }
 }
 
@@ -309,8 +313,9 @@ Expander::requireAttribute(UStringView value, UStringView attrname, UStringView 
 {
   if(value.empty())
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1025", {"line_number", "element_name", "attr_name"},
-                                         {xmlTextReaderGetParserLineNumber(reader),
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80250", {"file_name", "line_number", "element_name", "attr_name"},
+                                         {(char*)xmlTextReaderCurrentDoc(reader)->URL, 
+                                         xmlTextReaderGetParserLineNumber(reader),
                                          icu::UnicodeString(elemname.data()),
                                          icu::UnicodeString(attrname.data())}, true);
   }
@@ -340,7 +345,8 @@ Expander::procEntry(UFILE* output)
       int ret = xmlTextReaderRead(reader);
       if(ret != 1)
       {
-        I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1026", {"line_number"}, {xmlTextReaderGetParserLineNumber(reader)}, true);
+        I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80260", {"file_name", "line_number"},
+          {(char*)xmlTextReaderCurrentDoc(reader)->URL, xmlTextReaderGetParserLineNumber(reader)}, true);
       }
       myname = XMLParseUtil::readName(reader);
     }
@@ -370,8 +376,8 @@ Expander::procEntry(UFILE* output)
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1026", {"line_number"},
-                                                          {xmlTextReaderGetParserLineNumber(reader)}, true);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80260", {"file_name", "line_number"},
+        {(char*)xmlTextReaderCurrentDoc(reader)->URL, xmlTextReaderGetParserLineNumber(reader)}, true);
     }
     UString name = XMLParseUtil::readName(reader);
     skipBlanks(name);
@@ -414,9 +420,10 @@ Expander::procEntry(UFILE* output)
          paradigm_lr.find(p) == paradigm_lr.end() &&
          paradigm_rl.find(p) == paradigm_rl.end())
       {
-        I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1023", {"line_number", "paradigm_name"},
-                                             {xmlTextReaderGetParserLineNumber(reader),
-                                             icu::UnicodeString(p.data())}, true);
+        I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80230", {"file_name", "line_number", "paradigm_name"},
+                                         {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                                          xmlTextReaderGetParserLineNumber(reader),
+                                          icu::UnicodeString(p.data())}, true);
       }
 
       if(attribute == Compiler::COMPILER_RESTRICTION_LR_VAL)
@@ -496,10 +503,12 @@ Expander::procEntry(UFILE* output)
     }
     else
     {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1027", {"line_number", "element_name", "compiler_entry_element"},
-                                          {xmlTextReaderGetParserLineNumber(reader),
-                                          icu::UnicodeString(name.data()),
-                                          icu::UnicodeString(Compiler::COMPILER_ENTRY_ELEM.data())}, true);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80270",
+      {"file_name", "line_number", "element_name", "compiler_entry_element"},
+                                         {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                                         xmlTextReaderGetParserLineNumber(reader),
+                                         icu::UnicodeString(name.data()),
+                                         icu::UnicodeString(Compiler::COMPILER_ENTRY_ELEM.data())}, true);
     }
   }
 }
@@ -553,7 +562,7 @@ Expander::procNode(UFILE *output)
   }
   else
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1028", {"file_name", "line_number", "element_name"},
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80280", {"file_name", "line_number", "element_name"},
                                          {(char*)xmlTextReaderCurrentDoc(reader)->URL,
                                          xmlTextReaderGetParserLineNumber(reader),
                                          icu::UnicodeString(name.data())}, true);

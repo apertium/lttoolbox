@@ -68,7 +68,7 @@ void CLI::set_epilog(icu::UnicodeString e)
 
 void CLI::print_usage(std::ostream& out)
 {
-  I18n i18n {LTTB_I18N_DATA, "lttoolbox"};
+  I18n i18n {ALT_I18N_DATA, "lttoolbox"};
   if (!prog_name.empty()) {
     out << prog_name;
     if (!version.empty()) {
@@ -125,7 +125,7 @@ void CLI::print_usage(std::ostream& out)
 
 void CLI::parse_args(int argc, char* argv[])
 {
-  I18n i18n {LTTB_I18N_DATA, "lttoolbox"};
+  I18n i18n {ALT_I18N_DATA, "lttoolbox"};
   prog_name = basename(argv[0]);
   std::string arg_str;
 #if HAVE_GETOPT_LONG

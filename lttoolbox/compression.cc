@@ -31,7 +31,7 @@ Compression::writeByte(unsigned char byte, FILE *output)
 {
   if(fwrite_unlocked(&byte, 1, 1, output) != 1)
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1029", {}, {}, true);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80290", {}, {}, true);
   }
 }
 
@@ -42,7 +42,7 @@ Compression::readByte(FILE *input)
   if(fread_unlocked(&value, 1, 1, input) != 1)
   {
 //    Not uncomment this code since
-//    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1029", {}, {}, true);
+//    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80290", {}, {}, true);
   }
 
   return value;
@@ -88,7 +88,7 @@ Compression::multibyte_write(unsigned int value, FILE *output)
   }
   else
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1030", {"value"}, {std::to_string(value).c_str()}, true);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80300", {"value"}, {std::to_string(value).c_str()}, true);
   }
 }
 
@@ -134,7 +134,7 @@ Compression::multibyte_write(unsigned int value, std::ostream &output)
   }
   else
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1030", {"value"}, {std::to_string(value).c_str()}, true);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80300", {"value"}, {std::to_string(value).c_str()}, true);
   }
 }
 

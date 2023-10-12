@@ -49,7 +49,7 @@ TMXCompiler::parse(std::string const &file, UStringView lo, UStringView lm)
   reader = xmlReaderForFile(file.c_str(), NULL, 0);
   if(reader == NULL)
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1005", {"file_name"}, {file.c_str()}, true);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80050", {"file_name"}, {file.c_str()}, true);
   }
 
   int ret = xmlTextReaderRead(reader);
@@ -61,7 +61,7 @@ TMXCompiler::parse(std::string const &file, UStringView lo, UStringView lm)
 
   if(ret != 0)
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1011", {}, {}, false);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80110", {}, {}, false);
   }
 
   xmlFreeTextReader(reader);
@@ -76,8 +76,9 @@ TMXCompiler::requireEmptyError(UStringView name)
 {
   if(!xmlTextReaderIsEmptyElement(reader))
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1016", {"line_number", "name"}, 
-                            {xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(name.data())}, true);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80160", {"file_name", "line_number", "name"}, 
+                           {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                            xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(name.data())}, true);
   }
 }
 
@@ -104,8 +105,8 @@ TMXCompiler::skipBlanks(UString &name)
     {
       if(!allBlanks())
       {
-        I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1019", {"line_number"},
-                                                            {xmlTextReaderGetParserLineNumber(reader)}, true);
+        I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80190", {"file_name", "line_number"},
+          {(char*)xmlTextReaderCurrentDoc(reader)->URL, xmlTextReaderGetParserLineNumber(reader)}, true);
       }
     }
 
@@ -126,8 +127,8 @@ TMXCompiler::skip(UString &name, UStringView elem)
     {
       if(!allBlanks())
       {
-        I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1019", {"line_number"},
-                                                            {xmlTextReaderGetParserLineNumber(reader)}, true);
+        I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80190", {"file_name", "line_number"},
+          {(char*)xmlTextReaderCurrentDoc(reader)->URL, xmlTextReaderGetParserLineNumber(reader)}, true);
       }
     }
     xmlTextReaderRead(reader);
@@ -136,8 +137,9 @@ TMXCompiler::skip(UString &name, UStringView elem)
 
   if(name != elem)
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1020", {"line_number", "slash_element"},
-                           {xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(elem.data())}, true);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80200", {"file_name", "line_number", "slash_element"},
+                           {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                            xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(elem.data())}, true);
   }
 }
 
@@ -152,8 +154,9 @@ TMXCompiler::requireAttribute(UStringView value, UStringView attrname, UStringVi
 {
   if(value.empty())
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1025", {"line_number", "element_name", "attr_name"},
-                                         {xmlTextReaderGetParserLineNumber(reader),
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80250", {"file_name", "line_number", "element_name", "attr_name"},
+                                         {(char*)xmlTextReaderCurrentDoc(reader)->URL, 
+                                         xmlTextReaderGetParserLineNumber(reader),
                                          icu::UnicodeString(elemname.data()),
                                          icu::UnicodeString(attrname.data())}, true);
   }
@@ -401,7 +404,7 @@ TMXCompiler::procNode()
   }
   else
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1028", {"file_name", "line_number", "element_name"},
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80280", {"file_name", "line_number", "element_name"},
                                          {(char*)xmlTextReaderCurrentDoc(reader)->URL,
                                          xmlTextReaderGetParserLineNumber(reader),
                                          icu::UnicodeString(name.data())}, true);

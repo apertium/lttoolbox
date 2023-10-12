@@ -170,7 +170,7 @@ Transducer::linkStates(int const source, int const target,
   }
   else
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1055", {"source", "target", "tag"}, {source, target, tag}, true);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80550", {"source", "target", "tag"}, {source, target, tag}, true);
   }
 }
 
@@ -293,7 +293,7 @@ Transducer::joinFinals(int const epsilon_tag)
   }
   else if(finals.size() == 0)
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1056",{}, {}, true);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80560",{}, {}, true);
   }
 }
 
@@ -589,7 +589,7 @@ Transducer::read(FILE *input, int const decalage)
       if (strncmp(header, HEADER_TRANSDUCER, 4) == 0) {
           auto features = read_le<uint64_t>(input);
           if (features >= TDF_UNKNOWN) {
-            I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1059", {}, {}, true);
+            I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80590", {}, {}, true);
           }
           read_weights = (features & TDF_WEIGHTS);
       }
@@ -1092,7 +1092,7 @@ Transducer::trim(Transducer &trimmer,
         trimmer_preplus_next = trimmer_preplus;
 
     if(states_this_trimmed.find(current) == states_this_trimmed.end()) {
-      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1057",{"f_src", "g_src"}, {this_src, trimmer_src}, true);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80570",{"f_src", "g_src"}, {this_src, trimmer_src}, true);
     }
     int trimmed_src = states_this_trimmed[current];
 
@@ -1431,7 +1431,7 @@ Transducer::compose(Transducer const &g,
         g_src     = current.second;
 
     if(states_f_g_gf.find(current) == states_f_g_gf.end()) {
-      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1057",{"f_src", "g_src"}, {f_src, g_src}, true);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80570",{"f_src", "g_src"}, {f_src, g_src}, true);
     }
     int gf_src = states_f_g_gf[current];
 

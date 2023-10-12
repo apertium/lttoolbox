@@ -25,7 +25,7 @@
 void
 trim(FILE* file_mono, FILE* file_bi, FILE* file_out, std::set<UString> match_sections)
 {
-  I18n i18n {LTTB_I18N_DATA, "lttoolbox"};
+  I18n i18n {ALT_I18N_DATA, "lttoolbox"};
   Alphabet alph_mono;
   std::set<UChar32> letters_mono;
   std::map<UString, Transducer> trans_mono;
@@ -69,7 +69,7 @@ trim(FILE* file_mono, FILE* file_bi, FILE* file_out, std::set<UString> match_sec
 
   for (auto& it : trans_mono) {
     if (it.second.numberOfTransitions() == 0) {
-      i18n.error("LTTB1041", {"section_name"}, {icu::UnicodeString(it.first.data())}, false);
+      i18n.error("ALT60410", {"section_name"}, {icu::UnicodeString(it.first.data())}, false);
       continue;
     }
     if (moved_bi_transducers.count(it.first)) {
@@ -82,18 +82,18 @@ trim(FILE* file_mono, FILE* file_bi, FILE* file_out, std::set<UString> match_sec
                                         alph_mono,
                                         alph_prefix);
     if (trimmed.hasNoFinals()) {
-      i18n.error("LTTB1042", {"section_name"}, {icu::UnicodeString(it.first.data())}, false);
+      i18n.error("ALT60420", {"section_name"}, {icu::UnicodeString(it.first.data())}, false);
       continue;
     }
     trimmed.minimize();
     trans_trim[it.first] = trimmed;
   }
   for (const auto &name : sections_unmatched) {
-    i18n.error("LTTB1045", {"section_name"}, {icu::UnicodeString(name.data())}, false);
+    i18n.error("ALT60450", {"section_name"}, {icu::UnicodeString(name.data())}, false);
   }
 
   if (trans_trim.empty()) {
-    i18n.error("LTTB1046", {}, {}, true);
+    i18n.error("ALT80460", {}, {}, true);
   }
 
   writeTransducerSet(file_out, letters_mono, alph_mono, trans_trim);
@@ -102,7 +102,7 @@ trim(FILE* file_mono, FILE* file_bi, FILE* file_out, std::set<UString> match_sec
 
 int main(int argc, char *argv[])
 {
-  I18n i18n {LTTB_I18N_DATA, "lttoolbox"};
+  I18n i18n {ALT_I18N_DATA, "lttoolbox"};
   LtLocale::tryToSetLocale();
   CLI cli(i18n.format("lt_trim_desc"), PACKAGE_VERSION);
   cli.add_file_arg("analyser_bin_file", false);

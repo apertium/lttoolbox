@@ -22,7 +22,7 @@
 
 int main(int argc, char *argv[])
 {
-  I18n i18n {LTTB_I18N_DATA, "lttoolbox"};
+  I18n i18n {ALT_I18N_DATA, "lttoolbox"};
   LtLocale::tryToSetLocale();
   CLI cli(i18n.format("lt_tmxproc_desc"));
   cli.add_file_arg("fst_file", false);

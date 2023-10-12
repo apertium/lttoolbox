@@ -37,7 +37,7 @@ void get_symbol(const std::string& s, Alphabet& alpha, const char* prefix,
 
 int main(int argc, char* argv[])
 {
-  I18n i18n {LTTB_I18N_DATA, "lttoolbox"};
+  I18n i18n {ALT_I18N_DATA, "lttoolbox"};
 
   LtLocale::tryToSetLocale();
   CLI cli(i18n.format("lt_restrict_desc"), PACKAGE_VERSION);

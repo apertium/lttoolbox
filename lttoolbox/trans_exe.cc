@@ -75,7 +75,7 @@ TransExe::read(FILE *input, Alphabet const &alphabet)
       if (strncmp(header, HEADER_TRANSDUCER, 4) == 0) {
           auto features = read_le<uint64_t>(input);
           if (features >= TDF_UNKNOWN) {
-            I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1059", {}, {}, true);
+            I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80590", {}, {}, true);
           }
           read_weights = (features & TDF_WEIGHTS);
       }

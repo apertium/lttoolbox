@@ -88,13 +88,13 @@ RegexpCompiler::isReserved(int const t)
 void
 RegexpCompiler::error()
 {
-  I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1050", {}, {}, true);
+  I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80500", {}, {}, true);
 }
 
 void
 RegexpCompiler::errorConsuming(int const t)
 {
-  I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1050", {}, {}, true);
+  I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80500", {}, {}, true);
 }
 
 void

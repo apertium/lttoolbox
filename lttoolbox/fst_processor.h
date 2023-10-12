@@ -461,7 +461,7 @@ private:
     else {
       if(!max_case_insensitive_state_size_warned) {
         max_case_insensitive_state_size_warned = true; // only warn once
-        I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1032", {"max_case_insensitive_state_size"},
+        I18n(ALT_I18N_DATA, "lttoolbox").error("ALT60320", {"max_case_insensitive_state_size"},
                                              {std::to_string(max_case_insensitive_state_size).c_str()}, false);
       }
       return true;

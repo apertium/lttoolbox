@@ -29,7 +29,7 @@ lttoolboxlib = $(prefix)/lib
 lttoolbox_DATA = dix.dtd dix.rng dix.rnc acx.rng xsd/dix.xsd xsd/acx.xsd
 
 LDADD = liblttoolbox.la $(PTHREAD_LIBS)
-AM_CPPFLAGS = -DLTTB_I18N_DATA='"$(LTTB_I18N_DATA)"'
+AM_CPPFLAGS = -DALT_I18N_DATA='"$(ALT_I18N_DATA)"'
 AM_LDFLAGS = -llttoolbox $(LIBXML_LIBS) $(ICU_LIBS)
 
 lt_append_SOURCES = lt_append.cc

@@ -26,7 +26,7 @@
 void
 compose(FILE* file_f, FILE* file_g, FILE* file_gf, bool f_inverted, bool g_anywhere, bool jobs)
 {
-  I18n i18n(LTTB_I18N_DATA, "lttoolbox");
+  I18n i18n(ALT_I18N_DATA, "lttoolbox");
   Alphabet alph_f;
   std::set<UChar32> letters_f;
   std::map<UString, Transducer> trans_f;
@@ -51,7 +51,7 @@ compose(FILE* file_f, FILE* file_g, FILE* file_gf, bool f_inverted, bool g_anywh
   std::vector<std::future<std::pair<UString, Transducer>>> compositions;
   for (auto& it : trans_f) {
     if (it.second.numberOfTransitions() == 0) {
-      i18n.error("LTTB1041", {"section_name"}, {icu::UnicodeString(it.first.data())}, false);
+      i18n.error("ALT60410", {"section_name"}, {icu::UnicodeString(it.first.data())}, false);
       continue;
     }
     if(jobs) {
@@ -60,7 +60,7 @@ compose(FILE* file_f, FILE* file_g, FILE* file_gf, bool f_inverted, bool g_anywh
              bool f_inverted, bool g_anywhere, UString name) {
             Transducer gf = f.compose(g, alph_f, alph_g, f_inverted, g_anywhere);
             if (gf.hasNoFinals()) {
-              I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1042", {"section_name"}, {icu::UnicodeString(name.data())}, false);
+              I18n(ALT_I18N_DATA, "lttoolbox").error("ALT60420", {"section_name"}, {icu::UnicodeString(name.data())}, false);
             } else {
               gf.minimize();
             }
@@ -71,7 +71,7 @@ compose(FILE* file_f, FILE* file_g, FILE* file_gf, bool f_inverted, bool g_anywh
     } else {
       Transducer gf = it.second.compose(union_g, alph_f, alph_g, f_inverted, g_anywhere);
       if (gf.hasNoFinals()) {
-        i18n.error("LTTB1042", {"section_name"}, {icu::UnicodeString(it.first.data())}, false);
+        i18n.error("ALT60420", {"section_name"}, {icu::UnicodeString(it.first.data())}, false);
         continue;
       }
       gf.minimize();
@@ -86,7 +86,7 @@ compose(FILE* file_f, FILE* file_g, FILE* file_gf, bool f_inverted, bool g_anywh
   }
 
   if (trans_gf.empty()) {
-    i18n.error("LTTB1043", {}, {}, true);
+    i18n.error("ALT80430", {}, {}, true);
   }
 
   writeTransducerSet(file_gf, letters_f, alph_f, trans_gf);
@@ -95,7 +95,7 @@ compose(FILE* file_f, FILE* file_g, FILE* file_gf, bool f_inverted, bool g_anywh
 
 int main(int argc, char *argv[])
 {
-  I18n i18n(LTTB_I18N_DATA, "lttoolbox");
+  I18n i18n(ALT_I18N_DATA, "lttoolbox");
   LtLocale::tryToSetLocale();
   CLI cli(i18n.format("lt_compose_desc"), PACKAGE_VERSION);
   cli.add_bool_arg('i', "inverted", i18n.format("inverted_desc"));

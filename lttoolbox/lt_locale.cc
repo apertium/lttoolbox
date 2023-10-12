@@ -46,7 +46,7 @@ LtLocale::tryToSetLocale()
     return;
   }
 
-  I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1044", {}, {}, false);
+  I18n(ALT_I18N_DATA, "lttoolbox").error("ALT60440", {}, {}, false);
   setlocale(LC_ALL, "C");
 #endif
 #ifdef __CYGWIN__

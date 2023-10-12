@@ -31,7 +31,7 @@ void checkValidity(FSTProcessor const &fstp)
 int main(int argc, char *argv[])
 {
   LtLocale::tryToSetLocale();
-  I18n i18n {LTTB_I18N_DATA, "lttoolbox"};
+  I18n i18n {ALT_I18N_DATA, "lttoolbox"};
 
   CLI cli(i18n.format("lt_proc_desc"), PACKAGE_VERSION);
   cli.add_file_arg("fst_file", false);
@@ -147,21 +147,21 @@ int main(int argc, char *argv[])
   if (strs.find("analyses") != strs.end()) {
     int n = atoi(strs["analyses"].back().c_str());
     if (n < 1) {
-      i18n.error("LTTB1000", {"option"}, {"analyses"}, true);
+      i18n.error("ALT80000", {"option"}, {"analyses"}, true);
     }
     fstp.setMaxAnalysesValue(n);
   }
   if (strs.find("weight-classes") != strs.end()) {
     int n = atoi(strs["weight-classes"].back().c_str());
     if (n < 1) {
-      i18n.error("LTTB1000", {"option"}, {"weight-classes"}, true);
+      i18n.error("ALT80000", {"option"}, {"weight-classes"}, true);
     }
     fstp.setMaxWeightClassesValue(n);
   }
   if (strs.find("compound-max-elements") != strs.end()) { // Test
     int n = atoi(strs["compound-max-elements"].back().c_str());
     if (n < 1) {
-      i18n.error("LTTB1000", {"option"}, {"compound-max-elements"}, true);
+      i18n.error("ALT80000", {"option"}, {"compound-max-elements"}, true);
     }
     fstp.setCompoundMaxElements(n);
   }

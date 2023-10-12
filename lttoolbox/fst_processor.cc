@@ -52,7 +52,7 @@ FSTProcessor::FSTProcessor()
 void
 FSTProcessor::streamError()
 {
-  I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1061", {}, {}, true);
+  I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80610", {}, {}, true);
 }
 
 void
@@ -63,7 +63,7 @@ FSTProcessor::parseICX(std::string const &file)
     reader = xmlReaderForFile(file.c_str(), NULL, 0);
     if(reader == NULL)
     {
-      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1031", {"file_name"}, {icu::UnicodeString(file.c_str())}, true);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80050", {"file_name"}, {icu::UnicodeString(file.c_str())}, true);
     }
     int ret = xmlTextReaderRead(reader);
     while(ret == 1)
@@ -87,7 +87,7 @@ FSTProcessor::parseRCX(std::string const &file)
     reader = xmlReaderForFile(file.c_str(), NULL, 0);
     if(reader == NULL)
     {
-      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1031", {"file_name"}, {icu::UnicodeString(file.c_str())}, true);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80050", {"file_name"}, {icu::UnicodeString(file.c_str())}, true);
     }
     int ret = xmlTextReaderRead(reader);
     while(ret == 1)
@@ -120,7 +120,7 @@ FSTProcessor::procNodeICX()
   }
   else
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1028", {"file_name", "line_number", "element_name"},
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80280", {"file_name", "line_number", "element_name"},
                                          {(char*)xmlTextReaderCurrentDoc(reader)->URL,
                                          xmlTextReaderGetParserLineNumber(reader),
                                          icu::UnicodeString(name.data())}, true);
@@ -159,7 +159,7 @@ FSTProcessor::procNodeRCX()
   }
   else
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1028", {"file_name", "line_number", "element_name"},
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80280", {"file_name", "line_number", "element_name"},
                                          {(char*)xmlTextReaderCurrentDoc(reader)->URL,
                                          xmlTextReaderGetParserLineNumber(reader),
                                          icu::UnicodeString(name.data())}, true);
@@ -668,7 +668,7 @@ FSTProcessor::classifyFinals()
     }
     else
     {
-      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1033", {"transducer_first"}, {icu::UnicodeString(it.first.data())}, true);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80330", {"transducer_first"}, {icu::UnicodeString(it.first.data())}, true);
     }
   }
 }
@@ -907,7 +907,7 @@ FSTProcessor::compoundAnalysis(UString input_word)
 
     if(current_state.size() > MAX_COMBINATIONS)
     {
-      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1034", {"input_word", "index", "char"},
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT60340", {"input_word", "index", "char"},
                                            {icu::UnicodeString(input_word.data()),
                                            (int)i, val}, false);
 
@@ -942,7 +942,7 @@ FSTProcessor::initDecompositionSymbols()
      && (compoundOnlyLSymbol=alphabet(u"<@compound:only-L>")) == 0
      && (compoundOnlyLSymbol=alphabet(u"<compound-only-L>")) == 0)
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1035", {"symbol"}, {"<:compound:only-L>"}, false);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT60350", {"symbol"}, {"<:compound:only-L>"}, false);
   }
   else if(!showControlSymbols)
   {
@@ -955,7 +955,7 @@ FSTProcessor::initDecompositionSymbols()
      && (compoundRSymbol=alphabet(u"<@compound:R>")) == 0
      && (compoundRSymbol=alphabet(u"<compound-R>")) == 0)
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1035", {"symbol"}, {"<:compound:R>"}, false);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT60350", {"symbol"}, {"<:compound:R>"}, false);
   }
   else if(!showControlSymbols)
   {
@@ -2327,7 +2327,7 @@ FSTProcessor::valid() const
 {
   if(initial_state.isFinal(all_finals))
   {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1068", {}, {}, false);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80122", {}, {}, false);
     return false;
   }
   else
@@ -2336,7 +2336,7 @@ FSTProcessor::valid() const
     s.step(' ');
     if(s.size() != 0)
     {
-      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1070", {}, {}, false);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80124", {}, {}, false);
       return false;
     }
   }

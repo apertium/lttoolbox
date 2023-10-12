@@ -35,7 +35,7 @@ void errorFunc(void *ctx, const char *msg, ...)
 
 int main(int argc, char *argv[])
 {
-  I18n i18n(LTTB_I18N_DATA, "lttoolbox");
+  I18n i18n(ALT_I18N_DATA, "lttoolbox");
   LtLocale::tryToSetLocale();
   CLI cli(i18n.format("lt_comp_desc"), PACKAGE_VERSION);
   cli.add_bool_arg('d', "debug", i18n.format("debug_desc"));
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
   }
   else
   {
-    i18n.error("LTTB1031", {"file_name"}, {infile.c_str()}, true);
+    i18n.error("ALT80050", {"file_name"}, {infile.c_str()}, true);
   }
   initGenericErrorDefaultFunc(NULL);
 
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
   if(opc == "lr")
   {
     if (have_vl) {
-      i18n.error("LTTB1039", {}, {}, false);
+      i18n.error("ALT80390", {}, {}, false);
       cli.print_usage();
     }
     if(ttype == 'a')
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
   else if(opc == "rl")
   {
     if (have_vr) {
-      i18n.error("LTTB1040", {}, {}, false);
+      i18n.error("ALT80391", {}, {}, false);
       cli.print_usage();
     }
     if(ttype == 'a')

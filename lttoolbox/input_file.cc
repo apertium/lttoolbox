@@ -49,7 +49,7 @@ void
 InputFile::open_or_exit(const char* fname)
 {
   if (!open(fname)) {
-    I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1031", {"file_name"}, {fname}, true);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80050", {"file_name"}, {fname}, true);
   }
 }
 
@@ -96,17 +96,17 @@ InputFile::internal_read()
   if ((first & 0xF0) == 0xF0) {
     i += 3;
     if (fread_unlocked(cbuffer+1, 1, 3, infile) != 3) {
-      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1063", {"number"}, {3}, true);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80630", {"number"}, {3}, true);
     }
   } else if ((first & 0xE0) == 0xE0) {
     i += 2;
     if (fread_unlocked(cbuffer+1, 1, 2, infile) != 2) {
-      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1063", {"number"}, {2}, true);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80630", {"number"}, {2}, true);
     }
   } else if ((first & 0xC0) == 0xC0) {
     i += 1;
     if (fread_unlocked(cbuffer+1, 1, 1, infile) != 1) {
-      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1063", {"number"}, {1}, true);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80630", {"number"}, {1}, true);
     }
   }
   memset(ubuffer, 0, 3*sizeof(UChar));
@@ -150,7 +150,7 @@ InputFile::rewind()
 {
   if (infile != nullptr) {
     if (std::fseek(infile, 0, SEEK_SET) != 0) {
-      I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1036", {}, {}, true);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80360", {}, {}, true);
     }
   }
 }
@@ -225,7 +225,7 @@ InputFile::readBlank(bool readwblank)
       ret += c;
       if (c == '\\') {
         if (eof() || peek() == '\0') {
-          I18n(LTTB_I18N_DATA, "lttoolbox").error("LTTB1037", {}, {}, true);
+          I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80370", {}, {}, true);
         }
         ret += get();
       }
