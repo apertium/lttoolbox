@@ -22,6 +22,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include <iterator>
 
 namespace detail {
 	template<typename ForwardIt, typename Comp>
