@@ -4,7 +4,8 @@
 int main(int argc, char* argv[])
 {
     if (argc < 4 || argc % 2 != 0) {
-        std::cout << "USAGE: formatmsg <data-path> <package-name> <key> <arg-names> <arg-values>\n";
+        std::cout << I18n(ALT_I18N_DATA, "lttoolbox").format("usage")
+                  << "formatmsg <data-path> <package-name> <key> <arg-names> <arg-values>\n";
         return 0;
     }
 

@@ -63,7 +63,7 @@ Compiler::parse(std::string const &file, UStringView dir)
 
   if(ret != 0)
   {
-    i18n.error("ALT80110", {}, {}, true);
+    i18n.error("ALT80110", true);
   }
 
   xmlFreeTextReader(reader);
@@ -122,16 +122,16 @@ Compiler::valid(UStringView dir) const
     for(const auto i : fst.closure(initial, epsilonSymbols)) {
       if (finals.count(i)) {
         if (side = "right")
-          i18n.error("ALT80120", {}, {}, false);
+          i18n.error("ALT80120", false);
         else
-          i18n.error("ALT80122", {}, {}, false);
+          i18n.error("ALT80122", false);
         return false;
       }
       if(fst.closure(i, spaceSymbols).size() > 1) { // >1 since closure always includes self
         if (side = "right")
-          i18n.error("ALT80121", {}, {}, false);
+          i18n.error("ALT80121", false);
         else
-          i18n.error("ALT80123", {}, {}, false);
+          i18n.error("ALT80123", false);
         return false;
       }
     }
@@ -281,7 +281,7 @@ Compiler::matchTransduction(std::vector<int> const &pi,
           // rl compilation of a badly written rule
           // having an epsilon with wildcard output will produce
           // garbage output -- see https://github.com/apertium/apertium-separable/issues/8
-          i18n.error("ALT60150", {}, {}, false);
+          i18n.error("ALT60150", false);
         } else if (tag == alphabet(any_tag, any_tag) ||
                    tag == alphabet(any_char, any_char) ||
                    tag == alphabet(any_tag, 0) ||

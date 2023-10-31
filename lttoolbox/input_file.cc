@@ -150,7 +150,7 @@ InputFile::rewind()
 {
   if (infile != nullptr) {
     if (std::fseek(infile, 0, SEEK_SET) != 0) {
-      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80360", {}, {}, true);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80360", true);
     }
   }
 }
@@ -225,7 +225,7 @@ InputFile::readBlank(bool readwblank)
       ret += c;
       if (c == '\\') {
         if (eof() || peek() == '\0') {
-          I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80370", {}, {}, true);
+          I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80370", true);
         }
         ret += get();
       }

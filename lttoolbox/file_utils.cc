@@ -102,7 +102,7 @@ readShared(FILE* input, std::set<UChar32>& letters, Alphabet& alpha)
     if (strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
       auto features = read_le<uint64_t>(input);
       if (features >= LTF_UNKNOWN) {
-        I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80620", {}, {}, true);
+        I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80620", true);
       }
     } else {
       // Old binary format

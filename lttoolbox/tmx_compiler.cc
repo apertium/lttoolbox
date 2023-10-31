@@ -61,7 +61,7 @@ TMXCompiler::parse(std::string const &file, UStringView lo, UStringView lm)
 
   if(ret != 0)
   {
-    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80110", {}, {}, false);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80110", false);
   }
 
   xmlFreeTextReader(reader);

@@ -589,7 +589,7 @@ Transducer::read(FILE *input, int const decalage)
       if (strncmp(header, HEADER_TRANSDUCER, 4) == 0) {
           auto features = read_le<uint64_t>(input);
           if (features >= TDF_UNKNOWN) {
-            I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80590", {}, {}, true);
+            I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80590", true);
           }
           read_weights = (features & TDF_WEIGHTS);
       }

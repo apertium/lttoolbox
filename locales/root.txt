@@ -28,6 +28,8 @@ root{
     help_desc{"show this help"}
     usage{"USAGE: "}
     version{" version "}
+    modes{"Modes:"}
+    options{"Options:"}
 
 
     lt_append_desc{"add sections to a compiled transducer"}

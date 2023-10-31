@@ -86,7 +86,7 @@ compose(FILE* file_f, FILE* file_g, FILE* file_gf, bool f_inverted, bool g_anywh
   }
 
   if (trans_gf.empty()) {
-    i18n.error("ALT80430", {}, {}, true);
+    i18n.error("ALT80430", true);
   }
 
   writeTransducerSet(file_gf, letters_f, alph_f, trans_gf);

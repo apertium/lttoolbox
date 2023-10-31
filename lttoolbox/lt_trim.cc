@@ -93,7 +93,7 @@ trim(FILE* file_mono, FILE* file_bi, FILE* file_out, std::set<UString> match_sec
   }
 
   if (trans_trim.empty()) {
-    i18n.error("ALT80460", {}, {}, true);
+    i18n.error("ALT80460", true);
   }
 
   writeTransducerSet(file_out, letters_mono, alph_mono, trans_trim);

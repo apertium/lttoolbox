@@ -31,7 +31,7 @@ Compression::writeByte(unsigned char byte, FILE *output)
 {
   if(fwrite_unlocked(&byte, 1, 1, output) != 1)
   {
-    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80290", {}, {}, true);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80290", true);
   }
 }
 
@@ -42,7 +42,7 @@ Compression::readByte(FILE *input)
   if(fread_unlocked(&value, 1, 1, input) != 1)
   {
 //    Not uncomment this code since
-//    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80290", {}, {}, true);
+//    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80290", true);
   }
 
   return value;

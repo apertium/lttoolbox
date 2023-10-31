@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
   if(opc == "lr")
   {
     if (have_vl) {
-      i18n.error("ALT80390", {}, {}, false);
+      i18n.error("ALT80390", false);
       cli.print_usage();
     }
     if(ttype == 'a')
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
   else if(opc == "rl")
   {
     if (have_vr) {
-      i18n.error("ALT80391", {}, {}, false);
+      i18n.error("ALT80391", false);
       cli.print_usage();
     }
     if(ttype == 'a')

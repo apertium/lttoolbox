@@ -31,11 +31,11 @@ void endProgram(char *name)
   if(name != NULL)
   {
     std::cout << basename(name) << " v" << PACKAGE_VERSION << ": " << i18n.format("lt_tmxcomp_desc") << std::endl;
-    std::cout << "USAGE: " << basename(name) << " [OPTIONS] lang1-lang2 tmx_file output_file" << std::endl;
-    std::cout << "Modes:" << std::endl;
+    std::cout << i18n.format("usage") << basename(name) << " [OPTIONS] lang1-lang2 tmx_file output_file" << std::endl;
+    std::cout << i18n.format("modes") << std::endl;
     std::cout << "  lang1:     " << i18n.format("input_language") << std::endl;
     std::cout << "  lang2:     " << i18n.format("output_language") << std::endl;
-    std::cout << "Options:" << std::endl;
+    std::cout << i18n.format("options") << std::endl;
 #if HAVE_GETOPT_LONG
     std::cout << "  -o, --origin-code code   " << i18n.format("origin_code_desc") << std::endl;
     std::cout << "  -m, --meta-code code     " << i18n.format("meta_code_desc") << std::endl;

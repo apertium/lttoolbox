@@ -77,7 +77,7 @@ PatternList::beginSequence()
 {
   if(sequence)
   {
-    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80470", {}, {}, true);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80470", true);
   }
   sequence = true;
   sequence_data.clear();
@@ -88,7 +88,7 @@ PatternList::endSequence()
 {
   if(!sequence)
   {
-    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80471", {}, {}, true);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80471", true);
   }
   sequence = false;
 
@@ -190,7 +190,7 @@ PatternList::insert(int id, int otherid)
 {
   if(!sequence)
   {
-    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80490", {}, {}, true);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80490", true);
   }
 
   sequence_id = id;

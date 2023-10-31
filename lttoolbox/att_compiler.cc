@@ -422,7 +422,7 @@ TransducerType
 AttCompiler::classify_backwards(int state, std::set<int>& path)
 {
   if(finals.find(state) != finals.end()) {
-    i18n.error("ALT80080", {}, {}, true);
+    i18n.error("ALT80080", true);
   }
   AttNode* node = get_node(state);
   TransducerType type = UNDECIDED;
@@ -430,7 +430,7 @@ AttCompiler::classify_backwards(int state, std::set<int>& path)
     if(t1.type != UNDECIDED) {
       type |= t1.type;
     } else if(path.find(t1.to) != path.end()) {
-      i18n.error("ALT80090", {}, {}, true);
+      i18n.error("ALT80090", true);
     } else {
       path.insert(t1.to);
       t1.type = classify_backwards(t1.to, path);

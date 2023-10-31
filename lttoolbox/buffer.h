@@ -75,7 +75,7 @@ public:
       I18n i18n {ALT_I18N_DATA, "lttoolbox"};
       if(buf_size == 0)
       {
-        i18n.error("ALT80100", {}, {}, true);
+        i18n.error("ALT80100", true);
       }
       buf = new T[buf_size];
       size = buf_size;

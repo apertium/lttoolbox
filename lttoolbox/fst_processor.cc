@@ -52,7 +52,7 @@ FSTProcessor::FSTProcessor()
 void
 FSTProcessor::streamError()
 {
-  I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80610", {}, {}, true);
+  I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80610", true);
 }
 
 void
@@ -2327,7 +2327,7 @@ FSTProcessor::valid() const
 {
   if(initial_state.isFinal(all_finals))
   {
-    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80122", {}, {}, false);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80122", false);
     return false;
   }
   else
@@ -2336,7 +2336,7 @@ FSTProcessor::valid() const
     s.step(' ');
     if(s.size() != 0)
     {
-      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80124", {}, {}, false);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80124", false);
       return false;
     }
   }
