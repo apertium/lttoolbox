@@ -44,13 +44,15 @@ InputFile::open(const char* fname)
   return (infile != nullptr);
 }
 
+#if HAVE_DECL_FMEMOPEN
 bool
 InputFile::open_in_memory(char *input_buffer)
 {
   close();
   infile = fmemopen(input_buffer, strlen(input_buffer), "rb");
-  return (infile != nullptr);  
+  return (infile != nullptr);
 }
+#endif
 
 void
 InputFile::open_or_exit(const char* fname)

@@ -2,7 +2,7 @@ AC_PREREQ(2.52)
 
 m4_define([PKG_VERSION_MAJOR], [3])
 m4_define([PKG_VERSION_MINOR], [7])
-m4_define([PKG_VERSION_PATCH], [5])
+m4_define([PKG_VERSION_PATCH], [6])
 
 # Bump if the ABI (not API) changed in a backwards-incompatible manner
 m4_define([PKG_VERSION_ABI], [3])
@@ -61,8 +61,7 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
 
-AC_CHECK_DECLS([fread_unlocked, fwrite_unlocked, fgetc_unlocked, \
-fputc_unlocked, fputs_unlocked])
+AC_CHECK_DECLS([fread_unlocked, fwrite_unlocked, fgetc_unlocked, fputc_unlocked, fputs_unlocked, fmemopen])
 
 AC_CHECK_FUNCS([setlocale strdup getopt_long])
 

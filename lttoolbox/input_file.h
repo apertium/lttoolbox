@@ -34,7 +34,9 @@ public:
   InputFile();
   ~InputFile();
   bool open(const char* fname = nullptr);
+#if HAVE_DECL_FMEMOPEN
   bool open_in_memory(char* input_buffer);
+#endif
   void open_or_exit(const char* fname = nullptr);
   void close();
   void wrap(FILE* newinfile);
