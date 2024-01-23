@@ -25,11 +25,11 @@ private:
 public:
     I18n(const char *locales_path, std::string package_name);
     icu::UnicodeString format(const char* key, const std::vector<icu::UnicodeString> arg_names,
-                                               const std::vector<icu::Formattable> arg_values);
-    icu::UnicodeString format(const char* key);
+                                               const std::vector<icu::Formattable> arg_values) const;
+    icu::UnicodeString format(const char* key) const;
     void error(const char* key, const std::vector<icu::UnicodeString> arg_names,
-                                const std::vector<icu::Formattable> arg_values, bool quit);
-    void error(const char* key, bool quit);
+                                const std::vector<icu::Formattable> arg_values, bool quit) const;
+    void error(const char* key, bool quit) const;
 };
 
 // Store .dat files and map it to package name of it.
@@ -39,7 +39,7 @@ inline std::unordered_map<std::string, std::unique_ptr<char[]>> I18n::locales_da
 // being overriden by LtLocale::tryToSetLocale() function.
 inline icu::Locale I18n::locale = icu::Locale().getName();
 
-inline I18n::I18n(const char *locales_path, std::string package_name) : resource("", "", status)
+inline I18n::I18n(const char *locales_path, std::string package_name) : resource(status)
 {
     // Initialize status.
     status = U_ZERO_ERROR;
@@ -90,8 +90,9 @@ inline I18n::I18n(const char *locales_path, std::string package_name) : resource
 }
 
 inline icu::UnicodeString I18n::format(const char* key, const std::vector<icu::UnicodeString> arg_names,
-                                                 const std::vector<icu::Formattable> arg_values)
+                                                 const std::vector<icu::Formattable> arg_values) const
 {
+    UErrorCode status = U_ZERO_ERROR;
     icu::UnicodeString pattern;
     icu::UnicodeString output;
     
@@ -141,20 +142,20 @@ inline icu::UnicodeString I18n::format(const char* key, const std::vector<icu::U
     return output;
 }
 
-inline icu::UnicodeString I18n::format(const char* key)
+inline icu::UnicodeString I18n::format(const char* key) const
 {
     return format(key, {}, {});
 }
 
 inline void I18n::error(const char* key, const std::vector<icu::UnicodeString> arg_names,
-                                  const std::vector<icu::Formattable> arg_values, bool quit)
+                                  const std::vector<icu::Formattable> arg_values, bool quit) const
 {
     std::cerr << format(key, arg_names, arg_values) << std::endl;
     if (quit) {
         exit(EXIT_FAILURE);
     }
 }
-inline void I18n::error(const char* key, bool quit)
+inline void I18n::error(const char* key, bool quit) const
 {
     error(key, {}, {}, quit);
 }
