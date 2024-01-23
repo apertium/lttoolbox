@@ -19,6 +19,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <climits>
+#include <lttoolbox/i18n.h>
 
 #define FIN_FICHERO INT_MAX
 
@@ -87,15 +88,13 @@ RegexpCompiler::isReserved(int const t)
 void
 RegexpCompiler::error()
 {
-  std::cerr << "Error parsing regexp" << std::endl;
-  exit(EXIT_FAILURE);
+  I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80500", true);
 }
 
 void
 RegexpCompiler::errorConsuming(int const t)
 {
-  std::cerr << "Error parsing regexp" << std::endl;
-  exit(EXIT_FAILURE);
+  I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80500", true);
 }
 
 void

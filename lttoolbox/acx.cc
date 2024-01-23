@@ -16,6 +16,9 @@
  */
 #include <lttoolbox/acx.h>
 #include <lttoolbox/xml_walk_util.h>
+#include <iostream>
+#include <unicode/ustream.h>
+#include <lttoolbox/i18n.h>
 
 const xmlChar* CHAR_NODE = (const xmlChar*)"char";
 const xmlChar* EQUIV_NODE = (const xmlChar*)"equiv-char";
@@ -23,33 +26,37 @@ const char* VALUE_ATTR = "value";
 
 int32_t get_val(xmlNode* node)
 {
+  I18n i18n {ALT_I18N_DATA, "lttoolbox"};
   UString s = getattr(node, VALUE_ATTR);
   if (s.empty()) {
-    error_and_die(node, "Missing value attribute.");
+    i18n.error("ALT80010", {"node_doc_url", "line_number"},
+                           {(char*)node->doc->URL, node->line}, true);
   }
   std::vector<int32_t> v;
   ustring_to_vec32(s, v);
   if (v.size() > 1) {
-    error_and_die(node, "Expected a single character in value attribute, but found %d.", v.size());
+    i18n.error("ALT80020", {"node_doc_url", "line_number", "value_size"},
+                           {(char*)node->doc->URL, node->line, std::to_string(v.size()).c_str()}, true);
   }
   return v[0];
 }
 
 std::map<int32_t, sorted_vector<int32_t>> readACX(const char* file)
 {
+  I18n i18n {ALT_I18N_DATA, "lttoolbox"};
   std::map<int32_t, sorted_vector<int32_t>> acx;
   xmlNode* top_node = load_xml(file);
   for (auto char_node : children(top_node)) {
     if (!xmlStrEqual(char_node->name, CHAR_NODE)) {
-      error_and_die(char_node, "Expected <char> but found <%s>.",
-                    (const char*)char_node->name);
+      i18n.error("ALT80030", {"node_doc_url", "line_number", "expected", "found"},
+        {(char*)char_node->doc->URL, char_node->line, "char", (const char*)char_node->name}, true);
     }
     int32_t key = get_val(char_node);
     sorted_vector<int32_t> vec;
     for (auto equiv_node : children(char_node)) {
       if (!xmlStrEqual(equiv_node->name, EQUIV_NODE)) {
-        error_and_die(char_node, "Expected <equiv-char> but found <%s>.",
-                      (const char*)equiv_node->name);
+        i18n.error("ALT80030", {"node_doc_url", "line_number", "expected", "found"},
+          {(char*)char_node->doc->URL, char_node->line, "equiv-char", (const char*)equiv_node->name}, true);
       }
       vec.insert(get_val(equiv_node));
     }

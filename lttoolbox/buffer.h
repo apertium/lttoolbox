@@ -20,7 +20,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
-
+#include <unicode/ustream.h>
+#include <lttoolbox/i18n.h>
 /**
  * Generic circular buffer class
  */
@@ -71,10 +72,10 @@ public:
    */
   Buffer(unsigned int const buf_size=2048)
     {
+      I18n i18n {ALT_I18N_DATA, "lttoolbox"};
       if(buf_size == 0)
       {
-        std::cerr << "Error: Cannot create empty buffer." << std::endl;
-        exit(EXIT_FAILURE);
+        i18n.error("ALT80100", true);
       }
       buf = new T[buf_size];
       size = buf_size;

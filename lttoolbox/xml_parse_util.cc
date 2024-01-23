@@ -19,14 +19,14 @@
 #include <cstdlib>
 #include <iostream>
 #include <utf8.h>
+#include <lttoolbox/i18n.h>
 
 xmlTextReaderPtr
 XMLParseUtil::open_or_exit(const char* fname)
 {
   xmlTextReaderPtr reader = xmlReaderForFile(fname, NULL, 0);
   if (reader == NULL) {
-    std::cerr << "Error: cannot open '" << fname << "' for reading." << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80050", {"file_name"}, {fname}, true);
   }
   return reader;
 }

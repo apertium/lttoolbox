@@ -21,6 +21,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <lttoolbox/i18n.h>
 
 void
 PatternList::copy(PatternList const &o)
@@ -76,8 +77,7 @@ PatternList::beginSequence()
 {
   if(sequence)
   {
-    std::cerr << "Error: opening an unended sequence" << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80470", true);
   }
   sequence = true;
   sequence_data.clear();
@@ -88,8 +88,7 @@ PatternList::endSequence()
 {
   if(!sequence)
   {
-    std::cerr << "Error: ending an unopened sequence" << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80471", true);
   }
   sequence = false;
 
@@ -191,8 +190,7 @@ PatternList::insert(int id, int otherid)
 {
   if(!sequence)
   {
-    std::cerr << "Error: using labels outside of a sequence" << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80490", true);
   }
 
   sequence_id = id;

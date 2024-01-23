@@ -21,24 +21,27 @@
 #include <libgen.h>
 #include <string>
 #include <getopt.h>
+#include <lttoolbox/i18n.h>
+#include <unicode/ustream.h>
 
 
 void endProgram(char *name)
 {
+  I18n i18n {ALT_I18N_DATA, "lttoolbox"};
   if(name != NULL)
   {
-    std::cout << basename(name) << " v" << PACKAGE_VERSION <<": build a letter transducer from a TMX translation memory" << std::endl;
-    std::cout << "USAGE: " << basename(name) << " [OPTIONS] lang1-lang2 tmx_file output_file" << std::endl;
-    std::cout << "Modes:" << std::endl;
-    std::cout << "  lang1:     input language" << std::endl;
-    std::cout << "  lang2:     output language" << std::endl;
-    std::cout << "Options:" << std::endl;
+    std::cout << basename(name) << " v" << PACKAGE_VERSION << ": " << i18n.format("lt_tmxcomp_desc") << std::endl;
+    std::cout << i18n.format("usage") << basename(name) << " [OPTIONS] lang1-lang2 tmx_file output_file" << std::endl;
+    std::cout << i18n.format("modes") << std::endl;
+    std::cout << "  lang1:     " << i18n.format("input_language") << std::endl;
+    std::cout << "  lang2:     " << i18n.format("output_language") << std::endl;
+    std::cout << i18n.format("options") << std::endl;
 #if HAVE_GETOPT_LONG
-    std::cout << "  -o, --origin-code code   the language code to be taken as lang1" << std::endl;
-    std::cout << "  -m, --meta-code code     the language code to be taken as lang2" << std::endl;
+    std::cout << "  -o, --origin-code code   " << i18n.format("origin_code_desc") << std::endl;
+    std::cout << "  -m, --meta-code code     " << i18n.format("meta_code_desc") << std::endl;
 #else
-    std::cout << "  -o code   the language code to be taken as lang1" << std::endl;
-    std::cout << "  -m code   the language code to be taken as lang2" << std::endl;
+    std::cout << "  -o code   " << i18n.format("origin_code_desc") << std::endl;
+    std::cout << "  -m code   " << i18n.format("meta_code_desc") << std::endl;
 #endif
   }
   exit(EXIT_FAILURE);
@@ -107,8 +110,7 @@ int main(int argc, char *argv[])
   FILE *output = fopen(argv[argc-1], "wb");
   if(!output)
   {
-    std::cerr << "Error: Cannot open file '" << argv[2] << "'." << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80050", {"file_name"}, {argv[2]}, true);
   }
   c.write(output);
   fclose(output);

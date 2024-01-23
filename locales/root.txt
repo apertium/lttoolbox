@@ -1,0 +1,158 @@
+root{
+    lt_proc_desc{"process a stream with a letter transducer"}
+    analysis_desc{"morphological analysis (default behavior)"}
+    bilingual_desc{"lexical transfer"}
+    case_sensitive_desc{"use the literal case of the incoming characters"}
+    debugged_gen_desc{"morph. generation with all the stuff"}
+    decompose_nouns_desc{"Try to decompound unknown words"}
+    generation_desc{"morphological generation"}
+    ignored_chars_desc{"specify file with characters to ignore"}
+    restore_chars_desc{"specify file with characters to diacritic restoration"}
+    tagged_gen_desc{"morphological generation keeping lexical forms"}
+    tagged_nm_gen_desc{"same as -l but without unknown word marks"}
+    non_marked_gen_desc{"morph. generation without unknown word marks"}
+    surf_bilingual_desc{"lexical transfer with surface forms"}
+    post_generation_desc{"post-generation"}
+    inter_generation_desc{"inter-generation"}
+    sao_desc{"SAO annotation system input processing"}
+    transliteration_desc{"apply transliteration dictionary"}
+    version_desc{"version"}
+    null_flush_desc{"flush output on the null character"}
+    dictionary_case_desc{"use dictionary case instead of surface"}
+    careful_case_desc{"use dictionary case if present, else surface"}
+    no_default_ignore_desc{"skips loading the default ignore characters"}
+    show_weights_desc{"Print final analysis weights (if any)"}
+    analyses_desc{"Output no more than N analyses (if the transducer is weighted, the N best analyses)"}
+    weight_classes_desc{"Output no more than N best weight classes (where analyses with equal weight constitute a class)"}
+    compound_max_elements_desc{"Set compound max elements"}
+    help_desc{"show this help"}
+    usage{"USAGE: "}
+    version{" version "}
+    modes{"Modes:"}
+    options{"Options:"}
+
+
+    lt_append_desc{"add sections to a compiled transducer"}
+    keep_desc{"in case of section name conflicts, keep the one from the first transducer"}
+    single_desc{"treat input transducers as one-sided"}
+
+    lt_apply_acx_desc{"apply an ACX file to a compiled transducer"}
+
+    lt_comp_desc{"build a letter transducer from a dictionary"}
+    debug_desc{"insert line numbers before each entry"}
+    keep_boundaries_desc{"keep morpheme boundaries"}
+    var_desc{"set language variant"}
+    alt_desc{"set alternative (monodix)"}
+    var_left_desc{"set left language variant (bidix)"}
+    var_right_desc{"set right language variant (bidix)"}
+    expect_hfst_desc{"expect HFST symbols"}
+    no_split_desc{"don't attempt to split into word and punctuation sections"}
+    jobs_desc{"use one cpu core per section when minimising, new section after 50k entries"}
+    verbose_desc{"compile verbosely"}
+
+    lt_compose_desc{"compose transducer1 with transducer2"}
+    inverted_desc{"run composition right-to-left on transducer1"}
+    anywhere_desc{"don't require anchored matches, let transducer2 optionally compose at any sub-path"}
+
+    lt_expand{"expand the contents of a dictionary file"}
+    lt_invert_desc{"reverse the direction of a compiled transducer"}
+
+    lt_paradigm_desc{"generate listings from a compiled transducer"}
+    analyser_desc{"FST is an analyser (tags on the right)"}
+    exclude_desc{"disregard paths containing TAG"}
+    sort_desc{"alphabetize the paths for each pattern"}
+
+    lt_print_desc{"dump a transducer to text in ATT format"}
+    alpha_desc{"print transducer alphabet"}
+    use_hfst_desc{"use HFST-compatible character escapes"}
+
+    lt_restrict_desc{"remove paths from a transducer"}
+    minimise_desc{"minimise transducers after deleting paths"}
+
+    lt_tmxcomp_desc{"build a letter transducer from a TMX translation memory"}
+    origin_code_desc{"the language code to be taken as lang1"}
+    meta_code_desc{"the language code to be taken as lang2"}
+    input_language{"input language"}
+    output_language{"output language"}
+
+    lt_tmxproc_desc{"process a stream with a letter transducer"}
+
+    lt_trim_desc{"trim a transducer to another transducer"}
+    match_section_desc{"A section with this name (id@type) will only be trimmed against a section with the same name. This argument may be used multiple times."}
+
+    ALT80000{"ERROR ALT80000: Invalid or no argument for {option}"}
+    ALT80010{"ERROR ALT80010: In {node_doc_url} on line {line_number}: Missing value attribute."}
+    ALT80020{"ERROR ALT80020: In {node_doc_url} on line {line_number}: Expected a single character in value attribute, but found {value_size}."}
+    ALT80030{"ERROR ALT80030: In {node_doc_url} on line {line_number}: Expected <{expected}> but found <{found}>."}
+    ALT80050{"ERROR ALT80050: Unable to access \"{file_name}\"."}
+    ALT80060{"ERROR ALT80060: Invalid format in file \"{file_name}\" on line {line_number}."}
+    ALT60070{"WARNING ALT60070: Multiple fsts in \"{file_name}\" will be disjuncted."}
+    ALT80080{"ERROR ALT80080: Transducer contains epsilon transition to a final state. Aborting."}
+    ALT80090{"ERROR ALT80090: Transducer contains initial epsilon loop. Aborting."}
+    ALT80100{"ERROR ALT80100: Cannot create empty buffer."}
+    ALT80110{"ERROR ALT80110: Parse error at the end of input."}
+    ALT80120{"ERROR ALT80120: Invalid dictionary (hint: the right side of an entry is empty)."}
+    ALT80121{"ERROR ALT80121: Invalid dictionary (hint: entry on the right beginning with whitespace)."}
+    ALT80122{"ERROR ALT80122: Invalid dictionary (hint: the left side of an entry is empty)."}
+    ALT80123{"ERROR ALT80123: Invalid dictionary (hint: entry on the left beginning with whitespace)."}
+    ALT80124{"ERROR ALT80124: Invalid dictionary (hint: entry on the beginning with whitespace)."}
+    ALT80140{"ERROR ALT80140: In file \"{file_name}\" on line {line_number}: Missing alphabet symbols."}
+    ALT60150{"WARNING ALT60150: Cannot insert <t/> from empty input. Ignoring. (You probably want to specify exact tags when deleting a word.)"}
+    ALT80160{"ERROR ALT80160: In file \"{file_name}\" on line {line_number}: Non-empty element \"<{name}>\" should be empty."}
+    ALT80170{"ERROR ALT80170: In file \"{file_name}\" on line {line_number}: Undefined symbol \"{symbol}\"."}
+    ALT80180{"ERROR ALT80180: In file \"{file_name}\" on line {line_number}: Invalid specification of element \"<{name}>\" in this context."}
+    ALT80190{"ERROR ALT80190: In file \"{file_name}\" on line {line_number}: Invalid construction."}
+    ALT80200{"ERROR ALT80200: In file \"{file_name}\" on line {line_number}: Expected \"<{slash_element}>\"."}
+    ALT60210{"WARNING ALT60210: In file \"{file_name}\" on line {line_number}: Entry begins with space."}
+    ALT80220{"ERROR ALT80220: In file \"{file_name}\" on line {line_number}: Paradigm refers to itself \"{paradigm_name}\"."}
+    ALT80230{"ERROR ALT80230: In file \"{file_name}\" on line {line_number}: Undefined paradigm \"{paradigm_name}\"."}
+    ALT80240{"ERROR ALT80240: In file \"{file_name}\" on line {line_number}: Invalid entry token."}
+    ALT80250{"ERROR ALT80250: In file \"{file_name}\" on line {line_number}: \"<{element_name}>\" element must specify non-void \"{attr_name}\" attribute."}
+    ALT80260{"ERROR ALT80260: In file \"{file_name}\" on line {line_number}: Parse error."}
+    ALT80270{"ERROR ALT80270: In file \"{file_name}\" on line {line_number}: Invalid inclusion of \"<{element_name}>\" into \"<{compiler_entry_element}>\"."}
+    ALT80280{"ERROR ALT80280: In file \"{file_name}\" on line {line_number}: Invalid node \"<{element_name}>\"."}
+    ALT80290{"ERROR ALT80290: I/O Error."}
+    ALT80300{"ERROR ALT80300: Out of range: {value}."}
+    ALT60320{"WARNING ALT60320: Matching case-sensitively since processor state size >= {max_case_insensitive_state_size}"}
+    ALT80330{"ERROR ALT80330: Unsupported transducer type for \"{transducer_first}\"."}
+    ALT60340{"WARNING ALT60340: CompoundAnalysis's MAX_COMBINATIONS exceeded for \"{input_word}\"\n"
+             "                  gave up at char {index} \"{char}\"."}
+    ALT60350{"WARNING ALT60350: Decomposition symbol {symbol} not found."}
+    ALT80360{"ERROR ALT80360: Unable to rewind file."}
+    ALT80370{"ERROR ALT80370: Unexpected trailing backslash."}
+    ALT60380{"WARNING ALT60380: section \"{section}\" appears in both transducers and will be overwritten!"}
+    ALT80390{"ERROR ALT80390: -l specified, but mode is lr."}
+    ALT80391{"ERROR ALT80391: -r specified, but mode is rl."}
+    ALT60410{"WARNING ALT60410: section {section_name} is empty! Skipping it..."}
+    ALT60420{"WARNING ALT60420: section {section_name} had no final state after composing! Skipping it..."}
+    ALT80430{"ERROR ALT80430: Composition gave empty transducer!"}
+    ALT60440{"WARNING ALT60440: unsupported locale, fallback to \"C\""}
+    ALT60450{"WARNING ALT60450: section {section_name} was not found in both transducers! Skipping if in just one..."}
+    ALT80460{"ERROR ALT80460: Trimming gave empty transducer!\n"
+             "Hint: There are no words in bilingual dictionary that match words in both monolingual dictionaries?"}
+    ALT80470{"ERROR ALT80470: Opening an unended sequence."}
+    ALT80471{"ERROR ALT80471: Ending an unopened sequence."}
+    ALT80490{"ERROR ALT80490: Using labels outside of a sequence."}
+    ALT80500{"ERROR ALT80500: Parsing regexp."}
+    ALT80510{"ERROR ALT80510: Unable to lowercase string \"{string}\".\n"
+             "Error code: {error_name}"}
+    ALT80511{"ERROR ALT80511: Unable to uppercase string \"{string}\".\n"
+             "Error code: {error_name}"}
+    ALT80512{"ERROR ALT80512: Unable to titlecase string \"{string}\".\n"
+             "Error code: {error_name}"}
+    ALT80513{"ERROR ALT80513: Caseless string comparison failed on \"{string_a}\" and \"{string_b}\".\n"
+             "Error code: {error_name}"}
+    ALT80550{"ERROR ALT80550: Trying to link nonexistent states ({source}, {target}, {tag})."}
+    ALT80560{"ERROR ALT80560: Empty set of final states."}
+    ALT80570{"ERROR ALT80570: Couldn't find {f_src}, {g_src} in state map."}
+    ALT80580{"ERROR ALT80580: Failed to read/write uint64_t."}
+    ALT80590{"ERROR ALT80590: Transducer has features that are unknown to this version of lttoolbox - upgrade!"}
+    ALT80600{"ERROR ALT80600: Unable to parse {type}."}
+    ALT80610{"ERROR ALT80610: Malformed input stream."}
+    ALT80620{"ERROR ALT80620: FST has features that are unknown to this version of lttoolbox - upgrade!"}
+    ALT80630{"ERROR ALT80630: Could not read {number} expected bytes from stream."}
+    ALT80640{"ERROR ALT80640: Can't deserialise {size} byte integer type: Can't deserialise size."}
+    ALT80650{"ERROR ALT80650: Can't deserialise {size} byte integer type: Can't deserialise byte."}
+    ALT80660{"ERROR ALT80660: Can't serialise const {size_a} byte integer type: Can't serialise size {size_b}."}
+    ALT80670{"ERROR ALT80670: Can't serialise const {size} byte integer type: Can't serialise byte {byte}."}
+}

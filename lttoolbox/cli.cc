@@ -22,14 +22,17 @@
 #include <libgen.h>
 #include <string>
 #include <getopt.h>
+#include <unicode/ustream.h>
+#include <unicode/ustring.h>
+#include <lttoolbox/i18n.h>
 
-CLI::CLI(std::string desc, std::string ver)
+CLI::CLI(icu::UnicodeString desc, std::string ver)
 {
   description = desc;
   version = ver;
 }
 
-CLI::CLI(std::string desc)
+CLI::CLI(icu::UnicodeString desc)
 {
   description = desc;
 }
@@ -39,14 +42,14 @@ CLI::~CLI()
 }
 
 void CLI::add_str_arg(char short_flag, std::string long_flag,
-                         std::string desc, std::string arg)
+                         icu::UnicodeString desc, std::string arg)
 {
   options.push_back({.short_opt=short_flag, .long_opt=long_flag,
                      .desc=desc, .is_bool=false, .var=arg});
 }
 
 void CLI::add_bool_arg(char short_flag, std::string long_flag,
-                       std::string desc)
+                       icu::UnicodeString desc)
 {
   options.push_back({.short_opt=short_flag, .long_opt=long_flag,
                      .desc=desc, .is_bool=true, .var=""});
@@ -58,20 +61,21 @@ void CLI::add_file_arg(std::string name, bool optional)
   if (!optional) min_file_args++;
 }
 
-void CLI::set_epilog(std::string e)
+void CLI::set_epilog(icu::UnicodeString e)
 {
   epilog = e;
 }
 
 void CLI::print_usage(std::ostream& out)
 {
+  I18n i18n {ALT_I18N_DATA, "lttoolbox"};
   if (!prog_name.empty()) {
     out << prog_name;
     if (!version.empty()) {
       out << " v" << version;
     }
     out << ": " << description << std::endl;
-    out << "USAGE: " << prog_name;
+    out << i18n.format("usage") << prog_name;
     std::string bargs;
     std::string sargs;
     for (auto& it : options) {
@@ -112,7 +116,7 @@ void CLI::print_usage(std::ostream& out)
 #endif
       out << it.desc << std::endl;
     }
-    if (!epilog.empty()) {
+    if (!epilog.isEmpty()) {
       out << epilog << std::endl;
     }
   }
@@ -121,6 +125,7 @@ void CLI::print_usage(std::ostream& out)
 
 void CLI::parse_args(int argc, char* argv[])
 {
+  I18n i18n {ALT_I18N_DATA, "lttoolbox"};
   prog_name = basename(argv[0]);
   std::string arg_str;
 #if HAVE_GETOPT_LONG
@@ -151,7 +156,7 @@ void CLI::parse_args(int argc, char* argv[])
       if (it.short_opt == cnt) {
         found = true;
         if (it.short_opt == 'v' && it.long_opt == "version") {
-          std::cout << prog_name << " version " << version << std::endl;
+          std::cout << prog_name << i18n.format("version") << version << std::endl;
           exit(EXIT_SUCCESS);
         }
         if (it.is_bool) {

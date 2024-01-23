@@ -21,6 +21,7 @@
 #include <lttoolbox/file_utils.h>
 
 #include <iostream>
+#include <lttoolbox/i18n.h>
 
 /*
  * Error function that does nothing so that when we fallback from
@@ -34,19 +35,20 @@ void errorFunc(void *ctx, const char *msg, ...)
 
 int main(int argc, char *argv[])
 {
+  I18n i18n(ALT_I18N_DATA, "lttoolbox");
   LtLocale::tryToSetLocale();
-  CLI cli("build a letter transducer from a dictionary", PACKAGE_VERSION);
-  cli.add_bool_arg('d', "debug", "insert line numbers before each entry");
-  cli.add_bool_arg('m', "keep-boundaries", "keep morpheme boundaries");
-  cli.add_str_arg('v', "var", "set language variant", "VAR");
-  cli.add_str_arg('a', "alt", "set alternative (monodix)", "ALT");
-  cli.add_str_arg('l', "var-left", "set left language variant (bidix)", "VAR");
-  cli.add_str_arg('r', "var-right", "set right language variant (bidix)", "VAR");
-  cli.add_bool_arg('H', "hfst", "expect HFST symbols");
-  cli.add_bool_arg('S', "no-split", "don't attempt to split into word and punctuation sections");
-  cli.add_bool_arg('j', "jobs", "use one cpu core per section when minimising, new section after 50k entries");
-  cli.add_bool_arg('V', "verbose", "compile verbosely");
-  cli.add_bool_arg('h', "help", "print this message and exit");
+  CLI cli(i18n.format("lt_comp_desc"), PACKAGE_VERSION);
+  cli.add_bool_arg('d', "debug", i18n.format("debug_desc"));
+  cli.add_bool_arg('m', "keep-boundaries", i18n.format("keep_boundaries_desc"));
+  cli.add_str_arg('v', "var", i18n.format("var_desc"), "VAR");
+  cli.add_str_arg('a', "alt", i18n.format("alt_desc"), "ALT");
+  cli.add_str_arg('l', "var-left", i18n.format("var_left_desc"), "VAR");
+  cli.add_str_arg('r', "var-right", i18n.format("var_right_desc"), "VAR");
+  cli.add_bool_arg('H', "hfst", i18n.format("expect_hfst_desc"));
+  cli.add_bool_arg('S', "no-split", i18n.format("no_split_desc"));
+  cli.add_bool_arg('j', "jobs", i18n.format("jobs_desc"));
+  cli.add_bool_arg('V', "verbose", i18n.format("verbose_desc"));
+  cli.add_bool_arg('h', "help", i18n.format("help_desc"));
   cli.add_file_arg("lr | rl | u", false);
   cli.add_file_arg("dictionary_file", false);
   cli.add_file_arg("output_file", false);
@@ -116,8 +118,7 @@ int main(int argc, char *argv[])
   }
   else
   {
-    std::cerr << "Error: Cannot not open file '" << infile << "'." << std::endl << std::endl;
-    exit(EXIT_FAILURE);
+    i18n.error("ALT80050", {"file_name"}, {infile.c_str()}, true);
   }
   initGenericErrorDefaultFunc(NULL);
 
@@ -125,7 +126,7 @@ int main(int argc, char *argv[])
   if(opc == "lr")
   {
     if (have_vl) {
-      std::cerr << "Error: -l specified, but mode is lr" << std::endl;
+      i18n.error("ALT80390", false);
       cli.print_usage();
     }
     if(ttype == 'a')
@@ -144,7 +145,7 @@ int main(int argc, char *argv[])
   else if(opc == "rl")
   {
     if (have_vr) {
-      std::cerr << "Error: -r specified, but mode is rl" << std::endl;
+      i18n.error("ALT80391", false);
       cli.print_usage();
     }
     if(ttype == 'a')

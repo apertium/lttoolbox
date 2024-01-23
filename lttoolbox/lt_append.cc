@@ -19,14 +19,16 @@
 #include <lttoolbox/cli.h>
 #include <lttoolbox/lt_locale.h>
 #include <iostream>
+#include <lttoolbox/i18n.h>
 
 int main(int argc, char *argv[])
 {
+  I18n i18n {ALT_I18N_DATA, "lttoolbox"};
   LtLocale::tryToSetLocale();
-  CLI cli("add sections to a compiled transducer", PACKAGE_VERSION);
-  cli.add_bool_arg('k', "keep", "in case of section name conflicts, keep the one from the first transducer");
-  cli.add_bool_arg('s', "single", "treat input transducers as one-sided");
-  cli.add_bool_arg('h', "help", "print this message and exit");
+  CLI cli(i18n.format("lt_append_desc"), PACKAGE_VERSION);
+  cli.add_bool_arg('k', "keep", i18n.format("keep_desc"));
+  cli.add_bool_arg('s', "single", i18n.format("single_desc"));
+  cli.add_bool_arg('h', "help", i18n.format("help_desc"));
   cli.add_file_arg("bin_file1", false);
   cli.add_file_arg("bin_file2");
   cli.add_file_arg("output_file");
@@ -56,7 +58,7 @@ int main(int argc, char *argv[])
       if (keep) {
         continue;
       } else {
-        std::cerr << "WARNING: section '" << it.first << "' appears in both transducers and will be overwritten!" << std::endl;
+        i18n.error("ALT60380", {"section"}, {icu::UnicodeString(it.first.data())}, false);
       }
     }
     it.second.updateAlphabet(alpha2, alpha1, pairs);

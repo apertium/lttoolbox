@@ -25,6 +25,7 @@
 #include <iostream>
 #include <cerrno>
 #include <climits>
+#include <lttoolbox/i18n.h>
 
 
 FSTProcessor::FSTProcessor()
@@ -51,7 +52,7 @@ FSTProcessor::FSTProcessor()
 void
 FSTProcessor::streamError()
 {
-  throw Exception("Error: Malformed input stream.");
+  I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80610", true);
 }
 
 void
@@ -62,8 +63,7 @@ FSTProcessor::parseICX(std::string const &file)
     reader = xmlReaderForFile(file.c_str(), NULL, 0);
     if(reader == NULL)
     {
-      std::cerr << "Error: cannot open '" << file << "'." << std::endl;
-      exit(EXIT_FAILURE);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80050", {"file_name"}, {icu::UnicodeString(file.c_str())}, true);
     }
     int ret = xmlTextReaderRead(reader);
     while(ret == 1)
@@ -87,8 +87,7 @@ FSTProcessor::parseRCX(std::string const &file)
     reader = xmlReaderForFile(file.c_str(), NULL, 0);
     if(reader == NULL)
     {
-      std::cerr << "Error: cannot open '" << file << "'." << std::endl;
-      exit(EXIT_FAILURE);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80050", {"file_name"}, {icu::UnicodeString(file.c_str())}, true);
     }
     int ret = xmlTextReaderRead(reader);
     while(ret == 1)
@@ -121,9 +120,10 @@ FSTProcessor::procNodeICX()
   }
   else
   {
-    std::cerr << "Error in ICX file (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Invalid node '<" << name << ">'." << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80280", {"file_name", "line_number", "element_name"},
+                                         {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                                         xmlTextReaderGetParserLineNumber(reader),
+                                         icu::UnicodeString(name.data())}, true);
   }
 }
 
@@ -159,9 +159,10 @@ FSTProcessor::procNodeRCX()
   }
   else
   {
-    std::cerr << "Error in RCX file (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Invalid node '<" << name << ">'." << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80280", {"file_name", "line_number", "element_name"},
+                                         {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                                         xmlTextReaderGetParserLineNumber(reader),
+                                         icu::UnicodeString(name.data())}, true);
   }
 }
 
@@ -667,9 +668,7 @@ FSTProcessor::classifyFinals()
     }
     else
     {
-      std::cerr << "Error: Unsupported transducer type for '";
-      std::cerr << it.first << "'." << std::endl;
-      exit(EXIT_FAILURE);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80330", {"transducer_first"}, {icu::UnicodeString(it.first.data())}, true);
     }
   }
 }
@@ -908,8 +907,9 @@ FSTProcessor::compoundAnalysis(UString input_word)
 
     if(current_state.size() > MAX_COMBINATIONS)
     {
-      std::cerr << "Warning: compoundAnalysis's MAX_COMBINATIONS exceeded for '" << input_word << "'" << std::endl;
-      std::cerr << "         gave up at char " << i << " '" << val << "'." << std::endl;
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT60340", {"input_word", "index", "char"},
+                                           {icu::UnicodeString(input_word.data()),
+                                           (int)i, val}, false);
 
       UString nullString;
       return  nullString;
@@ -942,7 +942,7 @@ FSTProcessor::initDecompositionSymbols()
      && (compoundOnlyLSymbol=alphabet(u"<@compound:only-L>")) == 0
      && (compoundOnlyLSymbol=alphabet(u"<compound-only-L>")) == 0)
   {
-    std::cerr << "Warning: Decomposition symbol <:compound:only-L> not found" << std::endl;
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT60350", {"symbol"}, {"<:compound:only-L>"}, false);
   }
   else if(!showControlSymbols)
   {
@@ -955,7 +955,7 @@ FSTProcessor::initDecompositionSymbols()
      && (compoundRSymbol=alphabet(u"<@compound:R>")) == 0
      && (compoundRSymbol=alphabet(u"<compound-R>")) == 0)
   {
-    std::cerr << "Warning: Decomposition symbol <:compound:R> not found" << std::endl;
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT60350", {"symbol"}, {"<:compound:R>"}, false);
   }
   else if(!showControlSymbols)
   {
@@ -2327,7 +2327,7 @@ FSTProcessor::valid() const
 {
   if(initial_state.isFinal(all_finals))
   {
-    std::cerr << "Error: Invalid dictionary (hint: the left side of an entry is empty)" << std::endl;
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80122", false);
     return false;
   }
   else
@@ -2336,7 +2336,7 @@ FSTProcessor::valid() const
     s.step(' ');
     if(s.size() != 0)
     {
-      std::cerr << "Error: Invalid dictionary (hint: entry beginning with whitespace)" << std::endl;
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80124", false);
       return false;
     }
   }

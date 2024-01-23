@@ -18,13 +18,15 @@
 #include <lttoolbox/file_utils.h>
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/cli.h>
+#include <lttoolbox/i18n.h>
 
 int main(int argc, char* argv[])
 {
+  I18n i18n {ALT_I18N_DATA, "lttoolbox"};
   LtLocale::tryToSetLocale();
 
-  CLI cli("reverse the direction of a compiled transducer", PACKAGE_VERSION);
-  cli.add_bool_arg('h', "help", "print this message and exit");
+  CLI cli(i18n.format("lt_invert_desc"), PACKAGE_VERSION);
+  cli.add_bool_arg('h', "help", i18n.format("help_desc"));
   cli.add_file_arg("in_bin");
   cli.add_file_arg("out_bin");
   cli.parse_args(argc, argv);

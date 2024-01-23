@@ -23,8 +23,10 @@
 
 #include <iostream>
 #include <thread>
+#include <unicode/ustream.h>
+#include <lttoolbox/i18n.h>
 
-Compiler::Compiler()
+Compiler::Compiler(): i18n(ALT_I18N_DATA, "lttoolbox")
 {
 }
 
@@ -61,7 +63,7 @@ Compiler::parse(std::string const &file, UStringView dir)
 
   if(ret != 0)
   {
-    std::cerr << "Error: Parse error at the end of input." << std::endl;
+    i18n.error("ALT80110", true);
   }
 
   xmlFreeTextReader(reader);
@@ -109,6 +111,7 @@ Compiler::parse(std::string const &file, UStringView dir)
 bool
 Compiler::valid(UStringView dir) const
 {
+  I18n i18n {ALT_I18N_DATA, "lttoolbox"};
   const char* side = (dir == COMPILER_RESTRICTION_RL_VAL ? "right" : "left");
   const std::set<int> epsilonSymbols = alphabet.symbolsWhereLeftIs(0);
   const std::set<int> spaceSymbols = alphabet.symbolsWhereLeftIs(' ');
@@ -118,11 +121,17 @@ Compiler::valid(UStringView dir) const
     auto initial = fst.getInitial();
     for(const auto i : fst.closure(initial, epsilonSymbols)) {
       if (finals.count(i)) {
-        std::cerr << "Error: Invalid dictionary (hint: the " << side << " side of an entry is empty)" << std::endl;
+        if (side = "right")
+          i18n.error("ALT80120", false);
+        else
+          i18n.error("ALT80122", false);
         return false;
       }
       if(fst.closure(i, spaceSymbols).size() > 1) { // >1 since closure always includes self
-        std::cerr << "Error: Invalid dictionary (hint: entry on the " << side << " beginning with whitespace)" << std::endl;
+        if (side = "right")
+          i18n.error("ALT80121", false);
+        else
+          i18n.error("ALT80123", false);
         return false;
       }
     }
@@ -157,9 +166,8 @@ Compiler::procAlphabet()
     }
     else
     {
-      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      std::cerr << "): Missing alphabet symbols." << std::endl;
-      exit(EXIT_FAILURE);
+      i18n.error("ALT80140", {"file_name", "line_number"},
+        {(char*)xmlTextReaderCurrentDoc(reader)->URL, xmlTextReaderGetParserLineNumber(reader)}, true);
     }
   }
 }
@@ -273,7 +281,7 @@ Compiler::matchTransduction(std::vector<int> const &pi,
           // rl compilation of a badly written rule
           // having an epsilon with wildcard output will produce
           // garbage output -- see https://github.com/apertium/apertium-separable/issues/8
-          std::cerr << "Warning: Cannot insert <t/> from empty input. Ignoring. (You probably want to specify exact tags when deleting a word.)" << std::endl;
+          i18n.error("ALT60150", false);
         } else if (tag == alphabet(any_tag, any_tag) ||
                    tag == alphabet(any_char, any_char) ||
                    tag == alphabet(any_tag, 0) ||
@@ -302,9 +310,9 @@ Compiler::requireEmptyError(UStringView name)
 {
   if(!xmlTextReaderIsEmptyElement(reader))
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Non-empty element '<" << name << ">' should be empty." << std::endl;
-    exit(EXIT_FAILURE);
+    i18n.error("ALT80160", {"file_name", "line_number", "name"}, 
+                           {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                            xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(name.data())}, true);
   }
 }
 
@@ -359,9 +367,9 @@ Compiler::readString(std::vector<int> &result, UStringView name)
 
     if(!alphabet.isSymbolDefined(symbol))
     {
-      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      std::cerr << "): Undefined symbol '" << symbol << "'." << std::endl;
-      exit(EXIT_FAILURE);
+      i18n.error("ALT80170", {"file_name", "line_number", "symbol"},
+                             {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                              xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(symbol.data())}, true);
     }
 
     result.push_back(alphabet(symbol));
@@ -387,10 +395,9 @@ Compiler::readString(std::vector<int> &result, UStringView name)
   }
   else
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Invalid specification of element '<" << name;
-    std::cerr << ">' in this context." << std::endl;
-    exit(EXIT_FAILURE);
+    i18n.error("ALT80180", {"file_name", "line_number", "name"},
+                           {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                            xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(name.data())}, true);
   }
 }
 
@@ -403,9 +410,8 @@ Compiler::skipBlanks(UString &name)
     {
       if(!allBlanks())
       {
-        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        std::cerr << "): Invalid construction." << std::endl;
-        exit(EXIT_FAILURE);
+        i18n.error("ALT80190", {"file_name", "line_number"}, {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+          xmlTextReaderGetParserLineNumber(reader)}, true);
       }
     }
 
@@ -432,9 +438,8 @@ Compiler::skip(UString &name, UStringView elem, bool open)
     {
       if(!allBlanks())
       {
-        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        std::cerr << "): Invalid construction." << std::endl;
-        exit(EXIT_FAILURE);
+        i18n.error("ALT80190", {"file_name", "line_number"}, {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+          xmlTextReaderGetParserLineNumber(reader)}, true);
       }
     }
     xmlTextReaderRead(reader);
@@ -443,9 +448,10 @@ Compiler::skip(UString &name, UStringView elem, bool open)
 
   if(name != elem)
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Expected '<" << slash << elem << ">'." << std::endl;
-    exit(EXIT_FAILURE);
+    i18n.error("ALT80200", {"file_name", "line_number", "slash_element"},
+                           {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                            xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(slash.data()) +
+                                                                      icu::UnicodeString(elem.data())}, true);
   }
 }
 
@@ -472,8 +478,8 @@ Compiler::procIdentity(double const entry_weight, bool ig)
 
   if(verbose && first_element && (both_sides.front() == (int)' '))
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Entry begins with space." << std::endl;
+    i18n.error("ALT60210", {"file_name", "line_number"},
+      {(char*)xmlTextReaderCurrentDoc(reader)->URL, xmlTextReaderGetParserLineNumber(reader)}, false);
   }
   first_element = false;
   EntryToken e;
@@ -516,8 +522,8 @@ Compiler::procTransduction(double const entry_weight)
 
   if(verbose && first_element && (lhs.front() == (int)' '))
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Entry begins with space." << std::endl;
+    i18n.error("ALT60210", {"file_name", "line_number"},
+      {(char*)xmlTextReaderCurrentDoc(reader)->URL, xmlTextReaderGetParserLineNumber(reader)}, false);
   }
   first_element = false;
 
@@ -560,16 +566,18 @@ Compiler::procPar()
 
   if(!current_paradigm.empty() && paradigm_name == current_paradigm)
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Paradigm refers to itself '" << paradigm_name << "'." << std::endl;
-    exit(EXIT_FAILURE);
+    i18n.error("ALT80220", {"file_name", "line_number", "paradigm_name"},
+                                         {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                                          xmlTextReaderGetParserLineNumber(reader),
+                                          icu::UnicodeString(paradigm_name.data())}, true);
   }
 
   if(paradigms.find(paradigm_name) == paradigms.end())
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Undefined paradigm '" << paradigm_name << "'." << std::endl;
-    exit(EXIT_FAILURE);
+    i18n.error("ALT80230", {"file_name", "line_number", "paradigm_name"},
+                                         {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                                          xmlTextReaderGetParserLineNumber(reader),
+                                          icu::UnicodeString(paradigm_name.data())}, true);
   }
   e.setParadigm(paradigm_name);
   return e;
@@ -604,9 +612,8 @@ Compiler::insertEntryTokens(std::vector<EntryToken> const &elements)
       }
       else
       {
-        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        std::cerr << "): Invalid entry token." << std::endl;
-        exit(EXIT_FAILURE);
+        i18n.error("ALT80240", {"file_name", "line_number"},
+          {(char*)xmlTextReaderCurrentDoc(reader)->URL, xmlTextReaderGetParserLineNumber(reader)}, true);
       }
     }
     t.setFinal(e, default_weight);
@@ -679,11 +686,11 @@ Compiler::requireAttribute(UStringView value, UStringView attrname, UStringView 
 {
   if(value.empty())
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): '<" << elemname;
-    std::cerr << "' element must specify non-void '";
-    std::cerr << attrname << "' attribute." << std::endl;
-    exit(EXIT_FAILURE);
+    i18n.error("ALT80250", {"file_name", "line_number", "element_name", "attr_name"},
+                                         {(char*)xmlTextReaderCurrentDoc(reader)->URL, 
+                                         xmlTextReaderGetParserLineNumber(reader),
+                                         icu::UnicodeString(elemname.data()),
+                                         icu::UnicodeString(attrname.data())}, true);
   }
 }
 
@@ -869,9 +876,8 @@ Compiler::procEntry()
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      std::cerr << "): Parse error." << std::endl;
-      exit(EXIT_FAILURE);
+      i18n.error("ALT80260", {"file_name", "line_number"},
+        {(char*)xmlTextReaderCurrentDoc(reader)->URL, xmlTextReaderGetParserLineNumber(reader)}, true);
     }
     UString name = XMLParseUtil::readName(reader);
     skipBlanks(name);
@@ -909,9 +915,10 @@ Compiler::procEntry()
       auto it = paradigms.find(p);
       if(it == paradigms.end())
       {
-        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        std::cerr << "): Undefined paradigm '" << p << "'." << std::endl;
-        exit(EXIT_FAILURE);
+        i18n.error("ALT80230", {"file_name", "line_number", "paradigm_name"},
+                                         {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                                          xmlTextReaderGetParserLineNumber(reader),
+                                          icu::UnicodeString(p.data())}, true);
       }
       // discard entries with empty paradigms (by the directions, normally)
       if(it->second.isEmpty())
@@ -936,10 +943,11 @@ Compiler::procEntry()
     }
     else
     {
-      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      std::cerr << "): Invalid inclusion of '<" << name << ">' into '<" << COMPILER_ENTRY_ELEM;
-      std::cerr << ">'." << std::endl;
-      exit(EXIT_FAILURE);
+    i18n.error("ALT80270", {"file_name", "line_number", "element_name", "compiler_entry_element"},
+                                         {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                                         xmlTextReaderGetParserLineNumber(reader),
+                                         icu::UnicodeString(name.data()),
+                                         icu::UnicodeString(COMPILER_ENTRY_ELEM.data())}, true);
     }
   }
 }
@@ -1013,9 +1021,10 @@ Compiler::procNode()
   }
   else
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Invalid node '<" << name << ">'." << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80280", {"file_name", "line_number", "element_name"},
+                                         {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                                         xmlTextReaderGetParserLineNumber(reader),
+                                         icu::UnicodeString(name.data())}, true);
   }
 }
 

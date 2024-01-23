@@ -19,20 +19,22 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <unicode/ustream.h>
+#include <unicode/ustring.h>
 
 class CLI {
 private:
   struct CLIOption {
     char short_opt;
     std::string long_opt;
-    std::string desc;
+    icu::UnicodeString desc;
     bool is_bool;
     std::string var;
   };
 
-  std::string description;
+  icu::UnicodeString description;
   std::string version;
-  std::string epilog;
+  icu::UnicodeString epilog;
 
   std::vector<CLIOption> options;
   std::vector<std::pair<std::string, bool>> file_args;
@@ -45,14 +47,14 @@ private:
   std::string prog_name;
 
 public:
-  CLI(std::string desc, std::string version);
-  CLI(std::string desc);
+  CLI(icu::UnicodeString desc, std::string version);
+  CLI(icu::UnicodeString desc);
   ~CLI();
-  void add_str_arg(char short_flag, std::string long_flag, std::string desc,
+  void add_str_arg(char short_flag, std::string long_flag, icu::UnicodeString desc,
                    std::string arg);
-  void add_bool_arg(char short_flag, std::string long_flag, std::string desc);
+  void add_bool_arg(char short_flag, std::string long_flag, icu::UnicodeString desc);
   void add_file_arg(std::string name, bool optional = true);
-  void set_epilog(std::string e);
+  void set_epilog(icu::UnicodeString e);
   void print_usage(std::ostream& out = std::cerr);
   void parse_args(int argc, char* argv[]);
   std::map<std::string, std::vector<std::string>>& get_strs();

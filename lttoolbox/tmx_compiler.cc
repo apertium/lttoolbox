@@ -23,6 +23,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <libxml/encoding.h>
+#include <lttoolbox/i18n.h>
 
 
 TMXCompiler::TMXCompiler() :
@@ -48,8 +49,7 @@ TMXCompiler::parse(std::string const &file, UStringView lo, UStringView lm)
   reader = xmlReaderForFile(file.c_str(), NULL, 0);
   if(reader == NULL)
   {
-    std::cerr << "Error: Cannot open '" << file << "'." << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80050", {"file_name"}, {file.c_str()}, true);
   }
 
   int ret = xmlTextReaderRead(reader);
@@ -61,7 +61,7 @@ TMXCompiler::parse(std::string const &file, UStringView lo, UStringView lm)
 
   if(ret != 0)
   {
-    std::cerr << "Error: Parse error at the end of input." << std::endl;
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80110", false);
   }
 
   xmlFreeTextReader(reader);
@@ -76,9 +76,9 @@ TMXCompiler::requireEmptyError(UStringView name)
 {
   if(!xmlTextReaderIsEmptyElement(reader))
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Non-empty element '<" << name << ">' should be empty." << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80160", {"file_name", "line_number", "name"}, 
+                           {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                            xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(name.data())}, true);
   }
 }
 
@@ -105,9 +105,8 @@ TMXCompiler::skipBlanks(UString &name)
     {
       if(!allBlanks())
       {
-        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        std::cerr << "): Invalid construction." << std::endl;
-        exit(EXIT_FAILURE);
+        I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80190", {"file_name", "line_number"},
+          {(char*)xmlTextReaderCurrentDoc(reader)->URL, xmlTextReaderGetParserLineNumber(reader)}, true);
       }
     }
 
@@ -128,9 +127,8 @@ TMXCompiler::skip(UString &name, UStringView elem)
     {
       if(!allBlanks())
       {
-        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        std::cerr << "): Invalid construction." << std::endl;
-        exit(EXIT_FAILURE);
+        I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80190", {"file_name", "line_number"},
+          {(char*)xmlTextReaderCurrentDoc(reader)->URL, xmlTextReaderGetParserLineNumber(reader)}, true);
       }
     }
     xmlTextReaderRead(reader);
@@ -139,9 +137,9 @@ TMXCompiler::skip(UString &name, UStringView elem)
 
   if(name != elem)
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Expected '<" << elem << ">'." << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80200", {"file_name", "line_number", "slash_element"},
+                           {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                            xmlTextReaderGetParserLineNumber(reader), icu::UnicodeString(elem.data())}, true);
   }
 }
 
@@ -156,11 +154,11 @@ TMXCompiler::requireAttribute(UStringView value, UStringView attrname, UStringVi
 {
   if(value.empty())
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): '<" << elemname;
-    std::cerr << "' element must specify non-void '";
-    std::cerr << attrname << "' attribute." << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80250", {"file_name", "line_number", "element_name", "attr_name"},
+                                         {(char*)xmlTextReaderCurrentDoc(reader)->URL, 
+                                         xmlTextReaderGetParserLineNumber(reader),
+                                         icu::UnicodeString(elemname.data()),
+                                         icu::UnicodeString(attrname.data())}, true);
   }
 }
 
@@ -406,9 +404,10 @@ TMXCompiler::procNode()
   }
   else
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Invalid node '<" << name << ">'." << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80280", {"file_name", "line_number", "element_name"},
+                                         {(char*)xmlTextReaderCurrentDoc(reader)->URL,
+                                         xmlTextReaderGetParserLineNumber(reader),
+                                         icu::UnicodeString(name.data())}, true);
   }
 }
 

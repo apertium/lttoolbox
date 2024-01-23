@@ -1,6 +1,7 @@
 *.pyc
 **/*.deps/
 /build/
+/.vscode/
 /.ccls-cache/
 /*.pc
 /aclocal.m4
@@ -79,6 +80,7 @@
 /lttoolbox/lt-invert
 /lttoolbox/lt-restrict
 /lttoolbox/lt-apply-acx
+/lttoolbox/formatmsg
 /python/Makefile
 /python/Makefile.in
 /python/lttoolbox.i
@@ -86,6 +88,10 @@
 /python/lttoolbox.py
 /python/setup.py
 /python/build*
+/locales/Makefile
+/locales/Makefile.in
+*.res
+*.dat
 *.egg-info/
 *.egg
 **/.mypy_cache/

@@ -19,6 +19,8 @@
 #include <lttoolbox/compression.h>
 
 #include <cstring>
+#include <lttoolbox/i18n.h>
+#include <unicode/ustring.h>
 
 UFILE*
 openOutTextFile(const std::string& fname)
@@ -28,8 +30,7 @@ openOutTextFile(const std::string& fname)
   } else {
     UFILE* ret = u_fopen(fname.c_str(), "wb", NULL, NULL);
     if (!ret) {
-      std::cerr << "Error: Cannot open file '" << fname << "' for writing." << std::endl;
-      exit(EXIT_FAILURE);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80050", {"file_name"}, {fname.c_str()}, true);
     }
     return ret;
   }
@@ -43,8 +44,7 @@ openOutBinFile(const std::string& fname)
   } else {
     FILE* ret = fopen(fname.c_str(), "wb");
     if (!ret) {
-      std::cerr << "Error: Cannot open file '" << fname << "' for writing." << std::endl;
-      exit(EXIT_FAILURE);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80050", {"file_name"}, {fname.c_str()}, true);
     }
     return ret;
   }
@@ -58,8 +58,7 @@ openInBinFile(const std::string& fname)
   } else {
     FILE* ret = fopen(fname.c_str(), "rb");
     if (!ret) {
-      std::cerr << "Error: Cannot open file '" << fname << "' for reading." << std::endl;
-      exit(EXIT_FAILURE);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80050", {"file_name"}, {fname.c_str()}, true);
     }
     return ret;
   }
@@ -103,7 +102,7 @@ readShared(FILE* input, std::set<UChar32>& letters, Alphabet& alpha)
     if (strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
       auto features = read_le<uint64_t>(input);
       if (features >= LTF_UNKNOWN) {
-        throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
+        I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80620", true);
       }
     } else {
       // Old binary format

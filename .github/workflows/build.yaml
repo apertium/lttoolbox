@@ -17,7 +17,7 @@ jobs:
       run: ./configure --disable-static --enable-python-bindings
     - name: build
       run: make -j4 V=1 VERBOSE=1
-    - name: tests
-      run: make test
     - name: make install
       run: sudo make install
+    - name: tests
+      run: make test

@@ -22,6 +22,7 @@
 #include <cstring>
 #include <iostream>
 #include <lttoolbox/my_stdio.h>
+#include <lttoolbox/i18n.h>
 
 InputFile::InputFile()
   : infile(stdin), buffer_size(0)
@@ -58,8 +59,7 @@ void
 InputFile::open_or_exit(const char* fname)
 {
   if (!open(fname)) {
-    std::cerr << "Error: Unable to open '" << fname << "' for reading." << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80050", {"file_name"}, {fname}, true);
   }
 }
 
@@ -106,17 +106,17 @@ InputFile::internal_read()
   if ((first & 0xF0) == 0xF0) {
     i += 3;
     if (fread_unlocked(cbuffer+1, 1, 3, infile) != 3) {
-      throw std::runtime_error("Could not read 3 expected bytes from stream");
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80630", {"number"}, {3}, true);
     }
   } else if ((first & 0xE0) == 0xE0) {
     i += 2;
     if (fread_unlocked(cbuffer+1, 1, 2, infile) != 2) {
-      throw std::runtime_error("Could not read 2 expected bytes from stream");
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80630", {"number"}, {2}, true);
     }
   } else if ((first & 0xC0) == 0xC0) {
     i += 1;
     if (fread_unlocked(cbuffer+1, 1, 1, infile) != 1) {
-      throw std::runtime_error("Could not read 1 expected byte from stream");
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80630", {"number"}, {1}, true);
     }
   }
   memset(ubuffer, 0, 3*sizeof(UChar));
@@ -160,8 +160,7 @@ InputFile::rewind()
 {
   if (infile != nullptr) {
     if (std::fseek(infile, 0, SEEK_SET) != 0) {
-      std::cerr << "Error: Unable to rewind file" << std::endl;
-      exit(EXIT_FAILURE);
+      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80360", true);
     }
   }
 }
@@ -236,8 +235,7 @@ InputFile::readBlank(bool readwblank)
       ret += c;
       if (c == '\\') {
         if (eof() || peek() == '\0') {
-          std::cerr << "Unexpected trailing backslash" << std::endl;
-          exit(EXIT_FAILURE);
+          I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80370", true);
         }
         ret += get();
       }

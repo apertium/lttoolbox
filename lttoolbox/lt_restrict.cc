@@ -19,6 +19,7 @@
 #include <lttoolbox/cli.h>
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/string_utils.h>
+#include <lttoolbox/i18n.h>
 
 void get_symbol(const std::string& s, Alphabet& alpha, const char* prefix,
                 sorted_vector<int32_t>& vec)
@@ -36,13 +37,15 @@ void get_symbol(const std::string& s, Alphabet& alpha, const char* prefix,
 
 int main(int argc, char* argv[])
 {
+  I18n i18n {ALT_I18N_DATA, "lttoolbox"};
+
   LtLocale::tryToSetLocale();
-  CLI cli("remove paths from a transducer", PACKAGE_VERSION);
-  cli.add_bool_arg('m', "minimise", "minimise transducers after deleting paths");
-  cli.add_str_arg('v', "var", "set language variant", "VAR");
-  cli.add_str_arg('a', "alt", "set alternative (monodix)", "ALT");
-  cli.add_str_arg('l', "var-left", "set left language variant (bidix)", "VAR");
-  cli.add_str_arg('r', "var-right", "set right language variant (bidix)", "VAR");
+  CLI cli(i18n.format("lt_restrict_desc"), PACKAGE_VERSION);
+  cli.add_bool_arg('m', "minimise", i18n.format("minimise_desc"));
+  cli.add_str_arg('v', "var", i18n.format("var_desc"), "VAR");
+  cli.add_str_arg('a', "alt", i18n.format("alt_desc"), "ALT");
+  cli.add_str_arg('l', "var-left", i18n.format("var_left_desc"), "VAR");
+  cli.add_str_arg('r', "var-right", i18n.format("var_right_desc"), "VAR");
   cli.add_file_arg("lr | rl", false);
   cli.add_file_arg("input_file");
   cli.add_file_arg("output_file");

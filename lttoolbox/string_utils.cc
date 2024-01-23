@@ -5,6 +5,8 @@
 #include <unicode/ustring.h>
 #include <iostream>
 #include <limits>
+#include <lttoolbox/i18n.h>
+#include <unicode/ustream.h>
 
 UStringView
 StringUtils::trim(UStringView str)
@@ -146,7 +148,7 @@ StringUtils::stoi(const UString& str)
   int ret;
   int c = u_sscanf(str.c_str(), "%d", &ret);
   if (c != 1) {
-    throw std::invalid_argument("unable to parse int");
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80600", {"type"}, {"int"}, true);
   }
   return ret;
 }
@@ -165,7 +167,7 @@ StringUtils::stod(const UString& str)
     c = 1;
   }
   if (c != 1) {
-    throw std::invalid_argument("unable to parse float");
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80600", {"type"}, {"float"}, true);
   }
   return ret;
 }
@@ -177,9 +179,8 @@ StringUtils::tolower(UStringView str)
   UErrorCode err = U_ZERO_ERROR;
   u_strToLower(buf, str.size()*2, str.data(), str.size(), NULL, &err);
   if (U_FAILURE(err)) {
-    std::cerr << "Error: unable to lowercase string '" << str << "'.\n";
-    std::cerr << "error code: " << u_errorName(err) << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80510", {"string", "errer_name"},
+                                         {icu::UnicodeString(str.data()), u_errorName(err)}, true);
   }
   return buf;
 }
@@ -191,9 +192,8 @@ StringUtils::toupper(UStringView str)
   UErrorCode err = U_ZERO_ERROR;
   u_strToUpper(buf, str.size()*2, str.data(), str.size(), NULL, &err);
   if (U_FAILURE(err)) {
-    std::cerr << "Error: unable to uppercase string '" << str << "'.\n";
-    std::cerr << "error code: " << u_errorName(err) << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80511", {"string", "errer_name"},
+                                         {icu::UnicodeString(str.data()), u_errorName(err)}, true);
   }
   return buf;
 }
@@ -205,9 +205,8 @@ StringUtils::totitle(UStringView str)
   UErrorCode err = U_ZERO_ERROR;
   u_strToTitle(buf, str.size()*2, str.data(), str.size(), NULL, NULL, &err);
   if (U_FAILURE(err)) {
-    std::cerr << "Error: unable to titlecase string '" << str << "'.\n";
-    std::cerr << "error code: " << u_errorName(err) << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80512", {"string", "errer_name"},
+                                         {icu::UnicodeString(str.data()), u_errorName(err)}, true);
   }
   return buf;
 }
@@ -272,10 +271,9 @@ StringUtils::caseequal(UStringView a, UStringView b)
   UErrorCode err = U_ZERO_ERROR;
   int cmp = u_strCaseCompare(a.data(), a.size(), b.data(), b.size(), 0, &err);
   if (U_FAILURE(err)) {
-    std::cerr << "Error: caseless string comparison failed on '";
-    std::cerr << a << "' and '" << b << "'" << std::endl;
-    std::cerr << "error code: " << u_errorName(err) << std::endl;
-    exit(EXIT_FAILURE);
+    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80513", {"string_a", "string_b", "errer_name"},
+                                         {icu::UnicodeString(a.data()),
+                                          icu::UnicodeString(b.data()), u_errorName(err)}, true);
   }
   return (cmp == 0);
 }
