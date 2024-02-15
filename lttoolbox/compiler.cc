@@ -864,8 +864,9 @@ Compiler::procEntry()
     elements.push_back(e);
   }
 
-  while(true)
-  {
+  bool contentful = !xmlTextReaderIsEmptyElement(reader);
+  // do nothing if it's <e/>, but while(true) otherwise
+  while (contentful) {
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
