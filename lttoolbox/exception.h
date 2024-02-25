@@ -19,6 +19,8 @@
 
 #include <exception>
 #include <string>
+#include <unicode/ustring.h>
+#include <unicode/ustream.h>
 
 class Exception
 : public std::exception
@@ -29,32 +31,42 @@ public:
   {
   }
 
+  Exception(const icu::UnicodeString &_msg) throw ()
+  : std::exception(), msg(_msg)
+  {
+  }
+
   virtual ~Exception() throw ()
   {
   }
 
   const char* what() const throw ()
   {
-    return msg.c_str();
+    std::string res;
+    msg.toUTF8String(res);
+    return res.c_str();
   }
 
 private:
-  std::string msg;
+  icu::UnicodeString msg;
 };
 
 class IOException : public Exception {
 public:
   IOException(const char* _msg) throw () : Exception(_msg) {};
+  IOException(const icu::UnicodeString &_msg) throw () : Exception(_msg) {};
 };
 
 class SerialisationException : public IOException {
 public:
   SerialisationException(const char* _msg) throw () : IOException(_msg) {};
+  SerialisationException(const icu::UnicodeString &_msg) throw () : IOException(_msg) {};
 };
 
 class DeserialisationException : public IOException {
 public:
   DeserialisationException(const char* _msg) throw () : IOException(_msg) {};
+  DeserialisationException(const icu::UnicodeString &_msg) throw () : IOException(_msg) {};
 };
 
 #endif

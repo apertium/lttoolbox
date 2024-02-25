@@ -125,23 +125,28 @@ Deserialiser<std::pair<first_type, second_type> >::deserialise(
 
 template <typename integer_type>
 integer_type int_deserialise(std::istream &Stream_) {
-  integer_type SerialisedType_ = 0;
-  unsigned char SerialisedTypeSize = Stream_.get();
-
-  if (!Stream_)
-    I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80640", {"size"}, {std::to_string(sizeof(integer_type)).c_str()}, true);
-
-  for (; SerialisedTypeSize != 0;) {
-    SerialisedType_ +=
-        static_cast<integer_type>(Stream_.get())
-        << std::numeric_limits<unsigned char>::digits * --SerialisedTypeSize;
+  try {
+    integer_type SerialisedType_ = 0;
+    unsigned char SerialisedTypeSize = Stream_.get();
 
     if (!Stream_)
-      I18n(ALT_I18N_DATA, "lttoolbox").error("ALT80650", {"size"},
-                                                          {std::to_string(sizeof(integer_type)).c_str()}, true);
-  }
+      throw DeserialisationException(I18n(ALT_I18N_DATA, "lttoolbox").format("ALT80640",
+        {"size"}, {std::to_string(sizeof(integer_type)).c_str()}));
 
-  return SerialisedType_;
+    for (; SerialisedTypeSize != 0;) {
+      SerialisedType_ +=
+          static_cast<integer_type>(Stream_.get())
+          << std::numeric_limits<unsigned char>::digits * --SerialisedTypeSize;
+
+      if (!Stream_)
+        throw DeserialisationException(I18n(ALT_I18N_DATA, "lttoolbox").format("ALT80650", {"size"},
+          {std::to_string(sizeof(integer_type)).c_str()}));
+    }
+
+    return SerialisedType_;
+  } catch (const std::exception &exc) {
+    throw DeserialisationException(exc.what());
+  }
 }
 
 #ifdef SIZET_NOT_CSTDINT
