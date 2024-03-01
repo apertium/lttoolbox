@@ -176,6 +176,7 @@ private:
   int32_t word_boundary = 0;
   int32_t word_boundary_s = 0;
   int32_t word_boundary_ns = 0;
+  int32_t reading_boundary = 0;
 
   /**
    * Method to parse an XML Node
@@ -354,6 +355,7 @@ public:
   static constexpr UStringView COMPILER_LSX_WB_ELEM        = u"d";
   static constexpr UStringView COMPILER_LSX_CHAR_ELEM      = u"w";
   static constexpr UStringView COMPILER_LSX_TAG_ELEM       = u"t";
+  static constexpr UStringView COMPILER_LSX_FORM_SEP_ELEM  = u"f";
   static constexpr UStringView COMPILER_LSX_SPACE_ATTR     = u"space";
   static constexpr UStringView COMPILER_LSX_SPACE_YES_VAL  = u"yes";
   static constexpr UStringView COMPILER_LSX_SPACE_NO_VAL   = u"no";

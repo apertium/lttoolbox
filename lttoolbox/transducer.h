@@ -99,6 +99,7 @@ public:
   static constexpr UStringView LSX_BOUNDARY_SYMBOL         = u"<$>";
   static constexpr UStringView LSX_BOUNDARY_SPACE_SYMBOL   = u"<$_>";
   static constexpr UStringView LSX_BOUNDARY_NO_SPACE_SYMBOL= u"<$->";
+  static constexpr UStringView READING_SEPARATOR_SYMBOL    = u"</>";
   static constexpr UStringView COMPOUND_ONLY_L_SYMBOL      = u"<compound-only-L>";
   static constexpr UStringView COMPOUND_R_SYMBOL           = u"<compound-R>";
 

@@ -385,6 +385,10 @@ Compiler::readString(std::vector<int> &result, UStringView name)
       result.push_back(word_boundary);
     }
   }
+  else if (is_separable && name == COMPILER_LSX_FORM_SEP_ELEM) {
+    requireEmptyError(name);
+    result.push_back(reading_boundary);
+  }
   else
   {
     std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
@@ -966,11 +970,13 @@ Compiler::procNode()
       alphabet.includeSymbol(Transducer::LSX_BOUNDARY_SYMBOL);
       alphabet.includeSymbol(Transducer::LSX_BOUNDARY_SPACE_SYMBOL);
       alphabet.includeSymbol(Transducer::LSX_BOUNDARY_NO_SPACE_SYMBOL);
+      alphabet.includeSymbol(Transducer::READING_SEPARATOR_SYMBOL);
       any_tag          = alphabet(Transducer::ANY_TAG_SYMBOL);
       any_char         = alphabet(Transducer::ANY_CHAR_SYMBOL);
       word_boundary    = alphabet(Transducer::LSX_BOUNDARY_SYMBOL);
       word_boundary_s  = alphabet(Transducer::LSX_BOUNDARY_SPACE_SYMBOL);
       word_boundary_ns = alphabet(Transducer::LSX_BOUNDARY_NO_SPACE_SYMBOL);
+      reading_boundary = alphabet(Transducer::READING_SEPARATOR_SYMBOL);
     }
   }
   else if(name == COMPILER_ALPHABET_ELEM)

@@ -171,3 +171,6 @@
 
 <!ELEMENT w EMPTY>
     <!-- w: any word character -->
+
+<!ELEMENT f EMPTY>
+	<!-- f: form/reading separator -->
