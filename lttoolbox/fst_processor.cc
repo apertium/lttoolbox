@@ -2021,7 +2021,7 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
     val = tr.second;
 
     //fprintf(stderr, "> %ls : %lc : %d\n", tr.first.c_str(), tr.second, tr.second);
-    if(biltransSurfaceForms && !seensurface && !outOfWord)
+    if((biltransSurfaceForms || biltransSurfaceFormsKeep) && !seensurface && !outOfWord)
     {
       while(val != '/' && val != 0x7fffffff)
       {
@@ -2067,7 +2067,12 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
       }
       else if(!result.empty())
       {
-        printWordBilingual(sf, compose(result, queue), output);
+        if(biltransSurfaceFormsKeep) {
+          printWordBilingual(surface + "/"_u + sf, compose(result, queue), output);
+        }
+        else {
+          printWordBilingual(sf, compose(result, queue), output);
+        }
       }
       else
       { //xxx
@@ -2075,6 +2080,10 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
         if(biltransSurfaceForms)
         {
           printWordBilingual(surface, prefix + surface, output);
+        }
+        else if(biltransSurfaceFormsKeep)
+        {
+          printWordBilingual(surface + "/"_u + surface, prefix + surface, output);
         }
         else
         {
@@ -2571,6 +2580,12 @@ void
 FSTProcessor::setBiltransSurfaceForms(bool value)
 {
   biltransSurfaceForms = value;
+}
+
+void
+FSTProcessor::setBiltransSurfaceFormsKeep(bool value)
+{
+  biltransSurfaceFormsKeep = value;
 }
 
 void

@@ -152,9 +152,14 @@ private:
   bool outOfWord = false;
 
   /**
-   * true if we're automatically removing surface forms.
+   * true if we're assuming input has surface forms.
    */
   bool biltransSurfaceForms = false;
+
+  /**
+   * true if we're assuming both input and output should have surface forms.
+   */
+  bool biltransSurfaceFormsKeep = false;
 
 
   /**
@@ -514,6 +519,7 @@ public:
   void setCaseSensitiveMode(bool value);
   void setDictionaryCaseMode(bool value);
   void setBiltransSurfaceForms(bool value);
+  void setBiltransSurfaceFormsKeep(bool value);
   void setIgnoredChars(bool value);
   void setRestoreChars(bool value);
   void setNullFlush(bool value);

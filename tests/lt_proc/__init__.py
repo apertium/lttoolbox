@@ -432,6 +432,22 @@ class BufferIndex(ProcTest):
                        ]
 
 
+class Bilsurf(ProcTest):
+    """Test --surf-bilingual"""
+    procdix = "data/minimal-bi.dix"
+    procflags = ['-o', '-z']
+    procdir = "lr"
+    inputs = ["^Ab/ab<n><def>$"]
+    expectedOutputs = ["^ab<n><def>/xy<n><def>$"]
+
+class BilsurfKeep(ProcTest):
+    """Test --surf-bilingual-keep"""
+    procdix = "data/minimal-bi.dix"
+    procflags = ['-O', '-z']
+    procdir = "lr"
+    inputs = ["^Ab/ab<n><def>$"]
+    expectedOutputs = ["^Ab/ab<n><def>/xy<n><def>$"]
+
 class Bigen(ProcTest):
     """Test that we can run -b with -g before, and -b should override it."""
     procdix = "data/minimal-mono.dix"

@@ -46,7 +46,8 @@ int main(int argc, char *argv[])
   cli.add_bool_arg('l', "tagged-gen", "morphological generation keeping lexical forms");
   cli.add_bool_arg('m', "tagged-nm-gen", "same as -l but without unknown word marks");
   cli.add_bool_arg('n', "non-marked-gen", "morph. generation without unknown word marks");
-  cli.add_bool_arg('o', "surf-bilingual", "lexical transfer with surface forms");
+  cli.add_bool_arg('o', "surf-bilingual", "lexical transfer, input has surface forms");
+  cli.add_bool_arg('O', "surf-bilingual-keep", "lexical transfer, input and output has surface forms");
   cli.add_bool_arg('p', "post-generation", "post-generation");
   cli.add_bool_arg('x', "inter-generation", "inter-generation");
   cli.add_bool_arg('s', "sao", "SAO annotation system input processing");
@@ -79,6 +80,11 @@ int main(int argc, char *argv[])
     if (cmd && cmd != 'b') cli.print_usage();
     if (!cmd) cmd = 'b';
     fstp.setBiltransSurfaceForms(true);
+  }
+  if (args["surf-bilingual-keep"]) {
+    if (cmd && cmd != 'b') cli.print_usage();
+    if (!cmd) cmd = 'b';
+    fstp.setBiltransSurfaceFormsKeep(true);
   }
   if (args["generation"]) {
     if (cmd && cmd != 'b') cli.print_usage();
