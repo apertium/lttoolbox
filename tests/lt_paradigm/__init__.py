@@ -52,7 +52,7 @@ class OrTagTest(ParadigmTest):
     inputs = ['re<vblex><|pres|pret>', 're<vblex><|inf>', 're<vblex><|xqz>']
     expectedOutputs = [
         're<vblex><pres>:rer\nre<vblex><pres>:res\nre<vblex><pret>:ret',
-        're<vblex><inf>:re\nre<vblex><pret>:ret',
+        're<vblex><inf>:re',
         ''
     ]
 
@@ -65,6 +65,6 @@ class OrTagRepeatTest(ParadigmTest):
     ]
     expectedOutputs = [
         're<vblex><pres>:rer\nre<vblex><pres>:res\nre<vblex><pret>:ret',
-        're<vblex><inf>:re\nre<vblex><pret>:ret',
-        're<vblex><inf>:re\nre<vblex><pret>:ret',
+        're<vblex><inf>:re',
+        're<vblex><inf>:re',
     ]

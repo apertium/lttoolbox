@@ -67,7 +67,7 @@ sorted_vector<int32_t> split_tag(UStringView sym, Alphabet& alpha, int prefix,
     tag += '<';
     tag += tg;
     tag += '>';
-    ret.insert(alpha(tag));
+    if (alpha.isSymbolDefined(tag)) ret.insert(alpha(tag));
   }
   return ret;
 }
