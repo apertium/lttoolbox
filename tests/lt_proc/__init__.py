@@ -445,8 +445,10 @@ class BilsurfKeep(ProcTest):
     procdix = "data/minimal-bi.dix"
     procflags = ['-O', '-z']
     procdir = "lr"
-    inputs = ["^Ab/ab<n><def>$"]
-    expectedOutputs = ["^Ab/ab<n><def>/xy<n><def>$"]
+    inputs = ["^Ab/ab<n><def>$",
+              "^bad<data>$ ^Ab/ab<n><def>$",]
+    expectedOutputs = ["^Ab/ab<n><def>/xy<n><def>$",
+                       "^bad<data>/bad<data>/@bad<data>$ ^Ab/ab<n><def>/xy<n><def>$"]
 
 class Bigen(ProcTest):
     """Test that we can run -b with -g before, and -b should override it."""

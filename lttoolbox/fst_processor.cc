@@ -2023,7 +2023,7 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
     //fprintf(stderr, "> %ls : %lc : %d\n", tr.first.c_str(), tr.second, tr.second);
     if((biltransSurfaceForms || biltransSurfaceFormsKeep) && !seensurface && !outOfWord)
     {
-      while(val != '/' && val != 0x7fffffff)
+      while(val != '/' && val != '$' && val != 0x7fffffff)
       {
         surface = surface + symbol;
         alphabet.getSymbol(surface, val);
@@ -2032,10 +2032,12 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
         val = tr.second;
         //fprintf(stderr, " == %ls : %lc : %d => %ls\n", symbol.c_str(), val, val, surface.c_str());
       }
-      seensurface = true;
-      tr = readBilingual(input, output);
-      symbol = tr.first;
-      val = tr.second;
+      if(val == '/') {         // We've seen the surface form
+        seensurface = true;
+        tr = readBilingual(input, output);
+        symbol = tr.first;
+        val = tr.second;
+      }
     }
 
     if (val == 0x7fffffff)
