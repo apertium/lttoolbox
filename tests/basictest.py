@@ -78,8 +78,10 @@ class BasicTest:
             print("STDERR:", res.stderr)
         if expectFail:
             self.assertNotEqual(res.returncode, 0)
+            return False
         else:
             self.assertEqual(res.returncode, 0)
+            return True
 
 
 class TempDir:

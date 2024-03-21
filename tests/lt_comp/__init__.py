@@ -83,7 +83,7 @@ class VariantNoTest(unittest.TestCase, ProcTest):
 class VariantHoTest(unittest.TestCase, ProcTest):
     procdix = 'data/variants.dix'
     procdir = 'lr'
-    compflags = ['--var-right="ho"']
+    compflags = ['--var-right=ho']
     inputs = ['y']
     expectedOutputs = ['^y/y<n><ind>$']
 
