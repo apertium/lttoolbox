@@ -131,6 +131,18 @@ Compiler::valid(UStringView dir) const
 }
 
 void
+Compiler::step(UString& name)
+{
+  int ret = xmlTextReaderRead(reader);
+  if (ret == -1) {
+    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    std::cerr << "): Parse error." << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  name = XMLParseUtil::readName(reader);
+}
+
+void
 Compiler::procAlphabet()
 {
   int type=xmlTextReaderNodeType(reader);
@@ -413,16 +425,14 @@ Compiler::skipBlanks(UString &name)
       }
     }
 
-    xmlTextReaderRead(reader);
-    name = XMLParseUtil::readName(reader);
+    step(name);
   }
 }
 
 void
 Compiler::skip(UString &name, UStringView elem, bool open)
 {
-  xmlTextReaderRead(reader);
-  name = XMLParseUtil::readName(reader);
+  step(name);
   UString slash;
 
   if(!open)
@@ -441,8 +451,7 @@ Compiler::skip(UString &name, UStringView elem, bool open)
         exit(EXIT_FAILURE);
       }
     }
-    xmlTextReaderRead(reader);
-    name = XMLParseUtil::readName(reader);
+    step(name);
   }
 
   if(name != elem)
@@ -464,8 +473,7 @@ Compiler::procIdentity(double const entry_weight, bool ig)
 
     while(true)
     {
-      xmlTextReaderRead(reader);
-      name = XMLParseUtil::readName(reader);
+      step(name);
       if(name == COMPILER_IDENTITY_ELEM || name == COMPILER_IDENTITYGROUP_ELEM)
       {
         break;
@@ -505,15 +513,9 @@ Compiler::procTransduction(double const entry_weight)
 
   if(!xmlTextReaderIsEmptyElement(reader))
   {
-    name.clear();
-    while(true)
-    {
-      xmlTextReaderRead(reader);
-      name = XMLParseUtil::readName(reader);
-      if(name == COMPILER_LEFT_ELEM)
-      {
-        break;
-      }
+    while (true) {
+      step(name);
+      if (name == COMPILER_LEFT_ELEM) break;
       readString(lhs, name);
     }
   }
@@ -529,15 +531,9 @@ Compiler::procTransduction(double const entry_weight)
 
   if(!xmlTextReaderIsEmptyElement(reader))
   {
-    name.clear();
-    while(true)
-    {
-      xmlTextReaderRead(reader);
-      name = XMLParseUtil::readName(reader);
-      if(name == COMPILER_RIGHT_ELEM)
-      {
-        break;
-      }
+    while (true) {
+      step(name);
+      if (name == COMPILER_RIGHT_ELEM) break;
       readString(rhs, name);
     }
   }
@@ -830,8 +826,7 @@ Compiler::procEntry()
 
     while(name != COMPILER_ENTRY_ELEM)
     {
-      xmlTextReaderRead(reader);
-      name = XMLParseUtil::readName(reader);
+      step(name);
     }
 
     return;
@@ -871,14 +866,8 @@ Compiler::procEntry()
   bool contentful = !xmlTextReaderIsEmptyElement(reader);
   // do nothing if it's <e/>, but while(true) otherwise
   while (contentful) {
-    int ret = xmlTextReaderRead(reader);
-    if(ret != 1)
-    {
-      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      std::cerr << "): Parse error." << std::endl;
-      exit(EXIT_FAILURE);
-    }
-    UString name = XMLParseUtil::readName(reader);
+    UString name;
+    step(name);
     skipBlanks(name);
 
     if(current_paradigm.empty() && verbose)
@@ -923,8 +912,7 @@ Compiler::procEntry()
       {
         while(name != COMPILER_ENTRY_ELEM || type != XML_READER_TYPE_END_ELEMENT)
         {
-          xmlTextReaderRead(reader);
-          name = XMLParseUtil::readName(reader);
+          step(name);
           type = xmlTextReaderNodeType(reader);
         }
         return;

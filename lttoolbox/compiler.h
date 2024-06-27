@@ -277,6 +277,7 @@ private:
    */
   void skipBlanks(UString &name);
 
+  void step(UString& name);
 
   void readString(std::vector<int> &result, UStringView name);
 
