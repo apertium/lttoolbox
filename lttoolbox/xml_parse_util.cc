@@ -101,3 +101,16 @@ XMLParseUtil::allBlanks(xmlTextReaderPtr reader)
   }
   return true;
 }
+
+void
+XMLParseUtil::error_and_die(xmlTextReaderPtr reader, const char* fmt, ...)
+{
+  UFILE* err_out = u_finit(stderr, NULL, NULL);
+  u_fprintf(err_out, "Error (%d): ", xmlTextReaderGetParserLineNumber(reader));
+  va_list argptr;
+  va_start(argptr, fmt);
+  u_vfprintf(err_out, fmt, argptr);
+  va_end(argptr);
+  u_fputc('\n', err_out);
+  exit(EXIT_FAILURE);
+}

@@ -41,6 +41,8 @@ public:
   static void readValueInto32(xmlTextReaderPtr reader, std::vector<int32_t>& vec);
 
   static bool allBlanks(xmlTextReaderPtr reader);
+
+  static void error_and_die(xmlTextReaderPtr reader, const char* fmt, ...);
 };
 
 #endif

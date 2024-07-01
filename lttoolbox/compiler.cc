@@ -135,9 +135,7 @@ Compiler::step(UString& name)
 {
   int ret = xmlTextReaderRead(reader);
   if (ret == -1) {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Parse error." << std::endl;
-    exit(EXIT_FAILURE);
+    XMLParseUtil::error_and_die(reader, "Parse error.");
   }
   name = XMLParseUtil::readName(reader);
 }
@@ -169,9 +167,7 @@ Compiler::procAlphabet()
     }
     else
     {
-      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      std::cerr << "): Missing alphabet symbols." << std::endl;
-      exit(EXIT_FAILURE);
+      XMLParseUtil::error_and_die(reader, "Missing alphabet symbols.");
     }
   }
 }
@@ -371,9 +367,7 @@ Compiler::readString(std::vector<int> &result, UStringView name)
 
     if(!alphabet.isSymbolDefined(symbol))
     {
-      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      std::cerr << "): Undefined symbol '" << symbol << "'." << std::endl;
-      exit(EXIT_FAILURE);
+      XMLParseUtil::error_and_die(reader, "Undefined symbol '%S'.", symbol.c_str());
     }
 
     result.push_back(alphabet(symbol));
@@ -419,9 +413,7 @@ Compiler::skipBlanks(UString &name)
     {
       if(!allBlanks())
       {
-        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        std::cerr << "): Invalid construction." << std::endl;
-        exit(EXIT_FAILURE);
+	XMLParseUtil::error_and_die(reader, "Invalid construction.");
       }
     }
 
@@ -446,9 +438,7 @@ Compiler::skip(UString &name, UStringView elem, bool open)
     {
       if(!allBlanks())
       {
-        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        std::cerr << "): Invalid construction." << std::endl;
-        exit(EXIT_FAILURE);
+	XMLParseUtil::error_and_die(reader, "Invalid construction.");
       }
     }
     step(name);
@@ -560,16 +550,12 @@ Compiler::procPar()
 
   if(!current_paradigm.empty() && paradigm_name == current_paradigm)
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Paradigm refers to itself '" << paradigm_name << "'." << std::endl;
-    exit(EXIT_FAILURE);
+    XMLParseUtil::error_and_die(reader, "Paradigm refers to itself '%S'.", paradigm_name.c_str());
   }
 
   if(paradigms.find(paradigm_name) == paradigms.end())
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Undefined paradigm '" << paradigm_name << "'." << std::endl;
-    exit(EXIT_FAILURE);
+    XMLParseUtil::error_and_die(reader, "Undefined paradigm '%S'.", paradigm_name.c_str());
   }
   e.setParadigm(paradigm_name);
   return e;
@@ -604,9 +590,7 @@ Compiler::insertEntryTokens(std::vector<EntryToken> const &elements)
       }
       else
       {
-        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        std::cerr << "): Invalid entry token." << std::endl;
-        exit(EXIT_FAILURE);
+	XMLParseUtil::error_and_die(reader, "Invalid entry token.");
       }
     }
     t.setFinal(e, default_weight);
@@ -903,9 +887,7 @@ Compiler::procEntry()
       auto it = paradigms.find(p);
       if(it == paradigms.end())
       {
-        std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-        std::cerr << "): Undefined paradigm '" << p << "'." << std::endl;
-        exit(EXIT_FAILURE);
+	XMLParseUtil::error_and_die(reader, "Undefined paradigm '%S'.", p.c_str());
       }
       // discard entries with empty paradigms (by the directions, normally)
       if(it->second.isEmpty())
@@ -929,10 +911,7 @@ Compiler::procEntry()
     }
     else
     {
-      std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-      std::cerr << "): Invalid inclusion of '<" << name << ">' into '<" << COMPILER_ENTRY_ELEM;
-      std::cerr << ">'." << std::endl;
-      exit(EXIT_FAILURE);
+      XMLParseUtil::error_and_die(reader, "Invalid inclusion of '<%S>' into '<e>'.", name.c_str());
     }
   }
 }
@@ -1008,9 +987,7 @@ Compiler::procNode()
   }
   else
   {
-    std::cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
-    std::cerr << "): Invalid node '<" << name << ">'." << std::endl;
-    exit(EXIT_FAILURE);
+    XMLParseUtil::error_and_die(reader, "Invalid node '<%S>'.", name.c_str());
   }
 }
 
@@ -1018,9 +995,16 @@ EntryToken
 Compiler::procRegexp()
 {
   EntryToken et;
-  xmlTextReaderRead(reader);
+  UString name;
+  step(name);
+  if (name != COMPILER_TEXT_NODE) {
+    XMLParseUtil::error_and_die(reader, "Invalid inclusion of '<%S>' in '<re>'.", name.c_str());
+  }
   et.readRegexp(reader);
-  xmlTextReaderRead(reader);
+  step(name);
+  if (name != COMPILER_REGEXP_ELEM) {
+    XMLParseUtil::error_and_die(reader, "Invalid inclusion of '<%S>' in '<re>'.", name.c_str());
+  }
   return et;
 }
 
