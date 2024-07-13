@@ -143,9 +143,10 @@ StringUtils::ftoa(double f)
 int
 StringUtils::stoi(const UString& str)
 {
-  int ret;
-  int c = u_sscanf(str.c_str(), "%d", &ret);
-  if (c != 1) {
+  int ret, len;
+  int c = u_sscanf(str.c_str(), "%d%n", &ret, &len);
+  // apparently %n isn't counted when calculating the return value of u_sscanf
+  if (c != 1 || static_cast<size_t>(len) != str.size()) {
     throw std::invalid_argument("unable to parse int");
   }
   return ret;

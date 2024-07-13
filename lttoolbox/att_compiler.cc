@@ -202,7 +202,17 @@ AttCompiler::parse(std::string const &file_name, bool read_rl)
       continue;
     }
 
-    from = StringUtils::stoi(tokens[0]) + state_id_offset;
+    if (tokens.size() == 3 || tokens.size() > 5) {
+      std::cerr << "Error: wrong number of columns in file '" << file_name << "' on line " << line_number << "." << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    try {
+      from = StringUtils::stoi(tokens[0]) + state_id_offset;
+    } catch (const std::invalid_argument& e) {
+      std::cerr << "Error: invalid source state in file '" << file_name << "' on line " << line_number << "." << std::endl;
+      exit(EXIT_FAILURE);
+    }
     largest_seen_state_id = std::max(largest_seen_state_id, from);
 
     get_node(from);
@@ -222,7 +232,12 @@ AttCompiler::parse(std::string const &file_name, bool read_rl)
     {
       if (tokens.size() > 1)
       {
-        weight = StringUtils::stod(tokens[1]);
+	try {
+	  weight = StringUtils::stod(tokens[1]);
+	} catch (const std::invalid_argument& e) {
+	  std::cerr << "Error: invalid weight in file '" << file_name << "' on line " << line_number << "." << std::endl;
+	  exit(EXIT_FAILURE);
+	}
       }
       else
       {
@@ -232,7 +247,12 @@ AttCompiler::parse(std::string const &file_name, bool read_rl)
     }
     else
     {
-      to = StringUtils::stoi(tokens[1]) + state_id_offset;
+      try {
+	to = StringUtils::stoi(tokens[1]) + state_id_offset;
+      } catch (const std::invalid_argument& e) {
+	std::cerr << "Error: invalid target state in file '" << file_name << "' on line " << line_number << "." << std::endl;
+	exit(EXIT_FAILURE);
+      }
       largest_seen_state_id = std::max(largest_seen_state_id, to);
       if(read_rl)
       {
@@ -248,7 +268,12 @@ AttCompiler::parse(std::string const &file_name, bool read_rl)
       convert_hfst(lower);
       if(tokens.size() > 4)
       {
-        weight = StringUtils::stod(tokens[4]);
+	try {
+	  weight = StringUtils::stod(tokens[4]);
+	} catch (const std::invalid_argument& e) {
+	  std::cerr << "Error: invalid weight in file '" << file_name << "' on line " << line_number << "." << std::endl;
+	  exit(EXIT_FAILURE);
+	}
       }
       else
       {
