@@ -1440,7 +1440,8 @@ FSTProcessor::generation(InputFile& input, UFILE *output, GenerationMode mode)
     generation_wrapper_null_flush(input, output, mode);
   }
 
-  State current_state = initial_state;
+  ReusableState current_state;
+  current_state.init(&root);
   UString sf;
 
   outOfWord = false;
@@ -1565,7 +1566,7 @@ FSTProcessor::generation(InputFile& input, UFILE *output, GenerationMode mode)
         }
       }
 
-      current_state = initial_state;
+      current_state.init(&root);
       sf.clear();
     }
     else if(u_isspace(val) && sf.size() == 0)
@@ -1622,7 +1623,8 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
   size_t cur_word = 0;
   size_t cur_pos = 0;
   size_t match_pos = 0;
-  State current_state = initial_state;
+  ReusableState current_state;
+  current_state.init(&root);
   UString last_match;
   int space_diff = 0;
 
@@ -1802,7 +1804,7 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
       firstupper = false;
       have_first = false;
       have_second = false;
-      current_state = initial_state;
+      current_state.init(&root);
     }
   }
 }
