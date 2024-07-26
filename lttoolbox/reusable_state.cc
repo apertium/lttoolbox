@@ -1,24 +1,27 @@
 #include <reusable_state.h>
+#include <climits>
+
+#define WalkBack(var, pos, block) { \
+  size_t index = pos;               \
+  while (index != 0) {              \
+    auto& var = get(index);         \
+    block                           \
+    index = var.prev;               \
+  }                                 \
+  }
+
+#define StepLoop(block) {                      \
+  size_t new_start = end;                      \
+  for (size_t i = start; i < new_start; i++) { \
+    block                                      \
+  }                                            \
+  start = new_start;                           \
+  epsilonClosure();                            \
+  }
 
 ReusableState::ReusableState() {}
 
 ReusableState::~ReusableState()
-{
-  destroy();
-}
-
-ReusableState::ReusableState(const ReusableState& s)
-{
-  copy(s);
-}
-
-ReusableState& ReusableState::operator=(const ReusableState& s)
-{
-  if (this != &s) copy(s);
-  return *this;
-}
-
-void ReusableState::destroy()
 {
   for (size_t i = 0; i < steps.size(); i++) {
     delete steps[i];
@@ -26,21 +29,7 @@ void ReusableState::destroy()
   steps.clear();
 }
 
-void ReusableState::copy(const ReusableState& s)
-{
-  destroy();
-  size_t N = (s.end >> STATE_STEP_BLOCK_SIZE_EXP) + 1;
-  steps.reserve(N);
-  for (size_t i = 0; i < N; i++) {
-    auto block = new std::array<Step,STATE_STEP_BLOCK_SIZE>;
-    *block = *(s.steps[i]);
-    steps.push_back(block);
-  }
-  start = s.start;
-  end = s.end;
-}
-
-ReusableState::Step& ReusableState::create(size_t index)
+ReusableState::Step& ReusableState::get_or_create(size_t index)
 {
   size_t a = index >> STATE_STEP_BLOCK_SIZE_EXP;
   size_t b = index & (STATE_STEP_BLOCK_SIZE-1);
@@ -67,7 +56,7 @@ bool ReusableState::apply(int32_t input, size_t pos,
   it = prev.where->transitions.find(input);
   if (it != prev.where->transitions.end()) {
     for (int j = 0; j < it->second.size; j++) {
-      Step& next = create(end);
+      Step& next = get_or_create(end);
       next.where = it->second.dest[j];
       next.symbol = it->second.out_tag[j];
       if (old_sym && next.symbol == old_sym) next.symbol = new_sym;
@@ -101,18 +90,25 @@ void ReusableState::init(Node* initial)
   }
   start = 0;
   end = 1;
-  create(0).where = initial;
+  get_or_create(0).where = initial;
   epsilonClosure();
+}
+
+void ReusableState::reinit(Node* initial)
+{
+  size_t start_was = start;
+  get_or_create(end).where = initial;
+  start = end;
+  end++;
+  epsilonClosure();
+  start = start_was;
 }
 
 void ReusableState::step(int32_t input)
 {
-  size_t new_start = end;
-  for (size_t i = start; i < new_start; i++) {
-    apply(input, i, 0, 0, false);
-  }
-  start = new_start;
-  epsilonClosure();
+  StepLoop({
+      apply(input, i, 0, 0, false);
+    })
 }
 
 void ReusableState::step(int32_t input, int32_t alt)
@@ -121,24 +117,18 @@ void ReusableState::step(int32_t input, int32_t alt)
     step(input);
     return;
   }
-  size_t new_start = end;
-  for (size_t i = start; i < new_start; i++) {
-    apply(input, i, 0, 0, false);
-    apply(alt, i, 0, 0, true);
-  }
-  start = new_start;
-  epsilonClosure();
+  StepLoop({
+      apply(input, i, 0, 0, false);
+      apply(alt, i, 0, 0, true);
+    })
 }
 
 void ReusableState::step_override(int32_t input,
                                   int32_t old_sym, int32_t new_sym)
 {
-  size_t new_start = end;
-  for (size_t i = start; i < new_start; i++) {
-    apply(input, i, old_sym, new_sym, false);
-  }
-  start = new_start;
-  epsilonClosure();
+  StepLoop({
+      apply(input, i, old_sym, new_sym, false);
+    })
 }
 
 void ReusableState::step_override(int32_t input, int32_t alt,
@@ -148,13 +138,10 @@ void ReusableState::step_override(int32_t input, int32_t alt,
     step_override(input, old_sym, new_sym);
     return;
   }
-  size_t new_start = end;
-  for (size_t i = start; i < new_start; i++) {
-    apply(input, i, old_sym, new_sym, false);
-    apply(alt, i, old_sym, new_sym, true);
-  }
-  start = new_start;
-  epsilonClosure();
+  StepLoop({
+      apply(input, i, old_sym, new_sym, false);
+      apply(alt, i, old_sym, new_sym, true);
+    })
 }
 
 void ReusableState::step_careful(int32_t input, int32_t alt)
@@ -163,14 +150,11 @@ void ReusableState::step_careful(int32_t input, int32_t alt)
     step(input);
     return;
   }
-  size_t new_start = end;
-  for (size_t i = start; i < new_start; i++) {
-    if (!apply(input, i, 0, 0, false)) {
-      apply(alt, i, 0, 0, true);
-    }
-  }
-  start = new_start;
-  epsilonClosure();
+  StepLoop({
+      if (!apply(input, i, 0, 0, false)) {
+        apply(alt, i, 0, 0, true);
+      }
+    })
 }
 
 void ReusableState::step(int32_t input, int32_t alt1, int32_t alt2)
@@ -182,28 +166,22 @@ void ReusableState::step(int32_t input, int32_t alt1, int32_t alt2)
     step(input, alt1);
     return;
   }
-  size_t new_start = end;
-  for (size_t i = start; i < new_start; i++) {
-    apply(input, i, 0, 0, false);
-    apply(alt1, i, 0, 0, true);
-    apply(alt2, i, 0, 0, true);
-  }
-  start = new_start;
-  epsilonClosure();
+  StepLoop({
+      apply(input, i, 0, 0, false);
+      apply(alt1, i, 0, 0, true);
+      apply(alt2, i, 0, 0, true);
+    })
 }
 
 void ReusableState::step(int32_t input, std::set<int> alts)
 {
-  size_t new_start = end;
-  for (size_t i = start; i < new_start; i++) {
-    apply(input, i, 0, 0, false);
-    for (auto& a : alts) {
-      if (a == 0 || a == input) continue;
-      apply(a, i, 0, 0, true);
-    }
-  }
-  start = new_start;
-  epsilonClosure();
+  StepLoop({
+      apply(input, i, 0, 0, false);
+      for (auto& a : alts) {
+        if (a == 0 || a == input) continue;
+        apply(a, i, 0, 0, true);
+      }
+    })
 }
 
 void ReusableState::step_case(UChar32 val, UChar32 val2, bool caseSensitive)
@@ -252,14 +230,11 @@ void ReusableState::extract(size_t pos, UString& result, double& weight,
                             const Alphabet& alphabet,
                             const std::set<UChar32>& escaped_chars,
                             bool uppercase) const {
-  size_t i = pos;
   std::vector<int32_t> symbols;
-  while (i != 0) {
-    auto& it = get(i);
-    weight += it.weight;
-    if (it.symbol) symbols.push_back(it.symbol);
-    i = it.prev;
-  }
+  WalkBack(it, pos, {
+      weight += it.weight;
+      if (it.symbol) symbols.push_back(it.symbol);
+    })
   for (auto it = symbols.rbegin(); it != symbols.rend(); it++) {
     if (escaped_chars.find(*it) != escaped_chars.end()) result += '\\';
     alphabet.getSymbol(result, *it, uppercase);
@@ -332,4 +307,91 @@ UString ReusableState::filterFinals(const std::map<Node*, double>& finals,
     }
   }
   return temp;
+}
+
+bool ReusableState::lastPartHasRequiredSymbol(size_t pos, int32_t symbol,
+                                              int32_t separator)
+{
+  WalkBack(it, pos, {
+      if (it.symbol == symbol) return true;
+      else if (separator && it.symbol == separator) return false;
+    });
+  return false;
+}
+
+bool ReusableState::hasSymbol(int32_t symbol)
+{
+  for (size_t i = start; i < end; i++) {
+    if (lastPartHasRequiredSymbol(i, symbol, 0)) return true;
+  }
+  return false;
+}
+
+void ReusableState::pruneCompounds(int32_t requiredSymbol, int32_t separator,
+                                   int maxElements)
+{
+  int min = maxElements;
+  size_t len = size();
+  std::vector<int> count(len, 0);
+  for (size_t i = 0; i < len; i++) {
+    bool found = false;
+    WalkBack(it, i+start, {
+        if (it.symbol == requiredSymbol && count[i] == 0) found = true;
+        else if (it.symbol == separator) {
+          if (found) count[i]++;
+          else {
+            count[i] = INT_MAX;
+            break;
+          }
+        }
+      });
+    if (count[i] < min) min = count[i];
+  }
+  size_t keep = 0;
+  for (size_t i = 0; i < len; i++) {
+    if (count[i] == min) {
+      size_t src = start + i;
+      size_t dest = start + keep;
+      // move the step that we're keeping, overwriting one that's being
+      // discarded, and shrink the state size
+      if (src != dest) get_or_create(dest) = get(src);
+      keep++;
+    }
+  }
+  end = start + keep;
+}
+
+void ReusableState::restartFinals(const std::map<Node*, double>& finals,
+                                  int32_t requiredSymbol, Node* restart,
+                                  int32_t separator)
+{
+  if (restart == nullptr) return;
+  for (size_t i = start, limit = end; i < limit; i++) {
+    auto& step = get(i);
+    if (finals.count(step.where) > 0 &&
+        lastPartHasRequiredSymbol(i, requiredSymbol, separator)) {
+      size_t start_was = start;
+      start = end;
+      end++;
+      auto& newstep = get_or_create(start);
+      newstep.where = restart;
+      newstep.symbol = separator;
+      newstep.prev = i;
+      epsilonClosure();
+      start = start_was;
+    }
+  }
+}
+
+void ReusableState::pruneStatesWithForbiddenSymbol(int32_t symbol)
+{
+  size_t keep = 0;
+  for (size_t i = start; i < end; i++) {
+    if (!lastPartHasRequiredSymbol(i, symbol, 0)) {
+      size_t dest = start + keep;
+      if (i != dest) get_or_create(dest) = get(i);
+      keep++;
+    }
+  }
+  end = start + keep;
 }

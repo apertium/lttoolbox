@@ -324,6 +324,7 @@ private:
    * Assumes that casefrom is non-empty
    */
   UString filterFinals(const State& state, UStringView casefrom);
+  UString filterFinals(const ReusableState& state, UStringView casefrom);
 
   /**
    * Write a string to an output stream,

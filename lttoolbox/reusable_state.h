@@ -27,9 +27,7 @@ private:
   size_t start = 0;
   size_t end = 1;
 
-  void destroy();
-
-  Step& create(size_t index);
+  Step& get_or_create(size_t index);
   const Step& get(size_t index) const;
 
   bool apply(int32_t input, size_t pos, int32_t old_sym, int32_t new_sym,
@@ -44,13 +42,10 @@ private:
 public:
   ReusableState();
   ~ReusableState();
-  ReusableState(const ReusableState& s);
-  ReusableState& operator =(const ReusableState& s);
-
-  void copy(const ReusableState& s);
 
   size_t size() const;
   void init(Node* initial);
+  void reinit(Node* initial);
 
   void step(int32_t input);
   void step(int32_t input, int32_t alt);
@@ -74,6 +69,15 @@ public:
                        int max_analyses, int max_weight_classes,
                        bool uppercase, bool firstupper,
                        int firstchar = 0) const;
+
+  bool lastPartHasRequiredSymbol(size_t pos, int32_t symbol, int32_t separator);
+  bool hasSymbol(int32_t symbol);
+  void pruneCompounds(int32_t requiredSymbol, int32_t separator,
+                      int maxElements);
+  void restartFinals(const std::map<Node*, double>& finals,
+                     int32_t requiredSymbol, Node* restart_state,
+                     int32_t separator);
+  void pruneStatesWithForbiddenSymbol(int32_t symbol);
 };
 
 #endif

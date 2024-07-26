@@ -688,6 +688,20 @@ FSTProcessor::filterFinals(const State& state, UStringView casefrom)
                             uppercase, firstupper, 0);
 }
 
+UString
+FSTProcessor::filterFinals(const ReusableState& state, UStringView casefrom)
+{
+  bool firstupper = false, uppercase = false;
+  if (!dictionaryCase) {
+    firstupper = u_isupper(casefrom[0]);
+    uppercase = (casefrom.size() > 1 &&
+                 firstupper && u_isupper(casefrom[casefrom.size()-1]));
+  }
+  return state.filterFinals(all_finals, alphabet, escaped_chars,
+                            displayWeightsMode, maxAnalyses, maxWeightClasses,
+                            uppercase, firstupper, 0);
+}
+
 void
 FSTProcessor::writeEscaped(UStringView str, UFILE *output)
 {
@@ -983,7 +997,9 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
   bool last_incond = false;
   bool last_postblank = false;
   bool last_preblank = false;
-  State current_state = initial_state;
+  //State current_state = initial_state;
+  ReusableState current_state;
+  current_state.init(&root);
   UString lf;            // analysis (lexical form and tags)
   UString sf;            // surface form
   UString lf_spcmp;      // space compound analysis
@@ -1238,7 +1254,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
         }
       }
 
-      current_state = initial_state;
+      current_state.init(&root);
       lf.clear();
       sf.clear();
       last_start = input_buffer.getPos();
