@@ -287,13 +287,18 @@ private:
    */
   int readGeneration(InputFile& input, UFILE *output);
 
+  void skipToNextWord(InputFile& input, UFILE *output);
+
+  UChar32 skipReading(InputFile& input, UFILE* output);
+
   /**
-   * Read text from stream (biltrans version)
-   * @param input the stream to read
-   * @param output the stream to write on
-   * @return the queue of 0-symbols, and the next symbol in the stream
+   * Read and output until a word is found, then place the symbols
+   * of that word into `symbols`
+   * Note: if an unknown symbol is encountered, the alphabet will be updated.
    */
-  std::pair<UString, int> readBilingual(InputFile& input, UFILE *output);
+  void nextBilingualWord(InputFile& input, UFILE* output,
+                         std::vector<int32_t>& symbols,
+                         GenerationMode mode);
 
   /**
    * Read text from stream (SAO version)
@@ -369,15 +374,6 @@ private:
   void printWordPopBlank(UStringView sf, UStringView lf, UFILE *output);
 
   /**
-   * Prints a word (Bilingual version)
-   * @param sf surface form of the word
-   * @param lf lexical form of the word
-   * @param output stream where the word is written
-   */
-  void printWordBilingual(UStringView sf, UStringView lf, UFILE *output);
-
-
-  /**
    * Prints a word, SAO version
    * @param lf lexical form
    * @param output stream where the word is written
@@ -431,7 +427,6 @@ private:
   Indices firstNotAlpha(UStringView sf);
 
   void analysis_wrapper_null_flush(InputFile& input, UFILE *output);
-  void bilingual_wrapper_null_flush(InputFile& input, UFILE *output, GenerationMode mode = gm_unknown);
   void generation_wrapper_null_flush(InputFile& input, UFILE *output,
                                      GenerationMode mode);
   UString compose(UStringView lexforms, UStringView queue) const;

@@ -530,97 +530,6 @@ FSTProcessor::readGeneration(InputFile& input, UFILE *output)
   return 0x7fffffff;
 }
 
-std::pair<UString, int>
-FSTProcessor::readBilingual(InputFile& input, UFILE *output)
-{
-  UChar32 val = input.get();
-  UString symbol;
-
-  if(input.eof())
-  {
-    return std::pair<UString, int>(symbol, 0x7fffffff);
-  }
-
-  if(outOfWord)
-  {
-    if(val == '^')
-    {
-      val = input.get();
-      if(input.eof())
-      {
-        return std::pair<UString, int>(symbol, 0x7fffffff);
-      }
-    }
-    else if(val == '\\')
-    {
-      u_fputc(val, output);
-      val = input.get();
-      if(input.eof())
-      {
-        return std::pair<UString, int>(symbol, 0x7fffffff);
-      }
-      u_fputc(val,output);
-      skipUntil(input, output, '^');
-      val = input.get();
-      if(input.eof())
-      {
-        return std::pair<UString, int>(symbol, 0x7fffffff);
-      }
-    }
-    else
-    {
-      u_fputc(val, output);
-      skipUntil(input, output, '^');
-      val = input.get();
-      if(input.eof())
-      {
-        return std::pair<UString, int>(symbol, 0x7fffffff);
-      }
-    }
-    outOfWord = false;
-  }
-
-  if(val == '\\')
-  {
-    val = input.get();
-    return std::pair<UString, int>(symbol, val);
-  }
-  else if(val == '$')
-  {
-    outOfWord = true;
-    return std::pair<UString, int>(symbol, static_cast<int32_t>('$'));
-  }
-  else if(val == '<')
-  {
-    UString cad = input.readBlock('<', '>');
-
-    int res = alphabet(cad);
-
-    if (res == 0)
-    {
-      symbol = cad;
-    }
-    return std::pair<UString, int>(symbol, res);
-  }
-  else if(val == '[')
-  {
-    val = input.get();
-    if(val == '[')
-    {
-      write(input.finishWBlank(), output);
-    }
-    else
-    {
-      input.unget(val);
-      write(input.readBlock('[', ']'), output);
-    }
-
-    return readBilingual(input, output);
-  }
-
-  return std::pair<UString, int>(symbol, val);
-}
-
 void
 FSTProcessor::flushBlanks(UFILE *output)
 {
@@ -763,12 +672,6 @@ FSTProcessor::printWordPopBlank(UStringView sf, UStringView lf, UFILE *output)
     write(blankqueue.front(), output);
     blankqueue.pop();
   }
-}
-
-void
-FSTProcessor::printWordBilingual(UStringView sf, UStringView lf, UFILE *output)
-{
-  u_fprintf(output, "^%.*S%.*S$", sf.size(), sf.data(), lf.size(), lf.data());
 }
 
 void
@@ -1951,20 +1854,6 @@ FSTProcessor::biltrans(UStringView input_word, bool with_delim)
   }
 }
 
-void
-FSTProcessor::bilingual_wrapper_null_flush(InputFile& input, UFILE *output, GenerationMode mode)
-{
-  setNullFlush(false);
-  nullFlushGeneration = true;
-
-  while(!input.eof())
-  {
-    bilingual(input, output, mode);
-    u_fputc('\0', output);
-    u_fflush(output);
-  }
-}
-
 UString
 FSTProcessor::compose(UStringView lexforms, UStringView queue) const
 {
@@ -1991,182 +1880,214 @@ FSTProcessor::compose(UStringView lexforms, UStringView queue) const
 }
 
 void
-FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
+FSTProcessor::skipToNextWord(InputFile& input, UFILE* output)
 {
-  if(getNullFlush())
-  {
-    bilingual_wrapper_null_flush(input, output, mode);
+  int blank_depth = 0;
+
+  while (!input.eof()) {
+    UChar32 c = input.get();
+
+    switch (c) {
+    case '^':
+      if (blank_depth == 0) {
+        input.unget(c);
+        return;
+      } else {
+        u_fputc(c, output);
+      }
+      break;
+    case '\\':
+      u_fputc(c, output);
+      c = input.get();
+      u_fputc(c, output);
+      break;
+    case '\0':
+      u_fputc(c, output);
+      u_fflush(output);
+      break;
+    case U_EOF:
+      break;
+    case '[':
+      blank_depth++;
+      u_fputc(c, output);
+      break;
+    case ']':
+      if (blank_depth > 0) blank_depth--;
+      u_fputc(c, output);
+      break;
+    default:
+      u_fputc(c, output);
+    }
+  }
+}
+
+UChar32
+FSTProcessor::skipReading(InputFile& input, UFILE* output)
+{
+  UChar32 c = U_EOF;
+  while (!input.eof()) {
+    c = input.get();
+    if (output != nullptr) {
+      switch (c) {
+      case '\\':
+        u_fputc(c, output);
+        u_fputc(input.get(), output);
+        break;
+      case '<':
+        write(input.readBlock('<', '>'), output);
+        break;
+      case '/':
+      case '$':
+        u_fputc(c, output);
+        break;
+      default:
+        if (isEscaped(c)) u_fputc('\\', output);
+        u_fputc(c, output);
+      }
+    } else {
+      switch (c) {
+      case '\\':
+        input.get();
+        break;
+      case '<':
+        input.readBlock('<', '>');
+        break;
+      }
+    }
+    if (c == '/' || c == '$' || c == '\0') break;
+  }
+  return c;
+}
+
+void
+FSTProcessor::nextBilingualWord(InputFile& input, UFILE* output,
+                                std::vector<int32_t>& symbols,
+                                GenerationMode mode)
+{
+  symbols.clear();
+
+  skipToNextWord(input, output);
+
+  if (input.eof()) return;
+
+  u_fputc(input.get(), output); // ^
+
+  UChar32 c = '/';
+
+  if (biltransSurfaceFormsKeep) {
+    c = skipReading(input, output);
+  } else if (biltransSurfaceForms) {
+    c = skipReading(input, nullptr);
+  }
+  if (c != '/') {
+    nextBilingualWord(input, output, symbols, mode);
+    return;
   }
 
-  State current_state = initial_state;
-  UString sf;                   // source language analysis
-  UString queue;                // symbols to be added to each target
-  UString result;               // result of looking up analysis in bidix
+  bool unknown = false;
 
-  outOfWord = false;
+  if (input.peek() == '*') {
+    input.get();
+    unknown = true;
+  }
 
-  skipUntil(input, output, '^');
-  std::pair<UString,int> tr;           // readBilingual return value, containing:
-  int val;                        // the alphabet value of current symbol, and
-  UString symbol;           // the current symbol as a string
-  bool seentags = false;          // have we seen any tags at all in the analysis?
-
-  bool seensurface = false;
-  UString surface;
-
-  while(true)                   // ie. while(val != 0x7fffffff)
-  {
-    tr = readBilingual(input, output);
-    symbol = tr.first;
-    val = tr.second;
-
-    //fprintf(stderr, "> %ls : %lc : %d\n", tr.first.c_str(), tr.second, tr.second);
-    if((biltransSurfaceForms || biltransSurfaceFormsKeep) && !seensurface && !outOfWord)
-    {
-      while(val != '/' && val != '$' && val != 0x7fffffff)
-      {
-        surface = surface + symbol;
-        alphabet.getSymbol(surface, val);
-        tr = readBilingual(input, output);
-        symbol = tr.first;
-        val = tr.second;
-        //fprintf(stderr, " == %ls : %lc : %d => %ls\n", symbol.c_str(), val, val, surface.c_str());
-      }
-      if(val == '/') {         // We've seen the surface form
-        seensurface = true;
-        tr = readBilingual(input, output);
-        symbol = tr.first;
-        val = tr.second;
-      }
-    }
-
-    if (val == 0x7fffffff)
-    {
+  while (!input.eof()) {
+    c = input.get();
+    switch (c) {
+    case '\\':
+      symbols.push_back(input.get());
       break;
+    case '\0':
+    case '/':
+    case '$':
+      break;
+    case '<':
+      {
+        UString symbol = input.readBlock('<', '>');
+        alphabet.includeSymbol(symbol);
+        symbols.push_back(alphabet(symbol));
+      }
+      break;
+    default:
+      symbols.push_back(c);
+    }
+    if (c == '\0' || c == '/' || c == '$') break;
+  }
+
+  while (c == '/') c = skipReading(input, nullptr);
+
+  if (c == '\0' || unknown) {
+    UString in_str;
+    for (auto& s : symbols) {
+      if (isEscaped(s)) in_str += '\\';
+      alphabet.getSymbol(in_str, s);
+    }
+    symbols.clear();
+    if (c == '\0') {
+      write(in_str, output);
+      u_fflush(output);
+    } else {
+      u_fputc('*', output);
+      write(in_str, output);
+      u_fputc('/', output);
+      if (mode != gm_clean) u_fputc('*', output);
+      write(in_str, output);
+      u_fputc('$', output);
+    }
+    nextBilingualWord(input, output, symbols, mode);
+    return;
+  }
+}
+
+void
+FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
+{
+  std::vector<int32_t> symbols;
+  while (!input.eof()) {
+    nextBilingualWord(input, output, symbols, mode);
+    if (symbols.empty()) continue;
+
+    State current_state = initial_state;
+
+    bool firstupper = (symbols[0] > 0 && u_isupper(symbols[0]));
+    bool uppercase = (firstupper && symbols.size() > 1 &&
+                      symbols[1] > 0 && u_isupper(symbols[1]));
+
+    bool seenTags = false;
+    size_t queue_start = 0;
+    UString result;
+    for (size_t i = 0; i < symbols.size(); i++) {
+      seenTags = seenTags || alphabet.isTag(symbols[i]);
+      current_state.step_case(symbols[i], beCaseSensitive(current_state));
+      if (current_state.isFinal(all_finals)) {
+        queue_start = i;
+        result = current_state.filterFinals(all_finals, alphabet, escaped_chars,
+                                            displayWeightsMode, maxAnalyses,
+                                            maxWeightClasses, uppercase,
+                                            firstupper, 0);
+      }
+    }
+    // if there are no tags, we only return complete matches
+    if (!seenTags && queue_start < symbols.size()) result.clear();
+
+    UString source;
+    size_t queue_pos = 0;
+    for (size_t i = 0; i < symbols.size(); i++) {
+      if (isEscaped(symbols[i]) || (i == 0 && symbols[i] == '*')) source += '\\';
+      alphabet.getSymbol(source, symbols[i]);
+      if (i == queue_start) queue_pos = source.size();
     }
 
-    if(val == '$' && outOfWord)
-    {
-      if(!seentags)        // if no tags: only return complete matches
-      {
-        bool uppercase = sf.size() > 1 && u_isupper(sf[1]);
-        bool firstupper= u_isupper(sf[0]);
+    write(source, output);
 
-        result = current_state.filterFinals(all_finals, alphabet,
-                                            escaped_chars,
-                                            displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                            uppercase, firstupper, 0);
-      }
-
-      if(sf[0] == '*')
-      {
-        if (mode == gm_clean) {
-          printWordBilingual(sf, "/"_u + sf.substr(1), output);
-        }
-        else {
-          printWordBilingual(sf, "/"_u + sf, output);
-        }
-      }
-      else if(!result.empty())
-      {
-        if(biltransSurfaceFormsKeep) {
-          printWordBilingual(surface + "/"_u + sf, compose(result, queue), output);
-        }
-        else {
-          printWordBilingual(sf, compose(result, queue), output);
-        }
-      }
-      else
-      { //xxx
-        UString prefix = (mode == gm_all ? "/#"_u : "/@"_u);
-        if(biltransSurfaceForms)
-        {
-          printWordBilingual(surface, prefix + surface, output);
-        }
-        else if(biltransSurfaceFormsKeep)
-        {
-          printWordBilingual(surface + "/"_u + surface, prefix + surface, output);
-        }
-        else
-        {
-          printWordBilingual(sf, prefix + sf, output);
-        }
-      }
-      seensurface = false;
-      surface.clear();
-      queue.clear();
-      result.clear();
-      current_state = initial_state;
-      sf.clear();
-      seentags = false;
+    if (!result.empty()) {
+      write(compose(result, source.substr(queue_pos)), output);
+    } else {
+      u_fputc('/', output);
+      u_fputc((mode == gm_all ? '#' : '@'), output);
+      write(source, output);
     }
-    else if(u_isspace(val) && sf.size() == 0)
-    {
-      // do nothing
-    }
-    else if(sf.size() > 0 && sf[0] == '*')
-    {
-      if(escaped_chars.find(val) != escaped_chars.end())
-      {
-        sf += '\\';
-      }
-      alphabet.getSymbol(sf, val); // add symbol to sf iff alphabetic
-      if(val == 0)  // non-alphabetic, possibly unknown tag; add to sf
-      {
-        sf += symbol;
-      }
-    }
-    else
-    {
-      if(escaped_chars.find(val) != escaped_chars.end())
-      {
-        sf += '\\';
-      }
-      alphabet.getSymbol(sf, val); // add symbol to sf iff alphabetic
-      if(val == 0)  // non-alphabetic, possibly unknown tag; add to sf
-      {
-        sf += symbol;
-      }
-      if(alphabet.isTag(val) || val == 0)
-      {
-        seentags = true;
-      }
-      if(current_state.size() != 0)
-      {
-        current_state.step_case(val, beCaseSensitive(current_state));
-      }
-      if(current_state.isFinal(all_finals))
-      {
-        bool uppercase = sf.size() > 1 && u_isupper(sf[1]);
-        bool firstupper= u_isupper(sf[0]);
-
-        queue.clear(); // the intervening tags were matched
-        result = current_state.filterFinals(all_finals, alphabet,
-                                            escaped_chars,
-                                            displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                            uppercase, firstupper, 0);
-      }
-      else if(!result.empty())
-      {
-        // We already have a result, but there is still more to read
-        // of the analysis; following tags are not consumed, but
-        // output as target language tags (added to result on
-        // end-of-word). This queue is reset if result is changed.
-        if(alphabet.isTag(val)) // known tag
-        {
-          alphabet.getSymbol(queue, val);
-        }
-        else if (val == 0) // non-alphabetic, possibly unknown tag
-        {
-          queue += symbol;
-        }
-        else if(current_state.size() == 0)
-        {
-          // There are no more alive transductions and the current symbol is not a tag -- unknown word!
-          result.clear();
-        }
-      }
-    }
+    u_fputc('$', output);
   }
 }
 

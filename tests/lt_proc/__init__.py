@@ -448,7 +448,7 @@ class BilsurfKeep(ProcTest):
     inputs = ["^Ab/ab<n><def>$",
               "^bad<data>$ ^Ab/ab<n><def>$",]
     expectedOutputs = ["^Ab/ab<n><def>/xy<n><def>$",
-                       "^bad<data>/bad<data>/@bad<data>$ ^Ab/ab<n><def>/xy<n><def>$"]
+                       "^bad<data>$ ^Ab/ab<n><def>/xy<n><def>$"]
 
 class Bigen(ProcTest):
     """Test that we can run -b with -g before, and -b should override it."""
@@ -457,6 +457,14 @@ class Bigen(ProcTest):
     procdir = "rl"
     inputs = ["^ab<n><def>$"]
     expectedOutputs = ["^ab<n><def>/abc$"]
+
+class BiltransEscapedAsterisk(ProcTest):
+    procdix = "data/minimal-bi.dix"
+    procflags = ['-b', '-z']
+    procdir = "lr"
+    inputs = ["^*ab<n><def>$", '^\\*ab<n><def>$']
+    expectedOutputs = ["^*ab<n><def>/*ab<n><def>$",
+                       '^\\*ab<n><def>/@\\*ab<n><def>$']
 
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *
