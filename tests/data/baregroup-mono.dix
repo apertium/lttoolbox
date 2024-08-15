@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÄÅÆÇÈÉÊËÍÑÒÓÔÕÖØÙÚÜČĐŊŠŦŽabcdefghijklmnopqrstuvwxyzàáâäåæçèéêëíñòóôõöøùúüčđŋšŧž­-</alphabet>
+  <sdefs>
+    <sdef n="n"/>
+    <sdef n="ind"/>
+    <sdef n="f"/>
+    <sdef n="pl"/>
+    <sdef n="sg"/>
+  </sdefs>
+  <pardefs>
+  </pardefs>
+
+  <section id="main" type="standard">
+    <e lm="# fri" r="RL"><ig><b/>fri</ig></e>
+    <e lm="# frå kvarandre" r="RL"><ig><b/>frå<b/>kvarandre</ig></e>
+  </section>
+
+</dictionary>

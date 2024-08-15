@@ -458,6 +458,14 @@ class Bigen(ProcTest):
     inputs = ["^ab<n><def>$"]
     expectedOutputs = ["^ab<n><def>/abc$"]
 
+class BigenGroup(ProcTest):
+    """Test that bare <g> without tags can be generated in biltrans mode."""
+    procdix = "data/baregroup-mono.dix"
+    procflags = ['-g', '-b', '-z']
+    procdir = "rl"
+    inputs = ["^# fri$", "^# frå kvarandre$"]
+    expectedOutputs = ["^# fri/ fri$", "^# frå kvarandre/ frå kvarandre$"]
+
 class BiltransEscapedAsterisk(ProcTest):
     procdix = "data/minimal-bi.dix"
     procflags = ['-b', '-z']
