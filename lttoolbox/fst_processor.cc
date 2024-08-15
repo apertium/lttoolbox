@@ -2068,7 +2068,7 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
       }
     }
     // if there are no tags, we only return complete matches
-    if (!seenTags && queue_start < symbols.size()) result.clear();
+    if (!seenTags && queue_start + 1 < symbols.size()) result.clear();
 
     UString source;
     size_t queue_pos = 0;
