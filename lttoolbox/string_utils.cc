@@ -174,9 +174,9 @@ StringUtils::stod(const UString& str)
 UString
 StringUtils::tolower(UStringView str)
 {
-  UChar buf[str.size()*2];
+  UString buf(str.size()*2, 0);
   UErrorCode err = U_ZERO_ERROR;
-  u_strToLower(buf, str.size()*2, str.data(), str.size(), NULL, &err);
+  buf.resize(u_strToLower(&buf[0], str.size() * 2, str.data(), str.size(), NULL, &err));
   if (U_FAILURE(err)) {
     std::cerr << "Error: unable to lowercase string '" << str << "'.\n";
     std::cerr << "error code: " << u_errorName(err) << std::endl;
@@ -188,9 +188,9 @@ StringUtils::tolower(UStringView str)
 UString
 StringUtils::toupper(UStringView str)
 {
-  UChar buf[str.size()*2];
+  UString buf(str.size()*2, 0);
   UErrorCode err = U_ZERO_ERROR;
-  u_strToUpper(buf, str.size()*2, str.data(), str.size(), NULL, &err);
+  buf.resize(u_strToUpper(&buf[0], str.size()*2, str.data(), str.size(), NULL, &err));
   if (U_FAILURE(err)) {
     std::cerr << "Error: unable to uppercase string '" << str << "'.\n";
     std::cerr << "error code: " << u_errorName(err) << std::endl;
@@ -202,9 +202,9 @@ StringUtils::toupper(UStringView str)
 UString
 StringUtils::totitle(UStringView str)
 {
-  UChar buf[str.size()*2];
+  UString buf(str.size()*2, 0);
   UErrorCode err = U_ZERO_ERROR;
-  u_strToTitle(buf, str.size()*2, str.data(), str.size(), NULL, NULL, &err);
+  buf.resize(u_strToTitle(&buf[0], str.size()*2, str.data(), str.size(), NULL, NULL, &err));
   if (U_FAILURE(err)) {
     std::cerr << "Error: unable to titlecase string '" << str << "'.\n";
     std::cerr << "error code: " << u_errorName(err) << std::endl;

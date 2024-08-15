@@ -124,7 +124,7 @@ void CLI::parse_args(int argc, char* argv[])
   prog_name = basename(argv[0]);
   std::string arg_str;
 #if HAVE_GETOPT_LONG
-  struct option long_options[options.size()];
+  std::vector<struct option> long_options(options.size());
   int option_index = 0;
 #endif
   for (size_t i = 0; i < options.size(); i++) {
@@ -140,7 +140,7 @@ void CLI::parse_args(int argc, char* argv[])
 
   while (true) {
 #if HAVE_GETOPT_LONG
-    int cnt = getopt_long(argc, argv, arg_str.c_str(), long_options, &option_index);
+    int cnt = getopt_long(argc, argv, arg_str.c_str(), long_options.data(), &option_index);
 #else
     int cnt = getopt(argc, argv, arg_str.c_str());
 #endif
