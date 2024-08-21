@@ -625,6 +625,9 @@ Transducer::read(FILE *input, int const decalage)
   {
     int number_of_local_transitions = Compression::multibyte_read(input);
     int tagbase = 0;
+    if (new_t.transitions.find(current_state) == new_t.transitions.end()) {
+      new_t.transitions[current_state].clear(); // force create
+    }
     while(number_of_local_transitions > 0)
     {
       number_of_local_transitions--;
