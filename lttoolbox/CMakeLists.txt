@@ -65,7 +65,7 @@ set(LIBLTTOOLBOX_SOURCES
 	xml_walk_util.cc
 	${LIBLTTOOLBOX_HEADERS}
 	)
-if(WIN32)
+if(MSVC)
 	set(LIBLTTOOLBOX_SOURCES
 		win32/libgen.c
 		win32/libgen.h

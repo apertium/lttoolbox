@@ -79,15 +79,15 @@ else()
 	if(NOT _ENABLED_CXX)
 		message(FATAL_ERROR "Could not enable at least C++17 - upgrade your compiler")
 	endif()
-
-	# Generate pkg-config file
-	set(prefix      ${CMAKE_INSTALL_PREFIX})
-	set(exec_prefix "\${prefix}")
-	set(libdir      "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
-	set(includedir  "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
-	configure_file(lttoolbox.pc.in lttoolbox.pc @ONLY)
-	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/lttoolbox.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig/")
 endif()
+
+# Generate pkg-config file
+set(prefix      ${CMAKE_INSTALL_PREFIX})
+set(exec_prefix "\${prefix}")
+set(libdir      "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
+set(includedir  "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
+configure_file(lttoolbox.pc.in lttoolbox.pc @ONLY)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/lttoolbox.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig/")
 
 try_compile(SIZET_NOT_CSTDINT ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/lttoolbox/check-cstdint.cc)
 if(SIZET_NOT_CSTDINT)
