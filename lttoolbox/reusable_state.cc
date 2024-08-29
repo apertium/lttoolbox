@@ -241,19 +241,25 @@ void ReusableState::extract(size_t pos, UString& result, double& weight,
   }
 }
 
-void NFinals(std::vector<std::pair<double, UString>>& results,
+bool comp_pair(const std::pair<UString, double>& a,
+               const std::pair<UString, double>& b)
+{
+  return a.second < b.second;
+}
+
+void NFinals(std::vector<std::pair<UString, double>>& results,
              size_t maxAnalyses, size_t maxWeightClasses)
 {
   if (results.empty()) return;
-  sort(results.begin(), results.end());
+  sort(results.begin(), results.end(), comp_pair);
   if (maxAnalyses < results.size()) {
     results.erase(results.begin()+maxAnalyses, results.end());
   }
   if (maxWeightClasses < results.size()) {
-    double last_weight = results[0].first + 1;
+    double last_weight = results[0].second + 1;
     for (size_t i = 0; i < results.size(); i++) {
-      if (results[i].first != last_weight) {
-        last_weight = results[i].first;
+      if (results[i].second != last_weight) {
+        last_weight = results[i].second;
         if (maxWeightClasses == 0) {
           results.erase(results.begin()+i, results.end());
           return;
@@ -264,16 +270,13 @@ void NFinals(std::vector<std::pair<double, UString>>& results,
   }
 }
 
-UString ReusableState::filterFinals(const std::map<Node*, double>& finals,
-                                    const Alphabet& alphabet,
-                                    const std::set<UChar32>& escaped_chars,
-                                    bool display_weights,
-                                    int max_analyses, int max_weight_classes,
-                                    bool uppercase, bool firstupper,
-                                    int firstchar) const
+void ReusableState::gatherFinals(const std::map<Node*, double>& finals,
+                                 const Alphabet& alphabet,
+                                 const std::set<UChar32>& escaped_chars,
+                                 bool uppercase, bool firstupper,
+                                 int firstchar,
+                                 std::vector<std::pair<UString, double>>& results) const
 {
-  std::vector<std::pair<double, UString>> results;
-
   UString temp;
   double weight;
   for (size_t i = start; i < end; i++) {
@@ -286,27 +289,67 @@ UString ReusableState::filterFinals(const std::map<Node*, double>& finals,
         int idx = (temp[firstchar] == '~' ? firstchar + 1 : firstchar);
         temp[idx] = u_toupper(temp[idx]);
       }
-      results.push_back({weight, temp});
+      results.push_back({temp, weight});
     }
   }
+}
 
+void appendWeight(UString& s, double w, bool display_weights) {
+  if (!display_weights) return;
+  UChar wbuf[16]{};
+  // if anyone wants a weight of 10000, this will not be enough
+  u_sprintf(wbuf, "<W:%f>", w);
+  s += wbuf;
+}
+
+UString ReusableState::filterFinals(const std::map<Node*, double>& finals,
+                                    const Alphabet& alphabet,
+                                    const std::set<UChar32>& escaped_chars,
+                                    bool display_weights,
+                                    int max_analyses, int max_weight_classes,
+                                    bool uppercase, bool firstupper,
+                                    int firstchar) const
+{
+  std::vector<std::pair<UString, double>> results;
+  gatherFinals(finals, alphabet, escaped_chars, uppercase, firstupper, firstchar,
+               results);
   NFinals(results, max_analyses, max_weight_classes);
 
-  temp.clear();
+  UString temp;
   std::set<UString> seen;
   for (auto& it : results) {
-    if (seen.find(it.second) != seen.end()) continue;
-    seen.insert(it.second);
+    if (seen.find(it.first) != seen.end()) continue;
+    seen.insert(it.first);
     temp += '/';
-    temp += it.second;
-    if (display_weights) {
-      UChar wbuf[16]{};
-      // if anyone wants a weight of 10000, this will not be enough
-      u_sprintf(wbuf, "<W:%f>", it.first);
-      temp += wbuf;
-    }
+    temp += it.first;
+    appendWeight(temp, it.second, display_weights);
   }
   return temp;
+}
+
+std::vector<UString>
+ReusableState::filterFinalsArray(const std::map<Node*, double>& finals,
+                                 const Alphabet& alphabet,
+                                 const std::set<UChar32>& escaped_chars,
+                                 bool display_weights,
+                                 int max_analyses, int max_weight_classes,
+                                 bool uppercase, bool firstupper,
+                                 int firstchar) const
+{
+  std::vector<std::pair<UString, double>> results;
+  gatherFinals(finals, alphabet, escaped_chars, uppercase, firstupper, firstchar,
+               results);
+  NFinals(results, max_analyses, max_weight_classes);
+
+  std::set<UString> seen;
+  std::vector<UString> ret;
+  for (auto& it : results) {
+    if (seen.find(it.first) != seen.end()) continue;
+    seen.insert(it.first);
+    ret.push_back(it.first);
+    appendWeight(ret.back(), it.second, display_weights);
+  }
+  return ret;
 }
 
 bool ReusableState::lastPartHasRequiredSymbol(size_t pos, int32_t symbol,

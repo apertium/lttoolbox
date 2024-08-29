@@ -39,6 +39,12 @@ private:
                const Alphabet& alphabet,
                const std::set<UChar32>& escaped_chars, bool uppercase) const;
 
+  void gatherFinals(const std::map<Node*, double>& finals,
+                    const Alphabet& alphabet,
+                    const std::set<UChar32>& escaped_chars,
+                    bool uppercase, bool firstupper, int firstchar,
+                    std::vector<std::pair<UString, double>>& results) const;
+
 public:
   ReusableState();
   ~ReusableState();
@@ -69,6 +75,14 @@ public:
                        int max_analyses, int max_weight_classes,
                        bool uppercase, bool firstupper,
                        int firstchar = 0) const;
+  std::vector<UString>
+  filterFinalsArray(const std::map<Node*, double>& finals,
+                    const Alphabet& alphabet,
+                    const std::set<UChar32>& escaped_chars,
+                    bool display_weights,
+                    int max_analyses, int max_weight_classes,
+                    bool uppercase, bool firstupper,
+                    int firstchar = 0) const;
 
   bool lastPartHasRequiredSymbol(size_t pos, int32_t symbol, int32_t separator);
   bool hasSymbol(int32_t symbol);

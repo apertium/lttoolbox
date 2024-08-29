@@ -900,7 +900,6 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
   bool last_incond = false;
   bool last_postblank = false;
   bool last_preblank = false;
-  //State current_state = initial_state;
   ReusableState current_state;
   current_state.init(&root);
   UString lf;            // analysis (lexical form and tags)
