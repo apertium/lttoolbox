@@ -24,6 +24,7 @@
 #include <lttoolbox/buffer.h>
 #include <lttoolbox/my_stdio.h>
 #include <lttoolbox/state.h>
+#include <lttoolbox/reusable_state.h>
 #include <lttoolbox/trans_exe.h>
 #include <lttoolbox/input_file.h>
 #include <libxml/xmlreader.h>
@@ -328,6 +329,7 @@ private:
    * Assumes that casefrom is non-empty
    */
   UString filterFinals(const State& state, UStringView casefrom);
+  UString filterFinals(const ReusableState& state, UStringView casefrom);
 
   /**
    * Write a string to an output stream,
@@ -450,11 +452,11 @@ private:
    *
    * @return running with --case-sensitive or state size exceeds max
    */
-  bool beCaseSensitive(const State& state) {
+  bool beCaseSensitive(size_t size) {
     if(caseSensitive) {
       return true;
     }
-    else if(state.size() < max_case_insensitive_state_size)  {
+    else if(size < max_case_insensitive_state_size)  {
       return false;             // ie. do case-folding
     }
     else {
@@ -465,6 +467,11 @@ private:
       }
       return true;
     }
+  }
+
+  bool beCaseSensitive(const State& s) { return beCaseSensitive(s.size()); }
+  bool beCaseSensitive(const ReusableState& s) {
+    return beCaseSensitive(s.size());
   }
 
 public:

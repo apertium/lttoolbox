@@ -23,6 +23,7 @@
 #include <map>
 
 class State;
+class ReusableState;
 class Node;
 
 
@@ -35,6 +36,7 @@ private:
   double *out_weight;
 
   friend class State;
+  friend class ReusableState;
   friend class Node;
 
   void copy(Dest const &d)
@@ -112,6 +114,7 @@ class Node
 {
 private:
   friend class State;
+  friend class ReusableState;
 
   /**
    * The outgoing transitions of this node.
