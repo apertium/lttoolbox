@@ -807,6 +807,7 @@ void
 FSTProcessor::initBiltrans()
 {
   initGeneration();
+  escaped_chars.insert('*');
 }
 
 
@@ -1428,8 +1429,8 @@ FSTProcessor::generation(InputFile& input, UFILE *output, GenerationMode mode)
         bool firstupper = false, uppercase = false;
         if(!dictionaryCase)
         {
-          uppercase = sf.size() > 1 && u_isupper(sf[1]);
           firstupper= u_isupper(sf[0]);
+          uppercase = firstupper && sf.size() > 1 && u_isupper(sf[1]);
         }
 
         if(mode == gm_tagged || mode == gm_tagged_nm)
@@ -2060,11 +2061,13 @@ void
 FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
 {
   std::vector<int32_t> symbols;
+  ReusableState current_state;
+  current_state.init(&root);
   while (!input.eof()) {
     nextBilingualWord(input, output, symbols, mode);
     if (symbols.empty()) continue;
 
-    State current_state = initial_state;
+    current_state.reinit(&root);
 
     bool firstupper = (symbols[0] > 0 && u_isupper(symbols[0]));
     bool uppercase = (firstupper && symbols.size() > 1 &&
@@ -2072,16 +2075,17 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
 
     bool seenTags = false;
     size_t queue_start = 0;
-    UString result;
+    std::vector<UString> result;
     for (size_t i = 0; i < symbols.size(); i++) {
       seenTags = seenTags || alphabet.isTag(symbols[i]);
       current_state.step_case(symbols[i], beCaseSensitive(current_state));
       if (current_state.isFinal(all_finals)) {
         queue_start = i;
-        result = current_state.filterFinals(all_finals, alphabet, escaped_chars,
-                                            displayWeightsMode, maxAnalyses,
-                                            maxWeightClasses, uppercase,
-                                            firstupper, 0);
+        result = current_state.filterFinalsArray(all_finals, alphabet,
+                                                 escaped_chars,
+                                                 displayWeightsMode, maxAnalyses,
+                                                 maxWeightClasses, uppercase,
+                                                 firstupper, 0);
       }
     }
     // if there are no tags, we only return complete matches
@@ -2098,7 +2102,12 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
     write(source, output);
 
     if (!result.empty()) {
-      write(compose(result, source.substr(queue_pos)), output);
+      UString queue = source.substr(queue_pos);
+      for (auto& piece : result) {
+        u_fputc('/', output);
+        write(piece, output);
+        write(queue, output);
+      }
     } else {
       u_fputc('/', output);
       u_fputc((mode == gm_all ? '#' : '@'), output);

@@ -474,5 +474,34 @@ class BiltransEscapedAsterisk(ProcTest):
     expectedOutputs = ["^*ab<n><def>/*ab<n><def>$",
                        '^\\*ab<n><def>/@\\*ab<n><def>$']
 
+class SlashesInTags(ProcTest):
+    procdix = 'data/slash-tags.dix'
+    procflags = ['-b', '-z']
+    procdir = 'lr'
+    inputs = ['^\\*lobwana1.1<n><1/2>$',
+              '^\\*lobwana1.1<n><3/4>$',
+              '^\\*lobwana1.1<n><1/2><x>$',
+              '^\\*lobwana1.1<n><3/4><x>$',
+              '^\\*lobwana1.1<n><1/2><a/b>$',
+              '^\\*lobwana1.1<n><3/4><a/b>$']
+    expectedOutputs = ['^\\*lobwana1.1<n><1/2>/\\*lopwana1.1<n><1/2>$',
+                       '^\\*lobwana1.1<n><3/4>/@\\*lobwana1.1<n><3/4>$',
+                       '^\\*lobwana1.1<n><1/2><x>/\\*lopwana1.1<n><1/2><x>$',
+                       '^\\*lobwana1.1<n><3/4><x>/@\\*lobwana1.1<n><3/4><x>$',
+                       '^\\*lobwana1.1<n><1/2><a/b>/\\*lopwana1.1<n><1/2><a/b>$',
+                       '^\\*lobwana1.1<n><3/4><a/b>/@\\*lobwana1.1<n><3/4><a/b>$']
+
+class GeneratorCaps(ProcTest):
+    procdix = 'data/weird-caps.dix'
+    procflags = ['-g', '-z']
+    procdir = 'lr'
+    inputs = ['^iPad<np><al><m><sg>$',
+              '^IPad<np><al><m><sg>$',
+              '^iPaD<np><al><m><sg>$',
+              '^iPAD<np><al><m><sg>$',
+              '^IPAD<np><al><m><sg>$',
+              '^ipad<np><al><m><sg>$',]
+    expectedOutputs = ['iPad', 'IPAD', 'iPad', 'iPad', 'IPAD', '#ipad']
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *
