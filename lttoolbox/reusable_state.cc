@@ -237,7 +237,7 @@ void ReusableState::extract(size_t pos, UString& result, double& weight,
     })
   for (auto it = symbols.rbegin(); it != symbols.rend(); it++) {
     if (escaped_chars.find(*it) != escaped_chars.end()) result += '\\';
-    alphabet.getSymbol(result, *it, uppercase);
+    alphabet.getSymbol(result, *it, uppercase && get(pos).dirty);
   }
 }
 
