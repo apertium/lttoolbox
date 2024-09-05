@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+	<sdefs>
+		<sdef n="np"/>
+		<sdef n="al"/>
+		<sdef n="m"/>
+		<sdef n="sg"/>
+	</sdefs>
+	<section id="main" type="standard">
+		<e>
+			<p>
+				<l>iPad<s n="np"/><s n="al"/><s n="m"/><s n="sg"/></l>
+				<r>iPad</r>
+			</p>
+		</e>
+	</section>
+</dictionary>

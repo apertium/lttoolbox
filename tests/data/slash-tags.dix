@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+	<sdefs>
+		<sdef n="n"/>
+		<sdef n="1/2"/>
+	</sdefs>
+	<section id="main" type="standard">
+		<e>
+			<p>
+				<l>*lobwana1.1<s n="n" /><s n="1/2" /></l>
+				<r>*lopwana1.1<s n="n" /><s n="1/2" /></r>
+			</p>
+		</e>
+	</section>
+</dictionary>
