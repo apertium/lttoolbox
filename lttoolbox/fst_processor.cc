@@ -1971,6 +1971,11 @@ FSTProcessor::nextBilingualWord(InputFile& input, UFILE* output,
   if (input.eof()) return;
 
   u_fputc(input.get(), output); // ^
+  if (input.peek() == '$') {
+    u_fputc(input.get(), output);
+    nextBilingualWord(input, output, symbols, mode);
+    return;
+  }
 
   UChar32 c = '/';
 

@@ -474,5 +474,10 @@ class BiltransEscapedAsterisk(ProcTest):
     expectedOutputs = ["^*ab<n><def>/*ab<n><def>$",
                        '^\\*ab<n><def>/@\\*ab<n><def>$']
 
+class BiltransGarbage(ProcTest):
+    procflags = ['-b', '-z']
+    inputs = ['^$']
+    expectedOutputs = ['^$']
+
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *
