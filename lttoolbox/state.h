@@ -282,6 +282,20 @@ public:
                        int firstchar = 0) const;
 
   /**
+   * filterFinals(), but write the results into `result`
+   */
+  void filterFinalsArray(std::vector<UString>& result,
+                         std::map<Node *, double> const &finals,
+                         Alphabet const &a,
+                         std::set<UChar32> const &escaped_chars,
+                         bool display_weights = false,
+                         int max_analyses = INT_MAX,
+                         int max_weight_classes = INT_MAX,
+                         bool uppercase = false,
+                         bool firstupper = false,
+                         int firstchar = 0) const;
+
+  /**
    * Same as previous one, but  the output is adapted to the SAO system
    * @param finals the set of final nodes
    * @param a the alphabet to decode strings

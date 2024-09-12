@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 project(lttoolbox
-	VERSION 3.7.14
+	VERSION 3.7.15
 	LANGUAGES CXX C
 	)
 set(VERSION ${PROJECT_VERSION})

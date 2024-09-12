@@ -484,6 +484,52 @@ State::NFinals(std::vector<std::pair<UString, double>> lf, int maxAnalyses, int 
   return result;
 }
 
+void
+State::filterFinalsArray(std::vector<UString>& result,
+                         std::map<Node *, double> const &finals,
+                         Alphabet const &alphabet,
+                         std::set<UChar32> const &escaped_chars,
+                         bool display_weights,
+                         int max_analyses, int max_weight_classes,
+                         bool uppercase, bool firstupper, int firstchar) const
+{
+  std::vector<std::pair< UString, double >> response;
+  UString temp;
+  double cost = 0.0000;
+
+  for (auto& it : state) {
+    auto fin = finals.find(it.where);
+    if (fin == finals.end()) continue;
+    temp.clear();
+    cost = fin->second;
+    for (auto& step : *(it.sequence)) {
+      if (escaped_chars.find(step.first) != escaped_chars.end()) temp += '\\';
+      alphabet.getSymbol(temp, step.first, it.dirty && uppercase);
+      cost += step.second;
+    }
+    if (it.dirty && firstupper) {
+      int loc = firstchar;
+      if (temp[loc] == '~') loc++; // skip post-generation mark
+      temp[loc] = u_toupper(temp[loc]);
+    }
+    response.push_back({temp, cost});
+  }
+
+  response = NFinals(response, max_analyses, max_weight_classes);
+
+  result.clear();
+  sorted_vector<UString> seen;
+  for (auto& it : response) {
+    if (!seen.insert(it.first).second) continue;
+    result.push_back(it.first);
+    if (display_weights) {
+      UChar w[16]{};
+      // if anyone wants a weight of 10000, this will not be enough
+      u_sprintf(w, "<W:%f>", it.second);
+      result.back() += w;
+    }
+  }
+}
 
 UString
 State::filterFinals(std::map<Node *, double> const &finals,
@@ -492,85 +538,18 @@ State::filterFinals(std::map<Node *, double> const &finals,
                     bool display_weights, int max_analyses, int max_weight_classes,
                     bool uppercase, bool firstupper, int firstchar) const
 {
-  std::vector<std::pair< UString, double >> response;
+  std::vector<UString> result;
+  filterFinalsArray(result, finals, alphabet, escaped_chars, display_weights,
+                    max_analyses, max_weight_classes, uppercase, firstupper,
+                    firstchar);
 
-  UString result;
-  double cost = 0.0000;
-
-  for(size_t i = 0, limit = state.size(); i != limit; i++)
-  {
-    if(finals.find(state[i].where) != finals.end())
-    {
-      if(state[i].dirty)
-      {
-        result.clear();
-        cost = 0.0000;
-        unsigned int const first_char = result.size() + firstchar;
-        for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
-        {
-          if(escaped_chars.find(((*(state[i].sequence))[j]).first) != escaped_chars.end())
-          {
-            result += '\\';
-          }
-          alphabet.getSymbol(result, ((*(state[i].sequence))[j]).first, uppercase);
-          cost += ((*(state[i].sequence))[j]).second;
-        }
-        if(firstupper)
-        {
-          if(result[first_char] == '~')
-          {
-            // skip post-generation mark
-            result[first_char+1] = u_toupper(result[first_char+1]);
-          }
-          else
-          {
-            result[first_char] = u_toupper(result[first_char]);
-          }
-        }
-      }
-      else
-      {
-        result.clear();
-        cost = 0.0000;
-        for(size_t j = 0, limit2 = state[i].sequence->size(); j != limit2; j++)
-        {
-          if(escaped_chars.find(((*(state[i].sequence))[j]).first) != escaped_chars.end())
-          {
-            result += '\\';
-          }
-          alphabet.getSymbol(result, ((*(state[i].sequence))[j]).first);
-          cost += ((*(state[i].sequence))[j]).second;
-        }
-      }
-
-      // Add the weight of the final state
-      cost += (*(finals.find(state[i].where))).second;
-      response.push_back({result, cost});
-    }
+  UString ret;
+  for (auto& it : result) {
+    ret += '/';
+    ret += it;
   }
 
-  response = NFinals(response, max_analyses, max_weight_classes);
-
-  result.clear();
-  std::set<UString> seen;
-  for(auto it = response.begin(); it != response.end(); it++)
-  {
-    if(seen.find(it->first) != seen.end()) {
-      continue;
-    }
-    seen.insert(it->first);
-    result += '/';
-    result += it->first;
-    if(display_weights)
-    {
-      UChar temp[16]{};
-      // if anyone wants a weight of 10000, this will not be enough
-      u_sprintf(temp, "<W:%f>", it->second);
-      result += temp;
-    }
-  }
-
-  return result;
+  return ret;
 }
 
 

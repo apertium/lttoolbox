@@ -429,9 +429,9 @@ private:
   void analysis_wrapper_null_flush(InputFile& input, UFILE *output);
   void generation_wrapper_null_flush(InputFile& input, UFILE *output,
                                      GenerationMode mode);
-  UString compose(UStringView lexforms, UStringView queue) const;
-  bool step_biltrans(UStringView word, UString& result, UString& queue,
-                     bool delim, bool mark);
+  UString compose(const std::vector<UString>& lexforms, UStringView queue,
+                  bool delim = false, bool mark = false) const;
+  bool step_biltrans(UStringView word, std::vector<UString>& result, UString& queue);
 
   void procNodeICX();
   void procNodeRCX();

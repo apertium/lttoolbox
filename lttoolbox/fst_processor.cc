@@ -1711,8 +1711,7 @@ FSTProcessor::transliteration(InputFile& input, UFILE *output)
 }
 
 bool
-FSTProcessor::step_biltrans(UStringView word, UString& result, UString& queue,
-                            bool delim, bool mark)
+FSTProcessor::step_biltrans(UStringView word, std::vector<UString>& result, UString& queue)
 {
   State current_state = initial_state;
   bool firstupper = u_isupper(word[0]);
@@ -1723,13 +1722,11 @@ FSTProcessor::step_biltrans(UStringView word, UString& result, UString& queue,
       current_state.step(val, beCaseSensitive(current_state));
     }
     if (current_state.isFinal(all_finals)) {
-      result.clear();
-      if (delim) result += '^';
-      if (mark) result += '=';
-      result += current_state.filterFinals(all_finals, alphabet,
-                                           escaped_chars,
-                                           displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                           uppercase, firstupper, 0).substr(1);
+      current_state.filterFinalsArray(result,
+                                      all_finals, alphabet,
+                                      escaped_chars,
+                                      displayWeightsMode, maxAnalyses, maxWeightClasses,
+                                      uppercase, firstupper, 0);
     }
     if (current_state.size() == 0) {
       if (!result.empty()) queue.append(symbol);
@@ -1742,7 +1739,7 @@ FSTProcessor::step_biltrans(UStringView word, UString& result, UString& queue,
 UString
 FSTProcessor::biltransfull(UStringView input_word, bool with_delim)
 {
-  UString result;
+  std::vector<UString> result;
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
   UString queue;
@@ -1766,7 +1763,7 @@ FSTProcessor::biltransfull(UStringView input_word, bool with_delim)
   }
 
   auto word = input_word.substr(start_point, end_point-start_point);
-  bool exists = step_biltrans(word, result, queue, with_delim, mark);
+  bool exists = step_biltrans(word, result, queue);
   if (!exists) {
     if (with_delim) return "^@"_u + US(input_word.substr(1));
     else return "@"_u + US(input_word);
@@ -1778,23 +1775,7 @@ FSTProcessor::biltransfull(UStringView input_word, bool with_delim)
   }
   // attach unmatched queue automatically
 
-  if(!queue.empty())
-  {
-    UString result_with_queue = compose(result, queue);
-    if(with_delim)
-    {
-      result_with_queue += '$';
-    }
-    return result_with_queue;
-  }
-  else
-  {
-    if(with_delim)
-    {
-      result += '$';
-    }
-    return result;
-  }
+  return compose(result, queue, with_delim, mark);
 }
 
 
@@ -1803,7 +1784,7 @@ UString
 FSTProcessor::biltrans(UStringView input_word, bool with_delim)
 {
   State current_state = initial_state;
-  UString result;
+  std::vector<UString> result;
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
   UString queue;
@@ -1827,7 +1808,7 @@ FSTProcessor::biltrans(UStringView input_word, bool with_delim)
   }
 
   UStringView word = input_word.substr(start_point, end_point-start_point);
-  bool exists = step_biltrans(word, result, queue, with_delim, mark);
+  bool exists = step_biltrans(word, result, queue);
   if (!exists) {
     if (with_delim) return "^@"_u + US(input_word.substr(1));
     else return "@"_u + US(input_word);
@@ -1835,47 +1816,24 @@ FSTProcessor::biltrans(UStringView input_word, bool with_delim)
 
   // attach unmatched queue automatically
 
-  if(!queue.empty())
-  {
-    UString result_with_queue = compose(result, queue);
-    if(with_delim)
-    {
-      result_with_queue += '$';
-    }
-    return result_with_queue;
-  }
-  else
-  {
-    if(with_delim)
-    {
-      result += '$';
-    }
-    return result;
-  }
+  return compose(result, queue, with_delim, mark);
 }
 
 UString
-FSTProcessor::compose(UStringView lexforms, UStringView queue) const
+FSTProcessor::compose(const std::vector<UString>& lexforms, UStringView queue,
+                      bool delim, bool mark) const
 {
   UString result;
-  result.reserve(lexforms.size() + 2 * queue.size());
-  result += '/';
-
-  for(unsigned int i = 1; i< lexforms.size(); i++)
-  {
-    if(lexforms[i] == '\\')
-    {
-      result += '\\';
-      i++;
-    }
-    else if(lexforms[i] == '/')
-    {
-      result.append(queue);
-    }
-    result += lexforms[i];
+  if (delim) result += '^';
+  if (mark) result += '=';
+  bool first = true;
+  for (auto& it : lexforms) {
+    if (!first) result += '/';
+    first = false;
+    result += it;
+    result += queue;
   }
-
-  result += queue;
+  if (delim) result += '$';
   return result;
 }
 
@@ -2060,16 +2018,17 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
 
     bool seenTags = false;
     size_t queue_start = 0;
-    UString result;
+    std::vector<UString> result;
     for (size_t i = 0; i < symbols.size(); i++) {
       seenTags = seenTags || alphabet.isTag(symbols[i]);
       current_state.step_case(symbols[i], beCaseSensitive(current_state));
       if (current_state.isFinal(all_finals)) {
         queue_start = i;
-        result = current_state.filterFinals(all_finals, alphabet, escaped_chars,
-                                            displayWeightsMode, maxAnalyses,
-                                            maxWeightClasses, uppercase,
-                                            firstupper, 0);
+        current_state.filterFinalsArray(result,
+                                        all_finals, alphabet, escaped_chars,
+                                        displayWeightsMode, maxAnalyses,
+                                        maxWeightClasses, uppercase,
+                                        firstupper, 0);
       }
     }
     // if there are no tags, we only return complete matches
@@ -2084,11 +2043,11 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
     }
 
     write(source, output);
+    u_fputc('/', output);
 
     if (!result.empty()) {
       write(compose(result, source.substr(queue_pos)), output);
     } else {
-      u_fputc('/', output);
       u_fputc((mode == gm_all ? '#' : '@'), output);
       write(source, output);
     }
@@ -2100,7 +2059,8 @@ std::pair<UString, int>
 FSTProcessor::biltransWithQueue(UStringView input_word, bool with_delim)
 {
   State current_state = initial_state;
-  UString result;
+  std::vector<UString> result;
+  std::vector<UString> temp;
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
   UString queue;
@@ -2142,17 +2102,10 @@ FSTProcessor::biltransWithQueue(UStringView input_word, bool with_delim)
     }
     if(current_state.isFinal(all_finals))
     {
-      result.clear();
-      if (with_delim) {
-        result += '^';
-      }
-      if (mark) {
-        result += '=';
-      }
-      result += current_state.filterFinals(all_finals, alphabet,
-                                           escaped_chars,
-                                           displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                           uppercase, firstupper, 0).substr(1);
+      current_state.filterFinalsArray(result, all_finals, alphabet,
+                                      escaped_chars,
+                                      displayWeightsMode, maxAnalyses, maxWeightClasses,
+                                      uppercase, firstupper, 0);
     }
 
     if(current_state.size() == 0)
@@ -2166,13 +2119,12 @@ FSTProcessor::biltransWithQueue(UStringView input_word, bool with_delim)
         // word is not present
         if(with_delim)
         {
-          result = "^@"_u + US(input_word.substr(1));
+          return {"^@"_u + US(input_word.substr(1)), 0};
         }
         else
         {
-          result = "@"_u + US(input_word);
+          return {"@"_u + US(input_word), 0};
         }
-        return std::pair<UString, int>(result, 0);
       }
     }
   }
@@ -2185,43 +2137,25 @@ FSTProcessor::biltransWithQueue(UStringView input_word, bool with_delim)
     // word is not present
     if(with_delim)
     {
-      result = "^@"_u + US(input_word.substr(1));
+      return {"^@"_u + US(input_word.substr(1)), 0};
     }
     else
     {
-      result = "@"_u + US(input_word);
+      return {"@"_u + US(input_word), 0};
     }
-    return {result, 0};
   }
 
 
 
   // attach unmatched queue automatically
-
-  if(!queue.empty())
-  {
-    UString result_with_queue = compose(result, queue);
-    if(with_delim)
-    {
-      result_with_queue += '$';
-    }
-    return {result_with_queue, queue.size()};
-  }
-  else
-  {
-    if(with_delim)
-    {
-      result += '$';
-    }
-    return {result, 0};
-  }
+  return {compose(result, queue, with_delim, mark), queue.size()};
 }
 
 UString
 FSTProcessor::biltransWithoutQueue(UStringView input_word, bool with_delim)
 {
   State current_state = initial_state;
-  UString result;
+  std::vector<UString> result;
   unsigned int start_point = 1;
   unsigned int end_point = input_word.size()-2;
   bool mark = false;
@@ -2245,17 +2179,13 @@ FSTProcessor::biltransWithoutQueue(UStringView input_word, bool with_delim)
 
   auto word = input_word.substr(start_point, end_point-start_point);
   UString queue;
-  bool exists = step_biltrans(word, result, queue, with_delim, mark);
+  bool exists = step_biltrans(word, result, queue);
   if (!exists || !queue.empty()) {
     if (with_delim) return "^@"_u + US(input_word.substr(1));
     else return "@"_u + US(input_word);
   }
 
-  if(with_delim)
-  {
-    result += '$';
-  }
-  return result;
+  return compose(result, ""_u, with_delim, mark);
 }
 
 
