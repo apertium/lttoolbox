@@ -99,14 +99,14 @@ class GardenPathMwe(ProcTest):
                        "y[A]x",
                         "[A]y x",
                         "legge opp[<br/>]",
-                        "legge[][\n]L[<\/p>\n]",
+                        "legge[][\n]L[<\\/p>\n]",
                        ]
     expectedOutputs = ["^x/*x$[ <br/> ]^opp/opp<pr>$^./.<sent>$",
                         "^legge/legge<vblex><inf>$ ^opp/opp<pr>$[<br/>]^x/*x$^./.<sent>$",
                        "^y/*y$[A]^x/*x$",
                         "[A]^y/*y$ ^x/*x$",
                         "^legge/legge<vblex><inf>$ ^opp/opp<pr>$[<br/>]",
-                        "^legge/legge<vblex><inf>$[][\n]^L/*L$[<\/p>\n]",
+                        "^legge/legge<vblex><inf>$[][\n]^L/*L$[<\\/p>\n]",
                        ]
 
 class GardenPathMweNewlines(ProcTest):
@@ -208,9 +208,9 @@ class PostgenerationWordboundBlankTest(ProcTest):
 class PostgenerationWordboundBlankEscapingTest(ProcTest):
     procdix = "data/postgen.dix"
     procflags = ["-p", "-z"]
-    inputs          = [ "Systran ([[t:a:PJD9GA]]http:\/\/www.systran.de\/[[/]]).[] Systran (http:\/\/www.systran.de\/).[]"]
+    inputs          = [ "Systran ([[t:a:PJD9GA]]http:\\/\\/www.systran.de\\/[[/]]).[] Systran (http:\\/\\/www.systran.de\\/).[]"]
 
-    expectedOutputs = [ "Systran ([[t:a:PJD9GA]]http:\/\/www.systran.de\/[[/]]).[] Systran (http:\/\/www.systran.de\/).[]"]
+    expectedOutputs = [ "Systran ([[t:a:PJD9GA]]http:\\/\\/www.systran.de\\/[[/]]).[] Systran (http:\\/\\/www.systran.de\\/).[]"]
 
 
 class PostgenerationWordboundBlankNoRuleMatchTest(ProcTest):
