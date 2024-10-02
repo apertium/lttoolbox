@@ -248,6 +248,11 @@ private:
   void streamError();
 
   /**
+   * Write \0 to output and flush if at_null is true
+   */
+  void maybeFlush(UFILE* output, bool at_null);
+
+  /**
    * Returns true if the character code is identified as alphabetic
    * @param c the code provided by the user
    * @return true if it's alphabetic
@@ -278,27 +283,6 @@ private:
 
   bool readTransliterationBlank(InputFile& input);
   bool readTransliterationWord(InputFile& input);
-
-  /**
-   * Read text from stream (generation version)
-   * @param input the stream to read
-   * @param output the stream being written to
-   * @return the next symbol in the stream
-   */
-  int readGeneration(InputFile& input, UFILE *output);
-
-  void skipToNextWord(InputFile& input, UFILE *output);
-
-  UChar32 skipReading(InputFile& input, UFILE* output);
-
-  /**
-   * Read and output until a word is found, then place the symbols
-   * of that word into `symbols`
-   * Note: if an unknown symbol is encountered, the alphabet will be updated.
-   */
-  void nextBilingualWord(InputFile& input, UFILE* output,
-                         std::vector<int32_t>& symbols,
-                         GenerationMode mode);
 
   /**
    * Read text from stream (SAO version)
@@ -408,7 +392,6 @@ private:
    */
   void printChar(UChar32 val, UFILE* output);
 
-  void skipUntil(InputFile& input, UFILE *output, UChar32 character);
   static UStringView removeTags(UStringView str);
   UString compoundAnalysis(UString str);
 
