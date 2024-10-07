@@ -1200,7 +1200,7 @@ FSTProcessor::tm_analysis(InputFile& input, UFILE *output)
     // test for final states
     if(current_state.isFinal(all_finals))
     {
-      if(u_ispunct(val))
+      if(u_ispunct(val) || u_isspace(val))
       {
         lf = current_state.filterFinalsTM(all_finals, alphabet,
                                           escaped_chars,
