@@ -49,6 +49,16 @@ enum GenerationMode
 };
 
 /**
+ * How the translation memory matches input
+ */
+enum TranslationMemoryMode
+{
+  tm_punct,      // Require punctuation after a match
+  tm_space,      // Require space or punctuation after a match
+};
+
+
+/**
  * Class that implements the FST-based modules of the system
  */
 class FSTProcessor
@@ -493,7 +503,7 @@ public:
   void initDecomposition();
 
   void analysis(InputFile& input, UFILE *output);
-  void tm_analysis(InputFile& input, UFILE *output);
+  void tm_analysis(InputFile& input, UFILE *output, TranslationMemoryMode tm_mode);
   void generation(InputFile& input, UFILE *output, GenerationMode mode = gm_unknown);
   void postgeneration(InputFile& input, UFILE *output);
   void intergeneration(InputFile& input, UFILE *output);

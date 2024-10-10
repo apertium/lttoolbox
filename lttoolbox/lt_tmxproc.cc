@@ -26,7 +26,10 @@ int main(int argc, char *argv[])
   cli.add_file_arg("fst_file", false);
   cli.add_file_arg("input_file");
   cli.add_file_arg("output_file");
+  cli.add_bool_arg('s', "space", "allow a segment to match before space (as well as before punctuation)");
   cli.parse_args(argc, argv);
+
+  TranslationMemoryMode tm_mode = cli.get_bools()["space"] ? tm_space : tm_punct;
 
   FSTProcessor fstp;
   FILE* aux = openInBinFile(cli.get_files()[0]);
@@ -43,7 +46,7 @@ int main(int argc, char *argv[])
   }
   UFILE* output = openOutTextFile(cli.get_files()[2].c_str());
 
-  fstp.tm_analysis(input, output);
+  fstp.tm_analysis(input, output, tm_mode);
 
   u_fclose(output);
   return EXIT_SUCCESS;

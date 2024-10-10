@@ -1188,7 +1188,7 @@ FSTProcessor::generation_wrapper_null_flush(InputFile& input, UFILE *output,
 }
 
 void
-FSTProcessor::tm_analysis(InputFile& input, UFILE *output)
+FSTProcessor::tm_analysis(InputFile& input, UFILE *output, TranslationMemoryMode tm_mode)
 {
   State current_state = initial_state;
   UString lf;     //lexical form
@@ -1200,7 +1200,7 @@ FSTProcessor::tm_analysis(InputFile& input, UFILE *output)
     // test for final states
     if(current_state.isFinal(all_finals))
     {
-      if(u_ispunct(val) || u_isspace(val))
+      if(u_ispunct(val) || (tm_mode == tm_space && u_isspace(val)))
       {
         lf = current_state.filterFinalsTM(all_finals, alphabet,
                                           escaped_chars,
