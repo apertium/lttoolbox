@@ -27,13 +27,13 @@ int main(int argc, char *argv[])
   cli.add_file_arg("input_file");
   cli.add_file_arg("output_file");
   cli.add_bool_arg('s', "space", "allow a segment to match before space (as well as before punctuation)");
-  cli.add_bool_arg('z', "null-flush", "flush output on the null character");
+  cli.add_bool_arg('z', "null-flush", "flush output on the null character (always on, this is a no-op for backwards compatibility)");
   cli.parse_args(argc, argv);
 
   TranslationMemoryMode tm_mode = cli.get_bools()["space"] ? tm_space : tm_punct;
 
   FSTProcessor fstp;
-  fstp.setNullFlush(cli.get_bools()["null-flush"]);
+  fstp.setNullFlush(true); // cf. description of cli["null-flush"]
   FILE* aux = openInBinFile(cli.get_files()[0]);
   fstp.load(aux);
   fclose(aux);
