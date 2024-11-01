@@ -1188,8 +1188,29 @@ FSTProcessor::generation_wrapper_null_flush(InputFile& input, UFILE *output,
 }
 
 void
+FSTProcessor::tm_wrapper_null_flush(InputFile& input, UFILE *output,
+                                    TranslationMemoryMode tm_mode)
+{
+  setNullFlush(false);
+  nullFlushGeneration = true;
+
+  while(!input.eof())
+  {
+    tm_analysis(input, output, tm_mode);
+    u_fputc('\0', output);
+    u_fflush(output);
+  }
+}
+
+
+void
 FSTProcessor::tm_analysis(InputFile& input, UFILE *output, TranslationMemoryMode tm_mode)
 {
+  if(getNullFlush())
+  {
+    tm_wrapper_null_flush(input, output, tm_mode);
+  }
+
   State current_state = initial_state;
   UString lf;     //lexical form
   UString sf;     //surface form

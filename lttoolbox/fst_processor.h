@@ -439,6 +439,8 @@ private:
   void analysis_wrapper_null_flush(InputFile& input, UFILE *output);
   void generation_wrapper_null_flush(InputFile& input, UFILE *output,
                                      GenerationMode mode);
+  void tm_wrapper_null_flush(InputFile& input, UFILE *output,
+                             TranslationMemoryMode tm_mode);
   UString compose(const std::vector<UString>& lexforms, UStringView queue,
                   bool delim = false, bool mark = false) const;
   bool step_biltrans(UStringView word, std::vector<UString>& result, UString& queue);
