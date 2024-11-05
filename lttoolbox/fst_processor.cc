@@ -1348,6 +1348,7 @@ FSTProcessor::tm_analysis(InputFile& input, UFILE *output, TranslationMemoryMode
       current_state = initial_state;
       lf.clear();
       sf.clear();
+      numbers.clear();
     }
   }
 
