@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tmx version="1.4">
+  <header
+    creationtool="foo"
+    creationtoolversion="1.0"
+    segtype="phrase"
+    o-tmf="tmx"
+    adminlang="nb-NO"
+    srclang="nb-NO"
+    datatype="plaintext"
+  />
+  <body>
+    <tu>
+      <tuv xml:lang="nob">
+        <seg>kake 1</seg>
+      </tuv>
+      <tuv xml:lang="nno">
+        <seg>kake 1</seg>
+      </tuv>
+    </tu>
+    <tu>
+      <tuv xml:lang="nob">
+        <seg>kaffe 1 og 2</seg>
+      </tuv>
+      <tuv xml:lang="nno">
+        <seg>kaffi 1 og 2</seg>
+      </tuv>
+    </tu>
+    <tu>
+      <tuv xml:lang="nob">
+        <seg>ost 99 eller 78 kjeks</seg>
+      </tuv>
+      <tuv xml:lang="nno">
+        <seg>ost 99 eller 78 kjeks</seg>
+      </tuv>
+    </tu>
+    <tu>
+      <tuv xml:lang="nob">
+        <seg>3 på halv</seg>
+      </tuv>
+      <tuv xml:lang="nno">
+        <seg>3 på halv</seg>
+      </tuv>
+    </tu>
+  </body>
+</tmx>
