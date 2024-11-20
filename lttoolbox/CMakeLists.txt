@@ -25,6 +25,7 @@ set(LIBLTTOOLBOX_HEADERS
 	sorted_vector.h
 	sorted_vector.hpp
 	state.h
+	stream_reader.h
 	string_utils.h
 	symbol_iter.h
 	tmx_compiler.h
@@ -55,6 +56,7 @@ set(LIBLTTOOLBOX_SOURCES
 	regexp_compiler.cc
 	sorted_vector.cc
 	state.cc
+	stream_reader.cc
 	string_utils.cc
 	symbol_iter.cc
 	tmx_compiler.cc
