@@ -214,7 +214,8 @@ int main(int argc, char *argv[])
       case 'b':
         fstp.initBiltrans();
         checkValidity(fstp);
-        fstp.bilingual(input, output, bilmode);
+        // fstp.bilingual(input, output, bilmode);
+        fstp.quoteMerge(input, output); // TODO: separate mode, is there use for an fst or should it just be a new command lt-merge that takes no fst?
         break;
 
       case 'e':

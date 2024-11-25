@@ -496,6 +496,7 @@ public:
   UString biltrans(UStringView input_word, bool with_delim = true);
   UString biltransfull(UStringView input_word, bool with_delim = true);
   void bilingual(InputFile& input, UFILE *output, GenerationMode mode = gm_unknown);
+  void quoteMerge(InputFile& input, UFILE *output);
   std::pair<UString, int> biltransWithQueue(UStringView input_word, bool with_delim = true);
   UString biltransWithoutQueue(UStringView input_word, bool with_delim = true);
   void SAO(InputFile& input, UFILE *output);
