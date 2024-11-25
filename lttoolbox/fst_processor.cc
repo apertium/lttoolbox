@@ -1931,6 +1931,83 @@ FSTProcessor::biltransWithoutQueue(UStringView input_word, bool with_delim)
   return compose(result, ""_u, with_delim, mark);
 }
 
+void
+FSTProcessor::quoteMerge(InputFile& input, UFILE *output)
+{
+  StreamReader reader(&input);
+  reader.alpha = &alphabet;
+  reader.add_unknowns = true;
+
+  bool merging = false;
+  UString surface;
+  while (!reader.at_eof) {
+    reader.next();
+
+    bool end_merging = false;
+
+    for (StreamReader::Reading &it : reader.readings) {
+      // TODO: look up in it.symbols instead (but need to make an alphabet then)
+      if(it.content.find(u"<MERGE_BEG>") != std::string::npos) {
+        merging = true;
+      }
+      if(it.content.find(u"<MERGE_END>") != std::string::npos) {
+        end_merging = true;
+      }
+    }
+    if(merging) {
+      if(surface.size() > 0) {
+        surface += reader.blank;
+        appendEscaped(surface, reader.wblank);
+      }
+      else {
+        // The initial blank should just be output before the merged LU:
+        write(reader.blank, output);
+        write(reader.wblank, output);
+      }
+      if(reader.readings.size() > 0) {
+        // Drop possible unknown marks.
+        // Double-escape the form since we'll unescape during lt-unmerge:
+        appendEscaped(surface, reader.readings[0].content);
+      }
+    }
+    else {
+      write(reader.blank, output);
+      write(reader.wblank, output);
+      if(reader.readings.size() > 0) {
+        // NB. ^$ will produce a readings vector of length 1 where the single item is empty. EOF should give length 0.
+        // (We *want* to keep ^$ in stream, but not print extra ^$ when there was no ^$)
+        u_fputc('^', output);
+        bool seen_reading = false;
+        for (StreamReader::Reading &it : reader.readings) {
+          if (seen_reading) {
+            u_fputc('/', output);
+          }
+          if(it.mark != '\0') { u_fputc(it.mark, output); }
+          write(it.content, output);
+          seen_reading = true;
+        }
+        u_fputc('$', output);
+      }
+    }
+    if(end_merging || reader.at_null) {
+      if (merging) {
+        u_fputc('^', output);
+        write(surface, output);
+        u_fputc('/', output);
+        write(surface, output);
+        write("<MERGED>$"_u, output);
+        merging = false;
+      }
+      end_merging = false;
+      surface.clear();
+      if(reader.at_null) {
+        u_fputc('\0', output);
+        u_fflush(output);
+      }
+    }
+  }
+}
+
 
 bool
 FSTProcessor::valid() const

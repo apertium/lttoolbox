@@ -103,6 +103,9 @@ target_link_libraries(lt-comp lttoolbox ${GETOPT_LIB})
 add_executable(lt-proc lt_proc.cc)
 target_link_libraries(lt-proc lttoolbox ${GETOPT_LIB})
 
+add_executable(lt-merge lt_merge.cc)
+target_link_libraries(lt-merge lttoolbox ${GETOPT_LIB})
+
 add_executable(lt-expand lt_expand.cc)
 target_link_libraries(lt-expand lttoolbox ${GETOPT_LIB})
 
@@ -144,11 +147,11 @@ install(TARGETS lttoolbox
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES ${LIBLTTOOLBOX_HEADERS}
 	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/lttoolbox)
-install(TARGETS lt-append lt-print lt-trim lt-compose lt-comp lt-proc lt-expand lt-paradigm lt-tmxcomp lt-tmxproc lt-invert lt-restrict lt-apply-acx
+install(TARGETS lt-append lt-print lt-trim lt-compose lt-comp lt-proc lt-merge lt-expand lt-paradigm lt-tmxcomp lt-tmxproc lt-invert lt-restrict lt-apply-acx
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 install(FILES dix.dtd dix.rng dix.rnc acx.rng xsd/dix.xsd xsd/acx.xsd
 	DESTINATION ${CMAKE_INSTALL_DATADIR}/lttoolbox)
 
-install(FILES lt-append.1 lt-comp.1 lt-expand.1 lt-paradigm.1 lt-proc.1 lt-tmxcomp.1 lt-tmxproc.1 lt-print.1 lt-trim.1 lt-compose.1
+install(FILES lt-append.1 lt-comp.1 lt-expand.1 lt-paradigm.1 lt-proc.1 lt-merge.1 lt-tmxcomp.1 lt-tmxproc.1 lt-print.1 lt-trim.1 lt-compose.1
 	DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
