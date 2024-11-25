@@ -11,7 +11,9 @@ if len(sys.argv) > 1:
 
 modules = ['lt_proc', 'lt_trim', 'lt_print', 'lt_comp', 'lt_append',
            'lt_paradigm', 'lt_expand', 'lt_apply_acx', 'lt_compose',
-           'lt_tmxproc']
+           'lt_tmxproc', 'lt_merge']
+
+# modules = ['lt_merge']
 
 
 if __name__ == "__main__":

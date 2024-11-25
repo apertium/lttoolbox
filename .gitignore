@@ -47,6 +47,7 @@ lttoolbox/liblttoolbox.so.*
 /lttoolbox/lt-comp
 /lttoolbox/lt-compose
 /lttoolbox/lt-proc
+/lttoolbox/lt-merge
 /lttoolbox/lt-trim
 /lttoolbox/Makefile
 /lttoolbox/Makefile.in
