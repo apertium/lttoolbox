@@ -1966,12 +1966,7 @@ FSTProcessor::quoteMerge(InputFile& input, UFILE *output)
       std::cerr << "\033[0;35mmerging\033[0m" << std::endl;
       if(surface.size() > 0) {
         surface += reader.blank;
-        for(auto &c : reader.wblank) {
-          if (escaped_chars.find(c) != escaped_chars.end()) {
-            surface += u'\\';
-          }
-          surface += c;
-        }
+        appendEscaped(surface, reader.wblank);
       }
       else {
         // The initial blank should just be output before the merged LU:
@@ -1979,7 +1974,8 @@ FSTProcessor::quoteMerge(InputFile& input, UFILE *output)
         write(reader.wblank, output);
       }
       if(reader.readings.size() > 0) {
-        surface += reader.readings[0].content;
+        // Double-escape the form since we'll unescape during lt-unmerge:
+        appendEscaped(surface, reader.readings[0].content);
       }
     }
     else {

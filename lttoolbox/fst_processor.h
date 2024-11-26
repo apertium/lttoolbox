@@ -462,6 +462,15 @@ private:
     }
   }
 
+  void appendEscaped(UString& to, const UString& from) {
+    for(auto &c : from) {
+      if (escaped_chars.find(c) != escaped_chars.end()) {
+        to += u'\\';
+      }
+      to += c;
+    }
+  }
+
 public:
 
   /*
