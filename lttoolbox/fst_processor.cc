@@ -1982,8 +1982,8 @@ FSTProcessor::quoteMerge(InputFile& input, UFILE *output)
       write(reader.blank, output);
       write(reader.wblank, output);
       if(reader.readings.size() > 0) {
-        // TODO: How to differentiate EOF from a lexical unit with no readings like ^$ ?
-        // We *want* to keep ^$ in stream, but not print extra ^$ when there was no ^$
+        // NB. ^$ will produce a readings vector of length 1 where the single item is empty. EOF should give length 0.
+        // (We *want* to keep ^$ in stream, but not print extra ^$ when there was no ^$)
         u_fputc('^', output);
         bool seen_reading = false;
         for (StreamReader::Reading &it : reader.readings) {
