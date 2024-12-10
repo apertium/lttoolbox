@@ -19,6 +19,7 @@
 #include <lttoolbox/exception.h>
 #include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/file_utils.h>
+#include <lttoolbox/stream_reader.h>
 #include <lttoolbox/string_utils.h>
 #include <lttoolbox/symbol_iter.h>
 
@@ -52,6 +53,15 @@ void
 FSTProcessor::streamError()
 {
   throw Exception("Error: Malformed input stream.");
+}
+
+void
+FSTProcessor::maybeFlush(UFILE* output, bool at_null)
+{
+  if (at_null) {
+    u_fputc('\0', output);
+    u_fflush(output);
+  }
 }
 
 void
@@ -397,137 +407,6 @@ FSTProcessor::readTransliterationWord(InputFile& input)
   transliteration_queue.push_back(word);
 
   return true;
-}
-
-void
-FSTProcessor::skipUntil(InputFile& input, UFILE *output, UChar32 const character)
-{
-  while(true)
-  {
-    UChar32 val = input.get();
-    if(input.eof())
-    {
-      return;
-    }
-
-    switch(val)
-    {
-      case '\\':
-        val = input.get();
-        if(input.eof())
-        {
-          return;
-        }
-        u_fputc('\\', output);
-        u_fputc(val, output);
-        break;
-
-      case '\0':
-        u_fputc(val, output);
-        if(nullFlushGeneration)
-        {
-          u_fflush(output);
-        }
-        break;
-
-      default:
-        if(val == character)
-        {
-          return;
-        }
-        else
-        {
-          u_fputc(val, output);
-        }
-        break;
-    }
-  }
-}
-
-int
-FSTProcessor::readGeneration(InputFile& input, UFILE *output)
-{
-  UChar32 val = input.get();
-
-  if(input.eof())
-  {
-    return 0x7fffffff;
-  }
-
-  if(outOfWord)
-  {
-    if(val == '^')
-    {
-      val = input.get();
-      if(input.eof())
-      {
-        return 0x7fffffff;
-      }
-    }
-    else if(val == '\\')
-    {
-      u_fputc(val, output);
-      val = input.get();
-      if(input.eof())
-      {
-        return 0x7fffffff;
-      }
-      u_fputc(val,output);
-      skipUntil(input, output, '^');
-      val = input.get();
-      if(input.eof())
-      {
-        return 0x7fffffff;
-      }
-    }
-    else
-    {
-      u_fputc(val, output);
-      skipUntil(input, output, '^');
-      val = input.get();
-      if(input.eof())
-      {
-        return 0x7fffffff;
-      }
-    }
-    outOfWord = false;
-  }
-
-  if(val == '\\')
-  {
-    val = input.get();
-    return static_cast<int32_t>(val);
-  }
-  else if(val == '$')
-  {
-    outOfWord = true;
-    return static_cast<int32_t>('$');
-  }
-  else if(val == '<')
-  {
-    return alphabet(input.readBlock('<', '>'));
-  }
-  else if(val == '[')
-  {
-    val = input.get();
-    if(val == '[')
-    {
-      write(input.finishWBlank(), output);
-    }
-    else
-    {
-      input.unget(val);
-      write(input.readBlock('[', ']'), output);
-    }
-
-    return readGeneration(input, output);
-  }
-  else
-  {
-    return static_cast<int32_t>(val);
-  }
-
-  return 0x7fffffff;
 }
 
 void
@@ -1360,168 +1239,126 @@ FSTProcessor::tm_analysis(InputFile& input, UFILE *output, TranslationMemoryMode
 void
 FSTProcessor::generation(InputFile& input, UFILE *output, GenerationMode mode)
 {
-  if(getNullFlush())
-  {
-    generation_wrapper_null_flush(input, output, mode);
-  }
+  StreamReader reader(&input);
+  reader.alpha = &alphabet;
+  State current_state;
 
-  State current_state = initial_state;
-  UString sf;
-
-  outOfWord = false;
-
-  skipUntil(input, output, '^');
-  int val;
-
-  while((val = readGeneration(input, output)) != 0x7fffffff)
-  {
-    if(sf.empty() && val == '=')
-    {
-      u_fputc('=', output);
-      val = readGeneration(input, output);
-    }
-
-    if(val == '$' && outOfWord)
-    {
-      if(sf[0] == '*' || sf[0] == '%')
-      {
-        if(mode != gm_clean && mode != gm_tagged_nm)
-        {
-          writeEscaped(sf, output);
-        }
-        else if (mode == gm_clean)
-        {
-          writeEscaped(sf.substr(1), output);
-        }
-        else if(mode == gm_tagged_nm)
-        {
+  while (!reader.at_eof) {
+    reader.next();
+    write(reader.blank, output);
+    write(reader.wblank, output);
+    if (!reader.readings.empty()) {
+      auto& rd = reader.readings[0];
+      bool skip = false;
+      switch (rd.mark) {
+      case '=':
+        u_fputc('=', output);
+        break;
+      case '*':
+      case '%':
+        skip = true;
+        if (mode == gm_tagged_nm) {
           u_fputc('^', output);
-          writeEscaped(removeTags(sf.substr(1)), output);
+          writeEscaped(removeTags(rd.content), output);
           u_fputc('/', output);
-          writeEscapedWithTags(sf, output);
+          u_fputc(rd.mark, output);
+          writeEscapedWithTags(rd.content, output);
           u_fputc('$', output);
+        } else {
+          if (mode != gm_clean) u_fputc(rd.mark, output);
+          writeEscaped(rd.content, output);
         }
-      }
-      else if(sf[0] == '@')
-      {
-        if(mode == gm_all)
-        {
-          writeEscaped(sf, output);
-        }
-        else if(mode == gm_clean)
-        {
-          writeEscaped(removeTags(sf.substr(1)), output);
-        }
-        else if(mode == gm_unknown)
-        {
-          writeEscaped(removeTags(sf), output);
-        }
-        else if(mode == gm_tagged)
-        {
-          writeEscaped(removeTags(sf), output);
-        }
-        else if(mode == gm_tagged_nm)
-        {
+        break;
+      case '@':
+        skip = true;
+        switch (mode) {
+        case gm_all:
+          u_fputc(rd.mark, output);
+          writeEscaped(rd.content, output);
+          break;
+        case gm_unknown:
+        case gm_tagged:
+          u_fputc(rd.mark, output);
+          [[fallthrough]];
+        case gm_clean:
+          writeEscaped(removeTags(rd.content), output);
+          break;
+        case gm_tagged_nm:
           u_fputc('^', output);
-          writeEscaped(removeTags(sf.substr(1)), output);
+          writeEscaped(removeTags(rd.content), output);
           u_fputc('/', output);
-          writeEscapedWithTags(sf, output);
+          u_fputc(rd.mark, output);
+          writeEscapedWithTags(rd.content, output);
           u_fputc('$', output);
+          break;
+        default:
+          break;
         }
+        break;
       }
-      else if(current_state.isFinal(all_finals))
-      {
-        bool firstupper = false, uppercase = false;
-        if(!dictionaryCase)
-        {
-          uppercase = sf.size() > 1 && u_isupper(sf[1]);
-          firstupper= u_isupper(sf[0]);
+      if (!skip) {
+        current_state = initial_state;
+        for (auto& sym : reader.readings[0].symbols) {
+          if (!alphabet.isTag(sym) && u_isupper(sym) &&
+              !beCaseSensitive(current_state)) {
+            if (mode == gm_carefulcase) {
+              current_state.step_careful(sym, u_tolower(sym));
+            }
+            else {
+              current_state.step(sym, u_tolower(sym));
+            }
+          }
+          else current_state.step(sym);
         }
+        if (current_state.isFinal(all_finals)) {
+          bool firstupper = false, uppercase = false;
+          if (!dictionaryCase) {
+            uppercase = rd.content.size() > 1 && u_isupper(rd.content[1]);
+            firstupper= u_isupper(rd.content[0]);
+          }
 
-        if(mode == gm_tagged || mode == gm_tagged_nm)
-        {
-          u_fputc('^', output);
-        }
+          if (mode == gm_tagged || mode == gm_tagged_nm) {
+            u_fputc('^', output);
+          }
 
-        write(current_state.filterFinals(all_finals, alphabet,
-                                         escaped_chars,
-                                         displayWeightsMode, maxAnalyses, maxWeightClasses,
-                                         uppercase, firstupper).substr(1), output);
-        if(mode == gm_tagged || mode == gm_tagged_nm)
-        {
-          u_fputc('/', output);
-          writeEscapedWithTags(sf, output);
-          u_fputc('$', output);
-        }
-
-      }
-      else
-      {
-        if(mode == gm_all)
-        {
-          u_fputc('#', output);
-          writeEscaped(sf, output);
-        }
-        else if(mode == gm_clean)
-        {
-          writeEscaped(removeTags(sf), output);
-        }
-        else if(mode == gm_unknown)
-        {
-          if(!sf.empty())
-          {
+          write(current_state.filterFinals(all_finals, alphabet, escaped_chars,
+                                           displayWeightsMode, maxAnalyses,
+                                           maxWeightClasses,
+                                           uppercase, firstupper).substr(1), output);
+          if (mode == gm_tagged || mode == gm_tagged_nm) {
+            u_fputc('/', output);
+            writeEscapedWithTags(rd.content, output);
+            u_fputc('$', output);
+          }
+        } else {
+          switch (mode) {
+          case gm_all:
             u_fputc('#', output);
-            writeEscaped(removeTags(sf), output);
+            writeEscaped(rd.content, output);
+            break;
+          case gm_carefulcase:
+          case gm_unknown:
+          case gm_tagged:
+            if (!rd.content.empty()) u_fputc('#', output);
+            [[fallthrough]];
+          case gm_clean:
+            writeEscaped(removeTags(rd.content), output);
+            break;
+          case gm_tagged_nm:
+            u_fputc('^', output);
+            writeEscaped(removeTags(rd.content), output);
+            u_fputc('/', output);
+            u_fputc('#', output);
+            writeEscapedWithTags(rd.content, output);
+            u_fputc('$', output);
+            break;
           }
-        }
-        else if(mode == gm_tagged)
-        {
-          u_fputc('#', output);
-          writeEscaped(removeTags(sf), output);
-        }
-        else if(mode == gm_tagged_nm)
-        {
-          u_fputc('^', output);
-          writeEscaped(removeTags(sf), output);
-          u_fputc('/', output);
-          u_fputc('#', output);
-          writeEscapedWithTags(sf, output);
-          u_fputc('$', output);
         }
       }
-
-      current_state = initial_state;
-      sf.clear();
     }
-    else if(u_isspace(val) && sf.size() == 0)
-    {
-      // do nothing
-    }
-    else if(sf.size() > 0 && (sf[0] == '*' || sf[0] == '%' ))
-    {
-      alphabet.getSymbol(sf, val);
-    }
-    else
-    {
-      alphabet.getSymbol(sf,val);
-      if(current_state.size() > 0)
-      {
-        if(!alphabet.isTag(val) && u_isupper(val) && !(beCaseSensitive(current_state)))
-        {
-          if(mode == gm_carefulcase)
-          {
-            current_state.step_careful(val, u_tolower(val));
-          }
-          else
-          {
-            current_state.step(val, u_tolower(val));
-          }
-        }
-        else
-        {
-          current_state.step(val);
-        }
-      }
+    if (reader.at_null) {
+      u_fputc('\0', output);
+      u_fflush(output);
     }
   }
 }
@@ -1860,177 +1697,51 @@ FSTProcessor::compose(const std::vector<UString>& lexforms, UStringView queue,
 }
 
 void
-FSTProcessor::skipToNextWord(InputFile& input, UFILE* output)
-{
-  int blank_depth = 0;
-
-  while (!input.eof()) {
-    UChar32 c = input.get();
-
-    switch (c) {
-    case '^':
-      if (blank_depth == 0) {
-        input.unget(c);
-        return;
-      } else {
-        u_fputc(c, output);
-      }
-      break;
-    case '\\':
-      u_fputc(c, output);
-      c = input.get();
-      u_fputc(c, output);
-      break;
-    case '\0':
-      u_fputc(c, output);
-      u_fflush(output);
-      break;
-    case U_EOF:
-      break;
-    case '[':
-      blank_depth++;
-      u_fputc(c, output);
-      break;
-    case ']':
-      if (blank_depth > 0) blank_depth--;
-      u_fputc(c, output);
-      break;
-    default:
-      u_fputc(c, output);
-    }
-  }
-}
-
-UChar32
-FSTProcessor::skipReading(InputFile& input, UFILE* output)
-{
-  UChar32 c = U_EOF;
-  while (!input.eof()) {
-    c = input.get();
-    if (output != nullptr) {
-      switch (c) {
-      case '\\':
-        u_fputc(c, output);
-        u_fputc(input.get(), output);
-        break;
-      case '<':
-        write(input.readBlock('<', '>'), output);
-        break;
-      case '/':
-      case '$':
-        u_fputc(c, output);
-        break;
-      default:
-        if (isEscaped(c)) u_fputc('\\', output);
-        u_fputc(c, output);
-      }
-    } else {
-      switch (c) {
-      case '\\':
-        input.get();
-        break;
-      case '<':
-        input.readBlock('<', '>');
-        break;
-      }
-    }
-    if (c == '/' || c == '$' || c == '\0') break;
-  }
-  return c;
-}
-
-void
-FSTProcessor::nextBilingualWord(InputFile& input, UFILE* output,
-                                std::vector<int32_t>& symbols,
-                                GenerationMode mode)
-{
-  symbols.clear();
-
-  skipToNextWord(input, output);
-
-  if (input.eof()) return;
-
-  u_fputc(input.get(), output); // ^
-  if (input.peek() == '$') {
-    u_fputc(input.get(), output);
-    nextBilingualWord(input, output, symbols, mode);
-    return;
-  }
-
-  UChar32 c = '/';
-
-  if (biltransSurfaceFormsKeep) {
-    c = skipReading(input, output);
-  } else if (biltransSurfaceForms) {
-    c = skipReading(input, nullptr);
-  }
-  if (c != '/') {
-    nextBilingualWord(input, output, symbols, mode);
-    return;
-  }
-
-  bool unknown = false;
-
-  if (input.peek() == '*') {
-    input.get();
-    unknown = true;
-  }
-
-  while (!input.eof()) {
-    c = input.get();
-    switch (c) {
-    case '\\':
-      symbols.push_back(input.get());
-      break;
-    case '\0':
-    case '/':
-    case '$':
-      break;
-    case '<':
-      {
-        UString symbol = input.readBlock('<', '>');
-        alphabet.includeSymbol(symbol);
-        symbols.push_back(alphabet(symbol));
-      }
-      break;
-    default:
-      symbols.push_back(c);
-    }
-    if (c == '\0' || c == '/' || c == '$') break;
-  }
-
-  while (c == '/') c = skipReading(input, nullptr);
-
-  if (c == '\0' || unknown) {
-    UString in_str;
-    for (auto& s : symbols) {
-      if (isEscaped(s)) in_str += '\\';
-      alphabet.getSymbol(in_str, s);
-    }
-    symbols.clear();
-    if (c == '\0') {
-      write(in_str, output);
-      u_fflush(output);
-    } else {
-      u_fputc('*', output);
-      write(in_str, output);
-      u_fputc('/', output);
-      if (mode != gm_clean) u_fputc('*', output);
-      write(in_str, output);
-      u_fputc('$', output);
-    }
-    nextBilingualWord(input, output, symbols, mode);
-    return;
-  }
-}
-
-void
 FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
 {
-  std::vector<int32_t> symbols;
-  while (!input.eof()) {
-    nextBilingualWord(input, output, symbols, mode);
-    if (symbols.empty()) continue;
+  StreamReader reader(&input);
+  reader.alpha = &alphabet;
+  reader.add_unknowns = true;
+
+  size_t index = (biltransSurfaceForms || biltransSurfaceFormsKeep ? 1 : 0);
+
+  while (!reader.at_eof) {
+    reader.next();
+
+    write(reader.blank, output);
+    write(reader.wblank, output);
+
+    if (biltransSurfaceFormsKeep && !reader.readings.empty()) {
+      u_fputc('^', output);
+      write(reader.readings[0].content, output);
+      u_fputc((reader.readings.size() > 1 ? '/' : '$'), output);
+    }
+
+    if (index >= reader.readings.size()) {
+      maybeFlush(output, reader.at_null);
+      continue;
+    }
+
+    if (!biltransSurfaceFormsKeep) u_fputc('^', output);
+
+    if (reader.readings[index].mark == '*') {
+      u_fputc('*', output);
+      write(reader.readings[index].content, output);
+      u_fputc('/', output);
+      if (mode != gm_clean) u_fputc('*', output);
+      write(reader.readings[index].content, output);
+      u_fputc('$', output);
+      maybeFlush(output, reader.at_null);
+      continue;
+    }
+
+    auto& symbols = reader.readings[index].symbols;
+
+    if (symbols.empty()) {
+      u_fputc('$', output);
+      maybeFlush(output, reader.at_null);
+      continue;
+    }
 
     State current_state = initial_state;
 
@@ -2041,6 +1752,7 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
     bool seenTags = false;
     size_t queue_start = 0;
     std::vector<UString> result;
+    if (reader.readings[index].mark == '#') current_state.step('#');
     for (size_t i = 0; i < symbols.size(); i++) {
       seenTags = seenTags || alphabet.isTag(symbols[i]);
       current_state.step_case(symbols[i], beCaseSensitive(current_state));
@@ -2058,6 +1770,10 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
 
     UString source;
     size_t queue_pos = 0;
+    if (reader.readings[index].mark == '#') {
+      source += '#';
+      queue_pos = 1;
+    }
     for (size_t i = 0; i < symbols.size(); i++) {
       if (isEscaped(symbols[i]) || (i == 0 && symbols[i] == '*')) source += '\\';
       alphabet.getSymbol(source, symbols[i]);
@@ -2074,6 +1790,11 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
       write(source, output);
     }
     u_fputc('$', output);
+
+    if (reader.at_null) {
+      u_fputc('\0', output);
+      u_fflush(output);
+    }
   }
 }
 

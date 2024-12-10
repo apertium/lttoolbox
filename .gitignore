@@ -26,6 +26,7 @@ install_manifest.txt
 *.so
 *.dylib
 *.dll
+lttoolbox/liblttoolbox.so.*
 
 # Fortran module files
 *.mod
