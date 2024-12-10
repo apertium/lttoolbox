@@ -103,6 +103,9 @@ target_link_libraries(lt-comp lttoolbox ${GETOPT_LIB})
 add_executable(lt-proc lt_proc.cc)
 target_link_libraries(lt-proc lttoolbox ${GETOPT_LIB})
 
+add_executable(lt-merge lt_merge.cc)
+target_link_libraries(lt-merge lttoolbox ${GETOPT_LIB})
+
 add_executable(lt-expand lt_expand.cc)
 target_link_libraries(lt-expand lttoolbox ${GETOPT_LIB})
 
