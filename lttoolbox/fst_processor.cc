@@ -1277,7 +1277,6 @@ FSTProcessor::generation(InputFile& input, UFILE *output, GenerationMode mode)
       if (!skip) {
         current_state = initial_state;
         for (auto& sym : reader.readings[0].symbols) {
-          // std::cerr << "size = " << current_state.size() <<  " stapping by " << sym << std::endl;
           if (!alphabet.isTag(sym) && u_isupper(sym) &&
               !beCaseSensitive(current_state)) {
             if (mode == gm_carefulcase) {
@@ -1683,13 +1682,9 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
   reader.add_unknowns = true;
 
   size_t index = (biltransSurfaceForms || biltransSurfaceFormsKeep ? 1 : 0);
-  // std::cerr << "index = " << index << std::endl;
 
   while (!reader.at_eof) {
     reader.next();
-
-    // std::cerr << "reader.size " << reader.readings.size() << std::endl;
-    // for (auto& it : reader.readings) std::cerr << "  " << it.content << std::endl;
 
     write(reader.blank, output);
     write(reader.wblank, output);
