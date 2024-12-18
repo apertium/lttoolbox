@@ -2009,6 +2009,68 @@ FSTProcessor::quoteMerge(InputFile& input, UFILE *output)
 }
 
 
+void
+FSTProcessor::quoteUnmerge(InputFile &input, UFILE *output)
+{
+  StreamReader reader(&input);
+  reader.alpha = &alphabet;
+  reader.add_unknowns = true;
+
+  UString surface;
+  while (!reader.at_eof) {
+    reader.next();
+    bool unmerging = false;
+    for (StreamReader::Reading &it : reader.readings) {
+      // TODO: look up in it.symbols instead (but need to make an alphabet then)
+      if(it.content.find(u"<MERGED>") != std::string::npos) {
+        unmerging = true;
+      }
+    }
+    write(reader.blank, output);
+    write(reader.wblank, output);
+    if(unmerging) {
+      // Just output the last reading (surface form), removing one level of escaping
+      StreamReader::Reading &lastReading = reader.readings.back(); // (we know there's at least one because of the above loop)
+      UString surface;
+      bool escaping = false;
+      for(auto &c : lastReading.content) {
+        if(escaping) {
+          surface += c;
+          escaping = false;
+        }
+        else if(c == u'\\') {
+          escaping = true;
+        }
+        else {
+          surface += c;
+        }
+      }
+      write(surface, output);
+    }
+    else {
+      if(reader.readings.size() > 0) {
+        // NB. ^$ will produce a readings vector of length 1 where the single item is empty. EOF should give length 0.
+        // (We *want* to keep ^$ in stream, but not print extra ^$ when there was no ^$)
+        u_fputc('^', output);
+        bool seen_reading = false;
+        for (StreamReader::Reading &it : reader.readings) {
+          if (seen_reading) {
+            u_fputc('/', output);
+          }
+          if(it.mark != '\0') { u_fputc(it.mark, output); }
+          write(it.content, output);
+          seen_reading = true;
+        }
+        u_fputc('$', output);
+      }
+    }
+    if(reader.at_null) {
+      u_fputc('\0', output);
+      u_fflush(output);
+    }
+  }
+}
+
 bool
 FSTProcessor::valid() const
 {

@@ -42,7 +42,12 @@ int main(int argc, char *argv[])
   FSTProcessor fstp;
   fstp.setNullFlush(true); // cf. description of cli["null-flush"]
   fstp.initBiltrans();
-  fstp.quoteMerge(input, output);
+  if(unmerge) {
+    fstp.quoteUnmerge(input, output);
+  }
+  else {
+    fstp.quoteMerge(input, output);
+  }
 
   return 0;
 }

@@ -40,3 +40,17 @@ class WordblankTest(MergeTest):
     # Using r'' to avoid doubling escapes even more:
     inputs = [r'^«/«<lquot><MERGE_BEG>$[[tf:i:a]]^ve\/ldig/v<adv>$[[/]]^»/»<rquot><MERGE_END>$']
     expectedOutputs = [r'^«\[\[tf:i:a\]\]ve\\\/ldig\[\[\/\]\]»/«\[\[tf:i:a\]\]ve\\\/ldig\[\[\/\]\]»<MERGED>$']
+
+
+class SimpleUnmergeTest(MergeTest):
+    procflags = ['--unmerge']
+    # Using r'' to avoid doubling escapes even more:
+    inputs = [r'^ikkje<adv>/ikkje$ ^«Se og Hør»<MERGED>/«Se og Hør»$ ^då<adv>/då$']
+    expectedOutputs = [r'^ikkje<adv>/ikkje$ «Se og Hør» ^då<adv>/då$']
+
+
+class EscapedUnmergeTest(MergeTest):
+    procflags = ['--unmerge']
+    # Using r'' to avoid doubling escapes even more:
+    inputs = [r'^ikkje<adv>/ikkje$ ^«\[\[tf:i:a\]\]s\\\^å\[\[\/\]\]»<MERGED>/«\[\[tf:i:a\]\]s\\\^å\[\[\/\]\]»$']
+    expectedOutputs = [r'^ikkje<adv>/ikkje$ «[[tf:i:a]]s\^å[[/]]»']
