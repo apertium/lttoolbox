@@ -40,7 +40,12 @@ int main(int argc, char *argv[])
 
   FSTProcessor fstp;
   fstp.initBiltrans();
-  fstp.quoteMerge(input, output);
+  if(unmerge) {
+    fstp.quoteUnmerge(input, output);
+  }
+  else {
+    fstp.quoteMerge(input, output);
+  }
 
   return 0;
 }
