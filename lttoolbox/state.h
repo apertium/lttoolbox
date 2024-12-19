@@ -113,9 +113,9 @@ private:
 
   /**
    * Make a transition, but overriding the output symbol
-   * @param input symbol
-   * @param output symbol we expect to appear
-   * @param output symbol we want to appear
+   * @param input symbol read from infile
+   * @param output symbol from the FST
+   * @param output symbol we want to appear in outfile
    */
   void apply_override(int const input, int const old_sym, int const new_sym);
 

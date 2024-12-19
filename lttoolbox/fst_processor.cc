@@ -627,6 +627,8 @@ void
 FSTProcessor::load(FILE *input)
 {
   readTransducerSet(input, alphabetic_chars, alphabet, transducers);
+  alphabet.includeSymbol("<ANY_CHAR>"_u);
+  any_char = alphabet("<ANY_CHAR>"_u);
 }
 
 void
@@ -1755,7 +1757,14 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
     if (reader.readings[index].mark == '#') current_state.step('#');
     for (size_t i = 0; i < symbols.size(); i++) {
       seenTags = seenTags || alphabet.isTag(symbols[i]);
-      current_state.step_case(symbols[i], beCaseSensitive(current_state));
+      UString source;
+      alphabet.getSymbol(source, symbols[i]);
+      if(beCaseSensitive(current_state)) { // allow any_char
+        current_state.step_override(symbols[i], any_char, symbols[i]);
+      }
+      else {                    // include lower alt
+        current_state.step_override(symbols[i], towlower(symbols[i]), any_char, symbols[i]);
+      }
       if (current_state.isFinal(all_finals)) {
         queue_start = i;
         current_state.filterFinalsArray(result,
