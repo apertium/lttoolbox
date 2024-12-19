@@ -1967,6 +1967,7 @@ FSTProcessor::quoteMerge(InputFile& input, UFILE *output)
       if(surface.size() > 0) {
         surface += reader.blank;
         appendEscaped(surface, reader.wblank);
+        if(!reader.wblank.empty()) { appendEscaped(surface, "^$"_u); } // otherwise cg-proc will Error wordblank not prior to token
       }
       else {
         // The initial blank should just be output before the merged LU:

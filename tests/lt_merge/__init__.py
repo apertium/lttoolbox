@@ -38,8 +38,8 @@ class EscapeTest(MergeTest):
 
 class WordblankTest(MergeTest):
     # Using r'' to avoid doubling escapes even more:
-    inputs = [r'^«/«<lquot><MERGE_BEG>$[[tf:i:a]]^ve\/ldig/v<adv>$[[/]]^»/»<rquot><MERGE_END>$']
-    expectedOutputs = [r'^«\[\[tf:i:a\]\]ve\\\/ldig\[\[\/\]\]»/«\[\[tf:i:a\]\]ve\\\/ldig\[\[\/\]\]»<MERGED>$']
+    inputs = [r'^«/«<lquot><MERGE_BEG>$[[tf:i:a]]^ve\/ldig/v<adv>$^»/»<rquot><MERGE_END>$']
+    expectedOutputs = [r'^«\[\[tf:i:a\]\]\^\$ve\\\/ldig»/«\[\[tf:i:a\]\]\^\$ve\\\/ldig»<MERGED>$']
 
 
 class SimpleUnmergeTest(MergeTest):
@@ -52,5 +52,5 @@ class SimpleUnmergeTest(MergeTest):
 class EscapedUnmergeTest(MergeTest):
     procflags = ['--unmerge']
     # Using r'' to avoid doubling escapes even more:
-    inputs = [r'^ikkje<adv>/ikkje$ ^«\[\[tf:i:a\]\]s\\\^å\[\[\/\]\]»<MERGED>/«\[\[tf:i:a\]\]s\\\^å\[\[\/\]\]»$']
-    expectedOutputs = [r'^ikkje<adv>/ikkje$ «[[tf:i:a]]s\^å[[/]]»']
+    inputs = [r'^ikkje<adv>/ikkje$ ^«\[\[tf:i:a\]\]\^\$s\\\^å»<MERGED>/«\[\[tf:i:a\]\]\^\$s\\\^å»$']
+    expectedOutputs = [r'^ikkje<adv>/ikkje$ «[[tf:i:a]]^$s\^å»']
