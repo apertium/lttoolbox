@@ -1,0 +1,40 @@
+.Dd December 10, 2024
+.Dt LT-MERGE 1
+.Os Apertium
+.Sh NAME
+.Nm lt-merge
+.Nd lexical merger for Apertium
+.Sh SYNOPSIS
+.Nm lt-merge
+.Op Fl u
+.Op Ar input_file Op Ar output_file
+.Sh DESCRIPTION
+.Nm lt-merge
+is the application responsible for merging and unmerging
+lexical units
+.Pp
+It accomplishes this.
+.Sh OPTIONS
+.Bl -tag -width Ds
+.It Fl u , Fl Fl unmerge
+Run in reverse, this splits previously merged words.
+.It Fl v , Fl Fl version
+Display the version number.
+.It Fl h , Fl Fl help
+Display this help.
+.El
+\" .Sh FILES
+\" .Bl -tag -width Ds
+\" .It Ar input_file
+\" The input compiled dictionary.
+\" .El
+.Sh SEE ALSO
+.Xr apertium 1 ,
+.Xr lt-proc 1
+.Sh COPYRIGHT
+Copyright \(co 2024 Universitat d'Alacant / Universidad de Alicante.
+This is free software.
+You may redistribute copies of it under the terms of
+.Lk https://www.gnu.org/licenses/gpl.html the GNU General Public License .
+.Sh BUGS
+Many... lurking in the dark and waiting for you!

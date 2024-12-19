@@ -627,6 +627,8 @@ void
 FSTProcessor::load(FILE *input)
 {
   readTransducerSet(input, alphabetic_chars, alphabet, transducers);
+  alphabet.includeSymbol("<ANY_CHAR>"_u);
+  any_char = alphabet("<ANY_CHAR>"_u);
 }
 
 void
@@ -1755,7 +1757,14 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
     if (reader.readings[index].mark == '#') current_state.step('#');
     for (size_t i = 0; i < symbols.size(); i++) {
       seenTags = seenTags || alphabet.isTag(symbols[i]);
-      current_state.step_case(symbols[i], beCaseSensitive(current_state));
+      UString source;
+      alphabet.getSymbol(source, symbols[i]);
+      if(beCaseSensitive(current_state)) { // allow any_char
+        current_state.step_override(symbols[i], any_char, symbols[i]);
+      }
+      else {                    // include lower alt
+        current_state.step_override(symbols[i], towlower(symbols[i]), any_char, symbols[i]);
+      }
       if (current_state.isFinal(all_finals)) {
         queue_start = i;
         current_state.filterFinalsArray(result,
@@ -1931,6 +1940,142 @@ FSTProcessor::biltransWithoutQueue(UStringView input_word, bool with_delim)
   return compose(result, ""_u, with_delim, mark);
 }
 
+void
+FSTProcessor::quoteMerge(InputFile& input, UFILE *output)
+{
+  StreamReader reader(&input);
+  reader.alpha = &alphabet;
+  reader.add_unknowns = true;
+
+  bool merging = false;
+  UString surface;
+  while (!reader.at_eof) {
+    reader.next();
+
+    bool end_merging = false;
+
+    for (StreamReader::Reading &it : reader.readings) {
+      // TODO: look up in it.symbols instead (but need to make an alphabet then)
+      if(it.content.find(u"<MERGE_BEG>") != std::string::npos) {
+        merging = true;
+      }
+      if(it.content.find(u"<MERGE_END>") != std::string::npos) {
+        end_merging = true;
+      }
+    }
+    if(merging) {
+      if(surface.size() > 0) {
+        surface += reader.blank;
+        appendEscaped(surface, reader.wblank);
+      }
+      else {
+        // The initial blank should just be output before the merged LU:
+        write(reader.blank, output);
+        write(reader.wblank, output);
+      }
+      if(reader.readings.size() > 0) {
+        // Double-escape the form since we'll unescape during lt-unmerge:
+        appendEscaped(surface, reader.readings[0].content);
+      }
+    }
+    else {
+      write(reader.blank, output);
+      write(reader.wblank, output);
+      if(reader.readings.size() > 0) {
+        // NB. ^$ will produce a readings vector of length 1 where the single item is empty. EOF should give length 0.
+        // (We *want* to keep ^$ in stream, but not print extra ^$ when there was no ^$)
+        u_fputc('^', output);
+        bool seen_reading = false;
+        for (StreamReader::Reading &it : reader.readings) {
+          if (seen_reading) {
+            u_fputc('/', output);
+          }
+          write(it.content, output);
+          seen_reading = true;
+        }
+        u_fputc('$', output);
+      }
+    }
+    if(end_merging || reader.at_null) {
+      if (merging) {
+        u_fputc('^', output);
+        write(surface, output);
+        u_fputc('/', output);
+        write(surface, output);
+        write("<MERGED>$"_u, output);
+        merging = false;
+      }
+      end_merging = false;
+      surface.clear();
+      if(reader.at_null) {
+        u_fputc('\0', output);
+        u_fflush(output);
+      }
+    }
+  }
+}
+
+
+void
+FSTProcessor::quoteUnmerge(InputFile &input, UFILE *output)
+{
+  StreamReader reader(&input);
+  reader.alpha = &alphabet;
+  reader.add_unknowns = true;
+
+  UString surface;
+  while (!reader.at_eof) {
+    reader.next();
+    bool unmerging = false;
+    for (StreamReader::Reading &it : reader.readings) {
+      // TODO: look up in it.symbols instead (but need to make an alphabet then)
+      if(it.content.find(u"<MERGED>") != std::string::npos) {
+        unmerging = true;
+      }
+    }
+    write(reader.blank, output);
+    write(reader.wblank, output);
+    if(unmerging) {
+      // Just output the last reading (surface form), removing one level of escaping
+      StreamReader::Reading &lastReading = reader.readings.back(); // (we know there's at least one because of the above loop)
+      UString surface;
+      bool escaping = false;
+      for(auto &c : lastReading.content) {
+        if(escaping) {
+          surface += c;
+          escaping = false;
+        }
+        else if(c == u'\\') {
+          escaping = true;
+        }
+        else {
+          surface += c;
+        }
+      }
+      write(surface, output);
+    }
+    else {
+      if(reader.readings.size() > 0) {
+        // NB. ^$ will produce a readings vector of length 1 where the single item is empty. EOF should give length 0.
+        // (We *want* to keep ^$ in stream, but not print extra ^$ when there was no ^$)
+        u_fputc('^', output);
+        bool seen_reading = false;
+        for (StreamReader::Reading &it : reader.readings) {
+          if (seen_reading) {
+            u_fputc('/', output);
+          }
+          write(it.content, output);
+          seen_reading = true;
+        }
+        u_fputc('$', output);
+      }
+    }
+    if(reader.at_null) {
+      u_fputc('\0', output);
+      u_fflush(output);
+    }
+  }
+}
 
 bool
 FSTProcessor::valid() const

@@ -253,6 +253,11 @@ private:
   int maxWeightClasses = INT_MAX;
 
   /**
+   * The alphabet index of the tag <ANY_CHAR>
+   */
+  int any_char;
+
+  /**
    * Prints an error of input stream and exits
    */
   void streamError();
@@ -462,6 +467,15 @@ private:
     }
   }
 
+  void appendEscaped(UString& to, const UString& from) {
+    for(auto &c : from) {
+      if (escaped_chars.find(c) != escaped_chars.end()) {
+        to += u'\\';
+      }
+      to += c;
+    }
+  }
+
 public:
 
   /*
@@ -496,6 +510,8 @@ public:
   UString biltrans(UStringView input_word, bool with_delim = true);
   UString biltransfull(UStringView input_word, bool with_delim = true);
   void bilingual(InputFile& input, UFILE *output, GenerationMode mode = gm_unknown);
+  void quoteMerge(InputFile& input, UFILE *output);
+  void quoteUnmerge(InputFile& input, UFILE *output);
   std::pair<UString, int> biltransWithQueue(UStringView input_word, bool with_delim = true);
   UString biltransWithoutQueue(UStringView input_word, bool with_delim = true);
   void SAO(InputFile& input, UFILE *output);
