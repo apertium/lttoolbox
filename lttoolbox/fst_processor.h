@@ -253,6 +253,11 @@ private:
   int maxWeightClasses = INT_MAX;
 
   /**
+   * The alphabet index of the tag <ANY_CHAR>
+   */
+  int any_char;
+
+  /**
    * Prints an error of input stream and exits
    */
   void streamError();
