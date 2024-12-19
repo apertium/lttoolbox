@@ -479,6 +479,11 @@ class BiltransGarbage(ProcTest):
     inputs = ['^$']
     expectedOutputs = ['^$']
 
+class BiltransSimple(ProcTest):
+    procflags = ['-b', '-z']
+    inputs = ['^abc$']
+    expectedOutputs = ['^abc/ab<n><def>$']
+
 class SlashesInTags(ProcTest):
     procdix = 'data/slash-tags.dix'
     procflags = ['-b', '-z']
@@ -495,6 +500,22 @@ class SlashesInTags(ProcTest):
                        '^\\*lobwana1.1<n><3/4><x>/@\\*lobwana1.1<n><3/4><x>$',
                        '^\\*lobwana1.1<n><1/2><a/b>/*lopwana1.1<n><1/2><a/b>$',
                        '^\\*lobwana1.1<n><3/4><a/b>/@\\*lobwana1.1<n><3/4><a/b>$']
+
+class BiltransAnyChar(ProcTest):
+    procdix = 'data/pass-through.lsx'
+    procflags = ['-b', '-z']
+    # Using r'' to avoid doubling escapes even more:
+    inputs = [r'^simple<MERGED>$']
+    expectedOutputs = [r'^simple<MERGED>/simple<MERGED>$']
+
+
+class BiltransAnyCharEscapes(ProcTest):
+    procdix = 'data/pass-through.lsx'
+    procflags = ['-b', '-z']
+    # Using r'' to avoid doubling escapes even more:
+    inputs = [r'^«\[\[tf:i:a\]\]s\\\^å\[\[\/\]\]»<MERGED>$']
+    expectedOutputs = [r'^«\[\[tf:i:a\]\]s\\\^å\[\[\/\]\]»<MERGED>/«\[\[tf:i:a\]\]s\\\^å\[\[\/\]\]»<MERGED>$']
+
 
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *
