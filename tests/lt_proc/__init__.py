@@ -531,6 +531,30 @@ class BiltransGenDebugSymbols(ProcTest):
         '^ab<n><def>#c/#ab<n><def>#c$',
     ]
 
+class BiltransLowerFallback(ProcTest):
+    procdix = 'data/big-mono.dix'
+    procdir = 'rl'
+    procflags = ['-g', '-b', '-z']
+    inputs = [
+        '^HJERTERYTMEOVERVÅKNING<n><def>$',
+    ]
+    expectedOutputs = [
+        '^HJERTERYTMEOVERVÅKNING<n><def>/hjerterytmeovervåkningen$',
+    ]
+
+class AnalysisLowerFallback(ProcTest):
+    procdix = 'data/big-mono.dix'
+    procdir = 'lr'
+    procflags = ['-w', '-e', '-z']
+    inputs = [
+        'Vas vas',
+        'hjerterytmeovervåkningen hjerteklaffovervåkningen HJERTERYTMEOVERVÅKNINGEN HJERTEKLAFFOVERVÅKNINGEN',
+    ]
+    expectedOutputs = [
+        '^Vas/*Vas$ ^vas/*vas$',
+        '^hjerterytmeovervåkningen/hjerterytmeovervåkning<n><def>$ ^hjerteklaffovervåkningen/hjerteklaff<n>+overvåkning<n><def>$ ^HJERTERYTMEOVERVÅKNINGEN/hjerterytmeovervåkning<n><def>$ ^HJERTEKLAFFOVERVÅKNINGEN/hjerteklaff<n>+overvåkning<n><def>$'
+    ]
+
 
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *

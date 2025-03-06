@@ -411,6 +411,11 @@ private:
   static UStringView removeTags(UStringView str);
   UString compoundAnalysis(UString str);
 
+  /**
+   * As above, but if compoundAnalysis gives no results, try analysing the lowercased version of str.
+   */
+  UString compoundAnalysisOrLowering(UString str);
+
   struct Indices {
         size_t i_codepoint;
         size_t i_utf16; // always >= i_codepoint since some codepoints take up 2 UTF-16's
