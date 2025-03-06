@@ -715,6 +715,20 @@ FSTProcessor::compoundAnalysis(UString input_word)
   return filterFinals(current_state, input_word);
 }
 
+UString
+FSTProcessor::compoundAnalysisLowering(UString input_word) {
+  UString compound = compoundAnalysis(input_word);
+  if(!compound.empty()) {
+    return compound;
+  }
+  else if(std::any_of(input_word.begin(), input_word.end(), [](auto c) { return u_isupper(c);})) {
+    UString input_lowered = StringUtils::tolower(input_word);
+    return compoundAnalysis(input_lowered);
+  }
+  else {
+    return compound;
+  }
+}
 
 
 void
@@ -963,7 +977,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
           UString unknown_word = sf.substr(0, limit.i_utf16);
           if(do_decomposition)
           {
-            UString compound = compoundAnalysis(unknown_word);
+            UString compound = compoundAnalysisLowering(unknown_word);
             if(!compound.empty())
             {
               printWord(unknown_word, compound, output);
@@ -993,7 +1007,7 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
           UString unknown_word = sf.substr(0, limit.i_utf16);
           if(do_decomposition)
           {
-            UString compound = compoundAnalysis(unknown_word);
+            UString compound = compoundAnalysisLowering(unknown_word);
             if(!compound.empty())
             {
               printWord(unknown_word, compound, output);
