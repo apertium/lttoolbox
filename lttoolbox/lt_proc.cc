@@ -89,6 +89,7 @@ int main(int argc, char *argv[])
   if (args["generation"]) {
     if (cmd && cmd != 'b') cli.print_usage();
     if (!cmd) cmd = 'g';
+    else if(cmd == 'b') bilmode = gm_bilgen;
   }
   if (args["decompose-nouns"]) {
     if (cmd) cli.print_usage();
