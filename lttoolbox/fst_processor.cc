@@ -1795,6 +1795,32 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
       result.clear();
     }
 
+    if(result.empty()) {
+      // Retry looking up lower-cased version, this time not using alt-override (which leads to state explosions)
+      State current_state = initial_state;
+      if (reader.readings[index].mark == '#') current_state.step('#');
+      bool seenTags = false;
+      for (size_t i = 0; i < symbols.size(); i++) {
+        seenTags = seenTags || alphabet.isTag(symbols[i]);
+        if(alphabet.isTag(symbols[i]) || beCaseSensitive(current_state)) {
+          current_state.step_override(symbols[i], any_char, symbols[i]);
+        }
+        else {
+          int32_t symbol_low = u_tolower(symbols[i]);
+          current_state.step_override(symbol_low, any_char, symbol_low);
+        }
+        if (current_state.isFinal(all_finals)) {
+          queue_start = i;
+          current_state.filterFinalsArray(result,
+                                          all_finals, alphabet, escaped_chars,
+                                          displayWeightsMode, maxAnalyses,
+                                          maxWeightClasses);
+        }
+      }
+      // if there are no tags, we only return complete matches
+      if (!seenTags && queue_start + 1 < symbols.size()) result.clear();
+    }
+
     UString source;
     size_t queue_pos = 0;
     if (reader.readings[index].mark == '#') {
