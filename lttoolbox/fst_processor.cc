@@ -1795,7 +1795,7 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
       result.clear();
     }
 
-    if(result.empty()) {
+    if(result.empty() && (mode == gm_bilgen || mode == gm_all)) {
       // Retry looking up lower-cased version, this time not using alt-override (which leads to state explosions)
       State current_state = initial_state;
       if (reader.readings[index].mark == '#') current_state.step('#');
@@ -1818,7 +1818,9 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
         }
       }
       // if there are no tags, we only return complete matches
-      if (!seenTags && queue_start + 1 < symbols.size()) result.clear();
+      if ((!seenTags || mode == gm_all || mode == gm_bilgen) && queue_start + 1 < symbols.size()) {
+        result.clear();
+      }
     }
 
     UString source;
