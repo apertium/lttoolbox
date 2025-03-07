@@ -1282,6 +1282,7 @@ FSTProcessor::generation(InputFile& input, UFILE *output, GenerationMode mode)
         case gm_tagged:
           u_fputc(rd.mark, output);
           [[fallthrough]];
+        case gm_bilgen:
         case gm_clean:
           writeEscaped(removeTags(rd.content), output);
           break;
@@ -1343,6 +1344,7 @@ FSTProcessor::generation(InputFile& input, UFILE *output, GenerationMode mode)
           case gm_tagged:
             if (!rd.content.empty()) u_fputc('#', output);
             [[fallthrough]];
+          case gm_bilgen:
           case gm_clean:
             writeEscaped(removeTags(rd.content), output);
             break;
@@ -1775,7 +1777,9 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
       }
     }
     // if there are no tags, we only return complete matches
-    if (!seenTags && queue_start + 1 < symbols.size()) result.clear();
+    if ((!seenTags || mode == gm_all || mode == gm_bilgen) && queue_start + 1 < symbols.size()) {
+      result.clear();
+    }
 
     UString source;
     size_t queue_pos = 0;

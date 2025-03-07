@@ -516,6 +516,21 @@ class BiltransAnyCharEscapes(ProcTest):
     inputs = [r'^«\[\[tf:i:a\]\]s\\\^å\[\[\/\]\]»<MERGED>$']
     expectedOutputs = [r'^«\[\[tf:i:a\]\]s\\\^å\[\[\/\]\]»<MERGED>/«\[\[tf:i:a\]\]s\\\^å\[\[\/\]\]»<MERGED>$']
 
+class BiltransGenDebugSymbols(ProcTest):
+    procdix = 'data/minimal-mono.dix'
+    procdir = 'rl'
+    procflags = ['-d', '-b']
+    inputs = [
+        '^ab<n><def>$',
+        '^ab<n><def><potato>$',
+        '^ab<n><def>#c$',
+    ]
+    expectedOutputs = [
+        '^ab<n><def>/abc$',
+        '^ab<n><def><potato>/#ab<n><def><potato>$',
+        '^ab<n><def>#c/#ab<n><def>#c$',
+    ]
+
 
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *
