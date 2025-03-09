@@ -716,18 +716,39 @@ FSTProcessor::compoundAnalysis(UString input_word)
 }
 
 UString
-FSTProcessor::compoundAnalysisLowering(UString input_word) {
-  UString compound = compoundAnalysis(input_word);
-  if(!compound.empty()) {
-    return compound;
+FSTProcessor::compoundAnalysisOrLowering(UString input_cased) {
+  if(do_decomposition) {
+    // Try compound analysis without altering casing:
+    UString compound = compoundAnalysis(input_cased);
+    if(!compound.empty()) {
+      return compound;
+    }
   }
-  else if(std::any_of(input_word.begin(), input_word.end(), [](auto c) { return u_isupper(c);})) {
-    UString input_lowered = StringUtils::tolower(input_word);
-    return compoundAnalysis(input_lowered);
+  if(max_case_insensitive_state_size_warned) {
+    // If the above failed due to state explosion, we may try again with the lowercased string:
+    UString input_lowered = StringUtils::tolower(input_cased);
+    State current_state = initial_state;
+    for(unsigned int i=0; i<input_lowered.size(); i++) {
+      current_state.step_case(input_lowered[i], beCaseSensitive(current_state));
+      if(current_state.size()==0) {
+        break;
+      }
+    }
+    UString nonCompound = filterFinals(current_state, input_lowered);
+    if(!nonCompound.empty()) {
+      return nonCompound;
+    }
+    if(do_decomposition) {
+      // … or even on the compound analysis of the lowercased string:
+      UString compound = compoundAnalysis(input_lowered);
+      if(!compound.empty()) {
+        return compound;
+      }
+    }
   }
-  else {
-    return compound;
-  }
+  // None of the above:
+  UString nullString;
+  return nullString;
 }
 
 
@@ -975,17 +996,10 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
         {
           input_buffer.setPos(last_start + limit.i_codepoint);
           UString unknown_word = sf.substr(0, limit.i_utf16);
-          if(do_decomposition)
+          UString compoundOrLower = compoundAnalysisOrLowering(unknown_word);
+          if(!compoundOrLower.empty())
           {
-            UString compound = compoundAnalysisLowering(unknown_word);
-            if(!compound.empty())
-            {
-              printWord(unknown_word, compound, output);
-            }
-            else
-            {
-              printUnknownWord(unknown_word, output);
-            }
+            printWord(unknown_word, compoundOrLower, output);
           }
           else
           {
@@ -1005,17 +1019,10 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
         {
           input_buffer.setPos(last_start + limit.i_codepoint);
           UString unknown_word = sf.substr(0, limit.i_utf16);
-          if(do_decomposition)
+          UString compoundOrLower = compoundAnalysisOrLowering(unknown_word);
+          if(!compoundOrLower.empty())
           {
-            UString compound = compoundAnalysisLowering(unknown_word);
-            if(!compound.empty())
-            {
-              printWord(unknown_word, compound, output);
-            }
-            else
-            {
-              printUnknownWord(unknown_word, output);
-            }
+            printWord(unknown_word, compoundOrLower, output);
           }
           else
           {

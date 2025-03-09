@@ -547,10 +547,10 @@ class AnalysisLowerFallback(ProcTest):
     procdir = 'lr'
     procflags = ['-w', '-e']
     inputs = [
-        'HJERTERYTMEOVERVÅKNINGEN',
+        'hjerterytmeovervåkningen hjerteklaffovervåkningen HJERTERYTMEOVERVÅKNINGEN HJERTEKLAFFOVERVÅKNINGEN',
     ]
     expectedOutputs = [
-        '^HJERTERYTMEOVERVÅKNINGEN/hjerterytme<n>+overvåkning<n><def>$',
+        '^hjerterytmeovervåkningen/hjerterytmeovervåkning<n><def>$ ^hjerteklaffovervåkningen/hjerteklaff<n>+overvåkning<n><def>$ ^HJERTERYTMEOVERVÅKNINGEN/hjerterytmeovervåkning<n><def>$ ^HJERTEKLAFFOVERVÅKNINGEN/hjerteklaff<n>+overvåkning<n><def>$',
     ]
 
 

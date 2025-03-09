@@ -414,7 +414,7 @@ private:
   /**
    * As above, but if compoundAnalysis gives no results, try analysing the lowercased version of str.
    */
-  UString compoundAnalysisLowering(UString str);
+  UString compoundAnalysisOrLowering(UString str);
 
   struct Indices {
         size_t i_codepoint;
