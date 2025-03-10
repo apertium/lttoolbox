@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+	<alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÄÅÆÇÈÉÊËÍÑÒÓÔÕÖØÙÚÜČĐŊŠŦŽabcdefghijklmnopqrstuvwxyzàáâäåæçèéêëíñòóôõöøùúüčđŋšŧž­-</alphabet>
+	<sdefs>
+	  <sdef n="n"/>
+	  <sdef n="np"/>
+	  <sdef n="def"/>
+	  <sdef n="compound-only-L"/>
+	  <sdef n="compound-R"/>
+        </sdefs>
+<pardefs>
+
+</pardefs>
+
+<section id="main" type="standard">
+  <e><p><l>hjerterytmeovervåkningen</l><r>hjerterytmeovervåkning<s n="n"/><s n="def"/></r></p></e>
+  <e><p><l>hjerteklaff</l><r>hjerteklaff<s n="n"/><s n="compound-only-L"/></r></p></e>
+  <e><p><l>overvåkningen</l><r>overvåkning<s n="n"/><s n="def"/><s n="compound-R"/></r></p></e>
+  <e>     <re>[A-ZÆØÅ]+[a-zæøåA-ZÆØÅ]+!</re><p><l/><r><s n="np"/></r></p></e>
+
+  <e><p><l>vas</l><r>vass<s n="n"/><s n="compound-only-L"/></r></p></e>
+  <e><p><l>senga</l><r>seng<s n="n"/><s n="def"/><s n="compound-R"/></r></p></e>
+</section>
+
+
+</dictionary>

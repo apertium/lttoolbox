@@ -715,6 +715,42 @@ FSTProcessor::compoundAnalysis(UString input_word)
   return filterFinals(current_state, input_word);
 }
 
+UString
+FSTProcessor::compoundAnalysisOrLowering(UString input_cased) {
+  if(do_decomposition) {
+    // Try compound analysis without altering casing:
+    UString compound = compoundAnalysis(input_cased);
+    if(!compound.empty()) {
+      return compound;
+    }
+  }
+  // If we failed due to state explosion, we may try again with the lowercased string:
+  UString input_lowered = StringUtils::tolower(input_cased);
+  State current_state = initial_state;
+  for(unsigned int i=0; i<input_lowered.size(); i++) {
+    current_state.step_case(input_lowered[i], beCaseSensitive(current_state));
+    if(current_state.size()==0) {
+      break;
+    }
+  }
+  if(do_decomposition && compoundOnlyLSymbol != 0) {
+    current_state.pruneStatesWithForbiddenSymbol(compoundOnlyLSymbol);
+  }
+  UString nonCompound = filterFinals(current_state, input_lowered);
+  if(!nonCompound.empty()) {
+    return nonCompound;
+  }
+  if(do_decomposition) {
+    // … or even on the compound analysis of the lowercased string:
+    UString compound = compoundAnalysis(input_lowered);
+    if(!compound.empty()) {
+      return compound;
+    }
+  }
+  // None of the above:
+  UString nullString;
+  return nullString;
+}
 
 
 void
@@ -961,17 +997,10 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
         {
           input_buffer.setPos(last_start + limit.i_codepoint);
           UString unknown_word = sf.substr(0, limit.i_utf16);
-          if(do_decomposition)
+          UString compoundOrLower = compoundAnalysisOrLowering(unknown_word);
+          if(!compoundOrLower.empty())
           {
-            UString compound = compoundAnalysis(unknown_word);
-            if(!compound.empty())
-            {
-              printWord(unknown_word, compound, output);
-            }
-            else
-            {
-              printUnknownWord(unknown_word, output);
-            }
+            printWord(unknown_word, compoundOrLower, output);
           }
           else
           {
@@ -991,17 +1020,10 @@ FSTProcessor::analysis(InputFile& input, UFILE *output)
         {
           input_buffer.setPos(last_start + limit.i_codepoint);
           UString unknown_word = sf.substr(0, limit.i_utf16);
-          if(do_decomposition)
+          UString compoundOrLower = compoundAnalysisOrLowering(unknown_word);
+          if(!compoundOrLower.empty())
           {
-            UString compound = compoundAnalysis(unknown_word);
-            if(!compound.empty())
-            {
-              printWord(unknown_word, compound, output);
-            }
-            else
-            {
-              printUnknownWord(unknown_word, output);
-            }
+            printWord(unknown_word, compoundOrLower, output);
           }
           else
           {
@@ -1779,6 +1801,34 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
     // if there are no tags, we only return complete matches
     if ((!seenTags || mode == gm_all || mode == gm_bilgen) && queue_start + 1 < symbols.size()) {
       result.clear();
+    }
+
+    if(result.empty() && (mode == gm_bilgen || mode == gm_all)) {
+      // Retry looking up lower-cased version, this time not using alt-override (which leads to state explosions)
+      State current_state = initial_state;
+      if (reader.readings[index].mark == '#') current_state.step('#');
+      bool seenTags = false;
+      for (size_t i = 0; i < symbols.size(); i++) {
+        seenTags = seenTags || alphabet.isTag(symbols[i]);
+        if(alphabet.isTag(symbols[i]) || beCaseSensitive(current_state)) {
+          current_state.step_override(symbols[i], any_char, symbols[i]);
+        }
+        else {
+          int32_t symbol_low = u_tolower(symbols[i]);
+          current_state.step_override(symbol_low, any_char, symbol_low);
+        }
+        if (current_state.isFinal(all_finals)) {
+          queue_start = i;
+          current_state.filterFinalsArray(result,
+                                          all_finals, alphabet, escaped_chars,
+                                          displayWeightsMode, maxAnalyses,
+                                          maxWeightClasses);
+        }
+      }
+      // if there are no tags, we only return complete matches
+      if ((!seenTags || mode == gm_all || mode == gm_bilgen) && queue_start + 1 < symbols.size()) {
+        result.clear();
+      }
     }
 
     UString source;
