@@ -60,6 +60,26 @@ State::destroy()
   }
 
   state.clear();
+
+  for (auto& it : sequence_pool) {
+    delete it;
+  }
+  sequence_pool.clear();
+}
+
+std::vector<std::pair<int, double>>*
+State::new_sequence() {
+  if (sequence_pool.empty()) {
+    sequence_pool.push_back(new std::vector<std::pair<int, double>>());
+  }
+  auto ret = sequence_pool.back();
+  sequence_pool.pop_back();
+  return ret;
+}
+
+void
+State::free_sequence(std::vector<std::pair<int, double>>* seq) {
+  sequence_pool.push_back(seq);
 }
 
 void
@@ -70,12 +90,15 @@ State::copy(State const &s)
   {
     delete state[i].sequence;
   }
+  for (auto& it : sequence_pool) {
+    delete it;
+  }
 
   state = s.state;
 
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
-    std::vector<std::pair<int, double>> *tmp = new std::vector<std::pair<int, double>>();
+    auto tmp = new_sequence();
     *tmp = *(state[i].sequence);
     state[i].sequence = tmp;
   }
@@ -91,7 +114,7 @@ void
 State::init(Node *initial)
 {
   state.clear();
-  state.push_back(TNodeState(initial, new std::vector<std::pair<int, double>>(), false));
+  state.push_back(TNodeState(initial, new_sequence(), false));
   state[0].sequence->clear();
   epsilonClosure();
 }
@@ -105,7 +128,7 @@ State::apply_into(std::vector<TNodeState>* new_state, int const input, int index
   {
     for(int j = 0; j != it->second.size; j++)
     {
-      std::vector<std::pair<int, double>> *new_v = new std::vector<std::pair<int, double>>();
+      auto new_v = new_sequence();
       *new_v = *(state[index].sequence);
       if(it->first != 0)
       {
@@ -127,7 +150,7 @@ State::apply_into_override(std::vector<TNodeState>* new_state, int const input, 
   {
     for(int j = 0; j != it->second.size; j++)
     {
-      std::vector<std::pair<int, double>> *new_v = new std::vector<std::pair<int, double>>();
+      auto new_v = new_sequence();
       *new_v = *(state[index].sequence);
       if(it->first != 0)
       {
@@ -160,7 +183,7 @@ State::apply(int const input)
   for(size_t i = 0, limit = state.size(); i != limit; i++)
   {
     apply_into(&new_state, input, i, false);
-    delete state[i].sequence;
+    free_sequence(state[i].sequence);
   }
 
   state = new_state;
@@ -180,7 +203,7 @@ State::apply_override(int const input, int const old_sym, int const new_sym)
   {
     apply_into_override(&new_state, input, old_sym, new_sym, i, false);
     apply_into_override(&new_state, old_sym, old_sym, new_sym, i, true);
-    delete state[i].sequence;
+    free_sequence(state[i].sequence);
   }
 
   state = new_state;
@@ -207,7 +230,7 @@ State::apply_override(int const input, int const alt, int const old_sym, int con
     apply_into_override(&new_state, input, old_sym, new_sym, i, false);
     apply_into_override(&new_state, alt, old_sym, new_sym, i, true);
     apply_into_override(&new_state, old_sym, old_sym, new_sym, i, true);
-    delete state[i].sequence;
+    free_sequence(state[i].sequence);
   }
 
   state = new_state;
@@ -233,7 +256,7 @@ State::apply(int const input, int const alt)
   {
     apply_into(&new_state, input, i, false);
     apply_into(&new_state, alt, i, true);
-    delete state[i].sequence;
+    free_sequence(state[i].sequence);
   }
 
   state = new_state;
@@ -255,7 +278,7 @@ State::apply_careful(int const input, int const alt)
     {
       apply_into(&new_state, alt, i, true);
     }
-    delete state[i].sequence;
+    free_sequence(state[i].sequence);
   }
 
   state = new_state;
@@ -271,7 +294,7 @@ State::epsilonClosure()
     {
       for(int j = 0 ; j != it2->second.size; j++)
       {
-        std::vector<std::pair<int, double>> *tmp = new std::vector<std::pair<int, double>>();
+        auto tmp = new_sequence();
         *tmp = *(state[i].sequence);
         if(it2->second.out_tag[j] != 0)
         {
@@ -309,7 +332,7 @@ State::apply(int const input, int const alt1, int const alt2)
     apply_into(&new_state, input, i, false);
     apply_into(&new_state, alt1, i, true);
     apply_into(&new_state, alt2, i, true);
-    delete state[i].sequence;
+    free_sequence(state[i].sequence);
   }
 
   state = new_state;
@@ -342,7 +365,7 @@ State::apply(int const input, std::set<int> const alts)
       apply_into(&new_state, *sit, i, true);
     }
 
-    delete state[i].sequence;
+    free_sequence(state[i].sequence);
   }
 
   state = new_state;
@@ -793,7 +816,7 @@ State::pruneCompounds(int requiredSymbol, int separationSymbol, int compound_max
   {
     if(noOfCompoundElements[i] > minNoOfCompoundElements)
     {
-      delete (*it).sequence;
+      free_sequence((*it).sequence);
       it = state.erase(it);
     }
     else
@@ -821,7 +844,7 @@ State::pruneStatesWithForbiddenSymbol(int forbiddenSymbol)
       if((seq->at(i)).first == forbiddenSymbol)
       {
         i=-1;
-        delete (*it).sequence;
+        free_sequence((*it).sequence);
         it = state.erase(it);
         found = true;
       }
@@ -895,7 +918,8 @@ State::restartFinals(const std::map<Node *, double> &finals, int requiredSymbol,
           for(unsigned int j=0; j<restart_state->state.size(); j++)
           {
             TNodeState initst = restart_state->state.at(j);
-            std::vector<std::pair<int, double>> *tnvec = new std::vector<std::pair<int, double>>;
+            auto tnvec = new_sequence();
+            tnvec->clear();
 
             for(unsigned int k=0; k < state_i.sequence->size(); k++)
             {
@@ -943,7 +967,7 @@ void
 State::merge(const State& other)
 {
   for (auto& it : other.state) {
-    std::vector<std::pair<int, double>>* tmp = new std::vector<std::pair<int, double>>();
+    auto tmp = new_sequence();
     *tmp = *(it.sequence);
     TNodeState ns(it.where, tmp, it.dirty);
     this->state.push_back(std::move(ns));

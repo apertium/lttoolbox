@@ -68,6 +68,12 @@ private:
 
   std::vector<TNodeState> state;
 
+  std::vector<std::vector<std::pair<int, double>>*> sequence_pool;
+  // get or create a sequence vector (may be non-empty)
+  std::vector<std::pair<int, double>>* new_sequence();
+  // return a sequence vector to the pool
+  void free_sequence(std::vector<std::pair<int, double>>*);
+
   /**
    * Destroy function
    */
