@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
   cli.add_file_arg("output_file");
   cli.add_bool_arg('u', "unmerge", "Undo the merge");
   cli.add_bool_arg('z', "null-flush", "flush output on the null character");
+  cli.add_bool_arg('h', "help", "print this message and exit");
   cli.parse_args(argc, argv);
 
   auto strs = cli.get_strs();
