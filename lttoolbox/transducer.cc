@@ -256,6 +256,7 @@ Transducer::closure_all(const int epsilon_tag) const
     c.insert(i);
     auto range = transitions.at(i).equal_range(epsilon_tag);
     for (; range.first != range.second; range.first++) {
+      if (range.first->second.second != default_weight) continue;
       c.insert(range.first->second.first);
       reversed[range.first->second.first].push_back(i);
     }
@@ -356,7 +357,7 @@ Transducer::determinize(int const epsilon_tag)
       {
         for(auto& it3 : transitions[it2])
         {
-          if(it3.first != epsilon_tag)
+          if(it3.first != epsilon_tag || it3.second.second != default_weight)
           {
             auto& it4 = all_closures[it3.second.first];
             mymap[std::make_pair(it3.first, it3.second.second)].insert(it4.begin(), it4.end());
