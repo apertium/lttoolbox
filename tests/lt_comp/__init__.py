@@ -113,3 +113,9 @@ class RestrictRL2(RestrictTest):
     restrictflags = ['-v', 'oci']
     inputs = ['abc', 'ab']
     expectedOutputs = ['^abc/*abc$', '^ab/abbb<n><ind>$']
+
+class ConflictingEntryWeights(ProcTest):
+    procflags = ['-W']
+    procdix = 'data/more-entry-weights.dix'
+    inputs = ['house']
+    expectedOutputs = ['^house/house<n><sg><W:1.000000>/house<vblex><pres><W:2.000000>/house<vblex><inf><W:3.000000>/house<vblex><imp><W:4.000000>$']

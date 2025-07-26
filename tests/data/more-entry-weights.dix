@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÄÅÆÇÈÉÊËÍÑÒÓÔÕÖØÙÚÜČĐŊŠŦŽabcdefghijklmnopqrstuvwxyzàáâäåæçèéêëíñòóôõöøùúüčđŋšŧž­-</alphabet>
+  <sdefs>
+    <sdef n="n"/>
+    <sdef n="vblex"/>
+    <sdef n="m"/>
+    <sdef n="pr"/>
+    <sdef n="def"/>
+    <sdef n="inf"/>
+    <sdef n="imp"/>
+    <sdef n="pp"/>
+    <sdef n="pprs"/>
+    <sdef n="ger"/>
+    <sdef n="subs"/>
+    <sdef n="pres"/>
+    <sdef n="past"/>
+    <sdef n="p3"/>
+    <sdef n="sg"/>
+    <sdef n="pl"/>
+    <sdef n="gen"/>
+  </sdefs>
+  <pardefs>
+	  <pardef n="liv/e__vblex">
+		  <e w="1"><p><l>e</l><r>e<s n="vblex"/><s n="inf"/></r></p></e>
+		  <e w="2"><p><l>e</l><r>e<s n="vblex"/><s n="imp"/></r></p></e>
+		  <e><p><l>ed</l><r>e<s n="vblex"/><s n="pp"/></r></p></e>
+		  <e w="1"><p><l>ing</l><r>e<s n="vblex"/><s n="pprs"/></r></p></e>
+		  <e w="3"><p><l>ing</l><r>e<s n="vblex"/><s n="ger"/></r></p></e>
+		  <e w="2"><p><l>ing</l><r>e<s n="vblex"/><s n="subs"/></r></p></e>
+		  <e><p><l>e</l><r>e<s n="vblex"/><s n="pres"/></r></p></e>
+		  <e><p><l>es</l><r>e<s n="vblex"/><s n="pres"/><s n="p3"/><s n="sg"/></r></p></e>
+		  <e><p><l>ed</l><r>e<s n="vblex"/><s n="past"/></r></p></e>
+	  </pardef>
+	  <pardef n="house__n">
+		  <e><p><l></l><r><s n="n"/><s n="sg"/></r></p></e>
+		  <e r="RL"><p><l>'s</l><r><s n="n"/><s n="sg"/><j/>'s<s n="gen"/></r></p></e>
+		  <e><p><l>s</l><r><s n="n"/><s n="pl"/></r></p></e>
+		  <e r="RL"><p><l>s'</l><r><s n="n"/><s n="pl"/><j/>'s<s n="gen"/></r></p></e>
+	  </pardef>
+  </pardefs>
+  <section id="main" type="standard">
+	  <e lm="house" w="1"><i>house</i><par n="house__n"/></e>
+	  <e lm="house" w="2"><i>hous</i><par n="liv/e__vblex"/></e>
+  </section>
+</dictionary>
