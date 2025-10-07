@@ -68,6 +68,12 @@ private:
 
   std::vector<TNodeState> state;
 
+  std::vector<std::vector<std::pair<int, double>>*> sequence_pool;
+  // get or create a sequence vector (may be non-empty)
+  std::vector<std::pair<int, double>>* new_sequence();
+  // return a sequence vector to the pool
+  void free_sequence(std::vector<std::pair<int, double>>*);
+
   /**
    * Destroy function
    */
@@ -113,9 +119,9 @@ private:
 
   /**
    * Make a transition, but overriding the output symbol
-   * @param input symbol
-   * @param output symbol we expect to appear
-   * @param output symbol we want to appear
+   * @param input symbol read from infile
+   * @param output symbol from the FST
+   * @param output symbol we want to appear in outfile
    */
   void apply_override(int const input, int const old_sym, int const new_sym);
 
@@ -280,6 +286,20 @@ public:
                        bool uppercase = false,
                        bool firstupper = false,
                        int firstchar = 0) const;
+
+  /**
+   * filterFinals(), but write the results into `result`
+   */
+  void filterFinalsArray(std::vector<UString>& result,
+                         std::map<Node *, double> const &finals,
+                         Alphabet const &a,
+                         std::set<UChar32> const &escaped_chars,
+                         bool display_weights = false,
+                         int max_analyses = INT_MAX,
+                         int max_weight_classes = INT_MAX,
+                         bool uppercase = false,
+                         bool firstupper = false,
+                         int firstchar = 0) const;
 
   /**
    * Same as previous one, but  the output is adapted to the SAO system

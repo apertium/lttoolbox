@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 Universitat d'Alacant / Universidad de Alicante
+ * Copyright (C) 2024 Universitat d'Alacant / Universidad de Alicante
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -15,41 +15,40 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 #include <lttoolbox/fst_processor.h>
-#include <lttoolbox/lt_locale.h>
-#include <lttoolbox/cli.h>
 #include <lttoolbox/file_utils.h>
+#include <lttoolbox/cli.h>
+#include <lttoolbox/lt_locale.h>
+#include <iostream>
+
 
 int main(int argc, char *argv[])
 {
   LtLocale::tryToSetLocale();
-  CLI cli("process a stream with a letter transducer");
-  cli.add_file_arg("fst_file", false);
+  CLI cli("merge lexical units from the one tagged BEG until END", PACKAGE_VERSION);
   cli.add_file_arg("input_file");
   cli.add_file_arg("output_file");
-  cli.add_bool_arg('s', "space", "allow a segment to match before space (as well as before punctuation)");
-  cli.add_bool_arg('z', "null-flush", "flush output on the null character (always on, this is a no-op for backwards compatibility)");
+  cli.add_bool_arg('u', "unmerge", "Undo the merge");
+  cli.add_bool_arg('z', "null-flush", "flush output on the null character");
+  cli.add_bool_arg('h', "help", "print this message and exit");
   cli.parse_args(argc, argv);
 
-  TranslationMemoryMode tm_mode = cli.get_bools()["space"] ? tm_space : tm_punct;
+  auto strs = cli.get_strs();
+  bool unmerge = cli.get_bools()["unmerge"];
+  InputFile input;
+  if (!cli.get_files()[1].empty()) {
+    input.open_or_exit(cli.get_files()[0].c_str());
+  }
+  UFILE* output = openOutTextFile(cli.get_files()[1]);
 
   FSTProcessor fstp;
   fstp.setNullFlush(true); // cf. description of cli["null-flush"]
-  FILE* aux = openInBinFile(cli.get_files()[0]);
-  fstp.load(aux);
-  fclose(aux);
-  fstp.initTMAnalysis();
-  if (!fstp.valid()) {
-    return EXIT_FAILURE;
+  fstp.initBiltrans();
+  if(unmerge) {
+    fstp.quoteUnmerge(input, output);
+  }
+  else {
+    fstp.quoteMerge(input, output);
   }
 
-  InputFile input;
-  if (!cli.get_files()[1].empty()) {
-    input.open_or_exit(cli.get_files()[1].c_str());
-  }
-  UFILE* output = openOutTextFile(cli.get_files()[2].c_str());
-
-  fstp.tm_analysis(input, output, tm_mode);
-
-  u_fclose(output);
-  return EXIT_SUCCESS;
+  return 0;
 }

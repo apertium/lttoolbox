@@ -44,10 +44,21 @@ enum GenerationMode
   gm_clean,      // clear all
   gm_unknown,    // display unknown words, clear transfer and generation tags
   gm_all,        // display all
+  gm_bilgen,     // generation using biltrans (don't allow unconsumed tags)
   gm_tagged,     // tagged generation
   gm_tagged_nm,  // clean tagged generation
   gm_carefulcase // try lowercase iff no uppercase
 };
+
+/**
+ * How the translation memory matches input
+ */
+enum TranslationMemoryMode
+{
+  tm_punct,      // Require punctuation after a match
+  tm_space,      // Require space or punctuation after a match
+};
+
 
 /**
  * Class that implements the FST-based modules of the system
@@ -244,9 +255,19 @@ private:
   int maxWeightClasses = INT_MAX;
 
   /**
+   * The alphabet index of the tag <ANY_CHAR>
+   */
+  int any_char;
+
+  /**
    * Prints an error of input stream and exits
    */
   void streamError();
+
+  /**
+   * Write \0 to output and flush if at_null is true
+   */
+  void maybeFlush(UFILE* output, bool at_null);
 
   /**
    * Returns true if the character code is identified as alphabetic
@@ -279,27 +300,6 @@ private:
 
   bool readTransliterationBlank(InputFile& input);
   bool readTransliterationWord(InputFile& input);
-
-  /**
-   * Read text from stream (generation version)
-   * @param input the stream to read
-   * @param output the stream being written to
-   * @return the next symbol in the stream
-   */
-  int readGeneration(InputFile& input, UFILE *output);
-
-  void skipToNextWord(InputFile& input, UFILE *output);
-
-  UChar32 skipReading(InputFile& input, UFILE* output);
-
-  /**
-   * Read and output until a word is found, then place the symbols
-   * of that word into `symbols`
-   * Note: if an unknown symbol is encountered, the alphabet will be updated.
-   */
-  void nextBilingualWord(InputFile& input, UFILE* output,
-                         std::vector<int32_t>& symbols,
-                         GenerationMode mode);
 
   /**
    * Read text from stream (SAO version)
@@ -410,9 +410,13 @@ private:
    */
   void printChar(UChar32 val, UFILE* output);
 
-  void skipUntil(InputFile& input, UFILE *output, UChar32 character);
   static UStringView removeTags(UStringView str);
   UString compoundAnalysis(UString str);
+
+  /**
+   * As above, but if compoundAnalysis gives no results, try analysing the lowercased version of str.
+   */
+  UString compoundAnalysisOrLowering(UString str);
 
   struct Indices {
         size_t i_codepoint;
@@ -431,9 +435,11 @@ private:
   void analysis_wrapper_null_flush(InputFile& input, UFILE *output);
   void generation_wrapper_null_flush(InputFile& input, UFILE *output,
                                      GenerationMode mode);
-  UString compose(UStringView lexforms, UStringView queue) const;
-  bool step_biltrans(UStringView word, UString& result, UString& queue,
-                     bool delim, bool mark);
+  void tm_wrapper_null_flush(InputFile& input, UFILE *output,
+                             TranslationMemoryMode tm_mode);
+  UString compose(const std::vector<UString>& lexforms, UStringView queue,
+                  bool delim = false, bool mark = false) const;
+  bool step_biltrans(UStringView word, std::vector<UString>& result, UString& queue);
 
   void procNodeICX();
   void procNodeRCX();
@@ -472,6 +478,13 @@ private:
   bool beCaseSensitive(const State& s) { return beCaseSensitive(s.size()); }
   bool beCaseSensitive(const ReusableState& s) {
     return beCaseSensitive(s.size());
+  void appendEscaped(UString& to, const UString& from) {
+    for(auto &c : from) {
+      if (escaped_chars.find(c) != escaped_chars.end()) {
+        to += u'\\';
+      }
+      to += c;
+    }
   }
 
 public:
@@ -500,7 +513,7 @@ public:
   void initDecomposition();
 
   void analysis(InputFile& input, UFILE *output);
-  void tm_analysis(InputFile& input, UFILE *output);
+  void tm_analysis(InputFile& input, UFILE *output, TranslationMemoryMode tm_mode);
   void generation(InputFile& input, UFILE *output, GenerationMode mode = gm_unknown);
   void postgeneration(InputFile& input, UFILE *output);
   void intergeneration(InputFile& input, UFILE *output);
@@ -508,6 +521,8 @@ public:
   UString biltrans(UStringView input_word, bool with_delim = true);
   UString biltransfull(UStringView input_word, bool with_delim = true);
   void bilingual(InputFile& input, UFILE *output, GenerationMode mode = gm_unknown);
+  void quoteMerge(InputFile& input, UFILE *output);
+  void quoteUnmerge(InputFile& input, UFILE *output);
   std::pair<UString, int> biltransWithQueue(UStringView input_word, bool with_delim = true);
   UString biltransWithoutQueue(UStringView input_word, bool with_delim = true);
   void SAO(InputFile& input, UFILE *output);

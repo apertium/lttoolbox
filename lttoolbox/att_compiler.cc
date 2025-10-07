@@ -19,9 +19,9 @@
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/compression.h>
-#include <lttoolbox/string_utils.h>
 #include <lttoolbox/file_utils.h>
 #include <algorithm>
+#include <limits>
 #include <stack>
 #include <unicode/uchar.h>
 #include <unicode/ustring.h>
@@ -141,6 +141,53 @@ AttCompiler::add_transition(int from, int to,
   }
 }
 
+/*
+ * ICU number parsing does a lot of locale handling and this tends to
+ * dominate the runtime of lt-comp. Since we always force the locale
+ * to be C.UTF-8, we can make stronger assumptions leading to a
+ * ~2000x speedup for stoi and ~500x for stod relative to StringUtils.
+ * - DGS 2025-08-29
+ */
+
+int fast_stoi(UString s) {
+  int ret = 0;
+  for (size_t i = 0; i < s.size(); i++) {
+    if (s[i] < '0' || s[i] > '9') throw std::invalid_argument("bad int");
+    ret *= 10;
+    ret += (s[i] - '0');
+  }
+  return ret;
+}
+
+double fast_stod(UString s) {
+  if (s.size() == 0) throw std::invalid_argument("empty string");
+  double sign = 1;
+  size_t i = 0;
+  if (s[i] == '-') {
+    i++;
+    sign = -1;
+  }
+  if (i == s.size()) throw std::invalid_argument("no number");
+  if (i + 3 == s.size() && s[i] == 'i' && s[i+1] == 'n' && s[i+2] == 'f') {
+    return sign * std::numeric_limits<double>::infinity();
+  }
+  double ret = 0;
+  for (; i < s.size(); i++) {
+    if (s[i] == '.') break;
+    if (s[i] < '0' || s[i] > '9') throw std::invalid_argument("bad digit");
+    ret *= 10;
+    ret += (s[i] - '0');
+  }
+  i++;
+  double mul = 0.1;
+  for (; i < s.size(); i++) {
+    if (s[i] < '0' || s[i] > '9') throw std::invalid_argument("bad digit");
+    ret += (s[i] - '0') * mul;
+    mul *= 0.1;
+  }
+  return sign * ret;
+}
+
 void
 AttCompiler::parse(std::string const &file_name, bool read_rl)
 {
@@ -208,7 +255,7 @@ AttCompiler::parse(std::string const &file_name, bool read_rl)
     }
 
     try {
-      from = StringUtils::stoi(tokens[0]) + state_id_offset;
+      from = fast_stoi(tokens[0]) + state_id_offset;
     } catch (const std::invalid_argument& e) {
       std::cerr << "Error: invalid source state in file '" << file_name << "' on line " << line_number << "." << std::endl;
       exit(EXIT_FAILURE);
@@ -233,7 +280,7 @@ AttCompiler::parse(std::string const &file_name, bool read_rl)
       if (tokens.size() > 1)
       {
 	try {
-	  weight = StringUtils::stod(tokens[1]);
+    weight = fast_stod(tokens[1]);
 	} catch (const std::invalid_argument& e) {
 	  std::cerr << "Error: invalid weight in file '" << file_name << "' on line " << line_number << "." << std::endl;
 	  exit(EXIT_FAILURE);
@@ -248,7 +295,7 @@ AttCompiler::parse(std::string const &file_name, bool read_rl)
     else
     {
       try {
-	to = StringUtils::stoi(tokens[1]) + state_id_offset;
+        to = fast_stoi(tokens[1]) + state_id_offset;
       } catch (const std::invalid_argument& e) {
 	std::cerr << "Error: invalid target state in file '" << file_name << "' on line " << line_number << "." << std::endl;
 	exit(EXIT_FAILURE);
@@ -269,7 +316,7 @@ AttCompiler::parse(std::string const &file_name, bool read_rl)
       if(tokens.size() > 4)
       {
 	try {
-	  weight = StringUtils::stod(tokens[4]);
+    weight = fast_stod(tokens[4]);
 	} catch (const std::invalid_argument& e) {
 	  std::cerr << "Error: invalid weight in file '" << file_name << "' on line " << line_number << "." << std::endl;
 	  exit(EXIT_FAILURE);

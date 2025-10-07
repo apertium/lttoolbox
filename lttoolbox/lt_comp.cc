@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
     std::cerr << "Error: Cannot not open file '" << infile << "'." << std::endl << std::endl;
     exit(EXIT_FAILURE);
   }
-  initGenericErrorDefaultFunc(NULL);
+  xmlSetGenericErrorFunc(nullptr, nullptr);
 
 
   if(opc == "lr")

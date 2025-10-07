@@ -2,7 +2,7 @@
 set -e
 args=()
 
-while [[ $# > 0 ]];
+while [[ $# -gt 0 ]];
 do
 	case "$1" in
 	--prefix)

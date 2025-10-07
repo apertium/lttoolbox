@@ -99,14 +99,14 @@ class GardenPathMwe(ProcTest):
                        "y[A]x",
                         "[A]y x",
                         "legge opp[<br/>]",
-                        "legge[][\n]L[<\/p>\n]",
+                        "legge[][\n]L[<\\/p>\n]",
                        ]
     expectedOutputs = ["^x/*x$[ <br/> ]^opp/opp<pr>$^./.<sent>$",
                         "^legge/legge<vblex><inf>$ ^opp/opp<pr>$[<br/>]^x/*x$^./.<sent>$",
                        "^y/*y$[A]^x/*x$",
                         "[A]^y/*y$ ^x/*x$",
                         "^legge/legge<vblex><inf>$ ^opp/opp<pr>$[<br/>]",
-                        "^legge/legge<vblex><inf>$[][\n]^L/*L$[<\/p>\n]",
+                        "^legge/legge<vblex><inf>$[][\n]^L/*L$[<\\/p>\n]",
                        ]
 
 class GardenPathMweNewlines(ProcTest):
@@ -208,9 +208,9 @@ class PostgenerationWordboundBlankTest(ProcTest):
 class PostgenerationWordboundBlankEscapingTest(ProcTest):
     procdix = "data/postgen.dix"
     procflags = ["-p", "-z"]
-    inputs          = [ "Systran ([[t:a:PJD9GA]]http:\/\/www.systran.de\/[[/]]).[] Systran (http:\/\/www.systran.de\/).[]"]
+    inputs          = [ "Systran ([[t:a:PJD9GA]]http:\\/\\/www.systran.de\\/[[/]]).[] Systran (http:\\/\\/www.systran.de\\/).[]"]
 
-    expectedOutputs = [ "Systran ([[t:a:PJD9GA]]http:\/\/www.systran.de\/[[/]]).[] Systran (http:\/\/www.systran.de\/).[]"]
+    expectedOutputs = [ "Systran ([[t:a:PJD9GA]]http:\\/\\/www.systran.de\\/[[/]]).[] Systran (http:\\/\\/www.systran.de\\/).[]"]
 
 
 class PostgenerationWordboundBlankNoRuleMatchTest(ProcTest):
@@ -474,6 +474,16 @@ class BiltransEscapedAsterisk(ProcTest):
     expectedOutputs = ["^*ab<n><def>/*ab<n><def>$",
                        '^\\*ab<n><def>/@\\*ab<n><def>$']
 
+class BiltransGarbage(ProcTest):
+    procflags = ['-b', '-z']
+    inputs = ['^$']
+    expectedOutputs = ['^$']
+
+class BiltransSimple(ProcTest):
+    procflags = ['-b', '-z']
+    inputs = ['^abc$']
+    expectedOutputs = ['^abc/ab<n><def>$']
+
 class SlashesInTags(ProcTest):
     procdix = 'data/slash-tags.dix'
     procflags = ['-b', '-z']
@@ -502,6 +512,61 @@ class GeneratorCaps(ProcTest):
               '^IPAD<np><al><m><sg>$',
               '^ipad<np><al><m><sg>$',]
     expectedOutputs = ['iPad', 'IPAD', 'iPad', 'iPad', 'IPAD', '#ipad']
+
+class BiltransAnyChar(ProcTest):
+    procdix = 'data/pass-through.lsx'
+    procflags = ['-b', '-z']
+    # Using r'' to avoid doubling escapes even more:
+    inputs = [r'^simple<MERGED>$']
+    expectedOutputs = [r'^simple<MERGED>/simple<MERGED>$']
+
+
+class BiltransAnyCharEscapes(ProcTest):
+    procdix = 'data/pass-through.lsx'
+    procflags = ['-b', '-z']
+    # Using r'' to avoid doubling escapes even more:
+    inputs = [r'^«\[\[tf:i:a\]\]s\\\^å\[\[\/\]\]»<MERGED>$']
+    expectedOutputs = [r'^«\[\[tf:i:a\]\]s\\\^å\[\[\/\]\]»<MERGED>/«\[\[tf:i:a\]\]s\\\^å\[\[\/\]\]»<MERGED>$']
+
+class BiltransGenDebugSymbols(ProcTest):
+    procdix = 'data/minimal-mono.dix'
+    procdir = 'rl'
+    procflags = ['-d', '-b']
+    inputs = [
+        '^ab<n><def>$',
+        '^ab<n><def><potato>$',
+        '^ab<n><def>#c$',
+    ]
+    expectedOutputs = [
+        '^ab<n><def>/abc$',
+        '^ab<n><def><potato>/#ab<n><def><potato>$',
+        '^ab<n><def>#c/#ab<n><def>#c$',
+    ]
+
+class BiltransLowerFallback(ProcTest):
+    procdix = 'data/big-mono.dix'
+    procdir = 'rl'
+    procflags = ['-g', '-b', '-z']
+    inputs = [
+        '^HJERTERYTMEOVERVÅKNING<n><def>$',
+    ]
+    expectedOutputs = [
+        '^HJERTERYTMEOVERVÅKNING<n><def>/hjerterytmeovervåkningen$',
+    ]
+
+class AnalysisLowerFallback(ProcTest):
+    procdix = 'data/big-mono.dix'
+    procdir = 'lr'
+    procflags = ['-w', '-e', '-z']
+    inputs = [
+        'Vas vas',
+        'hjerterytmeovervåkningen hjerteklaffovervåkningen HJERTERYTMEOVERVÅKNINGEN HJERTEKLAFFOVERVÅKNINGEN',
+    ]
+    expectedOutputs = [
+        '^Vas/*Vas$ ^vas/*vas$',
+        '^hjerterytmeovervåkningen/hjerterytmeovervåkning<n><def>$ ^hjerteklaffovervåkningen/hjerteklaff<n>+overvåkning<n><def>$ ^HJERTERYTMEOVERVÅKNINGEN/hjerterytmeovervåkning<n><def>$ ^HJERTEKLAFFOVERVÅKNINGEN/hjerteklaff<n>+overvåkning<n><def>$'
+    ]
+
 
 # These fail on some systems:
 #from null_flush_invalid_stream_format import *

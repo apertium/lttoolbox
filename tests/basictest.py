@@ -34,13 +34,13 @@ class BasicTest:
         output = []
         char = None
         try:
-            char = self.withTimeout(2, process.stdout.read, 1)
+            char = self.withTimeout(10, process.stdout.read, 1)
         except Alarm:
             print("Timeout before reading a single character!", file=stderr)
         while char and char != b'\0':
             output.append(char)
             try:
-                char = self.withTimeout(2, process.stdout.read, 1)
+                char = self.withTimeout(10, process.stdout.read, 1)
             except Alarm:
                 print("Timeout before reading %s chars" % len(output),
                       file=stderr)

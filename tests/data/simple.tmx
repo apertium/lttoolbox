@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tmx version="1.4">
+  <header
+    creationtool="foo"
+    creationtoolversion="1.0"
+    segtype="phrase"
+    o-tmf="tmx"
+    adminlang="nb-NO"
+    srclang="nb-NO"
+    datatype="plaintext"
+  />
+  <body>
+    <tu>
+      <tuv xml:lang="nob">
+        <seg>Ikke så merkelig</seg>
+      </tuv>
+      <tuv xml:lang="nno">
+        <seg>Ikkje så merkeleg</seg>
+      </tuv>
+    </tu>
+  </body>
+</tmx>
