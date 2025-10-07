@@ -478,6 +478,7 @@ private:
   bool beCaseSensitive(const State& s) { return beCaseSensitive(s.size()); }
   bool beCaseSensitive(const ReusableState& s) {
     return beCaseSensitive(s.size());
+  }
   void appendEscaped(UString& to, const UString& from) {
     for(auto &c : from) {
       if (escaped_chars.find(c) != escaped_chars.end()) {

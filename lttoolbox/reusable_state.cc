@@ -1,5 +1,6 @@
 #include <reusable_state.h>
 #include <climits>
+#include <algorithm>
 
 #define WalkBack(var, pos, block) { \
   size_t index = pos;               \

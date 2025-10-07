@@ -1279,6 +1279,8 @@ FSTProcessor::tm_analysis(InputFile& input, UFILE *output, TranslationMemoryMode
 void
 FSTProcessor::generation(InputFile& input, UFILE *output, GenerationMode mode)
 {
+  StreamReader reader(&input);
+  reader.alpha = &alphabet;
   ReusableState current_state;
   current_state.init(&root);
 
@@ -1744,6 +1746,8 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
   StreamReader reader(&input);
   reader.alpha = &alphabet;
   reader.add_unknowns = true;
+  ReusableState current_state;
+  current_state.init(&root);
 
   size_t index = (biltransSurfaceForms || biltransSurfaceFormsKeep ? 1 : 0);
 
