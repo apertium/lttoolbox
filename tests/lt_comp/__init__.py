@@ -51,23 +51,23 @@ class CompSplitMultichar(unittest.TestCase, ProcTest):
 
 class CompLSX(unittest.TestCase, PrintTest):
     printdix = "data/basic.lsx"
-    expectedOutput = '''0	1	<ANY_CHAR>	<ANY_CHAR>	0.000000\t
-1	1	<ANY_CHAR>	<ANY_CHAR>	0.000000\t
-1	2	<vblex>	<vblex>	0.000000\t
-2	3	<ANY_TAG>	<ANY_TAG>	0.000000\t
-3	3	<ANY_TAG>	<ANY_TAG>	0.000000\t
-3	4	<$>	<prn>	0.000000\t
-4	5	p	<$>	0.000000\t
-5	6	r	ε	0.000000\t
-6	7	p	ε	0.000000\t
-7	8	e	ε	0.000000\t
-8	9	r	ε	0.000000\t
-9	10	s	ε	0.000000\t
-10	11	<prn>	ε	0.000000\t
-11	12	<$>	ε	0.000000\t
-12	14	ε	ε	0.000000\t
-12	13	<$>	<$>	0.000000\t
-13	14	ε	ε	0.000000\t
+    expectedOutput = '''0	1	<ANY_CHAR>	<ANY_CHAR>	0.000000
+1	1	<ANY_CHAR>	<ANY_CHAR>	0.000000
+1	2	<vblex>	<vblex>	0.000000
+2	3	<ANY_TAG>	<ANY_TAG>	0.000000
+3	3	<ANY_TAG>	<ANY_TAG>	0.000000
+3	4	<$>	<prn>	0.000000
+4	5	p	<$>	0.000000
+5	6	r	ε	0.000000
+6	7	p	ε	0.000000
+7	8	e	ε	0.000000
+8	9	r	ε	0.000000
+9	10	s	ε	0.000000
+10	11	<prn>	ε	0.000000
+11	12	<$>	ε	0.000000
+12	14	ε	ε	0.000000
+12	13	<$>	<$>	0.000000
+13	14	ε	ε	0.000000
 14	0.000000
 '''
 

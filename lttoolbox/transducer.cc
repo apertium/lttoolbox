@@ -766,7 +766,7 @@ Transducer::show(Alphabet const &alphabet, UFILE *output, int const epsilon_tag,
       alphabet.getSymbol(r, t.second);
       escapeSymbol(r, hfst);
       u_fprintf(output, "%S\t", r.c_str());
-      u_fprintf(output, "%f\t\n", it2.second.second);
+      u_fprintf(output, "%f\n", it2.second.second);
     }
   }
 
