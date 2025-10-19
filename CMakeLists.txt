@@ -137,6 +137,7 @@ endif()
 
 # ICU
 find_package(ICU COMPONENTS i18n io uc REQUIRED)
+include_directories(${ICU_INCLUDE_DIRS})
 
 # utf8cpp / utfcpp
 find_path(UTFCPP_INCLUDE_DIRS utf8.h PATH_SUFFIXES utf8cpp utfcpp utf8 REQUIRED)
