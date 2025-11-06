@@ -57,7 +57,7 @@ else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${_FLAGS_COMMON} -fvisibility-inlines-hidden")
 
 	# Enable latest possible C standard
-	foreach(flag "-std=c2x" "-std=c11" "-std=c1x" "-std=c99")
+	foreach(flag "-std=c2y" "-std=c23" "-std=c2x" "-std=c11" "-std=c1x" "-std=c99")
 		string(REGEX REPLACE "[^a-z0-9]" "-" _flag ${flag})
 		CHECK_C_COMPILER_FLAG(${flag} COMPILER_SUPPORTS_${_flag})
 		if(COMPILER_SUPPORTS_${_flag})
@@ -67,7 +67,7 @@ else()
 	endforeach()
 
 	# Require latest possible C++ standard
-	foreach(flag "-std=c++23" "-std=c++2b"  "-std=c++20" "-std=c++2a" "-std=c++17")
+	foreach(flag "-std=c++26" "-std=c++2c" "-std=c++23" "-std=c++2b" "-std=c++20" "-std=c++2a" "-std=c++17")
 		string(REGEX REPLACE "[^a-z0-9]" "-" _flag ${flag})
 		CHECK_CXX_COMPILER_FLAG(${flag} COMPILER_SUPPORTS_${_flag})
 		if(COMPILER_SUPPORTS_${_flag})
