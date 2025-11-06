@@ -26,6 +26,7 @@
 #include <vector>
 #include <cstdint>
 #include <iomanip>
+#include <ostream>
 
 typedef std::basic_string<UChar> UString;
 typedef std::basic_string_view<UChar> UStringView;
