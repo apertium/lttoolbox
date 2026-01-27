@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 project(lttoolbox
 	VERSION 3.8.2
@@ -84,8 +84,8 @@ endif()
 # Generate pkg-config file
 set(prefix      ${CMAKE_INSTALL_PREFIX})
 set(exec_prefix "\${prefix}")
-set(libdir      "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
-set(includedir  "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
+cmake_path(APPEND libdir "\${exec_prefix}" "${CMAKE_INSTALL_LIBDIR}")
+cmake_path(APPEND includedir "\${prefix}" "${CMAKE_INSTALL_INCLUDEDIR}")
 configure_file(lttoolbox.pc.in lttoolbox.pc @ONLY)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/lttoolbox.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig/")
 
