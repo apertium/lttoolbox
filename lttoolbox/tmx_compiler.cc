@@ -417,7 +417,7 @@ TMXCompiler::write(FILE *output)
 {
   fwrite_unlocked(HEADER_LTTOOLBOX, 1, 4, output);
   uint64_t features = 0;
-  write_le(output, features);
+  write_be(output, features);
 
   // letters (empty to keep the file format)
   Compression::multibyte_write(0, output);

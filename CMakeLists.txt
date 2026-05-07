@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 project(lttoolbox
-	VERSION 3.8.2
+	VERSION 3.8.3
 	LANGUAGES CXX C
 	)
 set(VERSION ${PROJECT_VERSION})
@@ -142,6 +142,10 @@ include_directories(${ICU_INCLUDE_DIRS})
 # utf8cpp / utfcpp
 find_path(UTFCPP_INCLUDE_DIRS utf8.h PATH_SUFFIXES utf8cpp utfcpp utf8 REQUIRED)
 include_directories(${UTFCPP_INCLUDE_DIRS})
+
+# Boost
+find_package(Boost 1.58.0 REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 

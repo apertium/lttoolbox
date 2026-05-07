@@ -23,6 +23,7 @@
 #include <stdexcept>
 #include <lttoolbox/ustring.h>
 #include <lttoolbox/my_stdio.h>
+#include <boost/endian/conversion.hpp>
 
 // Global lttoolbox features
 constexpr char HEADER_LTTOOLBOX[4]{'L', 'T', 'T', 'B'};
@@ -53,24 +54,15 @@ inline auto& write_u64(std::ostream& out, uint64_t value) {
 }
 
 template<typename Stream, typename Value>
-inline auto write_u64_le(Stream& out, const Value& value) {
+inline auto write_u64_be(Stream& out, const Value& value) {
   uint64_t v = static_cast<uint64_t>(value);
-  v =
-    ((v & 0xFF) << 56) |
-    ((v & 0xFF00) << 40) |
-    ((v & 0xFF0000) << 24) |
-    ((v & 0xFF000000) << 8) |
-    ((v & 0xFF00000000) >> 8) |
-    ((v & 0xFF0000000000) >> 24) |
-    ((v & 0xFF000000000000) >> 40) |
-    ((v & 0xFF00000000000000) >> 56)
-  ;
+  boost::endian::native_to_big_inplace(v);
   return write_u64(out, v);
 }
 
 template<typename Stream>
-inline auto write_le(Stream& out, uint64_t value) {
-  return write_u64_le(out, value);
+inline auto write_be(Stream& out, uint64_t value) {
+  return write_u64_be(out, value);
 }
 
 
@@ -89,34 +81,25 @@ inline auto read_u64(std::istream& in) {
 }
 
 template<typename Stream>
-inline auto read_u64_le(Stream& in) {
+inline auto read_u64_be(Stream& in) {
   uint64_t v = read_u64(in);
-  v =
-    ((v & 0xFF00000000000000) >> 56) |
-    ((v & 0xFF000000000000) >> 40) |
-    ((v & 0xFF0000000000) >> 24) |
-    ((v & 0xFF00000000) >> 8) |
-    ((v & 0xFF000000) << 8) |
-    ((v & 0xFF0000) << 24) |
-    ((v & 0xFF00) << 40) |
-    ((v & 0xFF) << 56)
-  ;
+  boost::endian::big_to_native_inplace(v);
   return v;
 }
 
 template<typename Stream>
-inline auto read_le(Stream& in, uint64_t) {
-  return read_u64_le(in);
+inline auto read_be(Stream& in, uint64_t) {
+  return read_u64_be(in);
 }
 
 template<typename Value = void>
-inline auto read_le(FILE *in) {
-  return read_le(in, Value{});
+inline auto read_be(FILE *in) {
+  return read_be(in, Value{});
 }
 
 template<typename Value = void>
-inline auto read_le(std::istream& in) {
-  return read_le(in, Value{});
+inline auto read_be(std::istream& in) {
+  return read_be(in, Value{});
 }
 
 /**

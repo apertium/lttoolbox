@@ -72,7 +72,7 @@ writeTransducerSet(FILE* output, UStringView letters,
 {
   fwrite_unlocked(HEADER_LTTOOLBOX, 1, 4, output);
   uint64_t features = 0;
-  write_le(output, features);
+  write_be(output, features);
 
   Compression::string_write(letters, output);
   alpha.write(output);
@@ -101,7 +101,7 @@ readShared(FILE* input, std::set<UChar32>& letters, Alphabet& alpha)
     char header[4]{};
     fread_unlocked(header, 1, 4, input);
     if (strncmp(header, HEADER_LTTOOLBOX, 4) == 0) {
-      auto features = read_le<uint64_t>(input);
+      auto features = read_be<uint64_t>(input);
       if (features >= LTF_UNKNOWN) {
         throw std::runtime_error("FST has features that are unknown to this version of lttoolbox - upgrade!");
       }

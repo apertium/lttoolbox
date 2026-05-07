@@ -535,7 +535,7 @@ Transducer::write(FILE *output, int const decalage)
   if (write_weights) {
       features |= TDF_WEIGHTS;
   }
-  write_le(output, features);
+  write_be(output, features);
 
   Compression::multibyte_write(initial, output);
   Compression::multibyte_write(finals.size(), output);
@@ -590,7 +590,7 @@ Transducer::read(FILE *input, int const decalage)
       char header[4]{};
       fread_unlocked(header, 1, 4, input);
       if (strncmp(header, HEADER_TRANSDUCER, 4) == 0) {
-          auto features = read_le<uint64_t>(input);
+          auto features = read_be<uint64_t>(input);
           if (features >= TDF_UNKNOWN) {
               throw std::runtime_error("Transducer has features that are unknown to this version of lttoolbox - upgrade!");
           }
