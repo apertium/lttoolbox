@@ -484,6 +484,35 @@ class BiltransSimple(ProcTest):
     inputs = ['^abc$']
     expectedOutputs = ['^abc/ab<n><def>$']
 
+class BiltransCyrillicCase(ProcTest):
+    # https://github.com/apertium/lttoolbox/issues/205
+    # Capitalized non-Latin (here Cyrillic) source forms must match their
+    # lowercase dictionary entry. This regressed on Windows because the
+    # lowercasing used the locale-dependent C-runtime towlower() instead of
+    # ICU's u_tolower().
+    procdix = 'data/cyrillic-case-bi.dix'
+    procflags = ['-b', '-z']
+    procdir = 'lr'
+    inputs = ['^наб1.1<perspron>$',
+              '^Наб1.1<perspron>$']
+    expectedOutputs = ['^наб1.1<perspron>/дам1.1<pers>$',
+                       '^Наб1.1<perspron>/Дам1.1<pers>$']
+
+class BiltransLatinExtBCase(ProcTest):
+    # https://github.com/apertium/lttoolbox/issues/205
+    # Same root cause as BiltransCyrillicCase, reported for Latin Extended-B:
+    # Ɓ (U+0181) must lowercase to ɓ (U+0253) to match the dictionary entry.
+    # The C-runtime towlower() failed to do this in non-Unicode locales (e.g.
+    # MinGW/MXE builds), where it left the character unchanged; u_tolower()
+    # handles it regardless of locale.
+    procdix = 'data/latin-extb-case-bi.dix'
+    procflags = ['-b', '-z']
+    procdir = 'lr'
+    inputs = ['^ɓaa1.1<n>$',
+              '^Ɓaa1.1<n>$']
+    expectedOutputs = ['^ɓaa1.1<n>/ɓaa1.1<n>$',
+                       '^Ɓaa1.1<n>/Ɓaa1.1<n>$']
+
 class SlashesInTags(ProcTest):
     procdix = 'data/slash-tags.dix'
     procflags = ['-b', '-z']

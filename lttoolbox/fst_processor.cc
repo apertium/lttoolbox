@@ -1787,7 +1787,7 @@ FSTProcessor::bilingual(InputFile& input, UFILE *output, GenerationMode mode)
         current_state.step_override(symbols[i], any_char, symbols[i]);
       }
       else {                    // include lower alt
-        current_state.step_override(symbols[i], towlower(symbols[i]), any_char, symbols[i]);
+        current_state.step_override(symbols[i], u_tolower(symbols[i]), any_char, symbols[i]);
       }
       if (current_state.isFinal(all_finals)) {
         queue_start = i;

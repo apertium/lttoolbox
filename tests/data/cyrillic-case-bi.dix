@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+	<sdefs>
+		<sdef n="perspron"/>
+		<sdef n="pers"/>
+	</sdefs>
+	<section id="main" type="standard">
+		<e>
+			<p>
+				<l>наб1.1<s n="perspron"/></l>
+				<r>дам1.1<s n="pers"/></r>
+			</p>
+		</e>
+	</section>
+</dictionary>
