@@ -542,6 +542,11 @@ public:
   void setCompoundMaxElements(int value);
   bool getNullFlush();
   bool getDecompoundingMode();
+
+  // look up a string without delimiters
+  // and write the output to `result`
+  // any existing contents of `result` will be cleared
+  bool lookup(UStringView input, std::vector<UString>& result);
 };
 
 #endif

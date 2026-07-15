@@ -2483,3 +2483,23 @@ FSTProcessor::firstNotAlpha(UStringView sf)
   }
   return ix;
 }
+
+bool
+FSTProcessor::lookup(UStringView word, std::vector<UString>& result)
+{
+  State current_state = initial_state;
+  bool firstupper = u_isupper(word[0]);
+  bool uppercase = firstupper && u_isupper(word[1]);
+  for (auto symbol : symbol_iter(word)) {
+    int32_t val = (symbol.size() == 1 ? symbol[0] : alphabet(symbol));
+    if (current_state.size() != 0) {
+      current_state.step(val, beCaseSensitive(current_state));
+    }
+  }
+  current_state.filterFinalsArray(result,
+                                  all_finals, alphabet,
+                                  escaped_chars,
+                                  displayWeightsMode, maxAnalyses, maxWeightClasses,
+                                  uppercase, firstupper, 0);
+  return !result.empty();
+}
