@@ -34,6 +34,21 @@ class SimpleSpaceSep(TmxProcTest):
     expectedOutputs = ['[Ikkje så merkeleg] at det skjer.']
 
 
+class Escapes(TmxProcTest):
+    procdix = 'data/simple.tmx'
+    procflags = ['-s']
+    inputs = [
+        'Hei \\$du',
+        'Hei \\$\\{namn\\}.',
+        'og \\[ja\\] \\<nei\\> \\^',
+    ]
+    expectedOutputs = [
+        'Hei \\$du',
+        'Hei \\$\\{namn\\}.',
+        'og \\[ja\\] \\<nei\\> \\^',
+    ]
+
+
 class Numbers(TmxProcTest):
     procdix = 'data/numbers.tmx'
     procflags = ['-s']
@@ -73,5 +88,16 @@ class NumbersTwice(TmxProcTest):
         '3 kaffe 9 og kjeks 2',
         '1 3 ost 99 eller [ost 88 eller 89 kjeks]',
         '1 [3 på halv] fire',
+    ]
+
+@unittest.expectedFailure
+class OtherEscapes(TmxProcTest):
+    procdix = 'data/simple.tmx'
+    procflags = ['-s']
+    inputs = [
+        'ein \\+ pluss',
+    ]
+    expectedOutputs = [
+        'ein \\+ pluss',
     ]
 

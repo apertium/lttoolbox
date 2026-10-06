@@ -1197,12 +1197,12 @@ FSTProcessor::tm_analysis(InputFile& input, UFILE *output, TranslationMemoryMode
 
         if(val == 0)
         {
-          write(sf, output);
+          writeEscaped(sf, output);
           return;
         }
 
         input_buffer.back(1);
-        write(sf, output);
+        writeEscaped(sf, output);
 
         while(blankqueue.size() > 0)
         {
@@ -1218,7 +1218,7 @@ FSTProcessor::tm_analysis(InputFile& input, UFILE *output, TranslationMemoryMode
         unsigned int size = sf.size();
         limit = (limit == static_cast<unsigned int>(UString::npos)?size:limit);
         input_buffer.back(1+(size-limit));
-        write(sf.substr(0, limit), output);
+        writeEscaped(sf.substr(0, limit), output);
 */      }
       else if(lf.empty())
       {
