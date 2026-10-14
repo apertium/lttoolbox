@@ -21,6 +21,7 @@ set(LIBLTTOOLBOX_HEADERS
 	node.h
 	pattern_list.h
 	regexp_compiler.h
+	reusable_state.h
 	serialiser.h
 	sorted_vector.h
 	sorted_vector.hpp
@@ -54,6 +55,7 @@ set(LIBLTTOOLBOX_SOURCES
 	node.cc
 	pattern_list.cc
 	regexp_compiler.cc
+	reusable_state.cc
 	sorted_vector.cc
 	state.cc
 	stream_reader.cc
